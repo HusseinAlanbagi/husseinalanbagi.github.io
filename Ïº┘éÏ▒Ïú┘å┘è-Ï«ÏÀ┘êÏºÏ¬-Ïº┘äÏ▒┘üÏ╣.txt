@@ -1,0 +1,29 @@
+رفع موقع حسين العنبكي على GitHub Pages
+
+هذا المجلد هو الموقع كاملًا: صفحة لكل قسم (index.html هي الرئيسية)،
+وملف التنسيق style.css، وملف الأزرار site.js، والصورة portrait.jpg.
+هذا الملف (اقرأني) لا حاجة لرفعه.
+
+1. افتح github.com واضغط Sign up وأنشئ حسابًا.
+   اسم المستخدم (Username) سيكون جزءًا من رابط موقعك، فاختره بعناية، مثل husseinalanbagi.
+
+2. بعد الدخول اضغط + في الأعلى ثم New repository.
+   - Repository name: اكتب اسم المستخدم متبوعًا بـ .github.io
+     مثلًا: husseinalanbagi.github.io (بالضبط وبأحرف صغيرة)
+   - اختر Public
+   - اضغط Create repository
+
+3. في الصفحة التي تظهر، اضغط الرابط uploading an existing file
+   (أو Add file ثم Upload files).
+   فك ضغط الملف المضغوط على حاسبتك، ثم اسحب الملفات نفسها (وليس المجلد) إلى الصفحة.
+   انتظر حتى تكتمل، ثم اضغط Commit changes.
+
+4. اذهب إلى Settings ثم Pages من القائمة الجانبية.
+   تحت Build and deployment تأكد أن Source هي Deploy from a branch،
+   وأن Branch هي main والمجلد / (root)، ثم Save.
+
+5. انتظر دقيقة أو دقيقتين، ثم افتح:
+   https://husseinalanbagi.github.io   (بدّل الاسم باسم المستخدم الذي اخترته)
+   في أعلى صفحة Settings ← Pages يظهر الرابط عندما يجهز الموقع.
+
+للتحديث لاحقًا: Add file ← Upload files، ثم ارفع الملف المعدّل بنفس اسمه فيستبدل القديم، ثم Commit changes.
