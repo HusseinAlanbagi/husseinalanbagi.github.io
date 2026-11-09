@@ -168,6 +168,27 @@
   .sym.tall { font-size:11px; min-height:44px; }
   .sym .symtxt { font:11px ui-monospace,Menlo,Consolas,monospace; color:var(--muted); white-space:nowrap; }
   .sym .gap { display:inline-block; border:1px dashed var(--muted); border-top:none; height:6px; vertical-align:-2px; margin-right:4px; }
+
+  .codewrap { position:relative; flex:1; display:flex; }
+  .codewrap textarea { flex:1; min-height:150px; margin:0; padding-right:84px; }
+  .copycorner { position:absolute; top:6px; right:6px; padding:3px 9px !important; font-size:12px !important; opacity:.92; }
+  .copycorner:hover { opacity:1; }
+  .shadowta { position:absolute !important; left:-9999px; top:0; width:10px; height:10px; opacity:0; pointer-events:none; }
+  .toolbar.bottom { border-bottom:none; padding-bottom:0; margin:8px 0 0; }
+  .tipsbtn { margin-left:auto; font-size:12px !important; }
+  .tips.hidden { display:none; }
+  .eqlist { flex:1; display:flex; flex-direction:column; gap:6px; }
+  .eqlist .mfwrap { flex:1; }
+  .eqlist.many { max-height:60vh; overflow:auto; padding-right:2px; }
+  .eqlist.many .mfwrap { flex:none; }
+  .eqlist.many math-field { min-height:70px !important; padding-top:14px !important; }
+  .eqlist.many .mfwrap::before { content:attr(data-n); position:absolute; left:-2px; top:-2px; z-index:2; font-size:10px; font-weight:700; background:var(--green); color:#fff; border-radius:8px; padding:0 6px; }
+  .eqstatic { display:flex; gap:8px; align-items:center; padding:6px 10px; border:1px dashed var(--line); border-radius:8px; cursor:pointer; font-size:16px; overflow-x:auto; }
+  .eqstatic:hover { border-style:solid; border-color:#9fd39b; background:var(--panel); }
+  .eqn { font-size:10px; font-weight:700; color:var(--muted); background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:0 6px; flex:none; }
+  .eqm { overflow-x:auto; }
+  .eqcount { font-weight:600; color:var(--muted); text-transform:none; letter-spacing:0; margin-left:2px; }
+  #clean.on { max-height:48vh; overflow:auto; margin-top:10px; }
   .wrapinfo { font-size:12px; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; }
 </style>
 <style id="ml-static">/* MathLive static rendering styles (MIT licence) */
@@ -188,7 +209,6 @@
       <button class="primary" id="secPut">⤶ Put back into section</button><button id="secCancel">Cancel</button></div>
     <div class="toolbar">
       <div class="tgroup">
-        <button class="primary" id="copy" title="Copy the LaTeX (Ctrl+Enter)">📋 Copy</button>
         <button id="undoBtn" title="Undo the last tool change (Alt+Z)">↶ Undo</button>
         <button id="clear" title="Clear both panes">Clear</button>
         <button id="cleanBtn" title="Find unnecessary parts to remove (Alt+C)">🧹 Clean</button>
@@ -209,6 +229,26 @@
       </select>
         <button id="numBtn" title="Numbering on/off (Alt+N)">#</button>
       </div>
+      <span class="status" id="status"></span><span class="note" id="note"></span>
+      <select id="unitStyle" style="display:none"><option value="qty">qty</option><option value="SI">SI</option></select>
+    </div>
+    <div class="panes">
+      <div class="pane">
+        <div class="plabel">LaTeX <span class="wrapinfo" id="wrapinfo"></span></div>
+        <div class="codewrap">
+          <textarea id="code" spellcheck="false" placeholder="Paste from Overleaf (or a Word equation)…  e.g. \frac{a+b}{c^2}   $E=mc^2$   \begin{equation} … \end{equation}&#10;&#10;Several equations? Put each on its own line."></textarea>
+          <button class="primary copycorner" id="copy" title="Copy all the LaTeX (Ctrl+Enter)">📋 Copy</button>
+        </div>
+        <textarea id="input" class="shadowta" tabindex="-1" aria-hidden="true"></textarea>
+      </div>
+      <div class="pane">
+        <div class="plabel">Visual <span class="eqcount" id="eqcount"></span><span class="accbar" id="accbar" title="Select a symbol (or part of the equation), then click an accent. With nothing selected, it applies to the symbol before the cursor."></span>
+          <span class="zoom" title="Size of the visual equation"><button class="icon" id="zoomOut" title="Smaller">−</button><button class="icon" id="zoomReset" title="Reset size"><span id="zoomVal">100%</span></button><button class="icon" id="zoomIn" title="Larger">+</button></span></div>
+        <div class="eqlist" id="eqlist"><div class="mfwrap"><math-field id="mf"></math-field><div class="hl" id="hl"></div></div></div>
+      </div>
+    </div>
+    <div class="checks" id="checks"></div>
+    <div class="toolbar bottom">
       <div class="tgroup">
         <button id="symBtn" title="Browse or search symbols (Alt+F)">Ω Symbols</button>
         <button id="matBtn" title="Build a matrix (Alt+M)">▦ Matrix</button>
@@ -218,25 +258,13 @@
         <button id="unitsBtn" title="Units ⇄ siunitx (Alt+U)">⚖ Units</button>
         <button id="expBtn" title="Export as image (Alt+I)">🖼 Image</button>
       </div>
-      <span class="status" id="status"></span><span class="note" id="note"></span>
-      <select id="unitStyle" style="display:none"><option value="qty">qty</option><option value="SI">SI</option></select>
+      <button id="tipsBtn" class="tipsbtn" title="Show or hide typing tips">💡 Tips</button>
     </div>
-    <div class="panes">
-      <div class="pane">
-        <div class="plabel">LaTeX <span class="wrapinfo" id="wrapinfo"></span></div>
-        <textarea id="input" spellcheck="false" placeholder="Paste from Overleaf (or a Word equation)…  e.g. \frac{a+b}{c^2}   $E=mc^2$   \begin{equation} … \end{equation}"></textarea>
-      </div>
-      <div class="pane">
-        <div class="plabel">Visual <span class="accbar" id="accbar" title="Select a symbol (or part of the equation), then click an accent. With nothing selected, it applies to the symbol before the cursor."></span>
-          <span class="zoom" title="Size of the visual equation"><button class="icon" id="zoomOut" title="Smaller">−</button><button class="icon" id="zoomReset" title="Reset size"><span id="zoomVal">100%</span></button><button class="icon" id="zoomIn" title="Larger">+</button></span></div>
-        <div class="mfwrap"><math-field id="mf"></math-field><div class="hl" id="hl"></div></div>
-      </div>
-    </div>
-    <div class="checks" id="checks"></div>
-    <div class="tips">
+    <div class="tips" id="tips">
       <kbd>/</kbd> fraction · <kbd>^</kbd> superscript · <kbd>_</kbd> subscript · <kbd>sqrt</kbd> root · <kbd>\alpha</kbd> Greek · <kbd>Tab</kbd> next part ·
       select code on the left to shade it on the right · <kbd>Alt</kbd>+<kbd>K</kbd> all shortcuts
     </div>
+    <div class="clean" id="clean"></div>
     <div class="symp" id="symPanel">
       <div class="symhead"><input id="symQ" placeholder="Search: arrow, integral, approx, real numbers…" autocomplete="off"><button class="icon" id="symClose" title="Close (Esc)">✕</button></div>
       <div class="symcats" id="symCats"></div>
@@ -261,7 +289,6 @@
       </div>
     </div>
     <div class="clean" id="unitsPanel"></div>
-    <div class="clean" id="clean"></div>
     <div class="symp" id="expPanel">
       <div class="expopts">
         <label>Colour <input type="color" id="expColor" value="#000000"></label>
@@ -743,7 +770,8 @@ function start() {
       return;
     }
     const total = issues.reduce((n, g) => n + g.items.length, 0);
-    let h = `<h3>🧹 Found ${total} thing${total > 1 ? 's' : ''} to tidy</h3>
+    const which = (document.getElementById('eqcount') || {}).textContent ? ' in equation ' + (document.getElementById('eqcount').textContent.match(/\d+/) || [''])[0] : '';
+    let h = `<h3>🧹 Found ${total} thing${total > 1 ? 's' : ''} to tidy${which}</h3>
       <div class="sum">${msg ? `<span class="done">${msg}</span> · ` : ''}Tick what to remove or simplify. Point at a line to see where it is in the equation.</div>`;
     issues.forEach((g, gi) => {
       const [tag, title, why, def] = INFO[g.kind];
@@ -1964,7 +1992,7 @@ function start() {
     ['Alt + I', 'Export as image', () => document.getElementById('expBtn').click()],
     ['Alt + Z', 'Undo last tool change', () => undoBtn.click()],
     ['Alt + E', 'Jump to the visual editor', () => mf.focus()],
-    ['Alt + L', 'Jump to the LaTeX box', () => input.focus()],
+    ['Alt + L', 'Jump to the LaTeX box', () => document.getElementById('code').focus()],
     ['Alt + D', 'Dark / light mode', () => themeBtn.click()],
     ['Alt + K', 'Show these shortcuts', () => document.getElementById('keysBtn').click()],
     ['Alt + H / T / B', 'Hat / tilde / bar on the selection', null],
@@ -1986,6 +2014,167 @@ function start() {
     '</table><p class="muted">On a Mac, use <kbd>⌥ Option</kbd> for Alt and <kbd>⌘</kbd> for Ctrl.</p><div class="row"><button id="keysClose">Close</button></div>';
   document.getElementById('keysBtn').onclick = () => keysPanel.classList.toggle('on');
   document.getElementById('keysClose').onclick = () => keysPanel.classList.remove('on');
+
+  // =================== Several equations in the code pane ===================
+  // The visible #code box holds all equations (one per line; multi-line environments
+  // and \[ … \] blocks stay together). The hidden #input always mirrors the *active*
+  // equation, so every existing tool keeps working on "the equation".
+  const code = document.getElementById('code');
+  const eqlist = document.getElementById('eqlist');
+  const mfwrapEl = document.querySelector('.mfwrap');
+  const eqcount = document.getElementById('eqcount');
+  const NV = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value');
+  let blocks = [], active = 0, syncing = false;
+
+  function splitBlocks(t) {
+    const lines = [];
+    for (let i = 0; ;) { const j = t.indexOf('\n', i), e = j < 0 ? t.length : j; lines.push({ s: i, e, txt: t.slice(i, e) }); if (j < 0) break; i = j + 1; }
+    const out = [];
+    for (let k = 0; k < lines.length; k++) {
+      const L = lines[k], tr = L.txt.trim();
+      if (!tr || /^%/.test(tr)) continue;
+      let endK = k;
+      const env = tr.match(/^\\begin\s*\{([^}]+)\}/);
+      if (env) {
+        const name = env[1].replace(/[*]/g, '\\*'), bre = new RegExp(`\\\\begin\\s*\\{${name}\\}`, 'g'), ere = new RegExp(`\\\\end\\s*\\{${name}\\}`, 'g');
+        let depth = 0;
+        for (let m = k; m < lines.length; m++) { depth += (lines[m].txt.match(bre) || []).length - (lines[m].txt.match(ere) || []).length; endK = m; if (depth <= 0) break; }
+      } else if (tr.startsWith('\\[') && !tr.includes('\\]')) {
+        for (let m = k + 1; m < lines.length; m++) { endK = m; if (lines[m].txt.includes('\\]')) break; }
+      } else if (tr.startsWith('$$') && tr.indexOf('$$', 2) < 0) {
+        for (let m = k + 1; m < lines.length; m++) { endK = m; if (lines[m].txt.includes('$$')) break; }
+      }
+      const s = L.s + (L.txt.length - L.txt.trimStart().length);
+      const last = lines[endK], e = last.e - (last.txt.length - last.txt.trimEnd().length);
+      out.push({ s, e });
+      k = endK;
+    }
+    return out;
+  }
+  const blk = () => blocks[active] || { s: code.value.length, e: code.value.length };
+  function pickActive(caret) {
+    if (!blocks.length) return 0;
+    let i = blocks.findIndex(b => caret >= b.s && caret <= b.e);
+    if (i < 0) { i = -1; blocks.forEach((b, j) => { if (b.e < caret) i = j; }); if (i < 0) i = 0; }
+    return i;
+  }
+  function refresh(byCaret) {
+    blocks = splitBlocks(code.value);
+    if (byCaret) active = pickActive(code.selectionStart);
+    active = Math.max(0, Math.min(active, Math.max(0, blocks.length - 1)));
+    const b = blk();
+    const txt = blocks.length ? code.value.slice(b.s, b.e) : '';
+    const changed = NV.get.call(input) !== txt;
+    NV.set.call(input, txt);
+    renderList();
+    return changed;
+  }
+  // writing to the active equation (from any tool) updates its place in the code box
+  Object.defineProperty(input, 'value', {
+    configurable: true,
+    get() { return NV.get.call(input); },
+    set(v) {
+      NV.set.call(input, v);
+      if (syncing) return;
+      let b = blk();
+      if (!blocks.length) { // empty box (or only blank lines): the equation becomes the content
+        const keep = code.value.trim() ? code.value.replace(/\s*$/, '\n') : '';
+        b = { s: keep.length, e: code.value.length };
+      }
+      const top = code.scrollTop;
+      NV.set.call(code, code.value.slice(0, b.s) + v + code.value.slice(b.e));
+      code.scrollTop = top;
+      blocks = splitBlocks(code.value);
+      active = pickActive(b.s);
+      renderList();
+    },
+  });
+  // selection and focus of the hidden box map onto the active equation in the code box
+  // if the cursor moved to another equation without an event we saw, switch first
+  function ensureActive() {
+    if (document.activeElement !== code && !code.contains(document.activeElement)) return;
+    const want = pickActive(code.selectionStart);
+    if (want !== active || splitBlocks(code.value).length !== blocks.length) caretMoved();
+  }
+  Object.defineProperty(input, 'selectionStart', { configurable: true, get() { ensureActive(); const b = blk(); return Math.max(0, Math.min(NV.get.call(input).length, code.selectionStart - b.s)); } });
+  Object.defineProperty(input, 'selectionEnd', { configurable: true, get() { ensureActive(); const b = blk(); return Math.max(0, Math.min(NV.get.call(input).length, code.selectionEnd - b.s)); } });
+  input.setSelectionRange = (a, b2) => { const b = blk(); code.setSelectionRange(b.s + a, b.s + b2); };
+  input.focus = () => code.focus();
+  input.select = () => code.select();
+
+  // typing / moving the cursor in the code box
+  code.addEventListener('input', () => {
+    syncing = true; refresh(true); syncing = false;
+    input.dispatchEvent(new Event('input'));
+  });
+  function caretMoved() {
+    const before = active;
+    syncing = true; const changed = refresh(true); syncing = false;
+    if (before !== active || changed) { load(); clearHl(); return true; }
+    return false;
+  }
+  ['keyup', 'mouseup', 'select', 'focus'].forEach(ev => code.addEventListener(ev, () => {
+    const switched = caretMoved();
+    // after switching equation, wait for the visual pane to redraw before shading
+    if (switched && ev !== 'focus') requestAnimationFrame(() => requestAnimationFrame(() => input.dispatchEvent(new Event(ev))));
+    else input.dispatchEvent(new Event(ev));
+  }));
+  code.addEventListener('blur', () => input.dispatchEvent(new Event('blur')));
+  code.addEventListener('paste', (e) => {
+    caretMoved();
+    const ev = new ClipboardEvent('paste', { clipboardData: e.clipboardData, cancelable: true });
+    input.dispatchEvent(ev);
+    if (ev.defaultPrevented) e.preventDefault();
+  });
+
+  // the visual pane: the active equation is editable, the others are shown and clickable
+  function renderList() {
+    eqlist.querySelectorAll('.eqstatic').forEach(n => n.remove());
+    const many = blocks.length > 1;
+    eqlist.classList.toggle('many', many);
+    eqcount.textContent = many ? `· equation ${active + 1} of ${blocks.length}` : '';
+    if (!many) return;
+    blocks.forEach((b, i) => {
+      if (i === active) return;
+      const d = document.createElement('div');
+      d.className = 'eqstatic';
+      d.title = 'Click to edit this equation';
+      d.innerHTML = `<span class="eqn">${i + 1}</span><span class="eqm">${renderStatic(fieldLatex(code.value.slice(b.s, b.e)))}</span>`;
+      d.onclick = () => activate(i);
+      eqlist.insertBefore(d, i < active ? mfwrapEl : null);
+    });
+    mfwrapEl.dataset.n = active + 1;
+  }
+  function activate(i) {
+    if (!blocks[i]) return;
+    active = i;
+    code.setSelectionRange(blocks[i].e, blocks[i].e);
+    syncing = true; refresh(false); syncing = false;
+    load(); clearHl();
+    mf.focus(); mf.executeCommand('moveToMathfieldEnd');
+  }
+  // Copy and Clear work on everything; history keeps the active equation
+  document.getElementById('copy').onclick = async () => {
+    const t = code.value.trim();
+    try { await navigator.clipboard.writeText(t); status.textContent = 'Copied ✓'; }
+    catch (e) { code.select(); status.textContent = 'Selected — press Ctrl+C'; }
+    setTimeout(() => (status.textContent = ''), 2500);
+  };
+  document.getElementById('copy').addEventListener('click', () => saveHistory(input.value));
+  document.getElementById('clear').onclick = () => {
+    saveHistory(input.value);
+    pushUndo(input.value);
+    syncing = true; NV.set.call(code, ''); refresh(false); syncing = false;
+    load(); clearHl(); code.focus();
+  };
+
+  // ---------- tips line can be hidden ----------
+  const tipsEl = document.getElementById('tips');
+  const setTips = (on) => { tipsEl.classList.toggle('hidden', !on); document.getElementById('tipsBtn').classList.toggle('sel', on); store('olve-tips', on); };
+  setTips(recall('olve-tips', true));
+  document.getElementById('tipsBtn').onclick = () => setTips(tipsEl.classList.contains('hidden'));
+  // clean-up suggestions: keep them in view right under the editor
+  document.getElementById('cleanBtn').addEventListener('click', () => setTimeout(() => { const c = document.getElementById('clean'); if (c.classList.contains('on')) c.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 0));
 
   input.value = '\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}';
   load();
