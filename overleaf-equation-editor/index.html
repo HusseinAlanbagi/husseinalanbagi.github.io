@@ -1500,9 +1500,20 @@ function start() {
     clone.querySelectorAll('[stroke="currentColor"]').forEach(n => n.setAttribute('stroke', c));
     return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(clone);
   }
-  function download(blob, name) {
+  // inside the claude.ai viewer, files must go through its save prompt; elsewhere a normal download
+  let dlCap;
+  async function download(blob, name) {
+    if (dlCap === undefined) {
+      dlCap = null;
+      try { if (window.claude && typeof window.claude.use === 'function') dlCap = await window.claude.use('downloads'); } catch (e) { dlCap = null; }
+    }
+    if (dlCap) {
+      try { await dlCap.save({ filename: name, data: blob }); return true; }
+      catch (e) { if (e && e.code === 'declined') throw new Error('Save cancelled.'); throw new Error('Saving files is not available here — use “Copy as image” instead.'); }
+    }
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
     document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    return true;
   }
   async function doExport(kind) {
     expStatus.textContent = 'Drawing…';
@@ -1511,9 +1522,9 @@ function start() {
       if (kind === 'copy') {
         const png = await svgToPng(svg);
         try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]); expStatus.textContent = 'Image copied ✓ — paste it into Word, PowerPoint, etc.'; }
-        catch (e) { download(png, 'equation.png'); expStatus.textContent = 'Your browser blocked copying images here, so it was downloaded instead.'; }
-      } else if (kind === 'png') { download(await svgToPng(svg), 'equation.png'); expStatus.textContent = 'PNG downloaded ✓'; }
-      else { download(new Blob([svgText(svg)], { type: 'image/svg+xml' }), 'equation.svg'); expStatus.textContent = 'SVG downloaded ✓ (sharp at any size — works in Word & PowerPoint)'; }
+        catch (e) { await download(png, 'equation.png'); expStatus.textContent = 'Your browser blocked copying images here, so it was saved as a file instead.'; }
+      } else if (kind === 'png') { await download(await svgToPng(svg), 'equation.png'); expStatus.textContent = 'PNG saved ✓'; }
+      else { await download(new Blob([svgText(svg)], { type: 'image/svg+xml' }), 'equation.svg'); expStatus.textContent = 'SVG saved ✓ (sharp at any size — works in Word & PowerPoint)'; }
       document.getElementById('expPrev').innerHTML = ''; document.getElementById('expPrev').appendChild(svg);
     } catch (e) { expStatus.textContent = '⚠ ' + e.message; }
   }
