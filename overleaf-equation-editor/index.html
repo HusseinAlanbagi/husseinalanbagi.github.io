@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Equation Editor for Overleaf</title>
+<style>
+  :root { --green:#138a07; --ink:#1f2328; --muted:#667085; --line:#d0d5dd; --bg:#f7f8fa; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--ink); background:var(--bg); }
+  main { max-width:860px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 22px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:16px; }
+  .label { font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+  .label .num { background:var(--green); color:#fff; width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px; }
+  textarea { width:100%; min-height:90px; font:14px/1.45 ui-monospace,Menlo,Consolas,monospace; padding:10px; border:1px solid var(--line); border-radius:8px; resize:vertical; }
+  textarea:focus, math-field:focus-within { outline:2px solid var(--green); outline-offset:1px; }
+  math-field { display:block; width:100%; font-size:26px; padding:14px; border:1px solid var(--line); border-radius:8px; min-height:70px; background:#fff; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center; }
+  button { font:inherit; font-size:14px; padding:7px 14px; border:1px solid var(--line); background:#fff; border-radius:7px; cursor:pointer; }
+  button:hover { background:#f2f4f7; }
+  button.primary { background:var(--green); border-color:var(--green); color:#fff; font-weight:600; }
+  button.primary:hover { background:#0d6a05; }
+  .status { color:var(--green); font-size:13px; }
+  .tips { color:var(--muted); font-size:13px; margin-top:10px; }
+  .tips kbd { font:12px ui-monospace,monospace; background:#f2f4f7; border:1px solid var(--line); border-radius:4px; padding:0 5px; }
+  .mfwrap { position:relative; }
+  .hl { position:fixed; background:rgba(255,196,0,.38); border:1px solid rgba(214,150,0,.8); border-radius:3px; pointer-events:none; z-index:5; display:none; }
+  .wrapinfo { font-size:12px; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Equation Editor for Overleaf</h1>
+  <p class="sub">Paste LaTeX from Overleaf, edit it visually, copy it back.</p>
+
+  <div class="card">
+    <div class="label"><span class="num">1</span> Paste your LaTeX <span class="wrapinfo" id="wrapinfo"></span></div>
+    <textarea id="input" spellcheck="false" placeholder="e.g.  \frac{a+b}{c^2}   or   $E=mc^2$   or   \begin{equation} ... \end{equation}"></textarea>
+    <div class="row">
+      <button id="clear">Clear</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label"><span class="num">2</span> Edit visually</div>
+    <div class="mfwrap"><math-field id="mf"></math-field><div class="hl" id="hl"></div></div>
+    <div class="row">
+      <button id="kbd">⌨ Symbols keyboard</button>
+    </div>
+    <div class="tips">
+      Type <kbd>/</kbd> for a fraction, <kbd>^</kbd> superscript, <kbd>_</kbd> subscript, <kbd>sqrt</kbd> root,
+      <kbd>\alpha</kbd> for Greek letters. Use arrow keys and <kbd>Tab</kbd> to move between parts.<br>
+      <b>Tip:</b> select part of the LaTeX in box 1 or 3 to see it shaded here.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label"><span class="num">3</span> Copy the result</div>
+    <textarea id="output" spellcheck="false" readonly></textarea>
+    <div class="row">
+      <button class="primary" id="copy">Copy LaTeX</button>
+      <span class="status" id="status"></span>
+    </div>
+  </div>
+</main>
+
+<script>
+const SOURCES = [
+  'mathlive.min.js',
+  'https://cdn.jsdelivr.net/npm/mathlive@0.111.4/mathlive.min.js',
+  'https://unpkg.com/mathlive@0.111.4/mathlive.min.js'
+];
+function loadLib(i) {
+  if (i >= SOURCES.length) {
+    document.getElementById('mf').outerHTML =
+      '<div style="padding:14px;border:1px solid #f0b4b4;background:#fff5f5;border-radius:8px;color:#a12">' +
+      'The visual editor could not load. Your network or browser may be blocking cdn.jsdelivr.net and unpkg.com. ' +
+      'Try another network, or use the offline version.</div>';
+    return;
+  }
+  const sc = document.createElement('script');
+  sc.src = SOURCES[i];
+  sc.onload = start;
+  sc.onerror = () => loadLib(i + 1);
+  document.head.appendChild(sc);
+}
+loadLib(0);
+function start() {
+(function () {
+  const MF = window.MathfieldElement || customElements.get('math-field');
+  if (MF) { MF.fontsDirectory = 'fonts/'; MF.soundsDirectory = null; }
+
+  const input = document.getElementById('input');
+  const output = document.getElementById('output');
+  const mf = document.getElementById('mf');
+  const wrapinfo = document.getElementById('wrapinfo');
+  const status = document.getElementById('status');
+  mf.mathVirtualKeyboardPolicy = 'manual';
+  mf.smartMode = false;
+
+  const MULTI = /^(align|flalign|alignat|eqnarray|gather|multline)$/;
+  let wrap = { pre: '', post: '', multi: false, extras: [] };
+
+  // Strip delimiters/environments, keep them to restore on copy.
+  function parse(raw) {
+    let s = raw.trim(), pre = '', post = '', multi = false, m;
+    if ((m = s.match(/^\\begin\{([a-zA-Z]+\*?)\}([\s\S]*)\\end\{\1\}$/))) {
+      pre = `\\begin{${m[1]}}\n  `; post = `\n\\end{${m[1]}}`; s = m[2];
+      multi = MULTI.test(m[1].replace('*', ''));
+    } else if ((m = s.match(/^\$\$([\s\S]*)\$\$$/))) { pre = '$$'; post = '$$'; s = m[1]; }
+    else if ((m = s.match(/^\\\[([\s\S]*)\\\]$/))) { pre = '\\['; post = '\\]'; s = m[1]; }
+    else if ((m = s.match(/^\\\(([\s\S]*)\\\)$/))) { pre = '\\('; post = '\\)'; s = m[1]; }
+    else if ((m = s.match(/^\$([\s\S]*)\$$/))) { pre = '$'; post = '$'; s = m[1]; }
+    const extras = [];
+    s = s.replace(/\\label\{[^}]*\}|\\nonumber\b|\\notag\b/g, (x) => { extras.push(x); return ''; }).trim();
+    return { body: s, pre, post, multi, extras };
+  }
+
+  function buildOutput() {
+    let body = mf.getValue('latex');
+    if (wrap.multi) body = body.replace(/^\\begin\{aligned\}/, '').replace(/\\end\{aligned\}$/, '');
+    const extras = wrap.extras.length ? ' ' + wrap.extras.join(' ') : '';
+    output.value = wrap.pre + body + extras + wrap.post;
+  }
+
+  function load() {
+    const p = parse(input.value);
+    wrap = p;
+    mf.setValue(p.multi ? `\\begin{aligned}${p.body}\\end{aligned}` : p.body, { silenceNotifications: true });
+    wrapinfo.textContent = p.pre ? `— detected ${p.pre.trim().replace(/\n.*/, '')} … ${p.post.trim()}` : '';
+    buildOutput();
+  }
+
+  input.addEventListener('input', load);
+  mf.addEventListener('input', () => { buildOutput(); input.value = output.value; clearHl(); });
+
+  // ---- Shade the part of the equation matching the selected LaTeX ----
+  const hl = document.getElementById('hl');
+  const norm = (x) => x.replace(/\s+/g, '');
+  function clearHl() { hl.style.display = 'none'; }
+  function countBefore(hay, needle) {
+    let n = 0, i = 0;
+    while ((i = hay.indexOf(needle, i)) !== -1) { n++; i += needle.length; }
+    return n;
+  }
+  function findRange(target, k) {
+    const N = mf.lastOffset;
+    if (N > 200) return null;
+    const exact = [], contains = [];
+    for (let a = 0; a < N; a++) {
+      for (let b = a + 1; b <= N; b++) {
+        const v = norm(mf.getValue(a, b, 'latex'));
+        if (v === target) exact.push([a, b]);
+        else if (v.includes(target)) { contains.push([a, b]); break; } // longer b only grows
+      }
+    }
+    // keep only the tightest ranges (drop any that wrap another exact match)
+    const tight = exact.filter(([a, b]) => !exact.some(([c, d]) => (c !== a || d !== b) && c >= a && d <= b));
+    if (tight.length) return tight[Math.min(k, tight.length - 1)];
+    if (!contains.length) return null;
+    contains.sort((x, y) => (x[1] - x[0]) - (y[1] - y[0]));
+    return contains[0];
+  }
+  function drawRange([a, b]) {
+    let L = Infinity, T = Infinity, R = -Infinity, B = -Infinity;
+    for (let i = a + 1; i <= b; i++) {
+      const info = mf.getElementInfo(i);
+      const r = info && info.bounds;
+      if (!r || r.width <= 0) continue;
+      L = Math.min(L, r.left); T = Math.min(T, r.top);
+      R = Math.max(R, r.right); B = Math.max(B, r.bottom);
+    }
+    if (L === Infinity) return clearHl();
+    Object.assign(hl.style, { display: 'block', left: (L - 3) + 'px', top: (T - 3) + 'px',
+      width: (R - L + 6) + 'px', height: (B - T + 6) + 'px' });
+  }
+  let lastSel = null;
+  function updateHl(el) {
+    const s0 = el.selectionStart, e0 = el.selectionEnd;
+    if (s0 === e0) { lastSel = null; return clearHl(); }
+    // only the equation body counts, not the $ / \begin wrapper
+    const txt = el.value;
+    const bodyStart = txt.indexOf(wrap.pre) === 0 ? wrap.pre.length : 0;
+    const target = norm(txt.slice(Math.max(s0, bodyStart), e0));
+    if (!target) return clearHl();
+    const k = countBefore(norm(txt.slice(bodyStart, Math.max(s0, bodyStart))), target);
+    const r = findRange(target, k);
+    lastSel = r ? [el, r] : null;
+    r ? drawRange(r) : clearHl();
+  }
+  [input, output].forEach((el) => {
+    ['select', 'mouseup', 'keyup'].forEach((ev) => el.addEventListener(ev, () => updateHl(el)));
+    el.addEventListener('blur', () => setTimeout(() => {
+      if (document.activeElement !== input && document.activeElement !== output) clearHl();
+    }, 0));
+  });
+  addEventListener('scroll', () => lastSel ? drawRange(lastSel[1]) : null, true);
+  addEventListener('resize', () => lastSel ? drawRange(lastSel[1]) : null);
+
+  document.getElementById('clear').onclick = () => { input.value = ''; load(); clearHl(); input.focus(); };
+  document.getElementById('kbd').onclick = () => {
+    mf.focus();
+    const vk = window.mathVirtualKeyboard;
+    if (vk) vk.visible ? vk.hide() : vk.show();
+  };
+  document.getElementById('copy').onclick = async () => {
+    try { await navigator.clipboard.writeText(output.value); status.textContent = 'Copied ✓'; }
+    catch (e) { output.select(); document.execCommand && document.execCommand('copy'); status.textContent = 'Selected — press Ctrl+C if it didn’t copy'; }
+    setTimeout(() => (status.textContent = ''), 2500);
+  };
+
+  input.value = '\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}';
+  load();
+})();
+}
+</script>
+</body>
+</html>
