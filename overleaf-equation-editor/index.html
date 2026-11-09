@@ -99,6 +99,8 @@ function start() {
   const status = document.getElementById('status');
   mf.mathVirtualKeyboardPolicy = 'manual';
   mf.smartMode = false;
+  mf.smartFence = false;   // don't auto-pair brackets
+  mf.smartSuperscript = false;
 
   const MULTI = /^(align|flalign|alignat|eqnarray|gather|multline)$/;
   let wrap = { pre: '', post: '', multi: false, extras: [] };
@@ -128,7 +130,7 @@ function start() {
   function load() {
     const p = parse(input.value);
     wrap = p;
-    mf.setValue(p.multi ? `\\begin{aligned}${p.body}\\end{aligned}` : p.body, { silenceNotifications: true });
+    mf.setValue(fieldLatex(input.value), { silenceNotifications: true });
     wrapinfo.textContent = p.pre ? `— detected ${p.pre.trim().replace(/\n.*/, '')} … ${p.post.trim()}` : '';
     buildOutput();
   }
@@ -137,31 +139,146 @@ function start() {
   mf.addEventListener('input', () => { buildOutput(); input.value = output.value; clearHl(); });
 
   // ---- Shade the part of the equation matching the selected LaTeX ----
+  // Approach: read the LaTeX's structure, widen the selection to whole pieces
+  // (a full \frac{..}{..}, a full x^{2}, a matched \left( .. \right) ...),
+  // drop two invisible marker characters around it, and let a hidden copy of
+  // MathLive tell us exactly which symbols sit between the markers.
   const hl = document.getElementById('hl');
-  const norm = (x) => x.replace(/\s+/g, '');
+  const MARK = '';
   function clearHl() { hl.style.display = 'none'; }
-  function countBefore(hay, needle) {
-    let n = 0, i = 0;
-    while ((i = hay.indexOf(needle, i)) !== -1) { n++; i += needle.length; }
-    return n;
-  }
-  function findRange(target, k) {
-    const N = mf.lastOffset;
-    if (N > 200) return null;
-    const exact = [], contains = [];
-    for (let a = 0; a < N; a++) {
-      for (let b = a + 1; b <= N; b++) {
-        const v = norm(mf.getValue(a, b, 'latex'));
-        if (v === target) exact.push([a, b]);
-        else if (v.includes(target)) { contains.push([a, b]); break; } // longer b only grows
-      }
+
+  // Mini LaTeX parser -> list of sibling nodes {s, e, kids:[[from,to],...]}
+  function matchBrace(src, i) { // src[i] === '{' or '['
+    const open = src[i], close = open === '{' ? '}' : ']';
+    let d = 0;
+    for (let j = i; j < src.length; j++) {
+      if (src[j] === '\\') { j++; continue; }
+      if (src[j] === open) d++;
+      else if (src[j] === close && --d === 0) return j;
     }
-    // keep only the tightest ranges (drop any that wrap another exact match)
-    const tight = exact.filter(([a, b]) => !exact.some(([c, d]) => (c !== a || d !== b) && c >= a && d <= b));
-    if (tight.length) return tight[Math.min(k, tight.length - 1)];
-    if (!contains.length) return null;
-    contains.sort((x, y) => (x[1] - x[0]) - (y[1] - y[0]));
-    return contains[0];
+    return src.length - 1;
+  }
+  function readCmd(src, i) { // src[i] === '\\' -> end index (exclusive) of the command name
+    if (/[a-zA-Z]/.test(src[i + 1] || '')) { let j = i + 1; while (/[a-zA-Z]/.test(src[j] || '')) j++; return j; }
+    return Math.min(i + 2, src.length);
+  }
+  function skipWs(src, i, end) { while (i < end && /\s/.test(src[i])) i++; return i; }
+  function readDelim(src, i) { i = skipWs(src, i, src.length); return src[i] === '\\' ? readCmd(src, i) : i + 1; }
+  function findPair(src, i, openRe, closeRe) { // nested \left..\right or \begin{env}..\end{env}
+    const re = new RegExp(`${openRe.source}|${closeRe.source}`, 'g');
+    re.lastIndex = i; let d = 1, m;
+    while ((m = re.exec(src))) {
+      if (new RegExp('^' + openRe.source).test(m[0])) d++; else if (--d === 0) return m.index;
+    }
+    return -1;
+  }
+  function parseList(src, i, end) {
+    const nodes = [];
+    while (true) {
+      i = skipWs(src, i, end);
+      if (i >= end) break;
+      const c = src[i];
+      if (c === '}') { i++; continue; }
+      const node = { s: i, e: i + 1, kids: [] };
+      if (c === '{') {
+        const j = matchBrace(src, i); node.kids.push([i + 1, j]); node.e = j + 1;
+      } else if (c === '\\') {
+        const ce = readCmd(src, i), name = src.slice(i + 1, ce);
+        if (name === 'begin') {
+          const env = src.slice(ce).match(/^\s*\{([^}]*)\}/);
+          const envName = env ? env[1] : '';
+          let inner = ce + (env ? env[0].length : 0);
+          while (src[skipWs(src, inner, end)] === '{' || src[skipWs(src, inner, end)] === '[') inner = matchBrace(src, skipWs(src, inner, end)) + 1;
+          const esc = envName.replace(/[*]/g, '\\*');
+          const endAt = findPair(src, inner, new RegExp(`\\\\begin\\{${esc}\\}`), new RegExp(`\\\\end\\{${esc}\\}`));
+          if (endAt < 0) { node.e = end; node.kids.push([inner, end]); }
+          else { node.kids.push([inner, endAt]); node.e = endAt + `\\end{${envName}}`.length; }
+        } else if (name === 'left') {
+          const inner = readDelim(src, ce);
+          const r = findPair(src, inner, /\\left(?![a-zA-Z])/, /\\right(?![a-zA-Z])/);
+          if (r < 0) { node.e = inner; }
+          else { node.kids.push([inner, r]); node.e = readDelim(src, r + 6); }
+        } else {
+          node.e = ce;
+          // swallow the command's {..} / [..] arguments
+          while (true) {
+            const k = skipWs(src, node.e, end);
+            if (src[k] === '{' || (src[k] === '[' && /^(sqrt|frac|dfrac|tfrac|binom|xrightarrow|xleftarrow)$/.test(name))) {
+              const j = matchBrace(src, k); node.kids.push([k + 1, j]); node.e = j + 1;
+            } else break;
+          }
+        }
+      }
+      // attach ^ and _ scripts to the node
+      while (true) {
+        const k = skipWs(src, node.e, end);
+        if (src[k] !== '^' && src[k] !== '_') break;
+        const t = skipWs(src, k + 1, end);
+        if (src[t] === '{') { const j = matchBrace(src, t); node.kids.push([t + 1, j]); node.e = j + 1; }
+        else if (src[t] === '\\') { node.e = readCmd(src, t); }
+        else node.e = t + 1;
+      }
+      node.e = Math.min(node.e, end);
+      nodes.push(node);
+      i = node.e;
+    }
+    return nodes;
+  }
+  // smallest run of sibling nodes covering [s, e)
+  function locate(src, from, to, s, e) {
+    const nodes = parseList(src, from, to).filter(n => n.e > s && n.s < e);
+    if (!nodes.length) return null;
+    if (nodes.length === 1) {
+      const kid = nodes[0].kids.find(([a, b]) => s >= a && e <= b);
+      if (kid) { const r = locate(src, kid[0], kid[1], s, e); if (r) return r; }
+    }
+    return [nodes[0].s, nodes[nodes.length - 1].e];
+  }
+
+  // same transformation load() applies, so the hidden copy matches the real field
+  function fieldLatex(raw) {
+    const p = parse(raw);
+    return p.multi ? `\\begin{aligned}${p.body}\\end{aligned}` : p.body;
+  }
+  let ghost = null;
+  function getGhost() {
+    if (ghost) return ghost;
+    ghost = document.createElement('math-field');
+    ghost.setAttribute('aria-hidden', 'true');
+    ghost.tabIndex = -1;
+    Object.assign(ghost.style, { position: 'fixed', left: '-10000px', top: '0', width: '2000px', visibility: 'hidden' });
+    document.body.appendChild(ghost);
+    return ghost;
+  }
+  // where the equation itself sits inside the box text (excluding $ / \[ / \begin{equation} wrapper)
+  function bodyBounds(txt) {
+    let a = txt.length - txt.trimStart().length, b = txt.trimEnd().length;
+    const t = txt.slice(a, b), m = t.match(/^\\begin\{([a-zA-Z]+\*?)\}/);
+    if (m && t.endsWith(`\\end{${m[1]}}`)) return [a + m[0].length, b - `\\end{${m[1]}}`.length];
+    for (const [o, c] of [['$$', '$$'], ['\\[', '\\]'], ['\\(', '\\)'], ['$', '$']])
+      if (t.startsWith(o) && t.endsWith(c) && t.length >= o.length + c.length) return [a + o.length, b - c.length];
+    return [a, b];
+  }
+  function rangeFor(el) {
+    const txt = el.value;
+    let s = el.selectionStart, e = el.selectionEnd;
+    if (s === e) return null;
+    const [bs, be] = bodyBounds(txt);
+    if (s <= bs && e >= be) return 'all';
+    s = Math.max(s, bs); e = Math.min(e, be);
+    if (s >= e) return null;
+    const r = locate(txt, bs, be, s, e);
+    if (!r) return null;
+    const marked = txt.slice(0, r[0]) + MARK + txt.slice(r[0], r[1]) + MARK + txt.slice(r[1]);
+    const g = getGhost();
+    g.setValue(fieldLatex(marked), { silenceNotifications: true });
+    const pos = [];
+    for (let i = 0; i <= g.lastOffset; i++) {
+      const info = g.getElementInfo(i);
+      if (info && info.latex === MARK) pos.push(i);
+    }
+    if (pos.length !== 2 || g.lastOffset !== mf.lastOffset + 2) return 'all-ish';
+    return [pos[0] - 1, pos[1] - 2];
   }
   function drawRange([a, b]) {
     let L = Infinity, T = Infinity, R = -Infinity, B = -Infinity;
@@ -178,16 +295,12 @@ function start() {
   }
   let lastSel = null;
   function updateHl(el) {
-    const s0 = el.selectionStart, e0 = el.selectionEnd;
-    if (s0 === e0) { lastSel = null; return clearHl(); }
-    // only the equation body counts, not the $ / \begin wrapper
-    const txt = el.value;
-    const bodyStart = txt.indexOf(wrap.pre) === 0 ? wrap.pre.length : 0;
-    const target = norm(txt.slice(Math.max(s0, bodyStart), e0));
-    if (!target) return clearHl();
-    const k = countBefore(norm(txt.slice(bodyStart, Math.max(s0, bodyStart))), target);
-    const r = findRange(target, k);
-    lastSel = r ? [el, r] : null;
+    let r = null;
+    try { r = rangeFor(el); } catch (err) { r = null; }
+    if (r === 'all') r = [0, mf.lastOffset];
+    if (r === 'all-ish') r = null; // structure didn't line up: better to show nothing than the wrong thing
+    lastSel = r;
+    hl.dataset.range = r ? r.join(',') : '';
     r ? drawRange(r) : clearHl();
   }
   [input, output].forEach((el) => {
@@ -196,8 +309,8 @@ function start() {
       if (document.activeElement !== input && document.activeElement !== output) clearHl();
     }, 0));
   });
-  addEventListener('scroll', () => lastSel ? drawRange(lastSel[1]) : null, true);
-  addEventListener('resize', () => lastSel ? drawRange(lastSel[1]) : null);
+  addEventListener('scroll', () => lastSel ? drawRange(lastSel) : null, true);
+  addEventListener('resize', () => lastSel ? drawRange(lastSel) : null);
 
   document.getElementById('clear').onclick = () => { input.value = ''; load(); clearHl(); input.focus(); };
   document.getElementById('kbd').onclick = () => {
