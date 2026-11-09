@@ -147,6 +147,19 @@
     .panes { grid-template-columns:1fr; }
     .tgroup { border-right:none; padding-right:0; }
   }
+  .accbar { display:inline-flex; gap:2px; margin-left:8px; vertical-align:middle; text-transform:none; letter-spacing:0; font-weight:400; flex-wrap:wrap; }
+  .acc { padding:0 5px; min-width:26px; height:24px; font-size:14px; display:inline-flex; align-items:center; justify-content:center; }
+  .pane .plabel { display:flex; align-items:center; flex-wrap:wrap; gap:2px; min-height:26px; }
+  .symhead { display:flex; gap:6px; }
+  .symhead input { flex:1; }
+  .symcats { display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; }
+  .symcat { padding:2px 9px; font-size:12px; border-radius:12px; }
+  .symcat.sel { background:#e9f6e8; border-color:#9fd39b; font-weight:600; }
+  [data-theme=dark] .symcat.sel { background:#1f3a22; border-color:#3f7a3b; }
+  .symp { padding:8px; }
+  .symgrid { gap:4px; max-height:190px; margin-top:8px; }
+  .sym { min-width:40px; height:38px; padding:2px 6px; font-size:15px; }
+  math-field::part(virtual-keyboard-toggle) { display:none; }
   .wrapinfo { font-size:12px; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; }
 </style>
 <style id="ml-static">/* MathLive static rendering styles (MIT licence) */
@@ -170,6 +183,7 @@
         <button class="primary" id="copy" title="Copy the LaTeX (Ctrl+Enter)">📋 Copy</button>
         <button id="undoBtn" title="Undo the last tool change (Alt+Z)">↶ Undo</button>
         <button id="clear" title="Clear both panes">Clear</button>
+        <button id="cleanBtn" title="Find unnecessary parts to remove (Alt+C)">🧹 Clean</button>
       </div>
       <div class="tgroup">
         <select id="formSel" title="Convert to another kind of equation">
@@ -188,12 +202,10 @@
         <button id="numBtn" title="Numbering on/off (Alt+N)">#</button>
       </div>
       <div class="tgroup">
-        <button id="symBtn" title="Find a symbol by name (Alt+F)">🔎 Symbol</button>
+        <button id="symBtn" title="Browse or search symbols (Alt+F)">Ω Symbols</button>
         <button id="matBtn" title="Build a matrix (Alt+M)">▦ Matrix</button>
-        <button id="kbd" title="On-screen maths keyboard">⌨ Keys</button>
       </div>
       <div class="tgroup">
-        <button id="cleanBtn" title="Find unnecessary parts (Alt+C)">🧹 Clean</button>
         <button id="alignBtn" title="Line up &amp; columns (Alt+A)">⇥ Align</button>
         <button id="unitsBtn" title="Units ⇄ siunitx (Alt+U)">⚖ Units</button>
         <button id="expBtn" title="Export as image (Alt+I)">🖼 Image</button>
@@ -207,7 +219,7 @@
         <textarea id="input" spellcheck="false" placeholder="Paste from Overleaf (or a Word equation)…  e.g. \frac{a+b}{c^2}   $E=mc^2$   \begin{equation} … \end{equation}"></textarea>
       </div>
       <div class="pane">
-        <div class="plabel">Visual</div>
+        <div class="plabel">Visual <span class="accbar" id="accbar" title="Select a symbol (or part of the equation), then click an accent. With nothing selected, it applies to the symbol before the cursor."></span></div>
         <div class="mfwrap"><math-field id="mf"></math-field><div class="hl" id="hl"></div></div>
       </div>
     </div>
@@ -216,7 +228,11 @@
       <kbd>/</kbd> fraction · <kbd>^</kbd> superscript · <kbd>_</kbd> subscript · <kbd>sqrt</kbd> root · <kbd>\alpha</kbd> Greek · <kbd>Tab</kbd> next part ·
       select code on the left to shade it on the right · <kbd>Alt</kbd>+<kbd>K</kbd> all shortcuts
     </div>
-    <div class="symp" id="symPanel"><input id="symQ" placeholder="Search symbols: arrow, integral, matrix, approx, real numbers…" autocomplete="off"><div class="symgrid" id="symGrid"></div></div>
+    <div class="symp" id="symPanel">
+      <div class="symhead"><input id="symQ" placeholder="Search: arrow, integral, approx, real numbers…" autocomplete="off"><button class="icon" id="symClose" title="Close (Esc)">✕</button></div>
+      <div class="symcats" id="symCats"></div>
+      <div class="symgrid" id="symGrid"></div>
+    </div>
     <div class="symp" id="matPanel">
       <div class="matwrap">
         <div><div class="muted" style="margin-bottom:4px">Pick a size</div><div id="matGrid"></div></div>
@@ -310,6 +326,7 @@ function start() {
   const wrapinfo = document.getElementById('wrapinfo');
   const status = document.getElementById('status');
   mf.mathVirtualKeyboardPolicy = 'manual';
+  try { window.mathVirtualKeyboard && window.mathVirtualKeyboard.hide(); } catch (e) {}
   mf.smartMode = false;
   mf.smartFence = false;   // don't auto-pair brackets
   mf.smartSuperscript = false;
@@ -523,11 +540,6 @@ function start() {
   addEventListener('resize', () => lastSel ? drawRange(lastSel) : null);
 
   document.getElementById('clear').onclick = () => { input.value = ''; load(); clearHl(); input.focus(); };
-  document.getElementById('kbd').onclick = () => {
-    mf.focus();
-    const vk = window.mathVirtualKeyboard;
-    if (vk) vk.visible ? vk.hide() : vk.show();
-  };
   document.getElementById('copy').onclick = async () => {
     try { await navigator.clipboard.writeText(input.value); status.textContent = 'Copied ✓'; }
     catch (e) { input.select(); document.execCommand && document.execCommand('copy'); status.textContent = 'Selected — press Ctrl+C if it didn’t copy'; }
@@ -1033,7 +1045,7 @@ function start() {
     ['\\times', 'times multiply cross product'], ['\\cdot', 'cdot dot multiply product'], ['\\div', 'divide division'], ['\\pm', 'plus minus'], ['\\mp', 'minus plus'],
     ['\\ast', 'asterisk star convolution'], ['\\star', 'star'], ['\\circ', 'circ compose composition degree ring'], ['\\bullet', 'bullet dot'],
     ['\\oplus', 'oplus direct sum xor circle plus'], ['\\otimes', 'otimes tensor product circle times'], ['\\odot', 'odot hadamard circle dot'],
-    ['=', 'equals'], ['\\neq', 'not equal neq'], ['\\approx', 'approx approximately almost equal'], ['\\equiv', 'equiv identical congruent defined'],
+    ['=', 'equals'], ['\\neq', 'not equal neq'], ['\\asymp', 'asymptotically equivalent'], ['\\doteq', 'approaches limit dot equal'], ['\\approx', 'approx approximately almost equal'], ['\\equiv', 'equiv identical congruent defined'],
     ['\\cong', 'cong congruent isomorphic'], ['\\sim', 'sim similar tilde distributed'], ['\\simeq', 'simeq similar equal'], ['\\propto', 'propto proportional'],
     ['\\triangleq', 'defined as equal by definition'], ['\\coloneqq', 'colon equals defined as assignment :='],
     ['<', 'less than'], ['>', 'greater than'], ['\\leq', 'leq less than or equal'], ['\\geq', 'geq greater than or equal'],
@@ -1051,21 +1063,22 @@ function start() {
     ['\\uparrow', 'up arrow'], ['\\downarrow', 'down arrow'], ['\\longrightarrow', 'long right arrow'], ['\\rightleftharpoons', 'equilibrium reversible reaction harpoons'],
     ['\\xrightarrow{#?}', 'arrow with text above extensible'],
     // calculus & big operators
-    ['\\frac{#?}{#?}', 'fraction divide over'], ['\\dfrac{#?}{#?}', 'display fraction big'], ['\\sqrt{#?}', 'square root sqrt radical'], ['\\sqrt[#?]{#?}', 'nth root cube root'],
+    ['\\frac{#@}{#?}', 'fraction divide over'], ['\\dfrac{#@}{#?}', 'display fraction big'], ['\\sqrt{#@}', 'square root sqrt radical'], ['\\sqrt[#?]{#?}', 'nth root cube root'],
     ['\\sum_{#?}^{#?}', 'sum summation sigma'], ['\\prod_{#?}^{#?}', 'product pi'], ['\\int_{#?}^{#?}', 'integral int definite'], ['\\int', 'integral'],
     ['\\iint', 'double integral'], ['\\iiint', 'triple integral'], ['\\oint', 'contour integral closed line'], ['\\lim_{#? \\to #?}', 'limit lim'],
     ['\\partial', 'partial derivative'], ['\\nabla', 'nabla gradient del'], ['\\infty', 'infinity infinite'], ['\\mathrm{d}', 'd differential upright'],
     ['\\frac{\\mathrm{d}#?}{\\mathrm{d}#?}', 'derivative dy dx'], ['\\frac{\\partial #?}{\\partial #?}', 'partial derivative fraction'],
     ['\\Delta', 'delta change difference laplacian'], ['\\prime', 'prime derivative'], ["'", 'prime apostrophe derivative'],
     // accents & decorations
-    ['\\hat{#?}', 'hat caret unit vector estimate'], ['\\bar{#?}', 'bar mean average overline'], ['\\overline{#?}', 'overline long bar conjugate'], ['\\tilde{#?}', 'tilde'],
-    ['\\vec{#?}', 'vector arrow'], ['\\dot{#?}', 'dot time derivative'], ['\\ddot{#?}', 'double dot second derivative'], ['\\underline{#?}', 'underline'],
-    ['\\overbrace{#?}^{#?}', 'overbrace brace above'], ['\\underbrace{#?}_{#?}', 'underbrace brace below'], ['\\mathbf{#?}', 'bold vector matrix'],
-    ['\\boldsymbol{#?}', 'bold symbol greek bold'], ['\\mathrm{#?}', 'upright roman text units'], ['\\mathcal{#?}', 'calligraphic script'], ['\\text{#?}', 'text words'],
+    ['\\hat{#@}', 'hat caret unit vector estimate'], ['\\bar{#@}', 'bar mean average overline'], ['\\overline{#@}', 'overline long bar conjugate'], ['\\tilde{#@}', 'tilde'],
+    ['\\vec{#@}', 'vector arrow'], ['\\dot{#@}', 'dot time derivative'], ['\\ddot{#@}', 'double dot second derivative'], ['\\underline{#@}', 'underline'],
+    ['\\overbrace{#@}^{#?}', 'overbrace brace above'], ['\\underbrace{#@}_{#?}', 'underbrace brace below'], ['\\widehat{#@}', 'wide hat caret accent'], ['\\widetilde{#@}', 'wide tilde accent'], ['\\check{#@}', 'check caron accent'], ['\\breve{#@}', 'breve accent'],
+    ['\\mathbf{#@}', 'bold vector matrix'], ['\\mathbb{#@}', 'blackboard bold double struck'], ['\\mathfrak{#@}', 'fraktur gothic'], ['\\operatorname{#?}', 'operator name function'],
+    ['\\boldsymbol{#@}', 'bold symbol greek bold'], ['\\mathrm{#@}', 'upright roman text units'], ['\\mathcal{#@}', 'calligraphic script'], ['\\text{#?}', 'text words'],
     // brackets & structures
-    ['\\left( #? \\right)', 'parentheses brackets auto size'], ['\\left[ #? \\right]', 'square brackets auto size'], ['\\left\\{ #? \\right\\}', 'curly braces set auto size'],
-    ['\\left| #? \\right|', 'absolute value modulus'], ['\\left\\| #? \\right\\|', 'norm double bars'], ['\\langle #? \\rangle', 'angle brackets inner product expectation'],
-    ['\\lfloor #? \\rfloor', 'floor'], ['\\lceil #? \\rceil', 'ceiling ceil'],
+    ['\\left( #@ \\right)', 'parentheses brackets auto size'], ['\\left[ #@ \\right]', 'square brackets auto size'], ['\\left\\{ #@ \\right\\}', 'curly braces set auto size'],
+    ['\\left| #@ \\right|', 'absolute value modulus'], ['\\left\\| #@ \\right\\|', 'norm double bars'], ['\\langle #@ \\rangle', 'angle brackets inner product expectation'],
+    ['\\lfloor #@ \\rfloor', 'floor'], ['\\lceil #@ \\rceil', 'ceiling ceil'],
     ['\\begin{pmatrix} #? & #? \\\\ #? & #? \\end{pmatrix}', 'matrix 2x2 parentheses pmatrix'], ['\\begin{bmatrix} #? & #? \\\\ #? & #? \\end{bmatrix}', 'matrix 2x2 square bmatrix'],
     ['\\begin{vmatrix} #? & #? \\\\ #? & #? \\end{vmatrix}', 'determinant matrix vmatrix'],
     ['\\begin{cases} #? & #? \\\\ #? & #? \\end{cases}', 'cases piecewise function brace'], ['\\binom{#?}{#?}', 'binomial choose combination'],
@@ -1077,25 +1090,124 @@ function start() {
     ['\\log', 'logarithm log'], ['\\ln', 'natural logarithm ln'], ['\\exp', 'exponential exp'], ['\\max', 'maximum max'], ['\\min', 'minimum min'],
     ['\\arg\\max_{#?}', 'argmax arg max'], ['\\arg\\min_{#?}', 'argmin arg min'], ['\\det', 'determinant det'], ['\\quad', 'space quad gap wide'], ['\\,', 'thin space small gap'],
   ];
-  const symPanel = document.getElementById('symPanel'), symQ = document.getElementById('symQ'), symGrid = document.getElementById('symGrid');
+  const symPanel = document.getElementById('symPanel'), symQ = document.getElementById('symQ'), symGrid = document.getElementById('symGrid'), symCats = document.getElementById('symCats');
+  const CATS = ['Greek', 'Operators', 'Relations', 'Arrows', 'Sets & logic', 'Calculus', 'Accents & fonts', 'Brackets & matrices', 'Other'];
+  function catOf(l, k) {
+    if (/^\\(hat|bar|overline|tilde|vec|dot|ddot|underline|overbrace|underbrace|widehat|widetilde|check|breve|mathbf|boldsymbol|mathrm|mathcal|mathbb|mathfrak|text|operatorname)\{#/.test(l)) return 'Accents & fonts';
+    if (/greek/.test(k)) return 'Greek';
+    if (/^\\(frac|dfrac|sqrt|sum|prod|int|iint|iiint|oint|lim|partial|nabla|infty|arg)|^\\mathrm\{d\}|\\prime|^'$|derivative/.test(l + ' ' + k)) return 'Calculus';
+    if (/arrow/.test(k + ' ' + l) || /^\\(to|mapsto|iff|implies|rightleftharpoons)$/.test(l)) return 'Arrows';
+    if (/^\\(left|langle|lfloor|lceil|begin|binom)/.test(l)) return 'Brackets & matrices';
+    if (/^\\(in|notin|ni|subset|subseteq|supset|supseteq|cup|cap|setminus|emptyset|varnothing|forall|exists|nexists|neg|land|lor|therefore|because)$|^\\mathbb\{[A-Z]\}$/.test(l)) return 'Sets & logic';
+    if (/^(=|<|>)$|^\\(neq|le|ge|leq|geq|approx|equiv|cong|sim|simeq|propto|triangleq|coloneqq|ll|gg|prec|succ|asymp|doteq|perp|parallel)$/.test(l)) return 'Relations';
+    if (/^\\(times|cdot|div|pm|mp|ast|star|circ|bullet|oplus|otimes|odot|dagger|top)$/.test(l)) return 'Operators';
+    return 'Other';
+  }
+  let symCat = recall('olve-symcat', 'Greek');
+  if (!CATS.includes(symCat)) symCat = 'Greek';
+  symCats.innerHTML = CATS.map(c => `<button class="symcat" data-c="${c}">${c}</button>`).join('');
+  symCats.querySelectorAll('.symcat').forEach(b => b.onclick = () => { symCat = b.dataset.c; store('olve-symcat', symCat); symQ.value = ''; showSyms(); });
+  const symPreview = (l) => l.replace(/\\(text|operatorname)\{#\?\}/, (m, c) => `\\${c}{${c === 'text' ? 'text' : 'op'}}`).replace(/#@/g, /wide|over|under/.test(l) ? 'xy' : 'x').replace(/#\?/g, '\\square');
   function showSyms() {
     const q = symQ.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    const hits = SYMBOLS.filter(([l, k]) => q.every(w => k.toLowerCase().includes(w) || l.toLowerCase().includes(w))).slice(0, 60);
-    symGrid.innerHTML = hits.length ? hits.map(([l, k], i) =>
-      `<button class="sym" data-l="${esc(l)}" title="${esc(k.split(' ').slice(0, 4).join(' '))} — ${esc(l.replace(/#\?/g, '□'))}">${renderStatic(l.replace(/#\?/g, '\\square'))}</button>`).join('')
+    const hits = q.length
+      ? SYMBOLS.filter(([l, k]) => q.every(w => k.toLowerCase().includes(w) || l.toLowerCase().includes(w))).slice(0, 80)
+      : SYMBOLS.filter(([l, k]) => catOf(l, k) === symCat);
+    symCats.querySelectorAll('.symcat').forEach(b => b.classList.toggle('sel', !q.length && b.dataset.c === symCat));
+    symGrid.innerHTML = hits.length ? hits.map(([l, k]) =>
+      `<button class="sym" data-l="${esc(l)}" title="${esc(k.split(' ').slice(0, 4).join(' '))} — ${esc(l.replace(/#[?@]/g, '□'))}">${renderStatic(symPreview(l))}</button>`).join('')
       : '<span style="color:#888">No match — try another word (e.g. "arrow", "integral", "matrix").</span>';
-    symGrid.querySelectorAll('.sym').forEach(b => b.onclick = () => {
-      mf.focus();
-      mf.insert(b.dataset.l, { format: 'latex', selectionMode: 'placeholder' });
-      buildOutput(); input.value = output.value; runChecks();
+    symGrid.querySelectorAll('.sym').forEach(b => {
+      b.addEventListener('mousedown', (e) => e.preventDefault()); // keep the selection where it is
+      b.onclick = () => applyTemplate(b.dataset.l);
     });
+  }
+  // the pane the user last worked in decides where symbols and accents go
+  let lastFocus = 'mf';
+  mf.addEventListener('focusin', () => { lastFocus = 'mf'; });
+  input.addEventListener('focus', () => { lastFocus = 'input'; });
+  let lastWrap = null;
+  function applyTemplate(l) {
+    if (lastFocus === 'input') {
+      const s0 = input.selectionStart, e0 = input.selectionEnd, sel = input.value.slice(s0, e0);
+      const t = l.replace(/#@/g, sel).replace(/#\?/g, '');
+      pushUndo(input.value);
+      input.value = input.value.slice(0, s0) + t + input.value.slice(e0);
+      let caret = s0 + t.length;
+      if (!sel) { const k = t.indexOf('{}'); if (k >= 0) caret = s0 + k + 1; }
+      input.focus(); input.setSelectionRange(caret, caret);
+      load();
+      return;
+    }
+    mf.focus();
+    if (l.includes('#?')) { mf.insert(l, { format: 'latex', selectionMode: 'placeholder' }); lastWrap = null; }
+    else {
+      const sel = mf.selection && mf.selection.ranges && mf.selection.ranges[0];
+      const collapsed = !sel || sel[0] === sel[1];
+      // chaining (x → hat → prime): apply to what we just accented
+      let target = !collapsed;
+      if (collapsed && lastWrap && lastWrap.value === mf.getValue('latex') && mf.position === lastWrap.end) { mf.selection = { ranges: [[lastWrap.start, lastWrap.end]] }; target = true; }
+      else if (collapsed && mf.position > 0) {
+        // no selection: use the item just before the cursor
+        const p = mf.position, norm = (x) => (x || '').replace(/\s+/g, '');
+        const info = norm((mf.getElementInfo(p) || {}).latex);
+        const isOp = (x) => /^([+\-=<>,;:!|([{]|\\(cdot|times|pm|mp|div|le|ge|leq|geq|neq|approx|to|in|,|;|quad|qquad))$/.test(x);
+        let a = -1;
+        const nb = (x) => x.replace(/[{}]/g, '');
+        if (/^[\^_]/.test(info)) { for (let k = p - 1; k >= 0; k--) { const v = norm(mf.getValue(k, p, 'latex')); if (v && !/^[\^_]/.test(v) && nb(v).endsWith(nb(info))) { a = k; break; } } }
+        else if (info && !isOp(info)) { for (let k = p - 1; k >= 0; k--) { if (norm(mf.getValue(k, p, 'latex')) === info) { a = k; break; } } }
+        if (a >= 0) {
+          const picked = norm(mf.getValue(a, p, 'latex'));
+          const sm = /^[\^_]/.test(info) && picked.match(/^(.*?)((?:[\^_](?:\{(?:[^{}]|\{[^{}]*\})*\}|\\[a-zA-Z]+|[^\\{}]))+)$/);
+          if (sm && sm[1]) {
+            // x^2 / c_{t+1}: accent the base and keep the scripts (\hat{c}_{t+1}); a prime joins the superscript (x^{\prime 2})
+            const base = sm[1];
+            let sub = '', sup = '';
+            sm[2].replace(/([\^_])(\{(?:[^{}]|\{[^{}]*\})*\}|\\[a-zA-Z]+|[^\\{}])/g, (all, k, v) => { v = v.replace(/^\{([\s\S]*)\}$/, '$1'); if (k === '_') sub = v; else sup = v; return ''; });
+            const subS = sub ? `_{${sub}}` : '';
+            const rep = /\^\{\\prime\}$/.test(l) ? `${base}${subS}^{\\prime${sup ? ' ' + sup : ''}}` : `${l.replace('#@', base)}${subS}${sup ? `^{${sup}}` : ''}`;
+            mf.selection = { ranges: [[a, p]] };
+            mf.insert(rep, { format: 'latex', selectionMode: 'item' });
+            const r = mf.selection.ranges[0]; const s0 = Math.min(...r), e0 = Math.max(...r);
+            mf.position = e0; lastWrap = { start: s0, end: e0, value: mf.getValue('latex') };
+            buildOutput(); input.value = output.value; runChecks();
+            return;
+          }
+          mf.selection = { ranges: [[a, p]] }; target = true;
+        }
+      }
+      if (!target) { mf.insert(l.replace('#@', '#?'), { format: 'latex', selectionMode: 'placeholder' }); lastWrap = null; buildOutput(); input.value = output.value; runChecks(); return; }
+      mf.insert(l, { format: 'latex', selectionMode: 'item' });
+      const r = mf.selection && mf.selection.ranges && mf.selection.ranges[0];
+      if (r) { const a = Math.min(r[0], r[1]), b = Math.max(r[0], r[1]); mf.position = b; lastWrap = { start: a, end: b, value: mf.getValue('latex') }; }
+    }
+    buildOutput(); input.value = output.value; runChecks();
   }
   document.getElementById('symBtn').onclick = () => {
     symPanel.classList.toggle('on');
-    if (symPanel.classList.contains('on')) { showSyms(); symQ.focus(); }
+    if (symPanel.classList.contains('on')) showSyms();
   };
+  document.getElementById('symClose').onclick = () => symPanel.classList.remove('on');
   symQ.addEventListener('input', showSyms);
-  symQ.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const f = symGrid.querySelector('.sym'); if (f) f.click(); } });
+  symQ.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const f = symGrid.querySelector('.sym'); if (f) f.click(); } if (e.key === 'Escape') symPanel.classList.remove('on'); });
+
+  // ---------- accents bar ----------
+  const ACCENTS = [
+    ['\\hat{#@}', 'Hat', 'H'], ['\\tilde{#@}', 'Tilde', 'T'], ['\\bar{#@}', 'Bar', 'B'], ['\\dot{#@}', 'Dot (time derivative)'], ['\\ddot{#@}', 'Double dot'],
+    ['\\vec{#@}', 'Vector arrow', 'V'], ['#@^{\\prime}', 'Prime', 'P'], ['\\overline{#@}', 'Overline (long bar)', 'O'], ['\\underline{#@}', 'Underline'],
+    ['\\widehat{#@}', 'Wide hat (for several symbols)'], ['\\widetilde{#@}', 'Wide tilde (for several symbols)'], ['\\boldsymbol{#@}', 'Bold (works for Greek too)'],
+  ];
+  const accbar = document.getElementById('accbar');
+  accbar.innerHTML = ACCENTS.map(([l, name, key], i) => `<button class="acc" data-i="${i}" title="${name}${key ? ' (Alt+' + key + ')' : ''}">${renderStatic(l.replace('#@', /wide/.test(l) ? 'xy' : 'x'))}</button>`).join('');
+  accbar.querySelectorAll('.acc').forEach(b => {
+    b.addEventListener('mousedown', (e) => e.preventDefault());
+    b.onclick = () => applyTemplate(ACCENTS[+b.dataset.i][0]);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (!e.altKey || e.ctrlKey || e.metaKey) return;
+    const a = ACCENTS.find(x => x[2] && e.code === 'Key' + x[2]);
+    if (a) { e.preventDefault(); e.stopPropagation(); setTimeout(() => applyTemplate(a[0]), 40); } // let the editor finish the last keystroke first
+  }, true);
 
   // =================== 5. My macros ===================
   const DEFAULT_MACROS = { ...mf.macros };
@@ -1808,7 +1920,7 @@ function start() {
   const SHORTCUTS = [
     ['Ctrl + Enter', 'Copy LaTeX', () => document.getElementById('copy').click()],
     ['Alt + C', 'Clean up', () => document.getElementById('cleanBtn').click()],
-    ['Alt + F', 'Find symbol', () => document.getElementById('symBtn').click()],
+    ['Alt + F', 'Symbols panel', () => document.getElementById('symBtn').click()],
     ['Alt + M', 'Matrix builder', () => document.getElementById('matBtn').click()],
     ['Alt + U', 'Units', () => document.getElementById('unitsBtn').click()],
     ['Alt + A', 'Align columns', () => document.getElementById('alignBtn').click()],
@@ -1819,6 +1931,8 @@ function start() {
     ['Alt + L', 'Jump to the LaTeX box', () => input.focus()],
     ['Alt + D', 'Dark / light mode', () => themeBtn.click()],
     ['Alt + K', 'Show these shortcuts', () => document.getElementById('keysBtn').click()],
+    ['Alt + H / T / B', 'Hat / tilde / bar on the selection', null],
+    ['Alt + V / P / O', 'Vector arrow / prime / overline', null],
     ['Esc', 'Close open panels', null],
   ];
   const KEYMAP = { Enter: 0, KeyC: 1, KeyF: 2, KeyM: 3, KeyU: 4, KeyA: 5, KeyN: 6, KeyI: 7, KeyZ: 8, KeyE: 9, KeyL: 10, KeyD: 11, KeyK: 12 };
