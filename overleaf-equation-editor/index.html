@@ -189,6 +189,14 @@
   .eqm { overflow-x:auto; }
   .eqcount { font-weight:600; color:var(--muted); text-transform:none; letter-spacing:0; margin-left:2px; }
   #clean.on { max-height:48vh; overflow:auto; margin-top:10px; }
+
+  .selbar { position:fixed; z-index:30; display:none; gap:2px; padding:3px; background:var(--card); border:1px solid var(--line); border-radius:9px; box-shadow:0 6px 18px rgba(0,0,0,.18); align-items:center; }
+  .selbar.on { display:flex; }
+  .selbar .sl { font-size:11px; color:var(--muted); padding:0 6px 0 4px; white-space:nowrap; }
+  .selbar button { min-width:30px; height:30px; padding:0 5px; font-size:13px; display:inline-flex; align-items:center; justify-content:center; }
+  .selbar .sep { width:1px; align-self:stretch; background:var(--line); margin:2px 3px; }
+  #spaceBtn.sel { background:#e9f6e8; border-color:#9fd39b; }
+  [data-theme=dark] #spaceBtn.sel { background:#1f3a22; border-color:#3f7a3b; }
   .wrapinfo { font-size:12px; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; }
 </style>
 <style id="ml-static">/* MathLive static rendering styles (MIT licence) */
@@ -243,7 +251,8 @@
       </div>
       <div class="pane">
         <div class="plabel">Visual <span class="eqcount" id="eqcount"></span><span class="accbar" id="accbar" title="Select a symbol (or part of the equation), then click an accent. With nothing selected, it applies to the symbol before the cursor."></span>
-          <span class="zoom" title="Size of the visual equation"><button class="icon" id="zoomOut" title="Smaller">−</button><button class="icon" id="zoomReset" title="Reset size"><span id="zoomVal">100%</span></button><button class="icon" id="zoomIn" title="Larger">+</button></span></div>
+          <span class="zoom" title="Size of the visual equation"><button class="icon" id="zoomOut" title="Smaller">−</button><button class="icon" id="zoomReset" title="Reset size"><span id="zoomVal">100%</span></button><button class="icon" id="zoomIn" title="Larger">+</button><button class="icon" id="spaceBtn" title="Space between symbols (easier to click and move between them)">↔</button></span></div>
+        <div class="selbar" id="selbar" role="toolbar" aria-label="Selection actions"></div>
         <div class="eqlist" id="eqlist"><div class="mfwrap"><math-field id="mf"></math-field><div class="hl" id="hl"></div></div></div>
       </div>
     </div>
@@ -655,7 +664,7 @@ function start() {
       if ((before === '^' || before === '_')) {
         const t = singleToken(inner);
         if (t && !(/^[0-9]$/.test(t) === false && t.length > 1 && !t.startsWith('\\'))) {
-          add('scriptBraces', [[o, c + 1, glue(t, txt, c + 1)]]); continue;
+          add('scriptBraces', [[o, o + 1, ''], [c, c + 1, / $/.test(glue(t, txt, c + 1)) ? ' ' : '']]); continue;
         }
       }
       // {{x}} -> {x}
@@ -668,7 +677,7 @@ function start() {
         const t = singleToken(inner);
         if (t) {
           const needSpace = /[a-zA-Z]/.test(txt[o - 1] || '') && /^[a-zA-Z]/.test(t); // \sin{x} -> \sin x
-          add('loneBraces', [[o, c + 1, (needSpace ? ' ' : '') + glue(t, txt, c + 1)]]);
+          add('loneBraces', [[o, o + 1, needSpace ? ' ' : ''], [c, c + 1, / $/.test(glue(t, txt, c + 1)) ? ' ' : '']]);
         }
       }
     }
@@ -1173,11 +1182,14 @@ function start() {
   function applyTemplate(l) {
     if (lastFocus === 'input') {
       const s0 = input.selectionStart, e0 = input.selectionEnd, sel = input.value.slice(s0, e0);
-      const t = l.replace(/#@/g, sel).replace(/#\?/g, '');
+      const withSel = l.replace(/#@/g, sel);
+      const slot = withSel.indexOf('#?');            // first empty slot, if any
+      const t = withSel.replace(/#\?/g, '');
       pushUndo(input.value);
       input.value = input.value.slice(0, s0) + t + input.value.slice(e0);
       let caret = s0 + t.length;
-      if (!sel) { const k = t.indexOf('{}'); if (k >= 0) caret = s0 + k + 1; }
+      if (slot >= 0) caret = s0 + slot;
+      else if (!sel) { const k = t.indexOf('{}'); if (k >= 0) caret = s0 + k + 1; }
       input.focus(); input.setSelectionRange(caret, caret);
       load();
       return;
@@ -2175,6 +2187,84 @@ function start() {
   document.getElementById('tipsBtn').onclick = () => setTips(tipsEl.classList.contains('hidden'));
   // clean-up suggestions: keep them in view right under the editor
   document.getElementById('cleanBtn').addEventListener('click', () => setTimeout(() => { const c = document.getElementById('clean'); if (c.classList.contains('on')) c.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 0));
+
+  // ---------- room between symbols in the visual box ----------
+  const SPACES_LV = [0, 0.1, 0.2], SPACE_NAMES = ['normal', 'roomy', 'extra roomy'];
+  let spaceLv = recall('olve-space', 1);
+  function applySpacing() {
+    const root = mf.shadowRoot; if (!root) return;
+    let st = root.getElementById('olve-space');
+    if (!st) { st = document.createElement('style'); st.id = 'olve-space'; root.appendChild(st); }
+    const em = SPACES_LV[spaceLv] || 0;
+    st.textContent = em ? `.ML__base > [data-atom-id], .ML__mrow > [data-atom-id] { margin-right:${em}em !important; }` : '';
+    const b = document.getElementById('spaceBtn');
+    b.classList.toggle('sel', spaceLv > 0);
+    b.title = `Space between symbols: ${SPACE_NAMES[spaceLv]} (click to change)`;
+    if (lastSel) setTimeout(() => drawRange(lastSel), 0);
+  }
+  document.getElementById('spaceBtn').addEventListener('mousedown', e => e.preventDefault());
+  document.getElementById('spaceBtn').onclick = () => { spaceLv = (spaceLv + 1) % SPACES_LV.length; store('olve-space', spaceLv); applySpacing(); };
+  applySpacing();
+
+  // ---------- floating toolbar for a selection ----------
+  const SEL_ACTIONS = [
+    ['\\frac{#@}{#?}', 'Make it a numerator', '\\frac{a}{\\square}'],
+    ['\\frac{#?}{#@}', 'Make it a denominator', '\\frac{\\square}{a}'],
+    null,
+    ['\\left(#@\\right)', 'Wrap in ( )', '(a)'],
+    ['\\left[#@\\right]', 'Wrap in [ ]', '[a]'],
+    ['\\left\\{#@\\right\\}', 'Wrap in { }', '\\{a\\}'],
+    ['\\left|#@\\right|', 'Absolute value | |', '|a|'],
+    null,
+    ['\\sqrt{#@}', 'Square root', '\\sqrt{a}'],
+    ['\\left(#@\\right)^{#?}', 'Raise to a power', '(a)^{\\square}'],
+    ['#?^{#@}', 'Make it an exponent', '\\square^{a}'],
+    ['#?_{#@}', 'Make it a subscript', '\\square_{a}'],
+    null,
+    ['\\overbrace{#@}^{#?}', 'Brace above, with a label', '\\overbrace{a}^{\\square}'],
+    ['\\underbrace{#@}_{#?}', 'Brace below, with a label', '\\underbrace{a}_{\\square}'],
+    ['\\boxed{#@}', 'Box it', '\\boxed{a}'],
+    ['\\text{#@}', 'Plain text (words)', '\\text{ab}'],
+  ];
+  const selbar = document.getElementById('selbar');
+  selbar.innerHTML = '<span class="sl">Selection:</span>' + SEL_ACTIONS.map((a, i) => a ? `<button data-i="${i}" title="${a[1]}">${renderStatic(a[2])}</button>` : '<span class="sep"></span>').join('');
+  selbar.addEventListener('mousedown', e => e.preventDefault());
+  selbar.querySelectorAll('button').forEach(b => b.onclick = () => { hideSelbar(); applyTemplate(SEL_ACTIONS[+b.dataset.i][0]); });
+  let selbarHideT = 0;
+  function showSelbarAt(rect) {
+    clearTimeout(selbarHideT);
+    selbar.classList.add('on');
+    const w = selbar.offsetWidth, h = selbar.offsetHeight;
+    let x = rect.left + rect.width / 2 - w / 2, y = rect.top - h - 8;
+    if (y < 6) y = rect.bottom + 8;
+    x = Math.max(6, Math.min(x, innerWidth - w - 6));
+    selbar.style.left = x + 'px'; selbar.style.top = y + 'px';
+  }
+  function hideSelbar() { selbar.classList.remove('on'); }
+  function rangeRect([a, b]) {
+    let L = Infinity, T = Infinity, R = -Infinity, B = -Infinity;
+    for (let i = a + 1; i <= b; i++) { const r = mf.getElementInfo(i)?.bounds; if (!r || r.width <= 0) continue; L = Math.min(L, r.left); T = Math.min(T, r.top); R = Math.max(R, r.right); B = Math.max(B, r.bottom); }
+    return L === Infinity ? null : { left: L, top: T, right: R, bottom: B, width: R - L, height: B - T };
+  }
+  // selection made in the visual box
+  mf.addEventListener('selection-change', () => {
+    const r = mf.selection && mf.selection.ranges && mf.selection.ranges[0];
+    if (!r || r[0] === r[1] || document.activeElement !== mf) { selbarHideT = setTimeout(hideSelbar, 120); return; }
+    const rect = rangeRect([Math.min(...r), Math.max(...r)]);
+    if (rect) showSelbarAt(rect);
+  });
+  mf.addEventListener('blur', () => { selbarHideT = setTimeout(hideSelbar, 150); });
+  // selection made in the code box: show the bar above the shaded part
+  const codeBox = document.getElementById('code');
+  const codeSel = () => {
+    setTimeout(() => {
+      if (document.activeElement !== codeBox || codeBox.selectionStart === codeBox.selectionEnd || hl.style.display !== 'block') { hideSelbar(); return; }
+      showSelbarAt(hl.getBoundingClientRect());
+    }, 60);
+  };
+  ['mouseup', 'keyup', 'select'].forEach(ev => codeBox.addEventListener(ev, codeSel));
+  codeBox.addEventListener('blur', () => { selbarHideT = setTimeout(hideSelbar, 150); });
+  addEventListener('scroll', hideSelbar, true);
 
   input.value = '\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}';
   load();
