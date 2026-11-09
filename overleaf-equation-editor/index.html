@@ -139,7 +139,7 @@
   .plabel { font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-bottom:5px; }
   .pane textarea { flex:1; min-height:150px; margin:0; }
   .pane .mfwrap { flex:1; display:flex; }
-  .pane math-field { flex:1; min-height:150px; display:block; width:100%; padding-top:40px; }
+  .pane math-field { flex:1; min-height:150px; display:block; width:100%; padding-top:30px; }
   .pane .mfwrap { position:relative; }
   .editor .checks { margin-top:8px; }
   .editor .tips { margin-top:8px; font-size:12px; }
@@ -160,6 +160,14 @@
   .symgrid { gap:4px; max-height:190px; margin-top:8px; }
   .sym { min-width:40px; height:38px; padding:2px 6px; font-size:15px; }
   math-field::part(virtual-keyboard-toggle) { display:none; }
+
+  .zoom { margin-left:auto; display:inline-flex; gap:2px; text-transform:none; letter-spacing:0; font-weight:400; }
+  .zoom button { padding:0 7px; height:24px; font-size:13px; }
+  #zoomVal { font-size:11px; color:var(--muted); min-width:34px; display:inline-block; }
+  .sym { height:auto; min-height:38px; min-width:40px; padding:3px 6px; overflow:hidden; }
+  .sym.tall { font-size:11px; min-height:44px; }
+  .sym .symtxt { font:11px ui-monospace,Menlo,Consolas,monospace; color:var(--muted); white-space:nowrap; }
+  .sym .gap { display:inline-block; border:1px dashed var(--muted); border-top:none; height:6px; vertical-align:-2px; margin-right:4px; }
   .wrapinfo { font-size:12px; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; }
 </style>
 <style id="ml-static">/* MathLive static rendering styles (MIT licence) */
@@ -219,7 +227,8 @@
         <textarea id="input" spellcheck="false" placeholder="Paste from Overleaf (or a Word equation)…  e.g. \frac{a+b}{c^2}   $E=mc^2$   \begin{equation} … \end{equation}"></textarea>
       </div>
       <div class="pane">
-        <div class="plabel">Visual <span class="accbar" id="accbar" title="Select a symbol (or part of the equation), then click an accent. With nothing selected, it applies to the symbol before the cursor."></span></div>
+        <div class="plabel">Visual <span class="accbar" id="accbar" title="Select a symbol (or part of the equation), then click an accent. With nothing selected, it applies to the symbol before the cursor."></span>
+          <span class="zoom" title="Size of the visual equation"><button class="icon" id="zoomOut" title="Smaller">−</button><button class="icon" id="zoomReset" title="Reset size"><span id="zoomVal">100%</span></button><button class="icon" id="zoomIn" title="Larger">+</button></span></div>
         <div class="mfwrap"><math-field id="mf"></math-field><div class="hl" id="hl"></div></div>
       </div>
     </div>
@@ -1088,7 +1097,7 @@ function start() {
     ['\\hbar', 'h bar planck reduced'], ['\\ell', 'ell script l length'], ['\\Re', 'real part'], ['\\Im', 'imaginary part'], ['\\aleph', 'aleph cardinal'],
     ['\\dagger', 'dagger adjoint hermitian'], ['\\top', 'transpose top'], ['\\sin', 'sine sin trig'], ['\\cos', 'cosine cos trig'], ['\\tan', 'tangent tan trig'],
     ['\\log', 'logarithm log'], ['\\ln', 'natural logarithm ln'], ['\\exp', 'exponential exp'], ['\\max', 'maximum max'], ['\\min', 'minimum min'],
-    ['\\arg\\max_{#?}', 'argmax arg max'], ['\\arg\\min_{#?}', 'argmin arg min'], ['\\det', 'determinant det'], ['\\quad', 'space quad gap wide'], ['\\,', 'thin space small gap'],
+    ['\\arg\\max_{#?}', 'argmax arg max'], ['\\arg\\min_{#?}', 'argmin arg min'], ['\\det', 'determinant det'], ['\\quad', 'space quad gap wide'], ['\\qquad', 'space qquad very wide gap'], ['\\;', 'thick space gap'], ['\\!', 'negative thin space'], ['\\,', 'thin space small gap'],
   ];
   const symPanel = document.getElementById('symPanel'), symQ = document.getElementById('symQ'), symGrid = document.getElementById('symGrid'), symCats = document.getElementById('symCats');
   const CATS = ['Greek', 'Operators', 'Relations', 'Arrows', 'Sets & logic', 'Calculus', 'Accents & fonts', 'Brackets & matrices', 'Other'];
@@ -1108,6 +1117,12 @@ function start() {
   symCats.innerHTML = CATS.map(c => `<button class="symcat" data-c="${c}">${c}</button>`).join('');
   symCats.querySelectorAll('.symcat').forEach(b => b.onclick = () => { symCat = b.dataset.c; store('olve-symcat', symCat); symQ.value = ''; showSyms(); });
   const symPreview = (l) => l.replace(/\\(text|operatorname)\{#\?\}/, (m, c) => `\\${c}{${c === 'text' ? 'text' : 'op'}}`).replace(/#@/g, /wide|over|under/.test(l) ? 'xy' : 'x').replace(/#\?/g, '\\square');
+  const TALL_SYM = /\\(begin|frac|dfrac|sum|prod|int|iint|iiint|oint|lim|binom|overbrace|underbrace|xrightarrow|arg)|\\sqrt\[/;
+  const SPACES = { '\\,': ['thin space', 0.5], '\\:': ['medium space', 0.7], '\\;': ['thick space', 0.9], '\\quad': ['quad', 1.6], '\\qquad': ['qquad', 2.6], '\\!': ['negative space', 0.4], '\\ ': ['space', 0.6], '~': ['non-breaking space', 0.6] };
+  function symFace(l) {
+    if (SPACES[l]) return `<span class="symtxt"><span class="gap" style="width:${SPACES[l][1]}em"></span>${esc(l)}</span>`;
+    return renderStatic(symPreview(l));
+  }
   function showSyms() {
     const q = symQ.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
     const hits = q.length
@@ -1115,7 +1130,7 @@ function start() {
       : SYMBOLS.filter(([l, k]) => catOf(l, k) === symCat);
     symCats.querySelectorAll('.symcat').forEach(b => b.classList.toggle('sel', !q.length && b.dataset.c === symCat));
     symGrid.innerHTML = hits.length ? hits.map(([l, k]) =>
-      `<button class="sym" data-l="${esc(l)}" title="${esc(k.split(' ').slice(0, 4).join(' '))} — ${esc(l.replace(/#[?@]/g, '□'))}">${renderStatic(symPreview(l))}</button>`).join('')
+      `<button class="sym${TALL_SYM.test(l) ? ' tall' : ''}" data-l="${esc(l)}" title="${esc(k.split(' ').slice(0, 4).join(' '))} — ${esc(l.replace(/#[?@]/g, '□'))}">${symFace(l)}</button>`).join('')
       : '<span style="color:#888">No match — try another word (e.g. "arrow", "integral", "matrix").</span>';
     symGrid.querySelectorAll('.sym').forEach(b => {
       b.addEventListener('mousedown', (e) => e.preventDefault()); // keep the selection where it is
@@ -1190,6 +1205,25 @@ function start() {
   document.getElementById('symClose').onclick = () => symPanel.classList.remove('on');
   symQ.addEventListener('input', showSyms);
   symQ.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const f = symGrid.querySelector('.sym'); if (f) f.click(); } if (e.key === 'Escape') symPanel.classList.remove('on'); });
+
+  // ---------- visual zoom ----------
+  const ZOOMS = [0.6, 0.7, 0.8, 0.9, 1, 1.15, 1.3, 1.5, 1.75, 2];
+  let zoom = recall('olve-zoom', 0.9);
+  function setZoom(z) {
+    zoom = Math.max(ZOOMS[0], Math.min(ZOOMS[ZOOMS.length - 1], z));
+    mf.style.fontSize = (24 * zoom).toFixed(1) + 'px';
+    document.getElementById('zoomVal').textContent = Math.round(zoom * 100) + '%';
+    store('olve-zoom', zoom);
+    if (lastSel) setTimeout(() => drawRange(lastSel), 0);
+  }
+  const zstep = (d) => { const i = ZOOMS.findIndex(z => z >= zoom - 1e-9); setZoom(ZOOMS[Math.max(0, Math.min(ZOOMS.length - 1, (i < 0 ? ZOOMS.length - 1 : i) + d))]); };
+  document.getElementById('zoomIn').onclick = () => zstep(1);
+  document.getElementById('zoomOut').onclick = () => zstep(-1);
+  document.getElementById('zoomReset').onclick = () => setZoom(0.9);
+  ['zoomIn', 'zoomOut', 'zoomReset'].forEach(id => document.getElementById(id).addEventListener('mousedown', e => e.preventDefault()));
+  setZoom(zoom);
+  // Ctrl/Cmd + mouse wheel over the visual pane zooms too
+  mf.addEventListener('wheel', (e) => { if (e.ctrlKey || e.metaKey) { e.preventDefault(); zstep(e.deltaY < 0 ? 1 : -1); } }, { passive: false });
 
   // ---------- accents bar ----------
   const ACCENTS = [
@@ -1933,6 +1967,7 @@ function start() {
     ['Alt + K', 'Show these shortcuts', () => document.getElementById('keysBtn').click()],
     ['Alt + H / T / B', 'Hat / tilde / bar on the selection', null],
     ['Alt + V / P / O', 'Vector arrow / prime / overline', null],
+    ['Ctrl + wheel', 'Zoom the visual equation (over the visual pane)', null],
     ['Esc', 'Close open panels', null],
   ];
   const KEYMAP = { Enter: 0, KeyC: 1, KeyF: 2, KeyM: 3, KeyU: 4, KeyA: 5, KeyN: 6, KeyI: 7, KeyZ: 8, KeyE: 9, KeyL: 10, KeyD: 11, KeyK: 12 };
