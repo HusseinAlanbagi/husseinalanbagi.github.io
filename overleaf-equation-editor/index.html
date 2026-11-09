@@ -2235,9 +2235,12 @@ function start() {
     clearTimeout(selbarHideT);
     selbar.classList.add('on');
     const w = selbar.offsetWidth, h = selbar.offsetHeight;
-    let x = rect.left + rect.width / 2 - w / 2, y = rect.top - h - 8;
-    if (y < 6) y = rect.bottom + 8;
-    x = Math.max(6, Math.min(x, innerWidth - w - 6));
+    // stay inside the visual pane (never over the code pane or its Copy button), just below the selection
+    const pane = mf.getBoundingClientRect();
+    let x = rect.left + rect.width / 2 - w / 2, y = rect.bottom + 8;
+    if (y + h > Math.min(innerHeight - 6, pane.bottom + h + 12)) y = rect.top - h - 8;
+    const minX = Math.max(6, pane.left), maxX = Math.min(innerWidth - 6, Math.max(pane.right, pane.left + w)) - w;
+    x = Math.max(minX, Math.min(x, maxX));
     selbar.style.left = x + 'px'; selbar.style.top = y + 'px';
   }
   function hideSelbar() { selbar.classList.remove('on'); }
@@ -2265,6 +2268,9 @@ function start() {
   ['mouseup', 'keyup', 'select'].forEach(ev => codeBox.addEventListener(ev, codeSel));
   codeBox.addEventListener('blur', () => { selbarHideT = setTimeout(hideSelbar, 150); });
   addEventListener('scroll', hideSelbar, true);
+  // clicking anywhere else (or Esc) closes it; a new selection shows it again
+  document.addEventListener('pointerdown', (e) => { if (!selbar.contains(e.target)) hideSelbar(); }, true);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideSelbar(); });
 
   input.value = '\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}';
   load();
