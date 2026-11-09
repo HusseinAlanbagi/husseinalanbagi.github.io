@@ -45,7 +45,45 @@
   .item .ctx { color:#888; }
   .item .arrow { color:#999; margin:0 4px; }
   .clean .done { color:var(--green); font-weight:600; }
+
+  .checks { margin-top:6px; display:flex; flex-direction:column; gap:3px; font-size:13px; }
+  .checks .ok { color:var(--green); }
+  .checks .err { text-align:left; border:none; background:#fff1f1; color:#a12; padding:4px 8px; border-radius:6px; font-size:13px; }
+  .checks .err.warn { background:#fff7e0; color:#8a5a00; }
+  .checks .err:hover { background:#ffe2e2; }
+  select { font:inherit; font-size:14px; padding:6px 8px; border:1px solid var(--line); border-radius:7px; background:#fff; }
+  button.sel { background:#e9f6e8; border-color:#9fd39b; }
+  button:disabled { opacity:.45; cursor:default; }
+  .note { font-size:13px; color:#3d5a80; }
+  .banner { display:none; background:#eef5ff; border:1px solid #bcd3f5; border-radius:8px; padding:8px 10px; margin-bottom:10px; font-size:14px; align-items:center; gap:8px; flex-wrap:wrap; }
+  .banner.on { display:flex; }
+  .symp { display:none; margin-top:10px; border:1px solid var(--line); border-radius:10px; padding:10px; background:#fbfcfd; }
+  .symp.on { display:block; }
+  .symp input { width:100%; font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px; }
+  .symgrid { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; max-height:260px; overflow:auto; }
+  .sym { min-width:52px; height:52px; padding:2px 8px; font-size:18px; display:flex; align-items:center; justify-content:center; }
+  .tabs { display:flex; gap:6px; margin-bottom:12px; border-bottom:1px solid var(--line); }
+  .tab { border:none; border-bottom:3px solid transparent; border-radius:0; background:none; padding:8px 12px; font-weight:600; color:var(--muted); }
+  .tab.sel { color:var(--ink); border-bottom-color:var(--green); background:none; }
+  .tabp { display:none; } .tabp.on { display:block; }
+  .muted { color:var(--muted); font-size:13px; }
+  .seq { display:flex; gap:10px; align-items:center; border-top:1px solid #eceef2; padding:8px 0; }
+  .seq.editing { background:#eef5ff; }
+  .snum { width:26px; height:26px; border-radius:50%; background:#eef0f3; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex:none; }
+  .sprev { flex:1; overflow-x:auto; font-size:17px; min-width:0; }
+  .smeta { font-size:12px; color:var(--muted); text-align:right; flex:none; }
+  .smeta span { margin-left:6px; font-weight:600; }
+  .bad { color:#b42318; } .tidy { color:#8a5a00; } .okc { color:var(--green); }
+  .hist { display:flex; gap:10px; align-items:center; border-top:1px solid #eceef2; padding:8px 0; }
+  .hprev { flex:1; cursor:pointer; overflow-x:auto; font-size:17px; padding:4px 6px; border-radius:6px; min-width:0; }
+  .hprev:hover { background:#f2f4f7; }
+  .hmeta { font-size:11px; color:var(--muted); text-align:right; flex:none; }
+  .hmeta button { padding:2px 8px; font-size:12px; margin-top:4px; }
+  .sum { color:var(--muted); font-size:13px; }
   .wrapinfo { font-size:12px; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; }
+</style>
+<style id="ml-static">/* MathLive static rendering styles (MIT licence) */
+/* 0.111.4 */@font-face{font-display:"swap";font-family:KaTeX_AMS;font-style:normal;font-weight:400;src:url(fonts/KaTeX_AMS-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Caligraphic;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Caligraphic-Bold.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Caligraphic;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Caligraphic-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Fraktur;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Fraktur-Bold.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Fraktur;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Fraktur-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Main;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Main-BoldItalic.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Main;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Main-Bold.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Main;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Main-Italic.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Main;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Main-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Math;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Math-BoldItalic.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Math;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Math-Italic.woff2) format("woff2")}@font-face{font-display:"swap";font-family:"KaTeX_SansSerif";font-style:normal;font-weight:700;src:url(fonts/KaTeX_SansSerif-Bold.woff2) format("woff2")}@font-face{font-display:"swap";font-family:"KaTeX_SansSerif";font-style:italic;font-weight:400;src:url(fonts/KaTeX_SansSerif-Italic.woff2) format("woff2")}@font-face{font-display:"swap";font-family:"KaTeX_SansSerif";font-style:normal;font-weight:400;src:url(fonts/KaTeX_SansSerif-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Script;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Script-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Size1;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size1-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Size2;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size2-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Size3;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size3-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Size4;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size4-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Typewriter;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Typewriter-Regular.woff2) format("woff2")}:root{--ML__static-fonts:true}.ML__container{min-height:auto!important;--_hue:var(--hue,212);--_placeholder-color:var(--placeholder-color,hsl(var(--_hue),40%,49%));--_placeholder-opacity:var(--placeholder-opacity,0.4);--_text-font-family:var(--text-font-family,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Roboto","Oxygen","Ubuntu","Cantarell","Fira Sans","Droid Sans","Helvetica Neue",sans-serif)}.ML__sr-only{height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;width:1px;clip:rect(0,0,0,0);border:0;clip-path:inset(50%);white-space:nowrap}.ML__base,.ML__is-inline{display:inline-block}.ML__base{border:0;box-sizing:content-box;cursor:text;font-family:inherit;font-style:inherit;font-weight:inherit;margin:0;outline:0;padding:0;position:relative;text-decoration:none;vertical-align:baseline;visibility:inherit;width:min-content}.ML__strut,.ML__strut--bottom{display:inline-block;min-height:0.5em}.ML__small-delim{font-family:KaTeX_Main}.ML__text{font-family:var(--_text-font-family);white-space:pre}.ML__cmr{font-family:KaTeX_Main;font-style:normal}.ML__mathit{font-family:KaTeX_Math;font-style:italic}.ML__mathbf{font-family:KaTeX_Main;font-weight:700}.ML__mathbfit,.lcGreek.ML__mathbf{font-family:KaTeX_Math}.ML__mathbfit{font-style:italic;font-weight:700}.ML__ams,.ML__bb{font-family:KaTeX_AMS}.ML__cal{font-family:KaTeX_Caligraphic}.ML__frak{font-family:KaTeX_Fraktur}.ML__tt{font-family:KaTeX_Typewriter}.ML__script{font-family:KaTeX_Script}.ML__sans{font-family:KaTeX_SansSerif}.ML__series_el,.ML__series_ul{font-weight:100}.ML__series_l{font-weight:200}.ML__series_sl{font-weight:300}.ML__series_sb{font-weight:500}.ML__bold{font-weight:700}.ML__series_eb{font-weight:800}.ML__series_ub{font-weight:900}.ML__series_uc{font-stretch:ultra-condensed}.ML__series_ec{font-stretch:extra-condensed}.ML__series_c{font-stretch:condensed}.ML__series_sc{font-stretch:semi-condensed}.ML__series_sx{font-stretch:semi-expanded}.ML__series_x{font-stretch:expanded}.ML__series_ex{font-stretch:extra-expanded}.ML__series_ux{font-stretch:ultra-expanded}.ML__it{font-style:italic}.ML__shape_ol{-webkit-text-stroke:1px #000;text-stroke:1px #000;color:transparent}.ML__shape_sc{font-variant:small-caps}.ML__shape_sl{font-style:oblique}.ML__emph{color:#bc2612}.ML__emph .ML__emph{color:#0c7f99}.ML__highlight{background:#edd1b0;color:#007cb2}.ML__center{text-align:center}.ML__left{text-align:left}.ML__right{text-align:right}.ML__label_padding{padding:0 0.5em}.ML__frac-line{min-height:1px;width:100%}.ML__frac-line:after{background:currentColor;box-sizing:content-box;content:"";display:block;forced-color-adjust:preserve-parent-color;margin-top:var(--frac-line-margin,max(-1px,-0.04em));min-height:var(--frac-line-thickness,max(1px,0.04em));print-color-adjust:exact;transform:translate(0)}@media (forced-colors:active){.ML__frac-line{min-height:0px}}.ML__sqrt,.ML__sqrt-sign{display:inline-block}.ML__sqrt-sign{position:relative}.ML__sqrt-line{display:inline-block;height:max(1px,0.04em);width:100%}.ML__sqrt-line:before{background:currentColor;content:"";display:block;forced-color-adjust:preserve-parent-color;margin-top:min(-1px,-0.04em);min-height:max(1px,0.04em);print-color-adjust:exact;transform:translate(0)}@media (forced-colors:active){.ML__sqrt-line:after{background:#fff!important}}.ML__sqrt-line:after{border-bottom-width:1px;content:" ";display:block;margin-top:-0.1em}.ML__sqrt-index{margin-left:0.27777778em;margin-right:-0.55555556em}.ML__delim-size1{font-family:KaTeX_Size1}.ML__delim-size2{font-family:KaTeX_Size2}.ML__delim-size3{font-family:KaTeX_Size3}.ML__delim-size4{font-family:KaTeX_Size4}.ML__delim-mult .delim-size1>span{font-family:KaTeX_Size1}.ML__delim-mult .delim-size4>span{font-family:KaTeX_Size4}.ML__accent-body{font-family:KaTeX_Main}.ML__accent-combining-char{left:0.24em;position:relative}.ML__latex{direction:ltr;display:inline-block;font-family:inherit;font-size-adjust:none;font-stretch:normal;font-style:normal;font-variant-caps:normal;letter-spacing:normal;line-height:1.2;text-align:left;text-indent:0;text-rendering:auto;word-wrap:normal;forced-color-adjust:preserve-parent-color;text-shadow:none;-webkit-user-select:none;user-select:none;white-space:nowrap;width:min-content;word-spacing:normal}.ML__latex .style-wrap{position:relative}.ML__latex .ML__left-right,.ML__latex .ML__mfrac{display:inline-block}.ML__latex .ML__vlist-t{border-collapse:collapse;display:inline-table;table-layout:fixed}.ML__latex .ML__vlist-r{display:table-row}.ML__latex .ML__vlist{display:table-cell;position:relative;vertical-align:bottom}.ML__latex .ML__vlist>span{display:block;height:0;position:relative}.ML__latex .ML__vlist>span>span{display:inline-block}.ML__latex .ML__vlist>span>.ML__pstrut{overflow:hidden;width:0}.ML__latex .ML__vlist-t2{margin-right:-2px}.ML__latex .ML__vlist-s{display:table-cell;font-size:1px;min-width:2px;vertical-align:bottom;width:2px}.ML__latex .ML__msubsup{text-align:left}.ML__latex .ML__negativethinspace{display:inline-block;height:0.71em;margin-left:-0.16667em}.ML__latex .ML__thinspace{display:inline-block;height:0.71em;width:0.16667em}.ML__latex .ML__mediumspace{display:inline-block;height:0.71em;width:0.22222em}.ML__latex .ML__thickspace{display:inline-block;height:0.71em;width:0.27778em}.ML__latex .ML__enspace{display:inline-block;height:0.71em;width:0.5em}.ML__latex .ML__quad{display:inline-block;height:0.71em;width:1em}.ML__latex .ML__qquad{display:inline-block;height:0.71em;width:2em}.ML__latex .ML__llap,.ML__latex .ML__rlap{display:inline-block;position:relative;width:0}.ML__latex .ML__llap>.ML__inner,.ML__latex .ML__rlap>.ML__inner{position:absolute}.ML__latex .ML__llap>.ML__fix,.ML__latex .ML__rlap>.ML__fix{display:inline-block}.ML__latex .ML__llap>.ML__inner{right:0}.ML__latex .ML__rlap>.ML__inner{left:0}.ML__latex .ML__rule{border:0 solid;box-sizing:border-box;display:inline-block;position:relative}.ML__latex .overline .overline-line,.ML__latex .underline .underline-line{width:100%}.ML__latex .overline .overline-line:before,.ML__latex .underline .underline-line:before{border-bottom-style:solid;border-bottom-width:max(1px,0.04em);content:"";display:block;print-color-adjust:exact}.ML__latex .overline .overline-line:after,.ML__latex .underline .underline-line:after{border-bottom-style:solid;border-bottom-width:max(1px,0.04em);content:"";display:block;margin-top:-1px;print-color-adjust:exact}.ML__latex .ML__stretchy{display:block;left:0;overflow:hidden;position:absolute;width:100%}.ML__latex .ML__stretchy:after,.ML__latex .ML__stretchy:before{content:""}.ML__latex .ML__stretchy svg{display:block;fill:currentColor;fill-opacity:1;fill-rule:nonzero;height:inherit;position:absolute;stroke:currentColor;stroke-dasharray:none;stroke-dashoffset:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-width:1;width:100%}.ML__latex .slice-1-of-2{left:0}.ML__latex .slice-1-of-2,.ML__latex .slice-2-of-2{display:inline-flex;overflow:hidden;position:absolute;width:50.2%}.ML__latex .slice-2-of-2{right:0}.ML__latex .slice-1-of-3{left:0;width:25.1%}.ML__latex .slice-1-of-3,.ML__latex .slice-2-of-3{display:inline-flex;overflow:hidden;position:absolute}.ML__latex .slice-2-of-3{left:25%;width:50%}.ML__latex .slice-3-of-3{right:0;width:25.1%}.ML__latex .slice-1-of-1,.ML__latex .slice-3-of-3{display:inline-flex;overflow:hidden;position:absolute}.ML__latex .slice-1-of-1{left:0;width:100%}.ML__latex .ML__nulldelimiter,.ML__latex .ML__op-group{display:inline-block}.ML__latex .ML__op-symbol{position:relative}.ML__latex .ML__op-symbol.ML__small-op{font-family:KaTeX_Size1}.ML__latex .ML__op-symbol.ML__large-op{font-family:KaTeX_Size2}.ML__latex:has(.ML__align_environment),.ML__latex:has(.ML__center_environment),.ML__latex:has(.ML__eqnarray_environment),.ML__latex:has(.ML__gather_environment),.ML__latex:has(.ML__multiline_environment){width:100%}.ML__latex .ML__multiline_environment{display:inline-flex;width:100%}.ML__latex .ML__center_environment{display:inline-flex;justify-content:center;width:100%}.ML__latex .ML__align_environment,.ML__latex .ML__eqnarray_environment,.ML__latex .ML__gather_environment{display:inline-block}.ML__latex .ML__mtable .ML__vertical-separator{box-sizing:border-box;display:inline-block;min-width:1px}.ML__latex .ML__mtable .ML__arraycolsep{display:inline-block}.ML__latex .ML__mtable .col-align-m>.ML__vlist-t{text-align:center}.ML__latex .ML__mtable .col-align-c>.ML__vlist-t{text-align:center}.ML__latex .ML__mtable .col-align-l>.ML__vlist-t{text-align:left}.ML__latex .ML__mtable .col-align-r>.ML__vlist-t{text-align:right}[data-href]{cursor:pointer}.ML__error{background-color:rgba(204,0,65,.1);background-image:radial-gradient(ellipse at center,#cc0041,transparent 70%);background-position:0 100%;background-repeat:repeat-x;background-size:3px 3px;display:inline-block;padding-bottom:3px}.ML__error>.ML__error{background:transparent;padding:0}.ML__placeholder{color:var(--_placeholder-color);font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;opacity:var(--_placeholder-opacity);padding-left:0.4ex;padding-right:0.4ex}.ML__notation{box-sizing:border-box;line-height:0;position:absolute}.ML__tooltip-container{position:relative;transform:scale(0)}.ML__tooltip-container .ML__tooltip-content{background:var(--_tooltip-background-color);border:var(--_tooltip-border);border-radius:var(--_tooltip-border-radius);display:inline-table;max-width:400px;padding:12px;position:fixed;visibility:hidden;width:max-content;z-index:2;--_selection-color:var(--_tooltip-color);box-shadow:var(--_tooltip-box-shadow);color:var(--_tooltip-color);opacity:0;transition:opacity 0.15s cubic-bezier(0.4,0,1,1)}.ML__tooltip-container .ML__tooltip-content .ML__text{white-space:normal}.ML__tooltip-container .ML__tooltip-content .ML__base{display:contents}.ML__tooltip-container:hover .ML__tooltip-content{font-size:0.75em;opacity:1;transform:scale(1) translateY(3em);visibility:visible}.ML__bg{background-color:transparent!important}.ML__bg:before{background-color:var(--bg-color);bottom:0;box-sizing:border-box;content:"";left:0;position:absolute;right:0;top:0;z-index:-1}
 </style>
 </head>
 <body>
@@ -55,9 +93,29 @@
 
   <div class="card">
     <div class="label"><span class="num">1</span> Paste your LaTeX <span class="wrapinfo" id="wrapinfo"></span></div>
+    <div class="banner" id="secBanner">✎ Editing <b>equation</b> from your section.
+      <button class="primary" id="secPut">⤶ Put back into section</button><button id="secCancel">Cancel</button></div>
     <textarea id="input" spellcheck="false" placeholder="e.g.  \frac{a+b}{c^2}   or   $E=mc^2$   or   \begin{equation} ... \end{equation}"></textarea>
+    <div class="checks" id="checks"></div>
     <div class="row">
       <button id="clear">Clear</button>
+      <button id="undoBtn" title="Undo the last clean-up, conversion or layout change">↶ Undo</button>
+      <span style="margin-left:8px;color:var(--muted);font-size:13px">Type:</span>
+      <select id="formSel" title="Convert to another kind of equation">
+        <option value="">—</option>
+        <option value="inline">$…$ inline</option>
+        <option value="paren">\(…\) inline</option>
+        <option value="display">\[…\] display</option>
+        <option value="equation">equation</option>
+        <option value="equation*">equation*</option>
+        <option value="align">align</option>
+        <option value="align*">align*</option>
+        <option value="gather">gather</option>
+        <option value="gather*">gather*</option>
+        <option value="multline">multline</option>
+      </select>
+      <button id="numBtn" title="Switch numbering on/off">#</button>
+      <span class="note" id="note"></span>
     </div>
   </div>
 
@@ -66,13 +124,16 @@
     <div class="mfwrap"><math-field id="mf"></math-field><div class="hl" id="hl"></div></div>
     <div class="row">
       <button id="kbd">⌨ Symbols keyboard</button>
+      <button id="symBtn">🔎 Find symbol</button>
       <button id="cleanBtn">🧹 Clean up</button>
+      <button id="alignBtn" title="Line up the &amp; columns of multi-line equations">⇥ Align columns</button>
     </div>
     <div class="tips">
       Type <kbd>/</kbd> for a fraction, <kbd>^</kbd> superscript, <kbd>_</kbd> subscript, <kbd>sqrt</kbd> root,
       <kbd>\alpha</kbd> for Greek letters. Use arrow keys and <kbd>Tab</kbd> to move between parts.<br>
       <b>Tip:</b> select part of the LaTeX in box 1 or 3 to see it shaded here.
     </div>
+    <div class="symp" id="symPanel"><input id="symQ" placeholder="Search symbols: arrow, integral, matrix, approx, real numbers…" autocomplete="off"><div class="symgrid" id="symGrid"></div></div>
     <div class="clean" id="clean"></div>
   </div>
 
@@ -83,6 +144,28 @@
       <button class="primary" id="copy">Copy LaTeX</button>
       <span class="status" id="status"></span>
     </div>
+  </div>
+
+  <div class="card" id="tools">
+    <div class="label">More tools</div>
+    <div class="tabs">
+      <button class="tab" data-tab="section">📄 Whole section</button>
+      <button class="tab" data-tab="macros">🧩 My macros</button>
+      <button class="tab" data-tab="history">🕘 History</button>
+    </div>
+    <div class="tabp" id="tab-section">
+      <p class="muted">Paste a whole section (or file) of LaTeX. Every equation is listed with its problems and things to tidy. Clean them all at once, or edit one and put it back.</p>
+      <textarea id="secTa" spellcheck="false" style="min-height:140px" placeholder="Paste a section of your .tex file here…"></textarea>
+      <div class="row"><button class="primary" id="secFind">Find equations</button></div>
+      <div id="secList" style="margin-top:10px"></div>
+    </div>
+    <div class="tabp" id="tab-macros">
+      <p class="muted">Paste the \newcommand / \DeclareMathOperator lines from your preamble. Your macros then display properly and stay as macros in the copied LaTeX. Saved in this browser only.</p>
+      <textarea id="macroTa" spellcheck="false" style="min-height:110px" placeholder="\newcommand{\R}{\mathbb{R}}&#10;\newcommand{\vect}[1]{\boldsymbol{#1}}&#10;\DeclareMathOperator{\tr}{tr}"></textarea>
+      <div class="row"><button class="primary" id="macroApply">Use these macros</button><button id="macroClear">Remove all</button></div>
+      <div class="note" id="macroStatus" style="margin-top:6px"></div>
+    </div>
+    <div class="tabp" id="tab-history"><div id="histList"></div></div>
   </div>
 </main>
 
@@ -128,7 +211,7 @@ function start() {
   // Strip delimiters/environments, keep them to restore on copy.
   function parse(raw) {
     let s = raw.trim(), pre = '', post = '', multi = false, m;
-    if ((m = s.match(/^\\begin\{([a-zA-Z]+\*?)\}([\s\S]*)\\end\{\1\}$/))) {
+    if ((m = s.match(/^\\begin\{((?:equation|align|alignat|flalign|gather|multline|eqnarray|displaymath|math)\*?)\}([\s\S]*)\\end\{\1\}$/))) {
       pre = `\\begin{${m[1]}}\n  `; post = `\n\\end{${m[1]}}`; s = m[2];
       multi = MULTI.test(m[1].replace('*', ''));
     } else if ((m = s.match(/^\$\$([\s\S]*)\$\$$/))) { pre = '$$'; post = '$$'; s = m[1]; }
@@ -152,7 +235,7 @@ function start() {
     wrap = p;
     mf.setValue(fieldLatex(input.value), { silenceNotifications: true });
     wrapinfo.textContent = p.pre ? `— detected ${p.pre.trim().replace(/\n.*/, '')} … ${p.post.trim()}` : '';
-    buildOutput();
+    buildOutput();  (typeof afterLoadHooks !== 'undefined' ? afterLoadHooks : []).forEach(h => { try { h(); } catch (e) {} });
   }
 
   input.addEventListener('input', load);
@@ -273,7 +356,7 @@ function start() {
   // where the equation itself sits inside the box text (excluding $ / \[ / \begin{equation} wrapper)
   function bodyBounds(txt) {
     let a = txt.length - txt.trimStart().length, b = txt.trimEnd().length;
-    const t = txt.slice(a, b), m = t.match(/^\\begin\{([a-zA-Z]+\*?)\}/);
+    const t = txt.slice(a, b), m = t.match(/^\\begin\{((?:equation|align|alignat|flalign|gather|multline|eqnarray|displaymath|math)\*?)\}/);
     if (m && t.endsWith(`\\end{${m[1]}}`)) return [a + m[0].length, b - `\\end{${m[1]}}`.length];
     for (const [o, c] of [['$$', '$$'], ['\\[', '\\]'], ['\\(', '\\)'], ['$', '$']])
       if (t.startsWith(o) && t.endsWith(c) && t.length >= o.length + c.length) return [a + o.length, b - c.length];
@@ -590,13 +673,13 @@ function start() {
     edits.sort((x, y) => y[0] - x[0]);
     let out = txt;
     for (const [a, b, rep] of edits) out = out.slice(0, a) + rep + out.slice(b);
-    undoStack.push(txt);
+    pushUndo(txt);
     input.value = out;
     load();
     clearHl();
     renderClean(`Applied ${applied} change${applied > 1 ? 's' : ''}.`);
     const und = document.createElement('button'); und.textContent = '↶ Undo clean-up';
-    und.onclick = () => { if (!undoStack.length) return; input.value = undoStack.pop(); load(); renderClean('Undone.'); };
+    und.onclick = () => undoBtn.click();
     cleanBox.querySelector('.row').appendChild(und);
   }
   document.getElementById('cleanBtn').onclick = () => {
@@ -605,6 +688,466 @@ function start() {
   };
   input.addEventListener('input', () => { if (cleanBox.classList.contains('on')) renderClean(); });
   mf.addEventListener('input', () => { if (cleanBox.classList.contains('on')) setTimeout(() => renderClean(), 0); });
+
+  // =================== Shared helpers for the extra tools ===================
+  var afterLoadHooks = afterLoadHooks || [];
+  const undoBtn = document.getElementById('undoBtn');
+  function pushUndo(txt) { undoStack.push(txt); if (undoStack.length > 50) undoStack.shift(); undoBtn.disabled = false; }
+  function setInput(txt, note) {
+    pushUndo(input.value);
+    input.value = txt;
+    load();
+    clearHl();
+    if (cleanBox.classList.contains('on')) renderClean(note || '');
+  }
+  undoBtn.onclick = () => {
+    if (!undoStack.length) return;
+    input.value = undoStack.pop();
+    load(); clearHl();
+    if (cleanBox.classList.contains('on')) renderClean('Undone.');
+    undoBtn.disabled = !undoStack.length;
+  };
+  undoBtn.disabled = true;
+
+  function store(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
+  function recall(key, dflt) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : dflt; } catch (e) { return dflt; } }
+  function renderStatic(latex) {
+    try { return MathLive.convertLatexToMarkup(latex, { mathstyle: 'displaystyle' }); } catch (e) { return esc(latex); }
+  }
+  // apply a list of issue items (non-overlapping) to a text
+  function applyItems(txt, items) {
+    const edits = [], taken = [];
+    let applied = 0;
+    for (const it of items) {
+      if (it.edits.some(([a, b]) => taken.some(([x, y]) => (a < y && b > x) || (a === b && a > x && a < y)))) continue;
+      it.edits.forEach(e => { edits.push(e); taken.push([e[0], e[1]]); });
+      applied++;
+    }
+    edits.sort((x, y) => y[0] - x[0]);
+    let out = txt;
+    for (const [a, b, rep] of edits) out = out.slice(0, a) + rep + out.slice(b);
+    return { out, applied };
+  }
+  // apply every "safe" fix, repeating until nothing is left (fixes can reveal new ones)
+  function autoClean(txt) {
+    let total = 0;
+    for (let pass = 0; pass < 5; pass++) {
+      const items = scanIssues(txt).filter(g => INFO[g.kind][3]).flatMap(g => g.items);
+      if (!items.length) break;
+      const r = applyItems(txt, items);
+      if (!r.applied) break;
+      txt = r.out; total += r.applied;
+    }
+    return { text: txt, count: total };
+  }
+
+  // =================== 1. Error check ===================
+  const checksBox = document.getElementById('checks');
+  function lineOf(txt, pos) { return txt.slice(0, pos).split('\n').length; }
+  function checkLatex(txt, withMathLive) {
+    const errs = [];
+    const stack = [];
+    for (let i = 0; i < txt.length; i++) {
+      const c = txt[i];
+      if (c === '%' && !isEscaped(txt, i)) { while (i < txt.length && txt[i] !== '\n') i++; continue; }
+      if ((c === '{' || c === '}') && isEscaped(txt, i)) continue;
+      if (c === '{') stack.push(i);
+      else if (c === '}') { if (stack.length) stack.pop(); else errs.push({ pos: i, len: 1, msg: 'Extra } with no matching {' }); }
+    }
+    stack.forEach(p => errs.push({ pos: p, len: 1, msg: 'This { is never closed — a } is missing' }));
+    const lr = [];
+    for (const m of txt.matchAll(/\\(left|right)(?![a-zA-Z])/g)) {
+      if (m[1] === 'left') lr.push(m.index);
+      else if (lr.length) lr.pop();
+      else errs.push({ pos: m.index, len: 6, msg: '\\right without a matching \\left' });
+    }
+    lr.forEach(p => errs.push({ pos: p, len: 5, msg: '\\left without a matching \\right (use \\right. if you want it invisible)' }));
+    const env = [];
+    for (const m of txt.matchAll(/\\(begin|end)\s*\{([^}]*)\}/g)) {
+      if (m[1] === 'begin') env.push([m[2], m.index, m[0].length]);
+      else {
+        const top = env.pop();
+        if (!top) errs.push({ pos: m.index, len: m[0].length, msg: `\\end{${m[2]}} without a matching \\begin` });
+        else if (top[0] !== m[2]) errs.push({ pos: m.index, len: m[0].length, msg: `\\begin{${top[0]}} is closed by \\end{${m[2]}}` });
+      }
+    }
+    env.forEach(([n, p, l]) => errs.push({ pos: p, len: l, msg: `\\begin{${n}} is never closed with \\end{${n}}` }));
+    for (const m of txt.matchAll(/\\(frac|dfrac|tfrac|binom)\s*(?![a-zA-Z])/g)) {
+      let k = m.index + m[0].length, n = 0;
+      while (n < 2) { k = nextNonWs(txt, k); if (txt[k] === '{') { k = matchBrace(txt, k) + 1; n++; } else if (txt[k] && /[A-Za-z0-9]|\\/.test(txt[k])) { k += txt[k] === '\\' ? readCmd(txt, k) - k : 1; n++; } else break; }
+      if (n < 2) errs.push({ pos: m.index, len: m[0].length, msg: `\\${m[1]} needs two parts, e.g. \\${m[1]}{a}{b}` });
+    }
+    if (withMathLive) {
+      for (const e of (mf.errors || [])) {
+        if (e.code === 'unknown-command' || e.code === 'unknown-environment') {
+          const p = txt.indexOf(e.arg);
+          errs.push({ pos: Math.max(0, p), len: e.arg.length, msg: `Unknown command ${e.arg} — a typo, or a macro you can add under “My macros”`, warn: true });
+        }
+      }
+    }
+    return errs.sort((a, b) => a.pos - b.pos);
+  }
+  function runChecks() {
+    const txt = input.value;
+    if (!txt.trim()) { checksBox.innerHTML = ''; return; }
+    const errs = checkLatex(txt, true);
+    if (!errs.length) { checksBox.innerHTML = '<span class="ok">✔ No problems found</span>'; return; }
+    checksBox.innerHTML = errs.map((e, i) =>
+      `<button class="err ${e.warn ? 'warn' : ''}" data-i="${i}">${e.warn ? '⚠' : '✖'} Line ${lineOf(txt, e.pos)}: ${esc(e.msg)}</button>`).join('');
+    checksBox.querySelectorAll('.err').forEach(b => b.onclick = () => {
+      const e = errs[b.dataset.i]; input.focus(); input.setSelectionRange(e.pos, e.pos + e.len);
+    });
+  }
+  afterLoadHooks.push(runChecks);
+  input.addEventListener('input', clearHl);
+  output.addEventListener('scroll', () => {});
+  mf.addEventListener('input', () => setTimeout(runChecks, 0));
+
+  // =================== 2. Convert type / numbering ===================
+  const formSel = document.getElementById('formSel');
+  const FORMS = {
+    inline: ['$', '$'], paren: ['\\(', '\\)'], display: ['\\[ ', ' \\]'],
+    'equation': null, 'equation*': null, 'align': null, 'align*': null, 'gather': null, 'gather*': null, 'multline': null,
+  };
+  const MULTI_ENVS = /^(align|gather|multline|flalign|alignat|eqnarray)\*?$/;
+  function currentForm(txt) {
+    const t = txt.trim(), m = t.match(/^\\begin\{((?:equation|align|alignat|flalign|gather|multline|eqnarray|displaymath|math)\*?)\}/);
+    if (m) return m[1];
+    if (t.startsWith('$$') || t.startsWith('\\[')) return 'display';
+    if (t.startsWith('\\(')) return 'paren';
+    if (t.startsWith('$')) return 'inline';
+    return '';
+  }
+  function hasTopLevelBreak(body) { return splitRows(body).length > 1; }
+  function convertTo(form) {
+    const p = parse(input.value);
+    let body = p.body;
+    const extras = p.extras.filter(x => !(/^\\(nonumber|notag)/.test(x) && !/^(equation|align|gather|multline)$/.test(form)));
+    const toMulti = MULTI_ENVS.test(form);
+    // single-line forms can't hold \\ directly: wrap the lines in aligned
+    if (!toMulti && hasTopLevelBreak(body) && !/^\\begin\{(aligned|gathered|split)\}/.test(body.trim())) body = `\\begin{aligned}\n  ${body}\n\\end{aligned}`;
+    // going to align: unwrap an aligned block, it's no longer needed
+    const un = body.trim().match(/^\\begin\{(aligned|gathered)\}([\s\S]*)\\end\{\1\}$/);
+    if (toMulti && un) body = un[2].trim();
+    const ex = extras.length ? ' ' + extras.join(' ') : '';
+    let out;
+    if (FORMS[form]) out = FORMS[form][0] + body + ex + FORMS[form][1];
+    else out = `\\begin{${form}}\n  ${body}${ex}\n\\end{${form}}`;
+    setInput(out);
+    showNote(`Converted to ${formSel.selectedOptions[0].textContent}.` +
+      (extras.some(x => x.startsWith('\\label')) && !/^(equation|align|gather|multline)$/.test(form) ? ' Note: \\label has no number to point to in this form.' : ''));
+  }
+  formSel.addEventListener('change', () => { if (formSel.value) convertTo(formSel.value); });
+  const numBtn = document.getElementById('numBtn');
+  numBtn.onclick = () => {
+    let f = currentForm(input.value);
+    if (!f || f === 'inline' || f === 'paren' || f === 'display') f = 'equation*';
+    convertTo(f.endsWith('*') ? f.slice(0, -1) : (FORMS[f + '*'] !== undefined ? f + '*' : f));
+  };
+  function syncForm() {
+    const f = currentForm(input.value);
+    formSel.value = FORMS[f] !== undefined ? f : '';
+    const numbered = /^(equation|align|gather|multline|flalign|alignat|eqnarray)$/.test(f);
+    numBtn.textContent = numbered ? '# Numbered ✓' : '# Numbered ✗';
+    numBtn.classList.toggle('sel', numbered);
+    alignBtn.disabled = !(MULTI_ENVS.test(f) || /\\begin\{(aligned|split|cases|matrix|pmatrix|bmatrix|array)/.test(input.value));
+  }
+  afterLoadHooks.push(syncForm);
+  const noteEl = document.getElementById('note');
+  let noteT = 0;
+  function showNote(t) { noteEl.textContent = t; clearTimeout(noteT); noteT = setTimeout(() => noteEl.textContent = '', 6000); }
+
+  // =================== 3. Align columns ===================
+  // split on top-level \\ (not inside braces or nested environments)
+  function splitTop(src, sepRe) {
+    const out = []; let depth = 0, envDepth = 0, last = 0;
+    for (let i = 0; i < src.length; i++) {
+      const c = src[i];
+      if (c === '\\') {
+        const rest = src.slice(i);
+        if (/^\\begin\{/.test(rest)) envDepth++;
+        else if (/^\\end\{/.test(rest)) envDepth--;
+        else if (depth === 0 && envDepth === 0 && sepRe === '\\\\' && rest.startsWith('\\\\')) { out.push(src.slice(last, i)); last = i + 2; i++; continue; }
+        i++; continue;
+      }
+      if (c === '{') depth++;
+      else if (c === '}') depth--;
+      else if (depth === 0 && envDepth === 0 && sepRe === '&' && c === '&') { out.push(src.slice(last, i)); last = i + 1; }
+    }
+    out.push(src.slice(last));
+    return out;
+  }
+  const splitRows = (body) => splitTop(body, '\\\\').filter((r, i, a) => r.trim() || i < a.length - 1);
+  function alignBlock(body) {
+    const rows = splitRows(body).map(r => splitTop(r.trim(), '&').map(c => c.trim()));
+    const ncol = Math.max(...rows.map(r => r.length));
+    const w = Array.from({ length: ncol }, (_, k) => Math.max(...rows.map(r => (r[k] || '').length)));
+    return rows.map((r, ri) => {
+      let line = '';
+      r.forEach((c, k) => {
+        if (k === 0) { line = r.length > 1 ? c.padEnd(w[0]) : c; return; }
+        // keep the usual "&= x" style: no space between & and a relation sign
+        const tight = /^(=|<|>|\\(le|ge|leq|geq|approx|equiv|sim|neq|to|in|subset|propto)(?![a-zA-Z]))/.test(c);
+        line += ' &' + (tight ? '' : ' ') + (k === r.length - 1 ? c : c.padEnd(w[k]));
+      });
+      return '  ' + line + (ri < rows.length - 1 ? ' \\\\' : '');
+    }).join('\n');
+  }
+  const alignBtn = document.getElementById('alignBtn');
+  alignBtn.onclick = () => {
+    const txt = input.value;
+    let out = txt, n = 0;
+    // top-level multi-line environment
+    const f = currentForm(txt);
+    if (MULTI_ENVS.test(f)) {
+      const [bs, be] = bodyBounds(txt);
+      out = txt.slice(0, bs) + '\n' + alignBlock(txt.slice(bs, be)) + '\n' + txt.slice(be).trimStart();
+      n++;
+    } else {
+      // nested aligned / cases / matrices
+      out = txt.replace(/\\begin\{(aligned|split|cases|matrix|pmatrix|bmatrix|vmatrix|Bmatrix|array)\}(\{[^}]*\})?([\s\S]*?)\\end\{\1\}/g, (all, env, spec, inner) => {
+        n++; return `\\begin{${env}}${spec || ''}\n${alignBlock(inner)}\n\\end{${env}}`;
+      });
+    }
+    if (!n || out === txt) { showNote('Nothing to line up.'); return; }
+    setInput(out);
+    showNote('Lined up the & columns. Same output, easier to read.');
+  };
+
+  // =================== 4. Symbol search ===================
+  const SYMBOLS = [
+    // Greek
+    ...['alpha','beta','gamma','delta','epsilon','varepsilon','zeta','eta','theta','vartheta','iota','kappa','lambda','mu','nu','xi','pi','varpi','rho','varrho','sigma','tau','upsilon','phi','varphi','chi','psi','omega']
+      .map(g => [`\\${g}`, `${g} greek letter lowercase`]),
+    ...['Gamma','Delta','Theta','Lambda','Xi','Pi','Sigma','Upsilon','Phi','Psi','Omega'].map(g => [`\\${g}`, `${g} greek letter capital uppercase`]),
+    // operators & relations
+    ['\\times', 'times multiply cross product'], ['\\cdot', 'cdot dot multiply product'], ['\\div', 'divide division'], ['\\pm', 'plus minus'], ['\\mp', 'minus plus'],
+    ['\\ast', 'asterisk star convolution'], ['\\star', 'star'], ['\\circ', 'circ compose composition degree ring'], ['\\bullet', 'bullet dot'],
+    ['\\oplus', 'oplus direct sum xor circle plus'], ['\\otimes', 'otimes tensor product circle times'], ['\\odot', 'odot hadamard circle dot'],
+    ['=', 'equals'], ['\\neq', 'not equal neq'], ['\\approx', 'approx approximately almost equal'], ['\\equiv', 'equiv identical congruent defined'],
+    ['\\cong', 'cong congruent isomorphic'], ['\\sim', 'sim similar tilde distributed'], ['\\simeq', 'simeq similar equal'], ['\\propto', 'propto proportional'],
+    ['\\triangleq', 'defined as equal by definition'], ['\\coloneqq', 'colon equals defined as assignment :='],
+    ['<', 'less than'], ['>', 'greater than'], ['\\leq', 'leq less than or equal'], ['\\geq', 'geq greater than or equal'],
+    ['\\ll', 'much less than'], ['\\gg', 'much greater than'], ['\\prec', 'precedes'], ['\\succ', 'succeeds'],
+    // sets & logic
+    ['\\in', 'in element of member'], ['\\notin', 'not in not element'], ['\\ni', 'ni contains as member'], ['\\subset', 'subset'], ['\\subseteq', 'subseteq subset or equal'],
+    ['\\supset', 'superset'], ['\\supseteq', 'superset or equal'], ['\\cup', 'cup union'], ['\\cap', 'cap intersection'], ['\\setminus', 'set minus difference'],
+    ['\\emptyset', 'empty set'], ['\\varnothing', 'empty set varnothing'], ['\\forall', 'for all every'], ['\\exists', 'exists there exists'], ['\\nexists', 'does not exist'],
+    ['\\neg', 'not negation'], ['\\land', 'and wedge logical'], ['\\lor', 'or vee logical'], ['\\implies', 'implies then arrow'], ['\\iff', 'iff if and only if equivalent'],
+    ['\\therefore', 'therefore'], ['\\because', 'because'],
+    ['\\mathbb{R}', 'real numbers R reals'], ['\\mathbb{N}', 'natural numbers N'], ['\\mathbb{Z}', 'integers Z'], ['\\mathbb{Q}', 'rational numbers Q'], ['\\mathbb{C}', 'complex numbers C'],
+    // arrows
+    ['\\to', 'to right arrow maps tends'], ['\\rightarrow', 'right arrow'], ['\\leftarrow', 'left arrow gets'], ['\\leftrightarrow', 'left right arrow both'],
+    ['\\Rightarrow', 'double right arrow implies'], ['\\Leftarrow', 'double left arrow'], ['\\Leftrightarrow', 'double left right arrow iff'], ['\\mapsto', 'maps to'],
+    ['\\uparrow', 'up arrow'], ['\\downarrow', 'down arrow'], ['\\longrightarrow', 'long right arrow'], ['\\rightleftharpoons', 'equilibrium reversible reaction harpoons'],
+    ['\\xrightarrow{#?}', 'arrow with text above extensible'],
+    // calculus & big operators
+    ['\\frac{#?}{#?}', 'fraction divide over'], ['\\dfrac{#?}{#?}', 'display fraction big'], ['\\sqrt{#?}', 'square root sqrt radical'], ['\\sqrt[#?]{#?}', 'nth root cube root'],
+    ['\\sum_{#?}^{#?}', 'sum summation sigma'], ['\\prod_{#?}^{#?}', 'product pi'], ['\\int_{#?}^{#?}', 'integral int definite'], ['\\int', 'integral'],
+    ['\\iint', 'double integral'], ['\\iiint', 'triple integral'], ['\\oint', 'contour integral closed line'], ['\\lim_{#? \\to #?}', 'limit lim'],
+    ['\\partial', 'partial derivative'], ['\\nabla', 'nabla gradient del'], ['\\infty', 'infinity infinite'], ['\\mathrm{d}', 'd differential upright'],
+    ['\\frac{\\mathrm{d}#?}{\\mathrm{d}#?}', 'derivative dy dx'], ['\\frac{\\partial #?}{\\partial #?}', 'partial derivative fraction'],
+    ['\\Delta', 'delta change difference laplacian'], ['\\prime', 'prime derivative'], ["'", 'prime apostrophe derivative'],
+    // accents & decorations
+    ['\\hat{#?}', 'hat caret unit vector estimate'], ['\\bar{#?}', 'bar mean average overline'], ['\\overline{#?}', 'overline long bar conjugate'], ['\\tilde{#?}', 'tilde'],
+    ['\\vec{#?}', 'vector arrow'], ['\\dot{#?}', 'dot time derivative'], ['\\ddot{#?}', 'double dot second derivative'], ['\\underline{#?}', 'underline'],
+    ['\\overbrace{#?}^{#?}', 'overbrace brace above'], ['\\underbrace{#?}_{#?}', 'underbrace brace below'], ['\\mathbf{#?}', 'bold vector matrix'],
+    ['\\boldsymbol{#?}', 'bold symbol greek bold'], ['\\mathrm{#?}', 'upright roman text units'], ['\\mathcal{#?}', 'calligraphic script'], ['\\text{#?}', 'text words'],
+    // brackets & structures
+    ['\\left( #? \\right)', 'parentheses brackets auto size'], ['\\left[ #? \\right]', 'square brackets auto size'], ['\\left\\{ #? \\right\\}', 'curly braces set auto size'],
+    ['\\left| #? \\right|', 'absolute value modulus'], ['\\left\\| #? \\right\\|', 'norm double bars'], ['\\langle #? \\rangle', 'angle brackets inner product expectation'],
+    ['\\lfloor #? \\rfloor', 'floor'], ['\\lceil #? \\rceil', 'ceiling ceil'],
+    ['\\begin{pmatrix} #? & #? \\\\ #? & #? \\end{pmatrix}', 'matrix 2x2 parentheses pmatrix'], ['\\begin{bmatrix} #? & #? \\\\ #? & #? \\end{bmatrix}', 'matrix 2x2 square bmatrix'],
+    ['\\begin{vmatrix} #? & #? \\\\ #? & #? \\end{vmatrix}', 'determinant matrix vmatrix'],
+    ['\\begin{cases} #? & #? \\\\ #? & #? \\end{cases}', 'cases piecewise function brace'], ['\\binom{#?}{#?}', 'binomial choose combination'],
+    // misc
+    ['\\ldots', 'dots ellipsis low'], ['\\cdots', 'center dots ellipsis'], ['\\vdots', 'vertical dots'], ['\\ddots', 'diagonal dots'],
+    ['\\angle', 'angle'], ['\\perp', 'perpendicular orthogonal'], ['\\parallel', 'parallel'], ['\\degree', 'degree'], ['^{\\circ}', 'degrees temperature angle'],
+    ['\\hbar', 'h bar planck reduced'], ['\\ell', 'ell script l length'], ['\\Re', 'real part'], ['\\Im', 'imaginary part'], ['\\aleph', 'aleph cardinal'],
+    ['\\dagger', 'dagger adjoint hermitian'], ['\\top', 'transpose top'], ['\\sin', 'sine sin trig'], ['\\cos', 'cosine cos trig'], ['\\tan', 'tangent tan trig'],
+    ['\\log', 'logarithm log'], ['\\ln', 'natural logarithm ln'], ['\\exp', 'exponential exp'], ['\\max', 'maximum max'], ['\\min', 'minimum min'],
+    ['\\arg\\max_{#?}', 'argmax arg max'], ['\\arg\\min_{#?}', 'argmin arg min'], ['\\det', 'determinant det'], ['\\quad', 'space quad gap wide'], ['\\,', 'thin space small gap'],
+  ];
+  const symPanel = document.getElementById('symPanel'), symQ = document.getElementById('symQ'), symGrid = document.getElementById('symGrid');
+  function showSyms() {
+    const q = symQ.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const hits = SYMBOLS.filter(([l, k]) => q.every(w => k.toLowerCase().includes(w) || l.toLowerCase().includes(w))).slice(0, 60);
+    symGrid.innerHTML = hits.length ? hits.map(([l, k], i) =>
+      `<button class="sym" data-l="${esc(l)}" title="${esc(k.split(' ').slice(0, 4).join(' '))} — ${esc(l.replace(/#\?/g, '□'))}">${renderStatic(l.replace(/#\?/g, '\\square'))}</button>`).join('')
+      : '<span style="color:#888">No match — try another word (e.g. "arrow", "integral", "matrix").</span>';
+    symGrid.querySelectorAll('.sym').forEach(b => b.onclick = () => {
+      mf.focus();
+      mf.insert(b.dataset.l, { format: 'latex', selectionMode: 'placeholder' });
+      buildOutput(); input.value = output.value; runChecks();
+    });
+  }
+  document.getElementById('symBtn').onclick = () => {
+    symPanel.classList.toggle('on');
+    if (symPanel.classList.contains('on')) { showSyms(); symQ.focus(); }
+  };
+  symQ.addEventListener('input', showSyms);
+  symQ.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const f = symGrid.querySelector('.sym'); if (f) f.click(); } });
+
+  // =================== 5. My macros ===================
+  const DEFAULT_MACROS = { ...mf.macros };
+  const macroTa = document.getElementById('macroTa'), macroStatus = document.getElementById('macroStatus');
+  function parseMacros(src) {
+    const out = {}, names = [];
+    src = src.replace(/(^|[^\\])%.*$/gm, '$1'); // drop comments
+    const grab = (i) => { // read {..} or \name at i -> [content, nextIndex]
+      i = nextNonWs(src, i);
+      if (src[i] === '{') { const j = matchBrace(src, i); return [src.slice(i + 1, j), j + 1]; }
+      if (src[i] === '\\') { const j = readCmd(src, i); return [src.slice(i, j), j]; }
+      return [null, i];
+    };
+    for (const m of src.matchAll(/\\(newcommand|renewcommand|providecommand|DeclareMathOperator|DeclareRobustCommand|def)(\*?)/g)) {
+      let i = m.index + m[0].length;
+      let [name, j] = m[1] === 'def' ? (() => { const k = nextNonWs(src, i); const e = readCmd(src, k); return [src.slice(k, e), e]; })() : grab(i);
+      if (!name) continue;
+      name = name.trim().replace(/^\\/, '');
+      let args = 0;
+      j = nextNonWs(src, j);
+      if (m[1] === 'def') { const pm = src.slice(j).match(/^(#\d)+/); if (pm) { args = pm[0].length / 2; j += pm[0].length; } }
+      else if (src[j] === '[') { const k = src.indexOf(']', j); args = parseInt(src.slice(j + 1, k)) || 0; j = nextNonWs(src, k + 1);
+        if (src[j] === '[') j = nextNonWs(src, src.indexOf(']', j) + 1); } // optional default arg: ignored
+      const [def] = grab(j);
+      if (def === null) continue;
+      out[name] = m[1] === 'DeclareMathOperator' ? { args: 0, def: `\\operatorname${m[2] ? '*' : ''}{${def}}` } : { args, def };
+      names.push('\\' + name);
+    }
+    return { macros: out, names };
+  }
+  function applyMacros(src, quiet) {
+    const { macros, names } = parseMacros(src);
+    mf.macros = { ...DEFAULT_MACROS, ...macros };
+    if (ghost) ghost.macros = mf.macros;
+    store('olve-macros', src);
+    macroStatus.textContent = names.length ? `✔ ${names.length} macro${names.length > 1 ? 's' : ''} active: ${names.slice(0, 12).join(' ')}${names.length > 12 ? ' …' : ''}` : (src.trim() ? 'No \\newcommand / \\DeclareMathOperator found.' : '');
+    if (!quiet) { load(); }
+  }
+  document.getElementById('macroApply').onclick = () => applyMacros(macroTa.value);
+  document.getElementById('macroClear').onclick = () => { macroTa.value = ''; applyMacros(''); };
+  macroTa.value = recall('olve-macros', '');
+  // the hidden copy used for shading must know the macros too
+  const _getGhost = getGhost;
+  getGhost = function () { const g = _getGhost(); if (g.macros !== mf.macros) g.macros = mf.macros; return g; };
+
+  // =================== 6. History ===================
+  const histList = document.getElementById('histList');
+  function saveHistory(txt) {
+    txt = (txt || '').trim();
+    if (!txt) return;
+    let h = recall('olve-history', []).filter(x => x.latex !== txt);
+    h.unshift({ latex: txt, t: Date.now() });
+    store('olve-history', h.slice(0, 40));
+    if (document.getElementById('tab-history').classList.contains('on')) showHistory();
+  }
+  function showHistory() {
+    const h = recall('olve-history', []);
+    if (!h.length) { histList.innerHTML = '<p class="muted">Equations you copy (or clear) appear here. They stay in this browser only.</p>'; return; }
+    histList.innerHTML = h.map((x, i) => `<div class="hist">
+        <div class="hprev" data-i="${i}" title="Open in editor">${renderStatic(fieldLatex(x.latex))}</div>
+        <div class="hmeta">${new Date(x.t).toLocaleString()}<br>
+          <button data-open="${i}">Open</button> <button data-del="${i}" title="Remove">✕</button></div></div>`).join('') +
+      '<div class="row"><button id="histClear">Clear history</button></div>';
+    histList.querySelectorAll('[data-open],.hprev').forEach(b => b.onclick = () => {
+      const x = h[b.dataset.open ?? b.dataset.i]; setInput(x.latex); window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    histList.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { h.splice(+b.dataset.del, 1); store('olve-history', h); showHistory(); });
+    document.getElementById('histClear').onclick = () => { store('olve-history', []); showHistory(); };
+  }
+  document.getElementById('copy').addEventListener('click', () => saveHistory(output.value));
+  const _clearBtn = document.getElementById('clear');
+  _clearBtn.onclick = () => { saveHistory(output.value); pushUndo(input.value); input.value = ''; load(); clearHl(); input.focus(); };
+
+  // =================== 7. Whole section ===================
+  const secTa = document.getElementById('secTa'), secList = document.getElementById('secList'), secBanner = document.getElementById('secBanner');
+  let secEqs = [], editingIdx = -1;
+  function findEquations(src) {
+    const comments = [];
+    for (let i = 0; i < src.length; i++) if (src[i] === '%' && !isEscaped(src, i)) { const j = src.indexOf('\n', i); comments.push([i, j < 0 ? src.length : j]); i = j < 0 ? src.length : j; }
+    const inComment = (a) => comments.some(([x, y]) => a >= x && a < y);
+    const found = [];
+    const free = (a, b) => !found.some(f => a < f.e && b > f.s);
+    const envRe = /\\begin\{((?:equation|align|gather|multline|eqnarray|displaymath|math|flalign|alignat)\*?)\}[\s\S]*?\\end\{\1\}/g;
+    for (const m of src.matchAll(envRe)) if (!inComment(m.index)) found.push({ s: m.index, e: m.index + m[0].length });
+    for (const re of [/\\\[[\s\S]*?\\\]/g, /\\\([\s\S]*?\\\)/g, /(?<!\\)\$\$[\s\S]*?(?<!\\)\$\$/g, /(?<![\\$])\$(?!\$)(?:\\.|[^$\\])+?(?<!\\)\$/g])
+      for (const m of src.matchAll(re)) { const s = m.index, e = s + m[0].length; if (!inComment(s) && free(s, e)) found.push({ s, e }); }
+    return found.sort((a, b) => a.s - b.s).map(f => ({ ...f, text: src.slice(f.s, f.e) }));
+  }
+  function showSection() {
+    const src = secTa.value;
+    secEqs = findEquations(src);
+    if (!secEqs.length) { secList.innerHTML = '<p class="muted">No equations found. Paste some LaTeX with $…$, \\[…\\] or equation/align environments.</p>'; return; }
+    let nIssues = 0, nErr = 0;
+    const rows = secEqs.map((q, i) => {
+      const safe = scanIssues(q.text).filter(g => INFO[g.kind][3]).reduce((n, g) => n + g.items.length, 0);
+      const errs = checkLatex(q.text, false).length;
+      nIssues += safe; nErr += errs ? 1 : 0;
+      return `<div class="seq ${i === editingIdx ? 'editing' : ''}">
+        <div class="snum">${i + 1}</div>
+        <div class="sprev">${renderStatic(fieldLatex(q.text))}</div>
+        <div class="smeta">line ${lineOf(src, q.s)} · ${esc(currentForm(q.text) || 'maths')}
+          ${errs ? `<span class="bad">✖ ${errs} problem${errs > 1 ? 's' : ''}</span>` : ''}
+          ${safe ? `<span class="tidy">🧹 ${safe} to tidy</span>` : '<span class="okc">✔ clean</span>'}
+          <br><button data-edit="${i}">✎ Edit</button></div></div>`;
+    }).join('');
+    secList.innerHTML = `<div class="sum">Found <b>${secEqs.length}</b> equation${secEqs.length > 1 ? 's' : ''} · ${nIssues} safe fix${nIssues === 1 ? '' : 'es'} available${nErr ? ` · <span class="bad">${nErr} with problems</span>` : ''}</div>
+      <div class="row" style="margin:6px 0 10px"><button class="primary" id="secCleanAll" ${nIssues ? '' : 'disabled'}>🧹 Clean all equations (safe fixes only)</button>
+      <button id="secCopy">Copy section</button><span class="status" id="secStatus"></span></div>${rows}`;
+    secList.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => editFromSection(+b.dataset.edit));
+    document.getElementById('secCleanAll').onclick = () => {
+      let src2 = secTa.value, total = 0;
+      for (const q of [...secEqs].reverse()) { const r = autoClean(q.text); total += r.count; src2 = src2.slice(0, q.s) + r.text + src2.slice(q.e); }
+      secUndo.push(secTa.value); secTa.value = src2; editingIdx = -1; secBanner.classList.remove('on');
+      showSection(); document.getElementById('secStatus').textContent = `Applied ${total} fixes. `;
+      addSecUndo();
+    };
+    document.getElementById('secCopy').onclick = async () => {
+      try { await navigator.clipboard.writeText(secTa.value); document.getElementById('secStatus').textContent = 'Copied ✓'; }
+      catch (e) { secTa.select(); document.getElementById('secStatus').textContent = 'Selected — press Ctrl+C'; }
+    };
+  }
+  const secUndo = [];
+  function addSecUndo() {
+    const b = document.createElement('button'); b.textContent = '↶ Undo';
+    b.onclick = () => { if (secUndo.length) { secTa.value = secUndo.pop(); showSection(); } };
+    document.getElementById('secCopy').after(b);
+  }
+  function editFromSection(i) {
+    editingIdx = i;
+    setInput(secEqs[i].text);
+    secBanner.classList.add('on');
+    secBanner.querySelector('b').textContent = `equation ${i + 1}`;
+    showSection();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  document.getElementById('secPut').onclick = () => {
+    if (editingIdx < 0) return;
+    const q = findEquations(secTa.value)[editingIdx];
+    if (!q) { showNote('Could not find that equation in the section any more.'); return; }
+    secUndo.push(secTa.value);
+    secTa.value = secTa.value.slice(0, q.s) + output.value + secTa.value.slice(q.e);
+    saveHistory(output.value);
+    showNote(`Equation ${editingIdx + 1} put back into the section.`);
+    editingIdx = -1; secBanner.classList.remove('on');
+    openTab('section'); showSection(); addSecUndo();
+    document.getElementById('tools').scrollIntoView({ behavior: 'smooth' });
+  };
+  document.getElementById('secCancel').onclick = () => { editingIdx = -1; secBanner.classList.remove('on'); showSection(); };
+  document.getElementById('secFind').onclick = () => { editingIdx = -1; secBanner.classList.remove('on'); showSection(); };
+
+  // =================== Tabs ===================
+  function openTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('sel', t.dataset.tab === name));
+    document.querySelectorAll('.tabp').forEach(p => p.classList.toggle('on', p.id === 'tab-' + name));
+    if (name === 'history') showHistory();
+    store('olve-tab', name);
+  }
+  document.querySelectorAll('.tab').forEach(t => t.onclick = () => openTab(t.dataset.tab));
+  openTab(recall('olve-tab', 'section'));
+
+  applyMacros(macroTa.value, true);
 
   input.value = '\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}';
   load();
