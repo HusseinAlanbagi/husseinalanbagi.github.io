@@ -27,6 +27,24 @@
   .tips kbd { font:12px ui-monospace,monospace; background:#f2f4f7; border:1px solid var(--line); border-radius:4px; padding:0 5px; }
   .mfwrap { position:relative; }
   .hl { position:fixed; background:rgba(255,196,0,.38); border:1px solid rgba(214,150,0,.8); border-radius:3px; pointer-events:none; z-index:5; display:none; }
+  .clean { margin-top:12px; border:1px solid var(--line); border-radius:10px; background:#fbfcfd; padding:12px 14px; display:none; }
+  .clean.on { display:block; }
+  .clean h3 { margin:0 0 4px; font-size:15px; }
+  .clean .sum { color:var(--muted); font-size:13px; margin-bottom:10px; }
+  .grp { border-top:1px solid #eceef2; padding:8px 0; }
+  .grp:first-of-type { border-top:none; }
+  .grp > label { display:flex; gap:8px; align-items:flex-start; font-weight:600; cursor:pointer; }
+  .grp .why { font-weight:400; color:var(--muted); font-size:12.5px; display:block; }
+  .grp .tagd { font-size:11px; font-weight:600; padding:1px 7px; border-radius:9px; margin-left:6px; vertical-align:1px; }
+  .tagd.safe { background:#e6f4e6; color:#1d6b1d; } .tagd.check { background:#fff3d6; color:#8a5a00; }
+  .items { margin:6px 0 0 26px; display:flex; flex-direction:column; gap:3px; }
+  .item { display:flex; gap:8px; align-items:center; font:12.5px ui-monospace,Menlo,Consolas,monospace; padding:3px 6px; border-radius:6px; cursor:pointer; }
+  .item:hover { background:#fff6d6; }
+  .item del { background:#ffe0e0; color:#a12; text-decoration:line-through; padding:0 2px; border-radius:3px; }
+  .item ins { background:#dff5df; color:#185c18; text-decoration:none; padding:0 2px; border-radius:3px; }
+  .item .ctx { color:#888; }
+  .item .arrow { color:#999; margin:0 4px; }
+  .clean .done { color:var(--green); font-weight:600; }
   .wrapinfo { font-size:12px; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; }
 </style>
 </head>
@@ -48,12 +66,14 @@
     <div class="mfwrap"><math-field id="mf"></math-field><div class="hl" id="hl"></div></div>
     <div class="row">
       <button id="kbd">⌨ Symbols keyboard</button>
+      <button id="cleanBtn">🧹 Clean up</button>
     </div>
     <div class="tips">
       Type <kbd>/</kbd> for a fraction, <kbd>^</kbd> superscript, <kbd>_</kbd> subscript, <kbd>sqrt</kbd> root,
       <kbd>\alpha</kbd> for Greek letters. Use arrow keys and <kbd>Tab</kbd> to move between parts.<br>
       <b>Tip:</b> select part of the LaTeX in box 1 or 3 to see it shaded here.
     </div>
+    <div class="clean" id="clean"></div>
   </div>
 
   <div class="card">
@@ -259,9 +279,8 @@ function start() {
       if (t.startsWith(o) && t.endsWith(c) && t.length >= o.length + c.length) return [a + o.length, b - c.length];
     return [a, b];
   }
-  function rangeFor(el) {
-    const txt = el.value;
-    let s = el.selectionStart, e = el.selectionEnd;
+  function rangeFor(el) { return rangeForText(el.value, el.selectionStart, el.selectionEnd); }
+  function rangeForText(txt, s, e) {
     if (s === e) return null;
     const [bs, be] = bodyBounds(txt);
     if (s <= bs && e >= be) return 'all';
@@ -300,7 +319,6 @@ function start() {
     if (r === 'all') r = [0, mf.lastOffset];
     if (r === 'all-ish') r = null; // structure didn't line up: better to show nothing than the wrong thing
     lastSel = r;
-    hl.dataset.range = r ? r.join(',') : '';
     r ? drawRange(r) : clearHl();
   }
   [input, output].forEach((el) => {
@@ -323,6 +341,270 @@ function start() {
     catch (e) { output.select(); document.execCommand && document.execCommand('copy'); status.textContent = 'Selected — press Ctrl+C if it didn’t copy'; }
     setTimeout(() => (status.textContent = ''), 2500);
   };
+
+  // =================== Equation clean-up ===================
+  const SAFE = 'safe', CHECK = 'check';
+  const isEscaped = (src, i) => { let n = 0; while (i - 1 - n >= 0 && src[i - 1 - n] === '\\') n++; return n % 2 === 1; };
+  const prevNonWs = (src, i) => { i--; while (i >= 0 && /\s/.test(src[i])) i--; return i; };
+  const nextNonWs = (src, i) => { while (i < src.length && /\s/.test(src[i])) i++; return i; };
+  // the '{' at i is an argument (of a command, ^, _, or a previous {..}/[..] chain)?
+  function isArg(src, i) {
+    const j = prevNonWs(src, i);
+    if (j < 0) return false;
+    const c = src[j];
+    if (c === '^' || c === '_' || c === '}' || c === ']') return true;
+    if (/[a-zA-Z]/.test(c)) {
+      const m = src.slice(0, j + 1).match(/\\([a-zA-Z]+)$/);
+      if (!m) return false;
+      return !new RegExp(`^(${FUNCS})$`).test(m[1]); // \sin{x}: the braces are not an argument
+    }
+    return false;
+  }
+  // single "token": one letter/digit, or one command without its own arguments
+  function singleToken(inner, src, afterIdx) {
+    const t = inner.trim();
+    if (/^[A-Za-z0-9]$/.test(t)) return t;
+    if (/^\\[a-zA-Z]+$/.test(t) || /^\\[^a-zA-Z]$/.test(t)) return t;
+    return null;
+  }
+  // a command name glued to a following letter would change meaning: \alpha b -> \alphab
+  const glue = (rep, src, after) => (/\\[a-zA-Z]+$/.test(rep) && /[a-zA-Z]/.test(src[after] || '')) ? rep + ' ' : rep;
+  const TALL = /\\(frac|dfrac|tfrac|cfrac|sum|prod|int|iint|iiint|oint|bigcup|bigcap|lim|binom|dbinom|sqrt|begin|over|matrix|pmatrix|bmatrix|displaystyle|overbrace|underbrace|overset|underset|stackrel)\b|\^|_/;
+  const FUNCS = 'sin|cos|tan|cot|sec|csc|sinh|cosh|tanh|coth|arcsin|arccos|arctan|log|ln|lg|exp|lim|liminf|limsup|max|min|sup|inf|det|dim|deg|gcd|hom|ker|arg|Pr';
+
+  function scanIssues(txt) {
+    const [bs, be] = bodyBounds(txt);
+    const inBody = (a, b) => a >= bs && b <= be;
+    // text-like command contents are left alone
+    const prot = [];
+    for (const m of txt.matchAll(/\\(label|tag|text|textrm|textbf|textit|textsf|texttt|mbox|ref|eqref|mathrm|operatorname|mathbf|mathit|mathsf|mathtt|mathcal|mathbb|mathfrak|boldsymbol)\s*\{/g)) {
+      const open = m.index + m[0].length - 1; prot.push([open + 1, matchBrace(txt, open)]);
+    }
+    const isProt = (a, b) => prot.some(([x, y]) => a < y && b > x);
+    const isDisplay = /^\s*(\\\[|\$\$|\\begin\{(equation|align|gather|multline|eqnarray|displaymath|flalign|alignat)\*?\})/.test(txt);
+    const groups = {};
+    function add(kind, edits, extra = {}) {
+      if (!edits.every(([a, b]) => inBody(a, b))) return;
+      const g = groups[kind] || (groups[kind] = { kind, items: [] });
+      g.items.push({ edits, ...extra });
+    }
+
+    // brace scan
+    const braces = [];
+    for (let i = bs; i < be; i++) if (txt[i] === '{' && !isEscaped(txt, i)) braces.push([i, matchBrace(txt, i)]);
+    const braceAt = new Map(braces);
+
+    for (const [o, c] of braces) {
+      if (c >= be) continue;
+      const inner = txt.slice(o + 1, c);
+      const j = prevNonWs(txt, o), before = txt[j];
+      const k = nextNonWs(txt, c + 1), after = txt[k];
+      // empty ^{} / _{}
+      if (!inner.trim() && (before === '^' || before === '_')) { add('emptyScript', [[j, c + 1, '']]); continue; }
+      // empty \cmd{} for font/text commands
+      if (!inner.trim() && /[a-zA-Z]/.test(before || '')) {
+        const m = txt.slice(0, j + 1).match(/\\(mathrm|mathbf|mathit|mathsf|mathtt|mathcal|mathbb|mathfrak|boldsymbol|text|textrm|textbf|textit|mbox|operatorname|bm)$/);
+        if (m) { add('emptyCmd', [[j + 1 - m[0].length, c + 1, '']]); continue; }
+      }
+      if (isProt(o, c)) continue;
+      // {}^{..} left-side scripts: probably intentional
+      if (!inner.trim() && !isArg(txt, o) && (after === '^' || after === '_')) { add('emptyPrescript', [[o, c + 1, '']]); continue; }
+      // stray empty {}
+      if (!inner.trim() && !isArg(txt, o)) { add('emptyGroup', [[o, c + 1, '']]); continue; }
+      // ^{2} -> ^2
+      if ((before === '^' || before === '_')) {
+        const t = singleToken(inner);
+        if (t && !(/^[0-9]$/.test(t) === false && t.length > 1 && !t.startsWith('\\'))) {
+          add('scriptBraces', [[o, c + 1, glue(t, txt, c + 1)]]); continue;
+        }
+      }
+      // {{x}} -> {x}
+      const io = nextNonWs(txt, o + 1);
+      if (txt[io] === '{' && braceAt.has(io) && nextNonWs(txt, braceAt.get(io) + 1) === c) {
+        add('doubleBraces', [[o, io, ''], [braceAt.get(io) + 1, c + 1, '']]); continue;
+      }
+      // a+{b} -> a+b
+      if (!isArg(txt, o) && after !== '^' && after !== '_') {
+        const t = singleToken(inner);
+        if (t) {
+          const needSpace = /[a-zA-Z]/.test(txt[o - 1] || '') && /^[a-zA-Z]/.test(t); // \sin{x} -> \sin x
+          add('loneBraces', [[o, c + 1, (needSpace ? ' ' : '') + glue(t, txt, c + 1)]]);
+        }
+      }
+    }
+
+    // \operatorname{sin} -> \sin
+    for (const m of txt.matchAll(new RegExp(`\\\\operatorname\\s*\\{\\s*(${FUNCS})\\s*\\}`, 'g'))) {
+      const end = m.index + m[0].length;
+      add('operatorname', [[m.index, end, glue('\\' + m[1], txt, end)]]);
+    }
+    // \mathrm{\mathrm{x}} -> \mathrm{x}
+    for (const m of txt.matchAll(/\\(mathrm|mathbf|mathit|mathsf|mathtt|mathcal|mathbb|boldsymbol|text)\s*\{\s*\\\1\s*\{/g)) {
+      const o1 = txt.indexOf('{', m.index), o2 = m.index + m[0].length - 1;
+      const c2 = matchBrace(txt, o2), c1 = matchBrace(txt, o1);
+      if (nextNonWs(txt, c2 + 1) === c1) add('nestedFont', [[o1 + 1, o2 + 1, ''], [c2, c1, '']]);
+    }
+    // \left( a+b \right) with nothing tall inside
+    for (const m of txt.matchAll(/\\left\s*(\\[{|]|\\[a-zA-Z]+|[()[\]|.])/g)) {
+      const start = m.index, inner0 = start + m[0].length;
+      const r = findPair(txt, inner0, /\\left(?![a-zA-Z])/, /\\right(?![a-zA-Z])/);
+      if (r < 0) continue;
+      const rd = txt.slice(r).match(/^\\right\s*(\\[}|]|\\[a-zA-Z]+|[()[\]|.])/);
+      if (!rd || m[1] === '.' || rd[1] === '.') continue;
+      const inner = txt.slice(inner0, r);
+      if (TALL.test(inner) || /\\left/.test(inner)) continue;
+      add('leftRight', [[start, inner0, glue(m[1], txt, inner0)], [r, r + rd[0].length, glue(rd[1], txt, r + rd[0].length)]]);
+    }
+    // \displaystyle in display maths
+    if (isDisplay) for (const m of txt.matchAll(/\\displaystyle(?![a-zA-Z])\s*/g)) add('displaystyle', [[m.index, m.index + m[0].length, '']]);
+    // stacked spacing commands \,\,\, or \quad\quad
+    for (const m of txt.matchAll(/(?:(?:\\[,:;! ]|\\quad|\\qquad|~)\s*){2,}/g)) {
+      if (isProt(m.index, m.index + m[0].length)) continue;
+      add('stackedSpace', [[m.index, m.index + m[0].length, m[0]]], { note: 'review' });
+    }
+    // spacing at the very start / end of the equation
+    const body = txt.slice(bs, be);
+    const lead = body.match(/^\s*((?:\\[,:;! ]|\\quad|\\qquad|~)\s*)+/);
+    if (lead) add('edgeSpace', [[bs, bs + lead[0].length, body.match(/^\s*/)[0]]]);
+    const trail = body.match(/((?:\\[,:;!]|\\quad|\\qquad|~)\s*)+$/);
+    if (trail && (!lead || trail.index > lead[0].length)) add('edgeSpace', [[be - trail[0].length, be, '']]);
+    // trailing \\ at the end of a multi-line environment
+    const tb = body.match(/\\\\\s*((?:\\(?:label\{[^}]*\}|nonumber|notag)\s*)*)$/);
+    if (tb && /\\begin\{/.test(txt.slice(0, bs))) { const at = be - tb[0].length; add('trailingBreak', [[at, at + 2, '']]); }
+    // repeated spaces
+    for (const m of txt.matchAll(/[ \t]{2,}/g)) {
+      const a = m.index, b = a + m[0].length;
+      const lineStart = a === 0 || txt[a - 1] === '\n';
+      if (lineStart || isProt(a, b) || !inBody(a, b)) continue;
+      add('spaces', [[a, b, ' ']]);
+    }
+    // order groups for display
+    return ORDER.filter(k => groups[k]).map(k => groups[k]);
+  }
+
+  const INFO = {
+    emptyScript:   [SAFE,  'Empty superscripts / subscripts', 'x^{} or x_{} adds nothing.', true],
+    emptyCmd:      [SAFE,  'Empty formatting commands', 'e.g. \\mathrm{} or \\text{} with nothing inside.', true],
+    emptyGroup:    [SAFE,  'Empty { } braces', 'Leftover braces with nothing inside (common after copy-paste or editors).', true],
+    doubleBraces:  [SAFE,  'Double braces {{ }}', 'One pair is enough.', true],
+    scriptBraces:  [SAFE,  'Braces around a one-character script', 'x^{2} → x^2. Same output, easier to read.', true],
+    loneBraces:    [SAFE,  'Braces around a single symbol', 'a+{b} → a+b, \\sin{x} → \\sin x.', true],
+    nestedFont:    [SAFE,  'Repeated font command', '\\mathrm{\\mathrm{x}} → \\mathrm{x}.', true],
+    operatorname:  [SAFE,  'Built-in function names', '\\operatorname{sin} → \\sin (LaTeX already knows these).', true],
+    displaystyle:  [SAFE,  '\\displaystyle in display maths', 'Display equations are already in display style.', true],
+    trailingBreak: [SAFE,  'Trailing \\\\ on the last line', 'Creates an empty (and sometimes numbered) extra line.', true],
+    edgeSpace:     [SAFE,  'Spacing at the start/end', 'Spacing commands at the edges of an equation have no visible effect or add unwanted gaps.', true],
+    spaces:        [SAFE,  'Extra spaces in the code', 'Cosmetic only — LaTeX ignores them in maths.', true],
+    leftRight:     [CHECK, '\\left … \\right around simple content', 'Plain brackets look tighter when nothing inside is tall. Keep them if you want auto-sizing.', false],
+    emptyPrescript:[CHECK, 'Empty {} before a script', 'Often intentional, e.g. {}^{14}C for left-side scripts. Only remove if not.', false],
+    stackedSpace:  [CHECK, 'Stacked spacing commands', 'Several spacing commands in a row (\\,\\,\\, …). Could be simplified — review manually.', false],
+  };
+  const ORDER = ['emptyScript', 'emptyCmd', 'emptyGroup', 'doubleBraces', 'scriptBraces', 'loneBraces', 'nestedFont', 'operatorname', 'displaystyle', 'trailingBreak', 'edgeSpace', 'spaces', 'leftRight', 'emptyPrescript', 'stackedSpace'];
+
+  const cleanBox = document.getElementById('clean');
+  let issues = [];
+  const esc = (x) => x.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+  const vis = (x) => x === '' ? '∅' : x.replace(/\n/g, '↵').replace(/ /g, '·');
+
+  function preview(txt, item) {
+    const a = Math.min(...item.edits.map(e => e[0])), b = Math.max(...item.edits.map(e => e[1]));
+    const before = txt.slice(Math.max(0, a - 10), a), after = txt.slice(b, b + 10);
+    let oldS = '', newS = '', pos = a;
+    for (const [s0, e0, rep] of [...item.edits].sort((x, y) => x[0] - y[0])) {
+      oldS += esc(txt.slice(pos, s0)); newS += esc(txt.slice(pos, s0));
+      oldS += `<del>${esc(vis(txt.slice(s0, e0)))}</del>`;
+      newS += rep ? `<ins>${esc(vis(rep))}</ins>` : '';
+      pos = e0;
+    }
+    return `<span class="ctx">${esc(before.replace(/\n/g, ' '))}</span>${oldS}<span class="ctx">${esc(after.replace(/\n/g, ' '))}</span>` +
+      `<span class="arrow">→</span><span class="ctx">${esc(before.replace(/\n/g, ' '))}</span>${newS}<span class="ctx">${esc(after.replace(/\n/g, ' '))}</span>`;
+  }
+
+  function renderClean(msg = '') {
+    const txt = input.value;
+    issues = scanIssues(txt);
+    if (!issues.length) {
+      cleanBox.innerHTML = `${msg ? `<div class="done">${msg}</div>` : ''}<div class="done">✨ Looks clean — nothing to tidy.</div><div class="row"><button id="cleanClose">Close</button></div>`;
+      cleanBox.classList.add('on');
+      document.getElementById('cleanClose').onclick = () => cleanBox.classList.remove('on');
+      return;
+    }
+    const total = issues.reduce((n, g) => n + g.items.length, 0);
+    let h = `<h3>🧹 Found ${total} thing${total > 1 ? 's' : ''} to tidy</h3>
+      <div class="sum">${msg ? `<span class="done">${msg}</span> · ` : ''}Tick what to remove or simplify. Point at a line to see where it is in the equation.</div>`;
+    issues.forEach((g, gi) => {
+      const [tag, title, why, def] = INFO[g.kind];
+      h += `<div class="grp"><label><input type="checkbox" class="gchk" data-g="${gi}" ${def ? 'checked' : ''}>
+        <span>${esc(title)} <span class="tagd ${tag}">${tag === SAFE ? 'safe' : 'check first'}</span> <span style="color:#999;font-weight:400">×${g.items.length}</span>
+        <span class="why">${esc(why)}</span></span></label><div class="items">`;
+      g.items.forEach((it, ii) => {
+        h += `<label class="item" data-g="${gi}" data-i="${ii}"><input type="checkbox" class="ichk" data-g="${gi}" data-i="${ii}" ${def && g.kind !== 'stackedSpace' ? 'checked' : ''}><span>${preview(txt, it)}</span></label>`;
+      });
+      h += `</div></div>`;
+    });
+    h += `<div class="row"><button class="primary" id="cleanApply">Apply selected</button>
+      <button id="cleanAll">Select all</button><button id="cleanNone">Select none</button><button id="cleanClose">Close</button></div>`;
+    cleanBox.innerHTML = h;
+    cleanBox.classList.add('on');
+
+    const syncGroup = (gi) => {
+      const its = [...cleanBox.querySelectorAll(`.ichk[data-g="${gi}"]`)], on = its.filter(x => x.checked).length;
+      const gc = cleanBox.querySelector(`.gchk[data-g="${gi}"]`);
+      gc.checked = on === its.length; gc.indeterminate = on > 0 && on < its.length;
+    };
+    cleanBox.querySelectorAll('.gchk').forEach(gc => gc.addEventListener('change', () => {
+      cleanBox.querySelectorAll(`.ichk[data-g="${gc.dataset.g}"]`).forEach(x => x.checked = gc.checked);
+    }));
+    cleanBox.querySelectorAll('.ichk').forEach(x => x.addEventListener('change', () => syncGroup(x.dataset.g)));
+    issues.forEach((_, gi) => syncGroup(gi));
+    // point at an item -> shade it in the visual field
+    cleanBox.querySelectorAll('.item').forEach(row => {
+      const it = issues[row.dataset.g].items[row.dataset.i];
+      row.addEventListener('mouseenter', () => {
+        const a = Math.min(...it.edits.map(e => e[0])), b = Math.max(...it.edits.map(e => e[1]));
+        let r = null; try { r = rangeForText(input.value, a, b); } catch (e) {}
+        if (r === 'all') r = [0, mf.lastOffset];
+        if (Array.isArray(r)) { lastSel = r; drawRange(r); } else clearHl();
+      });
+      row.addEventListener('mouseleave', clearHl);
+    });
+    document.getElementById('cleanAll').onclick = () => { cleanBox.querySelectorAll('.ichk').forEach(x => x.checked = true); issues.forEach((_, gi) => syncGroup(gi)); };
+    document.getElementById('cleanNone').onclick = () => { cleanBox.querySelectorAll('.ichk').forEach(x => x.checked = false); issues.forEach((_, gi) => syncGroup(gi)); };
+    document.getElementById('cleanClose').onclick = () => { cleanBox.classList.remove('on'); clearHl(); };
+    document.getElementById('cleanApply').onclick = applyClean;
+  }
+
+  let undoStack = [];
+  function applyClean() {
+    const txt = input.value;
+    const chosen = [...cleanBox.querySelectorAll('.ichk:checked')].map(x => issues[x.dataset.g].items[x.dataset.i]);
+    if (!chosen.length) return;
+    // apply non-overlapping edits from the end backwards; overlapping ones get picked up on the re-scan
+    const edits = [], taken = [];
+    let applied = 0;
+    for (const it of chosen) {
+      if (it.edits.some(([a, b]) => taken.some(([x, y]) => a < y && b > x || (a === b && a > x && a < y)))) continue;
+      it.edits.forEach(e => { edits.push(e); taken.push([e[0], e[1]]); });
+      applied++;
+    }
+    edits.sort((x, y) => y[0] - x[0]);
+    let out = txt;
+    for (const [a, b, rep] of edits) out = out.slice(0, a) + rep + out.slice(b);
+    undoStack.push(txt);
+    input.value = out;
+    load();
+    clearHl();
+    renderClean(`Applied ${applied} change${applied > 1 ? 's' : ''}.`);
+    const und = document.createElement('button'); und.textContent = '↶ Undo clean-up';
+    und.onclick = () => { if (!undoStack.length) return; input.value = undoStack.pop(); load(); renderClean('Undone.'); };
+    cleanBox.querySelector('.row').appendChild(und);
+  }
+  document.getElementById('cleanBtn').onclick = () => {
+    if (cleanBox.classList.contains('on')) { cleanBox.classList.remove('on'); clearHl(); return; }
+    renderClean();
+  };
+  input.addEventListener('input', () => { if (cleanBox.classList.contains('on')) renderClean(); });
+  mf.addEventListener('input', () => { if (cleanBox.classList.contains('on')) setTimeout(() => renderClean(), 0); });
 
   input.value = '\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}';
   load();
