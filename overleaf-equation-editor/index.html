@@ -1222,6 +1222,8 @@ function start() {
   document.getElementById('zoomReset').onclick = () => setZoom(0.9);
   ['zoomIn', 'zoomOut', 'zoomReset'].forEach(id => document.getElementById(id).addEventListener('mousedown', e => e.preventDefault()));
   setZoom(zoom);
+  // a click anywhere in the visual pane (not only on the equation) puts the cursor in it
+  mf.addEventListener('pointerdown', () => { setTimeout(() => { if (document.activeElement !== mf) { mf.focus(); mf.executeCommand('moveToMathfieldEnd'); } }, 0); });
   // Ctrl/Cmd + mouse wheel over the visual pane zooms too
   mf.addEventListener('wheel', (e) => { if (e.ctrlKey || e.metaKey) { e.preventDefault(); zstep(e.deltaY < 0 ? 1 : -1); } }, { passive: false });
 
