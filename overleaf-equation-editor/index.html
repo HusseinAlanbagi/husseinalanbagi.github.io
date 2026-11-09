@@ -126,6 +126,27 @@
   [data-theme=dark] .hl { background:rgba(255,196,0,.28); }
   [data-theme=dark] .mcell.on { background:#2f6b2b; border-color:#4fa049; }
   [data-theme=dark] .note { color:#a9c9ef; }
+
+  main { max-width:1240px !important; }
+  .editor { padding:12px 14px 14px; }
+  .toolbar { display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; padding-bottom:10px; border-bottom:1px solid var(--line); margin-bottom:10px; }
+  .tgroup { display:flex; gap:4px; align-items:center; padding-right:10px; border-right:1px solid var(--line); }
+  .tgroup:last-of-type { border-right:none; }
+  .toolbar button, .toolbar select { padding:5px 9px; font-size:13px; }
+  .toolbar .status, .toolbar .note { font-size:13px; }
+  .panes { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; align-items:stretch; }
+  .pane { display:flex; flex-direction:column; min-width:0; }
+  .plabel { font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-bottom:5px; }
+  .pane textarea { flex:1; min-height:150px; margin:0; }
+  .pane .mfwrap { flex:1; display:flex; }
+  .pane math-field { flex:1; min-height:150px; display:block; width:100%; padding-top:40px; }
+  .pane .mfwrap { position:relative; }
+  .editor .checks { margin-top:8px; }
+  .editor .tips { margin-top:8px; font-size:12px; }
+  @media (max-width: 820px) {
+    .panes { grid-template-columns:1fr; }
+    .tgroup { border-right:none; padding-right:0; }
+  }
   .wrapinfo { font-size:12px; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; }
 </style>
 <style id="ml-static">/* MathLive static rendering styles (MIT licence) */
@@ -141,17 +162,17 @@
   </div>
   <div class="clean" id="keysPanel" style="margin-bottom:16px"></div>
 
-  <div class="card">
-    <div class="label"><span class="num">1</span> Paste your LaTeX <span class="wrapinfo" id="wrapinfo"></span></div>
+  <div class="card editor">
     <div class="banner" id="secBanner">✎ Editing <b>equation</b> from your section.
       <button class="primary" id="secPut">⤶ Put back into section</button><button id="secCancel">Cancel</button></div>
-    <textarea id="input" spellcheck="false" placeholder="e.g.  \frac{a+b}{c^2}   or   $E=mc^2$   or   \begin{equation} ... \end{equation}"></textarea>
-    <div class="checks" id="checks"></div>
-    <div class="row">
-      <button id="clear">Clear</button>
-      <button id="undoBtn" title="Undo the last clean-up, conversion or layout change">↶ Undo</button>
-      <span style="margin-left:8px;color:var(--muted);font-size:13px">Type:</span>
-      <select id="formSel" title="Convert to another kind of equation">
+    <div class="toolbar">
+      <div class="tgroup">
+        <button class="primary" id="copy" title="Copy the LaTeX (Ctrl+Enter)">📋 Copy</button>
+        <button id="undoBtn" title="Undo the last tool change (Alt+Z)">↶ Undo</button>
+        <button id="clear" title="Clear both panes">Clear</button>
+      </div>
+      <div class="tgroup">
+        <select id="formSel" title="Convert to another kind of equation">
         <option value="">—</option>
         <option value="inline">$…$ inline</option>
         <option value="paren">\(…\) inline</option>
@@ -164,27 +185,36 @@
         <option value="gather*">gather*</option>
         <option value="multline">multline</option>
       </select>
-      <button id="numBtn" title="Switch numbering on/off">#</button>
-      <span class="note" id="note"></span>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="label"><span class="num">2</span> Edit visually</div>
-    <div class="mfwrap"><math-field id="mf"></math-field><div class="hl" id="hl"></div></div>
-    <div class="row">
-      <button id="kbd">⌨ Symbols keyboard</button>
-      <button id="symBtn">🔎 Find symbol</button>
-      <button id="cleanBtn">🧹 Clean up</button>
-      <button id="alignBtn" title="Line up the &amp; columns of multi-line equations">⇥ Align columns</button>
-      <button id="matBtn" title="Build a matrix (Alt+M)">▦ Matrix</button>
-      <button id="unitsBtn" title="Numbers with units ⇄ siunitx (Alt+U)">⚖ Units</button>
+        <button id="numBtn" title="Numbering on/off (Alt+N)">#</button>
+      </div>
+      <div class="tgroup">
+        <button id="symBtn" title="Find a symbol by name (Alt+F)">🔎 Symbol</button>
+        <button id="matBtn" title="Build a matrix (Alt+M)">▦ Matrix</button>
+        <button id="kbd" title="On-screen maths keyboard">⌨ Keys</button>
+      </div>
+      <div class="tgroup">
+        <button id="cleanBtn" title="Find unnecessary parts (Alt+C)">🧹 Clean</button>
+        <button id="alignBtn" title="Line up &amp; columns (Alt+A)">⇥ Align</button>
+        <button id="unitsBtn" title="Units ⇄ siunitx (Alt+U)">⚖ Units</button>
+        <button id="expBtn" title="Export as image (Alt+I)">🖼 Image</button>
+      </div>
+      <span class="status" id="status"></span><span class="note" id="note"></span>
       <select id="unitStyle" style="display:none"><option value="qty">qty</option><option value="SI">SI</option></select>
     </div>
+    <div class="panes">
+      <div class="pane">
+        <div class="plabel">LaTeX <span class="wrapinfo" id="wrapinfo"></span></div>
+        <textarea id="input" spellcheck="false" placeholder="Paste from Overleaf (or a Word equation)…  e.g. \frac{a+b}{c^2}   $E=mc^2$   \begin{equation} … \end{equation}"></textarea>
+      </div>
+      <div class="pane">
+        <div class="plabel">Visual</div>
+        <div class="mfwrap"><math-field id="mf"></math-field><div class="hl" id="hl"></div></div>
+      </div>
+    </div>
+    <div class="checks" id="checks"></div>
     <div class="tips">
-      Type <kbd>/</kbd> for a fraction, <kbd>^</kbd> superscript, <kbd>_</kbd> subscript, <kbd>sqrt</kbd> root,
-      <kbd>\alpha</kbd> for Greek letters. Use arrow keys and <kbd>Tab</kbd> to move between parts.<br>
-      <b>Tip:</b> select part of the LaTeX in box 1 or 3 to see it shaded here.
+      <kbd>/</kbd> fraction · <kbd>^</kbd> superscript · <kbd>_</kbd> subscript · <kbd>sqrt</kbd> root · <kbd>\alpha</kbd> Greek · <kbd>Tab</kbd> next part ·
+      select code on the left to shade it on the right · <kbd>Alt</kbd>+<kbd>K</kbd> all shortcuts
     </div>
     <div class="symp" id="symPanel"><input id="symQ" placeholder="Search symbols: arrow, integral, matrix, approx, real numbers…" autocomplete="off"><div class="symgrid" id="symGrid"></div></div>
     <div class="symp" id="matPanel">
@@ -207,16 +237,6 @@
     </div>
     <div class="clean" id="unitsPanel"></div>
     <div class="clean" id="clean"></div>
-  </div>
-
-  <div class="card">
-    <div class="label"><span class="num">3</span> Copy the result</div>
-    <textarea id="output" spellcheck="false" readonly></textarea>
-    <div class="row">
-      <button class="primary" id="copy">Copy LaTeX</button>
-      <button id="expBtn" title="Export as image (Alt+I)">🖼 Export as image</button>
-      <span class="status" id="status"></span>
-    </div>
     <div class="symp" id="expPanel">
       <div class="expopts">
         <label>Colour <input type="color" id="expColor" value="#000000"></label>
@@ -232,6 +252,7 @@
       <div id="expPrev"></div>
       <p class="muted">SVG stays sharp at any size and works in Word, PowerPoint and Keynote. The first export loads the drawing engine (MathJax).</p>
     </div>
+    <textarea id="output" hidden readonly></textarea>
   </div>
 
   <div class="card" id="tools">
@@ -508,8 +529,8 @@ function start() {
     if (vk) vk.visible ? vk.hide() : vk.show();
   };
   document.getElementById('copy').onclick = async () => {
-    try { await navigator.clipboard.writeText(output.value); status.textContent = 'Copied ✓'; }
-    catch (e) { output.select(); document.execCommand && document.execCommand('copy'); status.textContent = 'Selected — press Ctrl+C if it didn’t copy'; }
+    try { await navigator.clipboard.writeText(input.value); status.textContent = 'Copied ✓'; }
+    catch (e) { input.select(); document.execCommand && document.execCommand('copy'); status.textContent = 'Selected — press Ctrl+C if it didn’t copy'; }
     setTimeout(() => (status.textContent = ''), 2500);
   };
 
@@ -1144,9 +1165,9 @@ function start() {
     histList.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { h.splice(+b.dataset.del, 1); store('olve-history', h); showHistory(); });
     document.getElementById('histClear').onclick = () => { store('olve-history', []); showHistory(); };
   }
-  document.getElementById('copy').addEventListener('click', () => saveHistory(output.value));
+  document.getElementById('copy').addEventListener('click', () => saveHistory(input.value));
   const _clearBtn = document.getElementById('clear');
-  _clearBtn.onclick = () => { saveHistory(output.value); pushUndo(input.value); input.value = ''; load(); clearHl(); input.focus(); };
+  _clearBtn.onclick = () => { saveHistory(input.value); pushUndo(input.value); input.value = ''; load(); clearHl(); input.focus(); };
 
   // =================== 7. Whole section ===================
   const secTa = document.getElementById('secTa'), secList = document.getElementById('secList'), secBanner = document.getElementById('secBanner');
@@ -1215,8 +1236,8 @@ function start() {
     const q = findEquations(secTa.value)[editingIdx];
     if (!q) { showNote('Could not find that equation in the section any more.'); return; }
     secUndo.push(secTa.value);
-    secTa.value = secTa.value.slice(0, q.s) + output.value + secTa.value.slice(q.e);
-    saveHistory(output.value);
+    secTa.value = secTa.value.slice(0, q.s) + input.value + secTa.value.slice(q.e);
+    saveHistory(input.value);
     showNote(`Equation ${editingIdx + 1} put back into the section.`);
     editingIdx = -1; secBanner.classList.remove('on');
     openTab('section'); showSection(); addSecUndo();
@@ -1250,7 +1271,7 @@ function start() {
     gram: 'g', metre: 'm', meter: 'm', second: 's', kelvin: 'K', ampere: 'A', mole: 'mol', candela: 'cd',
     newton: 'N', joule: 'J', watt: 'W', pascal: 'Pa', hertz: 'Hz', volt: 'V', ohm: '\\Omega', coulomb: 'C',
     tesla: 'T', litre: 'L', liter: 'L', hour: 'h', minute: 'min', degreeCelsius: '{}^{\\circ}\\mathrm{C}',
-    percent: '\\%', per: '/', squared: '^{2}', cubed: '^{3}', degree: '^{\\circ}', electronvolt: 'eV', bar: 'bar',
+    percent: '\\%', per: '/', squared: '^{2}', cubed: '^{3}', degree: '^{\\circ}', electronvolt: 'eV',
   };
   Object.assign(DEFAULT_MACROS, SI_MACROS);
   mf.macros = { ...mf.macros, ...SI_MACROS };
@@ -1459,7 +1480,7 @@ function start() {
   }
   async function makeSvg() {
     await loadMathJax();
-    const latex = fieldLatex(output.value);
+    const latex = fieldLatex(input.value);
     try { MathJax.texReset(); } catch (e) {}
     const node = MathJax.tex2svg(macroPreamble() + '\n' + latex, { display: true });
     const svg = node.querySelector('svg');
