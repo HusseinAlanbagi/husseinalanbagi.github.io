@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Star Learners</title>
+<style>
+  :root {
+    --bg1:#1b1f4b; --bg2:#3a2b78; --card:#ffffff; --ink:#1d1d35;
+    --a:#3fb33f; --b:#e2433b; --x:#2f7de1; --y:#f2b705;
+    --good:#3fb33f; --bad:#e2433b;
+  }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; overflow:hidden; }
+  body {
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif; color:#fff;
+    background:radial-gradient(ellipse at top, var(--bg2), var(--bg1) 70%);
+    user-select:none;
+  }
+  /* twinkling stars background */
+  .sky { position:fixed; inset:0; pointer-events:none; overflow:hidden; }
+  .sky i { position:absolute; width:3px; height:3px; background:#fff; border-radius:50%; opacity:.6; animation:tw 3s infinite ease-in-out; }
+  @keyframes tw { 50% { opacity:.1; } }
+
+  /* TV-safe area: keep content away from screen edges */
+  .safe { position:absolute; inset:5vh 6vw; display:flex; flex-direction:column; }
+  .screen { display:none; flex:1; flex-direction:column; align-items:center; justify-content:center; }
+  .screen.on { display:flex; }
+
+  h1 { font-size:7vh; margin:0 0 1vh; letter-spacing:.02em; text-shadow:0 .6vh 0 rgba(0,0,0,.25); }
+  .tag { font-size:3vh; opacity:.85; margin:0 0 5vh; }
+
+  .menu { display:flex; gap:4vw; }
+  .big {
+    width:26vw; min-width:220px; padding:4vh 2vw; border:none; border-radius:3vh; cursor:pointer;
+    background:var(--card); color:var(--ink); font:inherit; font-size:4.5vh; font-weight:700;
+    box-shadow:0 1.2vh 0 rgba(0,0,0,.25); transition:transform .12s;
+    display:flex; flex-direction:column; align-items:center; gap:1.5vh;
+  }
+  .big .ico { font-size:12vh; line-height:1; }
+  .big small { font-size:2.4vh; font-weight:500; opacity:.7; }
+  .big:focus, .big:hover, .pill:focus, .pill:hover, .opt:focus, .opt:hover { outline:.8vh solid #ffd84d; outline-offset:.5vh; transform:scale(1.04); }
+
+  .row { display:flex; gap:2vw; margin-top:5vh; align-items:center; font-size:2.8vh; }
+  .pill {
+    border:none; border-radius:5vh; padding:1.4vh 3vw; font:inherit; font-size:2.8vh; font-weight:700; cursor:pointer;
+    background:rgba(255,255,255,.15); color:#fff; transition:transform .12s;
+  }
+  .pill.sel { background:#fff; color:var(--ink); }
+  .hint { margin-top:4vh; font-size:2.3vh; opacity:.7; text-align:center; }
+  .k { display:inline-flex; width:3.4vh; height:3.4vh; border-radius:50%; align-items:center; justify-content:center; font-weight:800; font-size:2vh; color:#fff; vertical-align:middle; }
+  .k.a{background:var(--a)} .k.b{background:var(--b)} .k.x{background:var(--x)} .k.y{background:var(--y);color:#222}
+
+  /* game screen */
+  .top { width:100%; display:flex; justify-content:space-between; align-items:center; font-size:3vh; font-weight:700; }
+  .progress { display:flex; gap:.8vw; }
+  .progress span { font-size:3.6vh; filter:grayscale(1) brightness(.6); transition:filter .3s, transform .3s; }
+  .progress span.got { filter:none; transform:scale(1.15); }
+  .progress span.cur { filter:grayscale(1) brightness(1.2); }
+  .q {
+    margin:3vh 0 2vh; min-height:30vh; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.08); border-radius:3vh; padding:2vh 2vw;
+  }
+  .q .prompt { font-size:3.4vh; opacity:.9; margin-bottom:1.5vh; }
+  .q .main { font-size:11vh; font-weight:800; line-height:1.1; text-align:center; }
+  .q .pic { font-size:15vh; line-height:1.1; }
+  .q .objs { font-size:6vh; line-height:1.2; margin-top:1vh; text-align:center; max-width:80vw; }
+  .q .objs b { margin:0 1.5vw; font-size:6vh; }
+  .opts { display:grid; grid-template-columns:1fr 1fr; gap:2.2vh 2vw; width:min(80vw, 1100px); }
+  .opt {
+    position:relative; border:none; border-radius:2.5vh; padding:2.2vh 2vw 2.2vh 9vh; cursor:pointer;
+    background:var(--card); color:var(--ink); font:inherit; font-size:6vh; font-weight:800; text-align:center;
+    box-shadow:0 .9vh 0 rgba(0,0,0,.25); transition:transform .12s, background .2s;
+  }
+  .opt .k { position:absolute; left:2vh; top:50%; transform:translateY(-50%); width:5.5vh; height:5.5vh; font-size:3vh; }
+  .opt.right { background:var(--good); color:#fff; }
+  .opt.wrong { background:#ddd; color:#999; transform:scale(.96); }
+  .opt.wrong .k { opacity:.4; }
+  .say { position:absolute; right:0; top:0; }
+  .feedback { height:6vh; margin-top:1.5vh; font-size:4.5vh; font-weight:800; text-shadow:0 .4vh 0 rgba(0,0,0,.3); }
+  .shake { animation:sh .35s; }
+  @keyframes sh { 25%{transform:translateX(-1.2vw)} 75%{transform:translateX(1.2vw)} }
+  .pop { animation:pop .4s; }
+  @keyframes pop { 50%{transform:scale(1.15)} }
+
+  /* end screen */
+  .stars3 { font-size:16vh; letter-spacing:2vw; margin:2vh 0; }
+  .stars3 span { display:inline-block; filter:grayscale(1) brightness(.5); }
+  .stars3 span.got { filter:none; animation:pop .5s backwards; }
+  .score { font-size:4vh; margin-bottom:1vh; }
+
+  .confetti { position:fixed; top:-5vh; font-size:4vh; pointer-events:none; animation:fall linear forwards; }
+  @keyframes fall { to { transform:translateY(115vh) rotate(540deg); } }
+</style>
+</head>
+<body>
+<div class="sky" id="sky"></div>
+<div class="safe">
+
+  <!-- HOME -->
+  <section class="screen on" id="home">
+    <h1>⭐ Star Learners ⭐</h1>
+    <p class="tag">Pick a game and collect all the stars!</p>
+    <div class="menu">
+      <button class="big" data-go="math"><span class="ico">🔢</span>Maths<small>Add, take away, times</small></button>
+      <button class="big" data-go="english"><span class="ico">🔤</span>English<small>Words, letters, pictures</small></button>
+    </div>
+    <div class="row">
+      Level:
+      <button class="pill sel" data-level="1">🐣 Easy</button>
+      <button class="pill" data-level="2">🦁 Harder</button>
+    </div>
+    <p class="hint">Use the D-pad to move and <span class="k a">A</span> to choose</p>
+  </section>
+
+  <!-- GAME -->
+  <section class="screen" id="game">
+    <div class="top">
+      <span id="modeLabel">Maths</span>
+      <div class="progress" id="progress"></div>
+      <span id="scoreLabel">⭐ 0</span>
+    </div>
+    <div class="q" id="q"></div>
+    <div class="opts" id="opts"></div>
+    <div class="feedback" id="fb"></div>
+    <p class="hint" style="margin-top:1vh">Press <span class="k a">A</span> <span class="k b">B</span> <span class="k x">X</span> <span class="k y">Y</span> to answer · <b>LB</b> hear it again · <b>Menu</b> go home</p>
+  </section>
+
+  <!-- END -->
+  <section class="screen" id="end">
+    <h1 id="endTitle">Well done!</h1>
+    <div class="stars3" id="stars3"><span>⭐</span><span>⭐</span><span>⭐</span></div>
+    <div class="score" id="endScore"></div>
+    <div class="menu" style="margin-top:3vh">
+      <button class="big" id="again" style="font-size:3.6vh"><span class="ico" style="font-size:8vh">🔁</span>Play again</button>
+      <button class="big" id="homeBtn" style="font-size:3.6vh"><span class="ico" style="font-size:8vh">🏠</span>Home</button>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+
+  // ---------- background stars ----------
+  const sky = $('sky');
+  for (let i = 0; i < 70; i++) {
+    const s = document.createElement('i');
+    s.style.left = Math.random() * 100 + 'vw'; s.style.top = Math.random() * 100 + 'vh';
+    s.style.animationDelay = (Math.random() * 3) + 's';
+    sky.appendChild(s);
+  }
+
+  // ---------- sound (generated, no files needed) ----------
+  let ac = null;
+  function tone(freq, start, dur, type = 'sine', vol = 0.18) {
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol, ac.currentTime + start);
+      g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + start + dur);
+      o.connect(g).connect(ac.destination);
+      o.start(ac.currentTime + start); o.stop(ac.currentTime + start + dur);
+    } catch (e) {}
+  }
+  const sfx = {
+    good() { tone(523, 0, .15); tone(659, .1, .15); tone(784, .2, .3); },
+    bad() { tone(220, 0, .25, 'triangle', .15); },
+    win() { [523, 659, 784, 1047].forEach((f, i) => tone(f, i * .13, .35)); },
+    move() { tone(880, 0, .05, 'sine', .05); },
+  };
+
+  // ---------- speech ----------
+  function say(text) {
+    try {
+      if (!('speechSynthesis' in window) || !text) return;
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-GB'; u.rate = 0.85; u.pitch = 1.1;
+      speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+
+  // ---------- word bank ----------
+  const WORDS = [
+    ['cat','🐱'],['dog','🐶'],['pig','🐷'],['cow','🐮'],['fox','🦊'],['bee','🐝'],['owl','🦉'],['hen','🐔'],
+    ['fish','🐟'],['frog','🐸'],['duck','🦆'],['bear','🐻'],['lion','🦁'],['bus','🚌'],['car','🚗'],['sun','☀️'],
+    ['moon','🌙'],['star','⭐'],['tree','🌳'],['cake','🎂'],['egg','🥚'],['hat','🎩'],['bed','🛏️'],['cup','☕'],
+    ['ball','⚽'],['book','📖'],['key','🔑'],['apple','🍎'],['milk','🥛'],['shoe','👟'],['ship','🚢'],['rain','🌧️'],
+    ['house','🏠'],['bird','🐦'],['horse','🐴'],['snake','🐍'],['train','🚂'],['clock','⏰'],['plane','✈️'],['grapes','🍇'],
+  ];
+  const EASY_WORDS = WORDS.filter(([w]) => w.length <= 4);
+  const LETTERS = 'abcdefghijklmnopqrstuvwxyz'.split('');
+  const OBJ = ['🍎','🍌','⭐','🐟','🎈','🍓','🚗','🐤'];
+
+  // ---------- question generators ----------
+  // each returns { prompt, html, speak, options:[strings], answer:string, big:bool }
+  function mathQ(level) {
+    const kinds = level === 1 ? ['add', 'add', 'sub'] : ['add', 'sub', 'mul', 'mul', 'missing'];
+    const kind = pick(kinds);
+    let a, b, ans, text, speak, visual = '';
+    if (kind === 'add') {
+      const max = level === 1 ? 10 : 20;
+      a = rnd(1, max - 1); b = rnd(1, max - a); ans = a + b;
+      text = `${a} + ${b} = ?`; speak = `What is ${a} plus ${b}?`;
+      if (level === 1) { const o = pick(OBJ); visual = `${o.repeat(a)}<b>+</b>${o.repeat(b)}`; }
+    } else if (kind === 'sub') {
+      const max = level === 1 ? 10 : 20;
+      a = rnd(2, max); b = rnd(1, a - 1); ans = a - b;
+      text = `${a} − ${b} = ?`; speak = `What is ${a} take away ${b}?`;
+      if (level === 1) { const o = pick(OBJ); visual = `${o.repeat(a)}<br><small style="font-size:3vh;opacity:.8">take away ${b}</small>`; }
+    } else if (kind === 'mul') {
+      a = pick([2, 3, 4, 5, 10]); b = rnd(1, 10); ans = a * b;
+      text = `${a} × ${b} = ?`; speak = `What is ${a} times ${b}?`;
+    } else { // missing number
+      a = rnd(1, 12); ans = rnd(1, 8); const sum = a + ans;
+      text = `${a} + ? = ${sum}`; speak = `${a} plus what makes ${sum}?`;
+    }
+    const opts = new Set([ans]);
+    while (opts.size < 4) {
+      const d = ans + pick([-3, -2, -1, 1, 2, 3, 10, -10]);
+      if (d >= 0) opts.add(d);
+    }
+    return {
+      prompt: 'Solve it!',
+      html: `<div class="main">${text}</div>${visual ? `<div class="objs">${visual}</div>` : ''}`,
+      speak, options: shuffle([...opts].map(String)), answer: String(ans),
+    };
+  }
+
+  function englishQ(level) {
+    const bank = level === 1 ? EASY_WORDS : WORDS;
+    const kinds = level === 1 ? ['picToWord', 'wordToPic', 'firstLetter'] : ['picToWord', 'firstLetter', 'missingLetter', 'wordToPic'];
+    const kind = pick(kinds);
+    const [word, emoji] = pick(bank);
+    const others = shuffle(bank.filter(([w]) => w !== word)).slice(0, 3);
+    if (kind === 'picToWord') {
+      return { prompt: 'What is this?', html: `<div class="pic">${emoji}</div>`, speak: 'What is this?',
+        options: shuffle([word, ...others.map(o => o[0])]), answer: word };
+    }
+    if (kind === 'wordToPic') {
+      return { prompt: 'Find the picture for:', html: `<div class="main">${word}</div>`, speak: `Find the ${word}`,
+        options: shuffle([emoji, ...others.map(o => o[1])]), answer: emoji, emojiOpts: true };
+    }
+    if (kind === 'firstLetter') {
+      const first = word[0];
+      const wrong = shuffle(LETTERS.filter(l => l !== first)).slice(0, 3);
+      return { prompt: 'Which letter does it start with?', html: `<div class="pic">${emoji}</div><div class="main" style="font-size:7vh">_${word.slice(1)}</div>`,
+        speak: `${word}. Which letter does ${word} start with?`, options: shuffle([first, ...wrong]), answer: first };
+    }
+    // missingLetter (harder): hide a middle letter
+    const i = rnd(1, word.length - 1);
+    const letter = word[i];
+    const vowels = 'aeiou'.split('');
+    const pool = vowels.includes(letter) ? vowels : LETTERS;
+    const wrong = shuffle(pool.filter(l => l !== letter)).slice(0, 3);
+    return { prompt: 'Find the missing letter', html: `<div class="pic">${emoji}</div><div class="main" style="font-size:7vh">${word.slice(0, i)}_${word.slice(i + 1)}</div>`,
+      speak: `${word}. Find the missing letter.`, options: shuffle([letter, ...wrong]), answer: letter };
+  }
+
+  // ---------- state ----------
+  const ROUND = 10;
+  const KEYS = ['a', 'b', 'x', 'y'];
+  let mode = 'math', level = 1, qn = 0, stars = 0, cur = null, tries = 0, locked = false, lastWord = null;
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
+    const first = document.querySelector(`#${id} .big, #${id} .opt`);
+    if (first) setTimeout(() => first.focus(), 30);
+  }
+
+  function startGame(m) {
+    mode = m; qn = 0; stars = 0;
+    $('modeLabel').textContent = m === 'math' ? '🔢 Maths' : '🔤 English';
+    $('progress').innerHTML = '<span>⭐</span>'.repeat(ROUND);
+    show('game');
+    nextQ();
+  }
+
+  function nextQ() {
+    if (qn >= ROUND) return endGame();
+    // avoid the same English word twice in a row
+    let q, guard = 0;
+    do { q = mode === 'math' ? mathQ(level) : englishQ(level); } while (q.answer === lastWord && guard++ < 5);
+    lastWord = q.answer;
+    cur = q; tries = 0; locked = false;
+    const prog = $('progress').children;
+    [...prog].forEach((s, i) => s.classList.toggle('cur', i === qn));
+    $('q').innerHTML = `<div class="prompt">${q.prompt}</div>${q.html}`;
+    $('fb').textContent = '';
+    $('opts').innerHTML = q.options.map((o, i) =>
+      `<button class="opt" data-i="${i}"${q.emojiOpts ? ' style="font-size:9vh;padding-top:1vh;padding-bottom:1vh"' : ''}><span class="k ${KEYS[i]}">${KEYS[i].toUpperCase()}</span>${o}</button>`).join('');
+    $('opts').querySelector('.opt').focus();
+    $('scoreLabel').textContent = `⭐ ${stars}`;
+    say(q.speak);
+  }
+
+  function answer(i) {
+    if (locked || !cur) return;
+    const btn = $('opts').children[i];
+    if (!btn || btn.classList.contains('wrong')) return;
+    const val = cur.options[i];
+    if (val === cur.answer) {
+      locked = true;
+      btn.classList.add('right', 'pop');
+      sfx.good();
+      const firstTry = tries === 0;
+      if (firstTry) { stars++; $('progress').children[qn].classList.add('got'); }
+      $('fb').textContent = pick(firstTry ? ['Great job! 🎉', 'Super! 🌟', 'You got it! 👏', 'Brilliant! 🚀', 'Awesome! 💪'] : ['Yes, that’s it! 👍', 'Well done! 😊']);
+      say(firstTry ? 'Great job!' : 'Well done!');
+      $('scoreLabel').textContent = `⭐ ${stars}`;
+      qn++;
+      setTimeout(nextQ, 1400);
+    } else {
+      tries++;
+      btn.classList.add('wrong');
+      $('q').classList.remove('shake'); void $('q').offsetWidth; $('q').classList.add('shake');
+      sfx.bad();
+      $('fb').textContent = pick(['Try again! 💛', 'Almost! Have another go 🙂', 'Oops! Try once more']);
+      const next = [...$('opts').children].find(b => !b.classList.contains('wrong'));
+      if (next) next.focus();
+    }
+  }
+
+  function endGame() {
+    cur = null;
+    const n = stars >= 9 ? 3 : stars >= 6 ? 2 : stars >= 3 ? 1 : 0;
+    [...$('stars3').children].forEach((s, i) => { s.classList.toggle('got', i < n); s.style.animationDelay = (i * .25) + 's'; });
+    $('endTitle').textContent = ['Good try! 🙂', 'Nice work! 😊', 'Great job! 🎉', 'Superstar! 🏆'][n];
+    $('endScore').textContent = `You got ${stars} out of ${ROUND} stars first time!`;
+    show('end');
+    sfx.win(); say($('endTitle').textContent.replace(/[^\w\s!]/g, ''));
+    if (n >= 2) confetti();
+  }
+
+  function confetti() {
+    const bits = ['🎉', '⭐', '🎈', '✨', '🌟'];
+    for (let i = 0; i < 40; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti'; c.textContent = pick(bits);
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.animationDuration = (2 + Math.random() * 2) + 's';
+      c.style.animationDelay = Math.random() * .8 + 's';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 5000);
+    }
+  }
+
+  // ---------- clicks ----------
+  document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => startGame(b.dataset.go)));
+  document.querySelectorAll('[data-level]').forEach(b => b.addEventListener('click', () => {
+    level = +b.dataset.level;
+    document.querySelectorAll('[data-level]').forEach(x => x.classList.toggle('sel', x === b));
+    sfx.move();
+  }));
+  $('opts').addEventListener('click', (e) => { const b = e.target.closest('.opt'); if (b) answer(+b.dataset.i); });
+  $('again').addEventListener('click', () => startGame(mode));
+  $('homeBtn').addEventListener('click', () => show('home'));
+
+  // ---------- focus movement (D-pad / arrow keys) ----------
+  function moveFocus(dir) {
+    const scr = document.querySelector('.screen.on');
+    const items = [...scr.querySelectorAll('button')].filter(b => !b.classList.contains('wrong') && b.offsetParent);
+    if (!items.length) return;
+    const curEl = items.includes(document.activeElement) ? document.activeElement : null;
+    if (!curEl) { items[0].focus(); return; }
+    const r0 = curEl.getBoundingClientRect(), cx = r0.left + r0.width / 2, cy = r0.top + r0.height / 2;
+    let best = null, bestD = Infinity;
+    for (const b of items) {
+      if (b === curEl) continue;
+      const r = b.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+      const dx = x - cx, dy = y - cy;
+      const ok = dir === 'left' ? dx < -5 : dir === 'right' ? dx > 5 : dir === 'up' ? dy < -5 : dy > 5;
+      if (!ok) continue;
+      const d = (dir === 'left' || dir === 'right') ? Math.abs(dx) + Math.abs(dy) * 2 : Math.abs(dy) + Math.abs(dx) * 2;
+      if (d < bestD) { bestD = d; best = b; }
+    }
+    if (best) { best.focus(); sfx.move(); }
+  }
+
+  // ---------- keyboard (also what the Xbox browser sends for some buttons) ----------
+  document.addEventListener('keydown', (e) => {
+    const k = e.key;
+    const map = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down',
+      GamepadDPadLeft: 'left', GamepadDPadRight: 'right', GamepadDPadUp: 'up', GamepadDPadDown: 'down',
+      GamepadLeftThumbstickLeft: 'left', GamepadLeftThumbstickRight: 'right', GamepadLeftThumbstickUp: 'up', GamepadLeftThumbstickDown: 'down' };
+    if (map[k]) { e.preventDefault(); moveFocus(map[k]); return; }
+    if ($('game').classList.contains('on')) {
+      const idx = { '1': 0, '2': 1, '3': 2, '4': 3, a: 0, b: 1, x: 2, y: 3, GamepadA: 0, GamepadB: 1, GamepadX: 2, GamepadY: 3 }[k.length === 1 ? k.toLowerCase() : k];
+      if (idx !== undefined) { e.preventDefault(); answer(idx); return; }
+      if (k === 'Escape' || k === 'GamepadMenu' || k === 'GamepadView') { e.preventDefault(); show('home'); return; }
+      if (k === 's' || k === 'GamepadLeftShoulder') { e.preventDefault(); cur && say(cur.speak); return; }
+    }
+    if ((k === 'GamepadA') && document.activeElement && document.activeElement.tagName === 'BUTTON') { e.preventDefault(); document.activeElement.click(); }
+  });
+
+  // ---------- controller via the Gamepad API ----------
+  // Buttons: 0=A 1=B 2=X 3=Y 4=LB 8=View 9=Menu 12-15=D-pad
+  const prev = {};
+  let lastStick = 0, keyboardRecently = 0;
+  document.addEventListener('keydown', () => { keyboardRecently = performance.now(); }, true);
+  function poll() {
+    const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+    for (const p of pads) {
+      if (!p) continue;
+      const pressed = (i) => p.buttons[i] && p.buttons[i].pressed;
+      const edge = (i) => { const now = pressed(i), was = prev[p.index + ':' + i]; prev[p.index + ':' + i] = now; return now && !was; };
+      // if the browser already turned this press into a key event, skip it to avoid double input
+      const dup = () => performance.now() - keyboardRecently < 120;
+      const inGame = $('game').classList.contains('on');
+      for (let i = 0; i < 4; i++) {
+        if (edge(i) && !dup()) {
+          if (inGame) answer(i);
+          else if (i === 0 && document.activeElement && document.activeElement.tagName === 'BUTTON') document.activeElement.click();
+          else if (i === 1 && !$('home').classList.contains('on')) show('home');
+        }
+      }
+      if (edge(4) && inGame && cur && !dup()) say(cur.speak);
+      if ((edge(8) | edge(9)) && inGame && !dup()) show('home');
+      if (edge(12) && !dup()) moveFocus('up');
+      if (edge(13) && !dup()) moveFocus('down');
+      if (edge(14) && !dup()) moveFocus('left');
+      if (edge(15) && !dup()) moveFocus('right');
+      const ax = p.axes[0] || 0, ay = p.axes[1] || 0, t = performance.now();
+      if (t - lastStick > 260 && !dup()) {
+        if (ax < -.6) { moveFocus('left'); lastStick = t; }
+        else if (ax > .6) { moveFocus('right'); lastStick = t; }
+        else if (ay < -.6) { moveFocus('up'); lastStick = t; }
+        else if (ay > .6) { moveFocus('down'); lastStick = t; }
+      }
+    }
+    requestAnimationFrame(poll);
+  }
+  requestAnimationFrame(poll);
+
+  // Ask the Xbox browser to send controller input to the page instead of moving a mouse cursor
+  try { navigator.gamepadInputEmulation = 'gamepad'; } catch (e) {}
+
+  show('home');
+})();
+</script>
+</body>
+</html>
