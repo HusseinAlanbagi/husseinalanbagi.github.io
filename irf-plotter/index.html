@@ -60,6 +60,7 @@
   .var .vname { font-family:ui-monospace,Menlo,Consolas,monospace; overflow:hidden; text-overflow:ellipsis; }
   .var input[type=text] { width:100%; font-size:12px; padding:2px 5px; }
   .var .mv button { padding:0 5px; font-size:11px; }
+  .previewbar { display:flex; gap:6px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
   .previewbox { border:1px solid var(--line); border-radius:9px; background:#fff; padding:10px; overflow:auto; }
   .previewbox svg { display:block; margin:0 auto; max-width:100%; height:auto; }
   .tabs { display:flex; gap:4px; margin:12px 0 8px; border-bottom:1px solid var(--line); }
@@ -68,6 +69,30 @@
   .tabp { display:none; } .tabp.on { display:block; }
   .status { font-size:13px; color:var(--green); }
   .empty { padding:40px 10px; text-align:center; color:var(--muted); }
+
+  .datacard { padding:10px 14px; }
+  .datahead { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .datahead .datasets { flex-direction:row; flex-wrap:wrap; margin:0; gap:6px; }
+  .ds { padding:3px 6px; gap:6px; }
+  .ds input[type=text] { width:140px; padding:2px 6px; }
+  .drop { margin-top:10px; }
+  .help { margin-top:10px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--panel); font-size:13px; }
+  .help p { margin:4px 0 6px; }
+  body.dragging .card { outline:2px dashed var(--green); outline-offset:-4px; }
+  button.icon { padding:3px 7px; line-height:1.1; }
+  .side { position:sticky; top:10px; }
+  .sidehead { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+  .figitem { font-size:13px; }
+  .ctabs { display:flex; gap:2px; border-bottom:1px solid var(--line); margin-bottom:8px; position:sticky; top:0; background:var(--card); z-index:2; }
+  .ctab { border:none; border-bottom:3px solid transparent; border-radius:0; background:none; font-weight:600; color:var(--muted); padding:6px 10px; }
+  .ctab.sel { color:var(--ink); border-bottom-color:var(--green); }
+  .ctabp { display:none; flex-direction:column; gap:10px; } .ctabp.on { display:flex; }
+  .row.nowrap { flex-wrap:nowrap; }
+  .trace { display:flex; flex-direction:column; gap:5px; }
+  .tip { display:inline-flex; width:15px; height:15px; border-radius:50%; border:1px solid var(--line); font-size:10px; align-items:center; justify-content:center; color:var(--muted); cursor:help; text-transform:none; letter-spacing:0; vertical-align:1px; }
+  .editor { grid-template-columns:190px 360px minmax(0,1fr); }
+  .controls { gap:0; }
+  @media (max-width:1150px) { .editor { grid-template-columns:1fr; } .side, .controls { position:static; max-height:none; } }
 </style>
 </head>
 <body>
@@ -78,19 +103,23 @@
     <div class="row"><a href="../overleaf-equation-editor/" style="font-size:13px;margin-right:6px">Equation editor ↗</a><button id="themeBtn">🌙 Dark</button></div>
   </div>
 
-  <div class="card">
-    <div class="label">1 · Load IRFs</div>
-    <div class="drop" id="drop">
-      <b>Drop your <code>yourmodel_results.mat</code> here</b> (or click to choose) — you can add several files to compare models.<br>
-      <span class="muted">Dynare writes it next to your .mod file, e.g. <code>nk_model/Output/nk_model_results.mat</code> (Dynare 5+) or <code>nk_model_results.mat</code>. A CSV from the snippet below also works.</span>
-      <input type="file" id="file" accept=".mat,.csv,.txt" multiple hidden>
-    </div>
-    <div class="row" style="margin-top:8px">
-      <button id="demoBtn">Try with example data</button>
+  <div class="card datacard">
+    <div class="datahead">
+      <span class="label" style="margin:0">Data</span>
+      <div class="datasets" id="datasets"></div>
+      <button id="addFile" title="Add a Dynare results file (.mat) or CSV — several files let you compare models">＋ Add file</button>
+      <button id="demoBtn" title="Load made-up example IRFs to try things out">Example data</button>
+      <button id="helpBtn" title="Where to find the file, and a CSV fallback">? Help</button>
       <span id="loadMsg" class="muted"></span>
     </div>
-    <details style="margin-top:8px"><summary>No .mat file, or it won't load? Export a CSV from MATLAB instead</summary>
-      <p class="muted">Run this in MATLAB right after Dynare (while <code>oo_</code> and <code>M_</code> are in the workspace). It writes <code>irfs.csv</code> in the current folder:</p>
+    <div class="drop" id="drop">
+      <b>Drop your <code>yourmodel_results.mat</code> here</b> or click to choose.<br>
+      <span class="muted">Dynare saves it as <code>yourmodel/Output/yourmodel_results.mat</code>. Your file never leaves this browser.</span>
+    </div>
+    <input type="file" id="file" accept=".mat,.csv,.txt" multiple hidden>
+    <div class="help" id="helpBox" hidden>
+      <p><b>Where is the file?</b> After <code>stoch_simul</code>, Dynare saves <code>yourmodel_results.mat</code> in <code>yourmodel/Output/</code> (Dynare 5 and later) or next to your .mod file (older versions). Add several files to compare models.</p>
+      <p><b>File won't load?</b> Run this in MATLAB right after Dynare. It writes <code>irfs.csv</code>, which you can add instead:</p>
 <pre id="snippet">% Export Dynare IRFs for the IRF Plotter
 names = {}; data = [];
 for j = 1:M_.exo_nbr
@@ -105,39 +134,34 @@ end
 writecell(names, 'irfs.csv');
 writematrix(data, 'irfs.csv', 'WriteMode', 'append');</pre>
       <div class="row"><button id="copySnippet">Copy snippet</button><span class="status" id="snipStatus"></span></div>
-      <p class="muted">If you saved the results yourself with <code>-v7.3</code>, re-save with <code>save('file.mat','oo_','M_','options_','-v7')</code> — the v7.3 format can't be read in a browser.</p>
-    </details>
-    <div class="datasets" id="datasets"></div>
+      <p class="muted">Files saved with <code>-v7.3</code> can't be read in a browser; re-save with <code>-v7</code>.</p>
+    </div>
   </div>
 
   <div class="card" id="editorCard">
-    <div class="label">2 · Design figures</div>
-    <div id="noData" class="empty">Load a results file (or try the example data) to start.</div>
+    <div id="noData" class="empty">Add a results file (or the example data) to start designing figures.</div>
     <div class="editor" id="editor" style="display:none">
-      <div>
+      <div class="side">
+        <div class="sidehead"><span class="label" style="margin:0">Figures</span>
+          <span class="row nowrap" style="margin-left:auto">
+            <button id="newFig" class="icon" title="New figure">＋</button>
+            <button id="dupFig" class="icon" title="Duplicate this figure">⧉</button>
+            <button id="delFig" class="icon" title="Delete this figure">🗑</button></span></div>
         <div class="figlist" id="figlist"></div>
-        <div class="row" style="margin-top:8px">
-          <button id="newFig" title="New empty figure">＋ New</button>
-          <button id="dupFig" title="Duplicate this figure">Duplicate</button>
-          <button id="delFig" title="Delete this figure">Delete</button>
-        </div>
-        <p class="muted" style="margin-top:10px">One figure per shock is created for you. To combine shocks, add more lines to a figure (or use <b>＋ New</b>).</p>
-        <div class="sec" style="margin-top:10px">
-          <h3>Paper settings</h3>
-          <div class="grid2">
-            <span>Text width</span><select id="gTextwidth">
-              <option value="345">345pt (article, 10pt)</option><option value="390">390pt (article, 12pt)</option>
-              <option value="418">418pt (A4, 2.5cm margins)</option><option value="468" selected>468pt (1in margins, letter)</option><option value="455">455pt (1in margins, A4)</option>
-              <option value="360">360pt (beamer slide)</option></select>
-          </div>
-          <p class="muted">Only affects the preview size; the LaTeX code always uses your document's <code>\linewidth</code>.</p>
-        </div>
       </div>
 
       <div class="controls" id="controls"></div>
 
       <div>
+        <div class="previewbar">
+          <button class="primary" id="qCopy" title="Copy the pgfplots code for this figure">📋 Copy LaTeX</button>
+          <button id="qPdf" title="Save as vector PDF">⬇ PDF</button>
+          <button id="qPng" title="Save as PNG">⬇ PNG</button>
+          <span class="status" id="qStatus"></span>
+          <a href="#outputs" class="muted" style="margin-left:auto">More output options ↓</a>
+        </div>
         <div class="previewbox" id="preview"></div>
+        <a id="outputs"></a>
         <div class="tabs">
           <button class="tab sel" data-tab="latex">LaTeX (pgfplots)</button>
           <button class="tab" data-tab="image">Image</button>
@@ -146,15 +170,13 @@ writematrix(data, 'irfs.csv', 'WriteMode', 'append');</pre>
         <div class="tabp on" id="tab-latex">
           <div class="row" style="margin-bottom:6px">
             <button class="primary" id="copyTex">📋 Copy LaTeX</button>
-            <label class="muted"><input type="radio" name="dataMode" value="inline" checked> data inside the code</label>
-            <label class="muted"><input type="radio" name="dataMode" value="csv"> data in a separate .csv</label>
+            <select id="dataModeSel" title="Where the numbers go"><option value="inline">Data inside the code</option><option value="csv">Data in a separate .csv</option></select>
             <button id="dlCsv" style="display:none">⬇ Download CSV</button>
-            <label class="muted"><input type="checkbox" id="wrapFig" checked> wrap in figure environment</label>
+            <label class="muted" title="Add \begin{figure}, \caption and \label"><input type="checkbox" id="wrapFig" checked> figure environment</label>
             <span class="status" id="texStatus"></span>
           </div>
           <textarea id="texOut" rows="16" readonly></textarea>
-          <p class="muted">In your preamble: <code>\usepackage{pgfplots}</code> <code>\usepgfplotslibrary{groupplots}</code> <code>\pgfplotsset{compat=1.18}</code>.
-            Legends use <code>\ref{…}</code>, so they appear after the second compile (Overleaf does this automatically). For many figures, separate CSV files keep your .tex short and compile faster.</p>
+          <p class="muted">Preamble: <code>\usepackage{pgfplots}</code> <code>\usepgfplotslibrary{groupplots}</code> <code>\pgfplotsset{compat=1.18}</code> <span class="tip" title="Legends use \ref{…}, so they appear after the second compile (Overleaf does this automatically). For many figures, separate CSV files keep your .tex short and compile faster.">?</span></p>
         </div>
         <div class="tabp" id="tab-image">
           <div class="row">
@@ -165,11 +187,11 @@ writematrix(data, 'irfs.csv', 'WriteMode', 'append');</pre>
             <label class="muted">PNG resolution <select id="pngScale"><option value="2">150 dpi</option><option value="4" selected>300 dpi</option><option value="8">600 dpi</option></select></label>
             <span class="status" id="imgStatus"></span>
           </div>
-          <p class="muted">The PDF is vector (sharp at any size) — use it with <code>\includegraphics</code>. Images are drawn at the preview's size and fonts, which match LaTeX's Computer Modern.</p>
+          <p class="muted">PDF and SVG are vector (sharp at any size); fonts match LaTeX's Computer Modern.</p>
         </div>
         <div class="tabp" id="tab-all">
           <div class="row" style="margin-bottom:6px"><button class="primary" id="copyAll">📋 Copy LaTeX for all figures</button><span class="status" id="allStatus"></span></div>
-          <p class="muted">All figures in one go, each in its own figure environment (data inside the code).</p>
+          <p class="muted">Every figure, each in its own figure environment.</p>
         </div>
       </div>
     </div>
@@ -305,7 +327,7 @@ function strList(v) {
 }
 
 // ====================== datasets ======================
-let datasets = [], figures = [], cur = -1, nextId = 1;
+let datasets = [], figures = [], cur = -1, nextId = 1, ctab = 'content', textwidthPt = recall('irf-textwidth', 468);
 const PALETTE = ['#1f4e9e', '#c0392b', '#2e8b57', '#d68910', '#7d3c98', '#17a2b8', '#555555', '#e377c2'];
 const DASHES = { solid: '', dashed: '6 3', dotted: '1.5 2.5', dashdotted: '6 2.5 1.5 2.5', 'densely dashed': '3.5 2' };
 
@@ -706,10 +728,10 @@ function pgfCode(f, fi, mode, wrap) {
 
 // ====================== UI ======================
 function renderDatasets() {
-  $('datasets').innerHTML = datasets.map(d => `<div class="ds" data-id="${d.id}">
-    <b>📄</b><input type="text" value="${esc(d.label)}" data-label="${d.id}" title="Name used in legends when comparing models">
-    <span class="muted">${d.vars.length} variables · ${d.shocks.length} shock${d.shocks.length === 1 ? '' : 's'} (${d.shocks.map(s => s.name).join(', ')}) · ${d.H} periods</span>
-    <button data-rm="${d.id}" title="Remove">✕</button></div>`).join('');
+  $('datasets').innerHTML = datasets.map(d => `<div class="ds" data-id="${d.id}" title="${d.vars.length} variables · shocks: ${esc(d.shocks.map(s => s.name).join(', '))} · ${d.H} periods">
+    📄 <input type="text" value="${esc(d.label)}" data-label="${d.id}" title="Name used in legends when comparing models">
+    <span class="muted">${d.vars.length} vars · ${d.shocks.length} shock${d.shocks.length === 1 ? '' : 's'} · ${d.H} periods</span>
+    <button class="icon" data-rm="${d.id}" title="Remove this file">✕</button></div>`).join('');
   $('datasets').querySelectorAll('[data-label]').forEach(i => i.oninput = () => { dsById(+i.dataset.label).label = i.value; render(); });
   $('datasets').querySelectorAll('[data-rm]').forEach(b => b.onclick = () => {
     const id = +b.dataset.rm; datasets = datasets.filter(d => d.id !== id);
@@ -719,6 +741,7 @@ function renderDatasets() {
     renderDatasets(); renderAll();
   });
   $('noData').style.display = datasets.length ? 'none' : '';
+  $('drop').style.display = datasets.length ? 'none' : '';
   $('editor').style.display = datasets.length ? '' : 'none';
 }
 function addDataset(ds) {
@@ -754,61 +777,72 @@ function renderControls() {
   if (!f) { $('controls').innerHTML = '<p class="muted">No figure selected.</p>'; return; }
   const allShocks = datasets.flatMap(d => d.shocks.map(s => ({ d, s })));
   const varsAll = figVarsUnion(f);
-  let h = `<div class="sec"><h3>Figure</h3><div class="grid2"><span>Name</span><input type="text" data-k="name" value="${esc(f.name)}"></div></div>`;
-  h += `<div class="sec"><h3>Lines (shocks${datasets.length > 1 ? ' / models' : ''})</h3>`;
+  const sec = (title, body, tip) => `<div class="sec"><h3>${title}${tip ? ` <span class="tip" title="${esc(tip)}">?</span>` : ''}</h3>${body}</div>`;
+  // ---- Content tab: lines + panels ----
+  let lines = `<div class="grid2" style="margin-bottom:8px"><span>Figure name</span><input type="text" data-k="name" value="${esc(f.name)}"></div>`;
   f.traces.forEach((t, k) => {
-    h += `<div class="trace"><div>
-      <select data-t="${k}" data-tk="src">${allShocks.map(({ d, s }) => opt(d.id + '|' + s.name, (datasets.length > 1 ? d.label + ' — ' : '') + (s.long || s.name), t.ds + '|' + t.shock)).join('')}</select>
-      <input type="text" data-t="${k}" data-tk="label" value="${esc(t.label)}" placeholder="Legend label" style="margin-top:4px">
-      <div class="row" style="margin-top:4px"><input type="color" data-t="${k}" data-tk="color" value="${t.color}">
-      <select data-t="${k}" data-tk="dash">${Object.keys(DASHES).map(d => opt(d, d, t.dash)).join('')}</select></div></div>
-      <div><button data-rmt="${k}" title="Remove line" ${f.traces.length < 2 ? 'disabled' : ''}>✕</button></div></div>`;
+    lines += `<div class="trace">
+      <div class="row nowrap"><input type="color" data-t="${k}" data-tk="color" value="${t.color}" title="Line colour">
+        <select data-t="${k}" data-tk="src" style="flex:1;min-width:0">${allShocks.map(({ d, s }) => opt(d.id + '|' + s.name, (datasets.length > 1 ? d.label + ' — ' : '') + (s.long || s.name), t.ds + '|' + t.shock)).join('')}</select>
+        <select data-t="${k}" data-tk="dash" title="Line style">${Object.keys(DASHES).map(d => opt(d, { solid: '———', dashed: '– – –', dotted: '·····', dashdotted: '–·–·', 'densely dashed': '‐‐‐‐' }[d], t.dash)).join('')}</select>
+        <button data-rmt="${k}" title="Remove this line" ${f.traces.length < 2 ? 'disabled' : ''}>✕</button></div>
+      ${f.traces.length > 1 ? `<input type="text" data-t="${k}" data-tk="label" value="${esc(t.label)}" placeholder="Legend text" title="Legend text">` : ''}</div>`;
   });
-  h += `<button id="addTrace">＋ Add a shock to this figure</button>
-    <p class="muted">Several lines = combined shocks${datasets.length > 1 ? ' or models' : ''}, with a legend.</p></div>`;
-  h += `<div class="sec"><h3>Panels</h3>
-    <div class="row" style="margin-bottom:6px"><button id="vAll">All</button><button id="vNone">None</button>
-      <span class="muted">Titles:</span><select data-k="titles">${opt('tex', 'LaTeX names', f.titles)}${opt('long', 'Long names', f.titles)}${opt('code', 'Code names', f.titles)}</select></div>
-    <div class="vars">`;
+  lines += `<button id="addTrace" title="Several lines in one figure = combined shocks${datasets.length > 1 ? ' or models' : ''}, with a legend">＋ Add another shock${datasets.length > 1 ? ' / model' : ''}</button>`;
   const order = [...f.vars, ...varsAll.filter(v => !f.vars.includes(v))];
+  let panels = `<div class="row" style="margin-bottom:6px"><button id="vAll">All</button><button id="vNone">None</button>
+      <span class="muted" style="margin-left:auto">Titles</span><select data-k="titles" title="Default panel titles">${opt('tex', 'LaTeX names', f.titles)}${opt('long', 'Long names', f.titles)}${opt('code', 'Code names', f.titles)}</select></div><div class="vars">`;
   order.forEach(v => {
     const on = f.vars.includes(v), i = f.vars.indexOf(v);
-    h += `<div class="var ${on ? '' : 'off'}"><input type="checkbox" data-v="${esc(v)}" ${on ? 'checked' : ''}>
+    panels += `<div class="var ${on ? '' : 'off'}"><input type="checkbox" data-v="${esc(v)}" ${on ? 'checked' : ''} title="Show this panel">
       <span class="vname" title="${esc(v)}">${esc(v)}</span>
-      <input type="text" data-vt="${esc(v)}" value="${esc(titleFor(f, v))}" ${on ? '' : 'disabled'} title="Panel title (LaTeX: use $…$ for maths)">
-      <span class="mv">${on ? `<button data-up="${i}" ${i === 0 ? 'disabled' : ''}>▲</button><button data-dn="${i}" ${i === f.vars.length - 1 ? 'disabled' : ''}>▼</button>` : ''}</span></div>`;
+      <input type="text" data-vt="${esc(v)}" value="${esc(titleFor(f, v))}" ${on ? '' : 'disabled'} title="Panel title (use $…$ for maths)">
+      <span class="mv">${on ? `<button data-up="${i}" ${i === 0 ? 'disabled' : ''} title="Move up">▲</button><button data-dn="${i}" ${i === f.vars.length - 1 ? 'disabled' : ''} title="Move down">▼</button>` : ''}</span></div>`;
   });
-  h += `</div></div>`;
-  h += `<div class="sec"><h3>Layout</h3><div class="grid2">
-    <span>Columns</span><input type="number" min="1" max="8" data-k="cols" value="${f.cols}">
-    <span>Width</span><select data-k="widthFrac">${[1, 0.9, 0.8, 0.7, 0.6, 0.5].map(x => opt(x, Math.round(x * 100) + '% of text width', f.widthFrac)).join('')}</select>
-    <span>Panel shape</span><select data-k="aspect">${opt(0.5, 'wide (2:1)', f.aspect)}${opt(0.62, 'golden', f.aspect)}${opt(0.72, 'standard', f.aspect)}${opt(0.85, 'tall-ish', f.aspect)}${opt(1, 'square', f.aspect)}</select>
-    <span>Gap across</span><input type="number" step="0.1" min="0.5" max="4" data-k="hsep" value="${f.hsep}">
-    <span>Gap down</span><input type="number" step="0.1" min="0.5" max="4" data-k="vsep" value="${f.vsep}">
-    <span>Legend</span><select data-k="legend">${opt('below', 'below', f.legend)}${opt('above', 'above', f.legend)}${opt('none', 'none', f.legend)}</select>
-  </div><p class="muted">Gaps in cm.</p></div>`;
-  h += `<div class="sec"><h3>Axes</h3><div class="grid2">
-    <span>Periods</span><input type="number" min="0" data-k="horizon" value="${f.horizon || ''}" placeholder="all">
-    <span>First period</span><select data-k="startAt">${opt(1, '1 (as in Dynare)', f.startAt)}${opt(0, '0 (impact = 0)', f.startAt)}</select>
-    <span>Scale</span><select data-k="scale">${opt(1, '× 1 (as in Dynare)', f.scale)}${opt(100, '× 100 (percent)', f.scale)}${opt(10000, '× 10000 (basis points)', f.scale)}</select>
-    <span>y label</span><input type="text" data-k="ylabel" value="${esc(f.ylabel)}">
-    <span>x label</span><input type="text" data-k="xlabel" value="${esc(f.xlabel)}">
-    <span>Same y-axis</span><label><input type="checkbox" data-k="sharedY" ${f.sharedY ? 'checked' : ''}> for all panels</label>
-    <span>Zero line</span><label><input type="checkbox" data-k="zero" ${f.zero ? 'checked' : ''}> show</label>
-    <span>Grid</span><select data-k="grid">${opt('none', 'none', f.grid)}${opt('major', 'horizontal', f.grid)}${opt('both', 'both', f.grid)}</select>
-  </div></div>`;
-  h += `<div class="sec"><h3>Style</h3><div class="grid2">
-    <span>Line width</span><select data-k="lineWidth">${[0.6, 0.8, 1, 1.2, 1.5, 2].map(x => opt(x, x + 'pt', f.lineWidth)).join('')}</select>
-    <span>Title size</span><select data-k="titleSize">${['scriptsize', 'footnotesize', 'small', 'normalsize'].map(x => opt(x, '\\' + x, f.titleSize)).join('')}</select>
-    <span>Tick size</span><select data-k="tickSize">${['tiny', 'scriptsize', 'footnotesize', 'small'].map(x => opt(x, '\\' + x, f.tickSize)).join('')}</select>
-    <span>Colours</span><div class="row"><button id="palColor">Colour</button><button id="palGray">Grayscale</button></div>
-  </div><div class="row" style="margin-top:8px"><button id="saveStyle" title="Use these layout/axes/style settings for new figures">★ Make default</button><button id="applyAll">Apply style to all figures</button></div></div>`;
-  h += `<div class="sec"><h3>Caption</h3><div class="grid2">
-    <span>Caption</span><input type="text" data-k="caption" value="${esc(f.caption)}">
-    <span>Label</span><input type="text" data-k="figLabel" value="${esc(f.figLabel)}">
-  </div></div>`;
+  panels += `</div>`;
+  const content = sec('Lines', lines) + sec('Panels', panels, 'Tick the variables to show; edit titles; ▲▼ to reorder');
+  // ---- Layout tab ----
+  const layoutTab = sec('Grid', `<div class="grid2">
+      <span>Columns</span><input type="number" min="1" max="8" data-k="cols" value="${f.cols}">
+      <span>Figure width</span><select data-k="widthFrac">${[1, 0.9, 0.8, 0.7, 0.6, 0.5].map(x => opt(x, Math.round(x * 100) + '% of text width', f.widthFrac)).join('')}</select>
+      <span>Panel shape</span><select data-k="aspect">${opt(0.5, 'wide (2:1)', f.aspect)}${opt(0.62, 'golden', f.aspect)}${opt(0.72, 'standard', f.aspect)}${opt(0.85, 'tall-ish', f.aspect)}${opt(1, 'square', f.aspect)}</select>
+      <span>Gaps (cm)</span><div class="row nowrap"><input type="number" step="0.1" min="0.5" max="4" data-k="hsep" value="${f.hsep}" title="Gap between columns"> ↔ <input type="number" step="0.1" min="0.5" max="4" data-k="vsep" value="${f.vsep}" title="Gap between rows"> ↕</div>
+    </div>`) + sec('Horizon & units', `<div class="grid2">
+      <span>Periods</span><input type="number" min="0" data-k="horizon" value="${f.horizon || ''}" placeholder="all">
+      <span>First period</span><select data-k="startAt">${opt(1, '1 (as in Dynare)', f.startAt)}${opt(0, '0 (impact = 0)', f.startAt)}</select>
+      <span>Scale</span><select data-k="scale">${opt(1, '× 1 (as in Dynare)', f.scale)}${opt(100, '× 100 (percent)', f.scale)}${opt(10000, '× 10000 (basis points)', f.scale)}</select>
+      <span>y-axis</span><label><input type="checkbox" data-k="sharedY" ${f.sharedY ? 'checked' : ''}> same for all panels</label>
+    </div>`) + sec('Preview page', `<div class="grid2"><span>Text width</span><select id="gTextwidth">${[[345, '345pt (article 10pt)'], [390, '390pt (article 12pt)'], [418, '418pt (A4, 2.5cm)'], [455, '455pt (A4, 1in)'], [468, '468pt (letter, 1in)'], [360, '360pt (Beamer)']].map(([v, l]) => opt(v, l, textwidthPt)).join('')}</select></div>`, 'Only changes the preview size. The LaTeX code always fits your document width.');
+  // ---- Style tab ----
+  const styleTab = sec('Lines & axes', `<div class="grid2">
+      <span>Colours</span><div class="row nowrap"><button id="palColor">Colour</button><button id="palGray">Grayscale</button></div>
+      <span>Line width</span><select data-k="lineWidth">${[0.6, 0.8, 1, 1.2, 1.5, 2].map(x => opt(x, x + 'pt', f.lineWidth)).join('')}</select>
+      <span>Zero line</span><label><input type="checkbox" data-k="zero" ${f.zero ? 'checked' : ''}> show</label>
+      <span>Grid</span><select data-k="grid">${opt('none', 'none', f.grid)}${opt('major', 'horizontal', f.grid)}${opt('both', 'both', f.grid)}</select>
+    </div>`) + sec('Fonts', `<div class="grid2">
+      <span>Titles</span><select data-k="titleSize">${['scriptsize', 'footnotesize', 'small', 'normalsize'].map(x => opt(x, '\\' + x, f.titleSize)).join('')}</select>
+      <span>Ticks & labels</span><select data-k="tickSize">${['tiny', 'scriptsize', 'footnotesize', 'small'].map(x => opt(x, '\\' + x, f.tickSize)).join('')}</select>
+    </div>`) + sec('Reuse this style', `<div class="row"><button id="saveStyle" title="New figures start with these layout and style settings">★ Make default</button><button id="applyAll" title="Copy layout and style (not lines or panels) to every figure">Apply to all figures</button></div>`);
+  // ---- Labels tab ----
+  const labelsTab = sec('Axis labels', `<div class="grid2">
+      <span>y label</span><input type="text" data-k="ylabel" value="${esc(f.ylabel)}">
+      <span>x label</span><input type="text" data-k="xlabel" value="${esc(f.xlabel)}">
+    </div>`) + sec('Legend', `<div class="grid2"><span>Position</span><select data-k="legend">${opt('below', 'below the figure', f.legend)}${opt('above', 'above the figure', f.legend)}${opt('none', 'none', f.legend)}</select></div>`, 'Shown when a figure has more than one line') +
+    sec('Caption', `<div class="grid2">
+      <span>Caption</span><input type="text" data-k="caption" value="${esc(f.caption)}">
+      <span>Label</span><input type="text" data-k="figLabel" value="${esc(f.figLabel)}">
+    </div>`);
+  const TABS = [['content', 'Content', content], ['layout', 'Layout', layoutTab], ['style', 'Style', styleTab], ['labels', 'Labels', labelsTab]];
+  const h = `<div class="ctabs">${TABS.map(([k, l]) => `<button class="ctab ${k === ctab ? 'sel' : ''}" data-ctab="${k}">${l}</button>`).join('')}</div>` +
+    TABS.map(([k, , body]) => `<div class="ctabp ${k === ctab ? 'on' : ''}" data-ctabp="${k}">${body}</div>`).join('');
   $('controls').innerHTML = h;
   const C = $('controls');
+  C.querySelectorAll('.ctab').forEach(b => b.onclick = () => {
+    ctab = b.dataset.ctab;
+    C.querySelectorAll('.ctab').forEach(x => x.classList.toggle('sel', x === b));
+    C.querySelectorAll('.ctabp').forEach(p => p.classList.toggle('on', p.dataset.ctabp === ctab));
+  });
+  $('gTextwidth').onchange = () => { textwidthPt = +$('gTextwidth').value; store('irf-textwidth', textwidthPt); render(); };
   const numKeys = new Set(['cols', 'widthFrac', 'aspect', 'hsep', 'vsep', 'horizon', 'startAt', 'scale', 'lineWidth']);
   C.querySelectorAll('[data-k]').forEach(el => {
     const ev = el.type === 'checkbox' || el.tagName === 'SELECT' ? 'change' : 'input';
@@ -860,13 +894,13 @@ function renderControls() {
   $('applyAll').onclick = () => { figures.forEach(g => { if (g !== f) STYLE_KEYS.forEach(k => g[k] = f[k]); }); renderFigList(); flash('texStatus', 'Style applied to all figures ✓'); };
 }
 function flash(id, t) { $(id).textContent = t; setTimeout(() => { if ($(id).textContent === t) $(id).textContent = ''; }, 3000); }
-const dataMode = () => document.querySelector('input[name=dataMode]:checked').value;
+const dataMode = () => $('dataModeSel').value;
 let lastCsv = null;
 function render() {
   const f = figures[cur];
   if (!f) { $('preview').innerHTML = ''; $('texOut').value = ''; return; }
   if (!f.vars.length || !f.traces.length) { $('preview').innerHTML = '<div class="empty">Choose at least one line and one panel.</div>'; $('texOut').value = ''; return; }
-  $('preview').innerHTML = figureSvg(f, +$('gTextwidth').value);
+  $('preview').innerHTML = figureSvg(f, textwidthPt);
   const r = pgfCode(f, cur, dataMode(), $('wrapFig').checked);
   $('texOut').value = r.code;
   lastCsv = r.csv;
@@ -885,6 +919,12 @@ async function handleFiles(files) {
 }
 const drop = $('drop');
 drop.onclick = () => $('file').click();
+$('addFile').onclick = () => $('file').click();
+$('helpBtn').onclick = () => { $('helpBox').hidden = !$('helpBox').hidden; };
+// drop files anywhere on the page
+['dragenter', 'dragover'].forEach(e => document.addEventListener(e, (ev) => { if ([...(ev.dataTransfer?.types || [])].includes('Files')) { ev.preventDefault(); document.body.classList.add('dragging'); } }));
+['dragleave', 'drop'].forEach(e => document.addEventListener(e, (ev) => { if (e === 'drop' || ev.target === document.documentElement) document.body.classList.remove('dragging'); }));
+document.addEventListener('drop', (ev) => { if (ev.dataTransfer?.files?.length && !drop.contains(ev.target)) { ev.preventDefault(); handleFiles([...ev.dataTransfer.files]); } });
 $('file').onchange = () => { handleFiles([...$('file').files]); $('file').value = ''; };
 ['dragenter', 'dragover'].forEach(e => drop.addEventListener(e, (ev) => { ev.preventDefault(); drop.classList.add('over'); }));
 ['dragleave', 'drop'].forEach(e => drop.addEventListener(e, (ev) => { ev.preventDefault(); drop.classList.remove('over'); }));
@@ -894,8 +934,7 @@ $('copySnippet').onclick = async () => { try { await navigator.clipboard.writeTe
 $('newFig').onclick = () => { const d = datasets[0]; const f = newFigure(d, d && d.shocks[0] ? d.shocks[0].name : null); f.name = 'Figure ' + (figures.length + 1); figures.push(f); cur = figures.length - 1; renderAll(); };
 $('dupFig').onclick = () => { const f = figures[cur]; if (!f) return; const g = JSON.parse(JSON.stringify(f)); g.id = nextId++; g.name = f.name + ' (copy)'; figures.splice(cur + 1, 0, g); cur++; renderAll(); };
 $('delFig').onclick = () => { if (cur < 0) return; figures.splice(cur, 1); cur = Math.min(cur, figures.length - 1); renderAll(); };
-$('gTextwidth').onchange = render;
-document.querySelectorAll('input[name=dataMode]').forEach(r => r.onchange = render);
+$('dataModeSel').onchange = render;
 $('wrapFig').onchange = render;
 document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
   document.querySelectorAll('.tab').forEach(x => x.classList.toggle('sel', x === t));
@@ -918,7 +957,7 @@ async function saveFile(blob, name) {
 }
 const fileBase = () => { const f = figures[cur]; return (f.figLabel || f.name || 'irf').replace(/^fig:/, '').replace(/[^\w-]+/g, '_'); };
 $('dlCsv').onclick = async () => { if (lastCsv) try { await saveFile(new Blob([lastCsv.text], { type: 'text/csv' }), lastCsv.name); flash('texStatus', `Saved ${lastCsv.name} — upload it to your Overleaf project`); } catch (e) { flash('texStatus', e.code === 'declined' ? 'Cancelled' : 'Could not save here'); } };
-function currentSvg() { const f = figures[cur]; return figureSvg(f, +$('gTextwidth').value); }
+function currentSvg() { const f = figures[cur]; return figureSvg(f, textwidthPt); }
 function svgSize(svgText) { const m = svgText.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/); return [+m[1], +m[2]]; }
 async function svgToPngBlob(svgText, scale) {
   const [w, h] = svgSize(svgText);
@@ -956,6 +995,9 @@ async function pdfBlob(svgText) {
 }
 $('dlPdf').onclick = async () => { flash('imgStatus', 'Making PDF…'); try { await saveFile(await pdfBlob(currentSvg()), fileBase() + '.pdf'); flash('imgStatus', 'PDF saved ✓'); } catch (e) { imgErr(e); } };
 
+$('qCopy').onclick = () => copyText($('texOut').value, 'qStatus');
+$('qPdf').onclick = async () => { flash('qStatus', 'Making PDF…'); try { await saveFile(await pdfBlob(currentSvg()), fileBase() + '.pdf'); flash('qStatus', 'PDF saved ✓'); } catch (e) { flash('qStatus', '⚠ ' + (e.code === 'declined' ? 'Cancelled' : e.message)); } };
+$('qPng').onclick = async () => { try { await saveFile(await svgToPngBlob(currentSvg(), +$('pngScale').value), fileBase() + '.png'); flash('qStatus', 'PNG saved ✓'); } catch (e) { flash('qStatus', '⚠ ' + (e.code === 'declined' ? 'Cancelled' : e.message)); } };
 // expose for tests
 window.__irf = { readMat, parseCsv, figures: () => figures, datasets: () => datasets, pgfCode, figureSvg, pdfBlob, select: (i) => { cur = i; renderAll(); }, current: () => figures[cur] };
 renderDatasets();
