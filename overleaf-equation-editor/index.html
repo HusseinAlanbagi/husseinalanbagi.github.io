@@ -80,6 +80,52 @@
   .hmeta { font-size:11px; color:var(--muted); text-align:right; flex:none; }
   .hmeta button { padding:2px 8px; font-size:12px; margin-top:4px; }
   .sum { color:var(--muted); font-size:13px; }
+
+  .refbox { display:flex; flex-direction:column; gap:3px; margin-bottom:10px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel); }
+  .refbox .err, .clean .err { text-align:left; border:none; padding:4px 8px; border-radius:6px; font-size:13px; }
+  .err.bad { background:#fff1f1; color:#a12; } .err.warn { background:#fff7e0; color:#8a5a00; } .err.info { background:#eef4fb; color:#2d5b8a; }
+  .matwrap { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; }
+  #matGrid { display:grid; grid-template-columns:repeat(8, 18px); gap:3px; }
+  .mcell { width:18px; height:18px; border:1px solid var(--line); border-radius:3px; background:var(--card); cursor:pointer; }
+  .mcell.on { background:#bfe5bc; border-color:#6dbb67; }
+  .matopts { display:grid; grid-template-columns:auto auto; gap:6px 10px; align-items:center; font-size:13px; }
+  .matopts input[type=number] { width:60px; font:inherit; padding:4px 6px; border:1px solid var(--line); border-radius:6px; background:var(--card); color:var(--ink); }
+  #matPrev, #expPrev { font-size:20px; padding:8px; min-height:40px; overflow-x:auto; }
+  #matCode { font:12px ui-monospace,Menlo,Consolas,monospace; color:var(--muted); word-break:break-all; }
+  .expopts { display:flex; gap:14px; flex-wrap:wrap; align-items:center; font-size:13px; margin-bottom:8px; }
+  #expPrev svg { max-width:100%; height:auto; }
+  .topbar { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .topbar .row { margin-top:0; }
+  #keysPanel table { border-collapse:collapse; font-size:14px; }
+  #keysPanel td { padding:4px 14px 4px 0; }
+  kbd { font:12px ui-monospace,Menlo,Consolas,monospace; background:var(--panel); border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:1px 6px; }
+  code { font:12.5px ui-monospace,Menlo,Consolas,monospace; background:var(--panel); padding:0 4px; border-radius:4px; }
+
+  /* ---------- dark mode ---------- */
+  :root { --card:#fff; --panel:#fbfcfd; --field:#fff; }
+  [data-theme=dark] { --ink:#e6e8ec; --muted:#9aa3b2; --line:#3a4150; --bg:#15181e; --card:#1d2129; --panel:#232833; --field:#1a1e25; color-scheme:dark; }
+  [data-theme=dark] body { background:var(--bg); color:var(--ink); }
+  [data-theme=dark] .card { background:var(--card); border-color:var(--line); }
+  [data-theme=dark] textarea, [data-theme=dark] select, [data-theme=dark] .symp input, [data-theme=dark] input[type=number] { background:var(--field); color:var(--ink); border-color:var(--line); }
+  [data-theme=dark] math-field { background:var(--field); color:var(--ink); border-color:var(--line); --caret-color:#7fd17a; --selection-background-color:#2e4a6b; --contains-highlight-background-color:#2a2f3a; }
+  [data-theme=dark] button { background:#262b36; color:var(--ink); border-color:var(--line); }
+  [data-theme=dark] button:hover { background:#2f3542; }
+  [data-theme=dark] button.primary { background:var(--green); border-color:var(--green); color:#fff; }
+  [data-theme=dark] button.sel { background:#1f3a22; border-color:#3f7a3b; }
+  [data-theme=dark] .tab { background:none; }
+  [data-theme=dark] .clean, [data-theme=dark] .symp, [data-theme=dark] .refbox { background:var(--panel); border-color:var(--line); }
+  [data-theme=dark] .item:hover, [data-theme=dark] .hprev:hover { background:#2d2a1e; }
+  [data-theme=dark] .item del { background:#4a2020; color:#ffb4b4; } [data-theme=dark] .item ins { background:#1e3d22; color:#b6f0b0; }
+  [data-theme=dark] .err.bad, [data-theme=dark] .checks .err { background:#3a1f22; color:#ffb4b4; }
+  [data-theme=dark] .err.warn, [data-theme=dark] .checks .err.warn { background:#3a321c; color:#f3d48a; }
+  [data-theme=dark] .err.info { background:#1e2c3d; color:#a9c9ef; }
+  [data-theme=dark] .banner { background:#1e2c3d; border-color:#34557a; }
+  [data-theme=dark] .seq.editing { background:#1e2c3d; }
+  [data-theme=dark] .snum { background:#2f3542; }
+  [data-theme=dark] .tagd.safe { background:#1e3d22; color:#b6f0b0; } [data-theme=dark] .tagd.check { background:#3a321c; color:#f3d48a; }
+  [data-theme=dark] .hl { background:rgba(255,196,0,.28); }
+  [data-theme=dark] .mcell.on { background:#2f6b2b; border-color:#4fa049; }
+  [data-theme=dark] .note { color:#a9c9ef; }
   .wrapinfo { font-size:12px; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; }
 </style>
 <style id="ml-static">/* MathLive static rendering styles (MIT licence) */
@@ -88,8 +134,12 @@
 </head>
 <body>
 <main>
-  <h1>Equation Editor for Overleaf</h1>
-  <p class="sub">Paste LaTeX from Overleaf, edit it visually, copy it back.</p>
+  <div class="topbar">
+    <div><h1>Equation Editor for Overleaf</h1>
+    <p class="sub">Paste LaTeX from Overleaf (or an equation from Word), edit it visually, copy it back.</p></div>
+    <div class="row"><button id="keysBtn" title="Keyboard shortcuts (Alt+K)">⌨ Shortcuts</button><button id="themeBtn">🌙 Dark</button></div>
+  </div>
+  <div class="clean" id="keysPanel" style="margin-bottom:16px"></div>
 
   <div class="card">
     <div class="label"><span class="num">1</span> Paste your LaTeX <span class="wrapinfo" id="wrapinfo"></span></div>
@@ -127,6 +177,9 @@
       <button id="symBtn">🔎 Find symbol</button>
       <button id="cleanBtn">🧹 Clean up</button>
       <button id="alignBtn" title="Line up the &amp; columns of multi-line equations">⇥ Align columns</button>
+      <button id="matBtn" title="Build a matrix (Alt+M)">▦ Matrix</button>
+      <button id="unitsBtn" title="Numbers with units ⇄ siunitx (Alt+U)">⚖ Units</button>
+      <select id="unitStyle" style="display:none"><option value="qty">qty</option><option value="SI">SI</option></select>
     </div>
     <div class="tips">
       Type <kbd>/</kbd> for a fraction, <kbd>^</kbd> superscript, <kbd>_</kbd> subscript, <kbd>sqrt</kbd> root,
@@ -134,6 +187,25 @@
       <b>Tip:</b> select part of the LaTeX in box 1 or 3 to see it shaded here.
     </div>
     <div class="symp" id="symPanel"><input id="symQ" placeholder="Search symbols: arrow, integral, matrix, approx, real numbers…" autocomplete="off"><div class="symgrid" id="symGrid"></div></div>
+    <div class="symp" id="matPanel">
+      <div class="matwrap">
+        <div><div class="muted" style="margin-bottom:4px">Pick a size</div><div id="matGrid"></div></div>
+        <div class="matopts">
+          <span>Rows</span><input type="number" id="matR" min="1" max="20" value="2">
+          <span>Columns</span><input type="number" id="matC" min="1" max="20" value="2">
+          <span>Brackets</span><select id="matType">
+            <option value="pmatrix">( ) pmatrix</option><option value="bmatrix">[ ] bmatrix</option><option value="Bmatrix">{ } Bmatrix</option>
+            <option value="vmatrix">| | determinant</option><option value="Vmatrix">‖ ‖ norm</option><option value="matrix">none</option>
+            <option value="array">[ | ] augmented</option></select>
+          <span>Fill with</span><select id="matFill">
+            <option value="empty">empty boxes</option><option value="zeros">zeros</option><option value="identity">identity</option>
+            <option value="aij">a₁₁, a₁₂, …</option><option value="general">general m×n (with dots)</option></select>
+        </div>
+        <div style="flex:1;min-width:200px"><div id="matPrev"></div><div id="matCode"></div>
+          <div class="row"><button class="primary" id="matInsert">Insert at cursor</button></div></div>
+      </div>
+    </div>
+    <div class="clean" id="unitsPanel"></div>
     <div class="clean" id="clean"></div>
   </div>
 
@@ -142,7 +214,23 @@
     <textarea id="output" spellcheck="false" readonly></textarea>
     <div class="row">
       <button class="primary" id="copy">Copy LaTeX</button>
+      <button id="expBtn" title="Export as image (Alt+I)">🖼 Export as image</button>
       <span class="status" id="status"></span>
+    </div>
+    <div class="symp" id="expPanel">
+      <div class="expopts">
+        <label>Colour <input type="color" id="expColor" value="#000000"></label>
+        <label>Size <select id="expScale"><option value="2">small</option><option value="4" selected>sharp</option><option value="8">extra sharp</option></select></label>
+        <label><input type="checkbox" id="expTransparent"> transparent background (PNG)</label>
+      </div>
+      <div class="row" style="margin-top:0">
+        <button class="primary" id="expCopy">Copy as image</button>
+        <button id="expPng">Download PNG</button>
+        <button id="expSvg">Download SVG</button>
+        <span class="status" id="expStatus"></span>
+      </div>
+      <div id="expPrev"></div>
+      <p class="muted">SVG stays sharp at any size and works in Word, PowerPoint and Keynote. The first export loads the drawing engine (MathJax).</p>
     </div>
   </div>
 
@@ -1148,6 +1236,573 @@ function start() {
   openTab(recall('olve-tab', 'section'));
 
   applyMacros(macroTa.value, true);
+
+  // =================================================================
+  //  Batch 2: refs check, units, matrix builder, image export,
+  //  paste from Word, dark mode + shortcuts
+  // =================================================================
+
+  // ---------- siunitx display support inside the editor ----------
+  const SI_MACROS = {
+    qty: { args: 2, def: '#1\\,\\mathrm{#2}' }, SI: { args: 2, def: '#1\\,\\mathrm{#2}' },
+    si: { args: 1, def: '\\mathrm{#1}' }, num: { args: 1, def: '#1' }, ang: { args: 1, def: '#1^{\\circ}' },
+    kilo: 'k', mega: 'M', giga: 'G', milli: 'm', micro: '\\mu ', nano: 'n', centi: 'c', pico: 'p',
+    gram: 'g', metre: 'm', meter: 'm', second: 's', kelvin: 'K', ampere: 'A', mole: 'mol', candela: 'cd',
+    newton: 'N', joule: 'J', watt: 'W', pascal: 'Pa', hertz: 'Hz', volt: 'V', ohm: '\\Omega', coulomb: 'C',
+    tesla: 'T', litre: 'L', liter: 'L', hour: 'h', minute: 'min', degreeCelsius: '{}^{\\circ}\\mathrm{C}',
+    percent: '\\%', per: '/', squared: '^{2}', cubed: '^{3}', degree: '^{\\circ}', electronvolt: 'eV', bar: 'bar',
+  };
+  Object.assign(DEFAULT_MACROS, SI_MACROS);
+  mf.macros = { ...mf.macros, ...SI_MACROS };
+
+  // ================= 1. Labels & references (whole section) =================
+  const REFCMD = /\\(ref|eqref|autoref|cref|Cref|pageref|vref|nameref|labelcref)\s*\{([^}]*)\}/g;
+  function refReport(src) {
+    const commentAt = [];
+    for (let i = 0; i < src.length; i++) if (src[i] === '%' && !isEscaped(src, i)) { const j = src.indexOf('\n', i); commentAt.push([i, j < 0 ? src.length : j]); i = j < 0 ? src.length : j; }
+    const inC = (p) => commentAt.some(([a, b]) => p >= a && p < b);
+    const labels = {}, refs = {};
+    for (const m of src.matchAll(/\\label\s*\{([^}]*)\}/g)) if (!inC(m.index)) (labels[m[1].trim()] ||= []).push({ pos: m.index, len: m[0].length });
+    for (const m of src.matchAll(REFCMD)) if (!inC(m.index))
+      for (const k of m[2].split(',')) (refs[k.trim()] ||= []).push({ pos: m.index, len: m[0].length });
+    const items = [];
+    for (const [k, v] of Object.entries(labels)) if (v.length > 1) v.forEach(x => items.push({ sev: 'bad', msg: `Label “${k}” is defined ${v.length} times`, ...x }));
+    for (const [k, v] of Object.entries(refs)) if (!labels[k]) v.forEach(x => items.push({ sev: 'warn', msg: `Reference to “${k}”, but no \\label{${k}} here (fine if it's in another section)`, ...x }));
+    for (const [k, v] of Object.entries(labels)) if (!refs[k]) items.push({ sev: 'info', msg: `Label “${k}” is never referenced`, ...v[0] });
+    // \label inside maths that gets no number
+    for (const q of findEquations(src)) {
+      const f = currentForm(q.text);
+      if (/^(inline|paren|display)$/.test(f) || /\*$/.test(f) || f === '') {
+        for (const m of q.text.matchAll(/\\label\s*\{([^}]*)\}/g))
+          items.push({ sev: 'warn', msg: `Label “${m[1]}” is in an unnumbered equation (${f || 'maths'}) — it has no number to show`, pos: q.s + m.index, len: m[0].length });
+      } else if (/^(align|gather|multline|flalign|alignat|eqnarray)$/.test(f)) {
+        // \nonumber on a line that also has a \label
+        splitRows(q.text).forEach(row => {
+          if (/\\(nonumber|notag)\b/.test(row) && /\\label\s*\{/.test(row)) {
+            const m = row.match(/\\label\s*\{([^}]*)\}/); const p = q.text.indexOf(m[0]);
+            items.push({ sev: 'warn', msg: `Label “${m[1]}” is on a line marked \\nonumber`, pos: q.s + p, len: m[0].length });
+          }
+        });
+      }
+    }
+    const order = { bad: 0, warn: 1, info: 2 };
+    return { items: items.sort((a, b) => order[a.sev] - order[b.sev] || a.pos - b.pos), nLabels: Object.keys(labels).length, nRefs: Object.values(refs).reduce((n, v) => n + v.length, 0) };
+  }
+  const _showSection = showSection;
+  showSection = function () {
+    _showSection();
+    const src = secTa.value;
+    if (!src.trim()) return;
+    const r = refReport(src);
+    if (!r.nLabels && !r.nRefs && !r.items.length) return;
+    const box = document.createElement('div');
+    box.className = 'refbox';
+    const icon = { bad: '✖', warn: '⚠', info: 'ℹ' };
+    box.innerHTML = `<div class="sum">🔗 <b>Labels & references:</b> ${r.nLabels} label${r.nLabels === 1 ? '' : 's'}, ${r.nRefs} reference${r.nRefs === 1 ? '' : 's'}${r.items.length ? '' : ' — <span class="okc">all good ✔</span>'}</div>` +
+      r.items.map((x, i) => `<button class="err ${x.sev}" data-i="${i}">${icon[x.sev]} Line ${lineOf(src, x.pos)}: ${esc(x.msg)}</button>`).join('');
+    box.querySelectorAll('.err').forEach(b => b.onclick = () => { const x = r.items[b.dataset.i]; secTa.focus(); secTa.setSelectionRange(x.pos, x.pos + x.len); });
+    secList.prepend(box);
+  };
+
+  // ================= 2. Units ⇄ siunitx =================
+  const unitsPanel = document.getElementById('unitsPanel');
+  const U_NUM = String.raw`(-?\d+(?:[.,]\d+)?(?:\s*(?:\\times|\\cdot)\s*10\^\{?-?\d+\}?)?)`;
+  const U_SEP = String.raw`(?:\s|\\[,;:! ]|~)*`;
+  const U_UNIT = String.raw`\\(?:mathrm|text|textrm|rm|mathsf|unit)\s*\{((?:[^{}]|\{[^{}]*\})+)\}`;
+  const plainRe = () => new RegExp(U_NUM + U_SEP + String.raw`(\\mu\s*|µ|μ)?` + U_UNIT, 'g');
+  const degRe = () => new RegExp(U_NUM + U_SEP + String.raw`\^\s*\{?\s*\\circ\s*\}?(?:` + U_SEP + String.raw`(?:\\mathrm\s*\{\s*C\s*\}|C(?![a-zA-Z])))?`, 'g');
+  const pctRe = () => new RegExp(U_NUM + U_SEP + String.raw`\\%`, 'g');
+  function numToSi(n) { return n.replace(/\s+/g, '').replace(/(?:\\times|\\cdot)10\^\{?(-?\d+)\}?/, 'e$1'); }
+  function unitToSi(u) {
+    return u.replace(/\\mu\s*|µ|μ/g, '\\micro ').replace(/\\Omega|Ω/g, '\\ohm').replace(/\^\{?\\circ\}?\s*C/g, '\\degreeCelsius')
+      .replace(/(^|[.\/\s])([kMGmnpc])\\ohm/g, (a, p, x) => p + ({ k: '\\kilo', M: '\\mega', G: '\\giga', m: '\\milli', n: '\\nano', p: '\\pico', c: '\\centi' })[x] + '\\ohm')
+      .replace(/\s*(\\[,;:! ]|\\cdot|~)\s*/g, '.').replace(/\s+/g, '.').replace(/\.{2,}/g, '.').replace(/^\.|\.$/g, '').replace(/\\micro\s*\./g, '\\micro ').trim();
+  }
+  const SI_BACK = { kilo: 'k', mega: 'M', giga: 'G', milli: 'm', micro: '\\mu ', nano: 'n', centi: 'c', pico: 'p', gram: 'g', metre: 'm', meter: 'm', second: 's',
+    kelvin: 'K', ampere: 'A', mole: 'mol', candela: 'cd', newton: 'N', joule: 'J', watt: 'W', pascal: 'Pa', hertz: 'Hz', volt: 'V', ohm: '\\Omega', coulomb: 'C',
+    tesla: 'T', litre: 'L', liter: 'L', hour: 'h', minute: 'min', electronvolt: 'eV' };
+  function numFromSi(n) { const m = n.trim().match(/^(-?[\d.,]+)\s*[eE]\s*([-+]?\d+)$/); return m ? `${m[1]}\\times10^{${+m[2]}}` : n.trim(); }
+  function unitFromSi(u) {
+    let s = u.trim();
+    s = s.replace(/\\per\s*/g, '/').replace(/\\squared/g, '^{2}').replace(/\\cubed/g, '^{3}')
+      .replace(/\\([a-zA-Z]+)\s*/g, (all, n) => SI_BACK[n] !== undefined ? SI_BACK[n] : all);
+    return s.replace(/\./g, '\\,').trim();
+  }
+  function scanUnits(txt) {
+    const [bs, be] = bodyBounds(txt);
+    const toSi = [], toPlain = [], taken = [];
+    const free = (a, b) => a >= bs && b <= be && !taken.some(([x, y]) => a < y && b > x);
+    const style = document.getElementById('unitStyle').value;
+    for (const m of txt.matchAll(degRe())) {
+      const a = m.index, b = a + m[0].length; if (!free(a, b)) continue; taken.push([a, b]);
+      const isC = /C\s*\}?\s*$/.test(m[0]);
+      toSi.push({ a, b, rep: isC ? `\\${style}{${numToSi(m[1])}}{\\degreeCelsius}` : `\\ang{${numToSi(m[1])}}` });
+    }
+    for (const m of txt.matchAll(pctRe())) { const a = m.index, b = a + m[0].length; if (!free(a, b)) continue; taken.push([a, b]); toSi.push({ a, b, rep: `\\${style}{${numToSi(m[1])}}{\\percent}` }); }
+    for (const m of txt.matchAll(plainRe())) {
+      const a = m.index, b = a + m[0].length; if (!free(a, b)) continue; taken.push([a, b]);
+      toSi.push({ a, b, rep: `\\${style}{${numToSi(m[1])}}{${(m[2] ? '\\micro ' : '') + unitToSi(m[3])}}` });
+    }
+    for (const m of txt.matchAll(/\\(qty|SI)\s*\{([^{}]*)\}\s*\{((?:[^{}]|\{[^{}]*\})*)\}/g)) {
+      const a = m.index, b = a + m[0].length; if (!free(a, b)) continue; taken.push([a, b]);
+      const u = m[3].trim();
+      const rep = u === '\\percent' ? `${numFromSi(m[2])}\\%` : u === '\\degreeCelsius' ? `${numFromSi(m[2])}^{\\circ}\\mathrm{C}` : `${numFromSi(m[2])}\\,\\mathrm{${unitFromSi(u)}}`;
+      toPlain.push({ a, b, rep });
+    }
+    for (const m of txt.matchAll(/\\(si|num|ang)\s*\{((?:[^{}]|\{[^{}]*\})*)\}/g)) {
+      const a = m.index, b = a + m[0].length; if (!free(a, b)) continue; taken.push([a, b]);
+      toPlain.push({ a, b, rep: m[1] === 'si' ? `\\mathrm{${unitFromSi(m[2])}}` : m[1] === 'num' ? numFromSi(m[2]) : `${numFromSi(m[2])}^{\\circ}` });
+    }
+    return { toSi: toSi.sort((x, y) => x.a - y.a), toPlain: toPlain.sort((x, y) => x.a - y.a) };
+  }
+  function renderUnits(msg = '') {
+    const txt = input.value, { toSi, toPlain } = scanUnits(txt);
+    const row = (it, k, i) => `<label class="item" data-a="${it.a}" data-b="${it.b}"><input type="checkbox" class="uchk" data-k="${k}" data-i="${i}" checked>
+      <span><del>${esc(txt.slice(it.a, it.b))}</del><span class="arrow">→</span><ins>${esc(it.rep)}</ins></span></label>`;
+    let h = `<h3>⚖ Units</h3><div class="sum">${msg ? `<span class="done">${msg}</span> · ` : ''}siunitx keeps numbers and units consistently formatted. It needs <code>\\usepackage{siunitx}</code> in your preamble.
+      Style: <select id="unitStyleSel"><option value="qty">\\qty{…}{…} (siunitx v3)</option><option value="SI">\\SI{…}{…} (older)</option></select></div>`;
+    if (toSi.length) h += `<div class="grp"><b>Plain → siunitx</b><div class="items">${toSi.map((it, i) => row(it, 'toSi', i)).join('')}</div></div>`;
+    if (toPlain.length) h += `<div class="grp"><b>siunitx → plain</b> <span class="why" style="display:inline">(unticked: tick to convert back)</span><div class="items">${toPlain.map((it, i) => row(it, 'toPlain', i).replace(' checked>', '>')).join('')}</div></div>`;
+    if (!toSi.length && !toPlain.length) h += `<p class="muted">No numbers with units found. I look for things like <code>5\\,\\mathrm{kg}</code>, <code>9.81~\\text{m/s^2}</code>, <code>25^{\\circ}C</code>, <code>40\\%</code>, or <code>\\qty{5}{kg}</code>.</p>`;
+    h += `<div class="row">${toSi.length || toPlain.length ? '<button class="primary" id="unitApply">Apply selected</button>' : ''}<button id="unitClose">Close</button></div>`;
+    unitsPanel.innerHTML = h;
+    const sel = document.getElementById('unitStyleSel');
+    sel.value = document.getElementById('unitStyle').value;
+    sel.onchange = () => { document.getElementById('unitStyle').value = sel.value; store('olve-unitstyle', sel.value); renderUnits(); };
+    unitsPanel.querySelectorAll('.item').forEach(r => {
+      r.addEventListener('mouseenter', () => { let x = null; try { x = rangeForText(input.value, +r.dataset.a, +r.dataset.b); } catch (e) {} if (Array.isArray(x)) drawRange(x); });
+      r.addEventListener('mouseleave', clearHl);
+    });
+    document.getElementById('unitClose').onclick = () => { unitsPanel.classList.remove('on'); clearHl(); };
+    const ap = document.getElementById('unitApply');
+    if (ap) ap.onclick = () => {
+      const all = { toSi, toPlain };
+      const chosen = [...unitsPanel.querySelectorAll('.uchk:checked')].map(c => all[c.dataset.k][c.dataset.i]).sort((x, y) => y.a - x.a);
+      if (!chosen.length) return;
+      let out = input.value;
+      for (const it of chosen) out = out.slice(0, it.a) + it.rep + out.slice(it.b);
+      setInput(out);
+      renderUnits(`Converted ${chosen.length}.`);
+    };
+  }
+  document.getElementById('unitStyle').value = recall('olve-unitstyle', 'qty');
+  document.getElementById('unitsBtn').onclick = () => {
+    if (unitsPanel.classList.toggle('on')) renderUnits(); else clearHl();
+  };
+
+  // ================= 3. Matrix builder =================
+  const matPanel = document.getElementById('matPanel'), matGrid = document.getElementById('matGrid');
+  const matR = document.getElementById('matR'), matC = document.getElementById('matC');
+  const matType = document.getElementById('matType'), matFill = document.getElementById('matFill'), matPrev = document.getElementById('matPrev');
+  for (let r = 1; r <= 8; r++) for (let c = 1; c <= 8; c++) {
+    const d = document.createElement('div'); d.className = 'mcell'; d.dataset.r = r; d.dataset.c = c; matGrid.appendChild(d);
+  }
+  function paintGrid(R, C) { matGrid.querySelectorAll('.mcell').forEach(d => d.classList.toggle('on', +d.dataset.r <= R && +d.dataset.c <= C)); }
+  matGrid.addEventListener('mouseover', (e) => { const d = e.target.closest('.mcell'); if (d) paintGrid(+d.dataset.r, +d.dataset.c); });
+  matGrid.addEventListener('mouseleave', () => paintGrid(+matR.value, +matC.value));
+  matGrid.addEventListener('click', (e) => { const d = e.target.closest('.mcell'); if (d) { matR.value = d.dataset.r; matC.value = d.dataset.c; updateMat(); } });
+  function buildMatrix(forPreview) {
+    const R = Math.max(1, Math.min(20, +matR.value || 2)), C = Math.max(1, Math.min(20, +matC.value || 2));
+    const fill = matFill.value, env = matType.value, ph = forPreview ? '\\square' : '#?';
+    const idx = (i, j) => (R > 9 || C > 9) ? `${i},${j}` : `${i}${j}`;
+    let rows = [];
+    if (fill === 'general') {
+      const n = (i) => i === R ? 'm' : i, m = (j) => j === C ? 'n' : j;
+      const ri = R >= 3 ? [1, 2, 'dots', R] : [...Array(R)].map((_, i) => i + 1);
+      const cj = C >= 3 ? [1, 2, 'dots', C] : [...Array(C)].map((_, j) => j + 1);
+      rows = ri.map(i => cj.map(j => i === 'dots' && j === 'dots' ? '\\ddots' : i === 'dots' ? '\\vdots' : j === 'dots' ? '\\cdots' : `a_{${n(i)}${m(j)}}`));
+    } else {
+      for (let i = 1; i <= R; i++) {
+        const row = [];
+        for (let j = 1; j <= C; j++) row.push(fill === 'zeros' ? '0' : fill === 'identity' ? (i === j ? '1' : '0') : fill === 'aij' ? `a_{${idx(i, j)}}` : ph);
+        rows.push(row);
+      }
+    }
+    const body = rows.map(r => r.join(' & ')).join(' \\\\ ');
+    if (env === 'array') return `\\left[\\begin{array}{${'c'.repeat(C - 1)}|c} ${body} \\end{array}\\right]`;
+    return `\\begin{${env}} ${body} \\end{${env}}`;
+  }
+  function updateMat() { paintGrid(+matR.value, +matC.value); matPrev.innerHTML = renderStatic(buildMatrix(true)); document.getElementById('matCode').textContent = buildMatrix(false).replace(/#\?/g, '□'); }
+  [matR, matC, matType, matFill].forEach(el => el.addEventListener('input', updateMat));
+  document.getElementById('matBtn').onclick = () => { if (matPanel.classList.toggle('on')) updateMat(); };
+  document.getElementById('matInsert').onclick = () => {
+    mf.focus();
+    mf.insert(buildMatrix(false), { format: 'latex', selectionMode: 'placeholder' });
+    buildOutput(); input.value = output.value; runChecks();
+    matPanel.classList.remove('on');
+  };
+
+  // ================= 4. Export as image =================
+  let mjReady = null;
+  function loadMathJax() {
+    if (mjReady) return mjReady;
+    mjReady = new Promise((resolve, reject) => {
+      window.MathJax = { startup: { typeset: false }, svg: { fontCache: 'none' }, tex: { packages: { '[+]': ['ams', 'newcommand', 'boldsymbol', 'cancel', 'color'] } } };
+      const srcs = ['mathjax/tex-svg-full.js', 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js'];
+      const tryLoad = (i) => {
+        if (i >= srcs.length) { mjReady = null; return reject(new Error('Could not load the image renderer (MathJax). Check your internet connection.')); }
+        const sc = document.createElement('script'); sc.src = srcs[i];
+        sc.onload = () => MathJax.startup.promise.then(resolve, reject);
+        sc.onerror = () => { sc.remove(); tryLoad(i + 1); };
+        document.head.appendChild(sc);
+      };
+      tryLoad(0);
+    });
+    return mjReady;
+  }
+  const expStatus = document.getElementById('expStatus');
+  function macroPreamble() {
+    // user macros + siunitx fallbacks, written as \newcommand so MathJax understands them
+    const user = macroTa.value.replace(/(^|[^\\])%.*$/gm, '$1');
+    return user + '\n\\newcommand{\\qty}[2]{#1\\,\\mathrm{#2}}\\newcommand{\\SI}[2]{#1\\,\\mathrm{#2}}\\newcommand{\\si}[1]{\\mathrm{#1}}\\newcommand{\\num}[1]{#1}\\newcommand{\\ang}[1]{#1^{\\circ}}' +
+      Object.entries(SI_MACROS).filter(([, v]) => typeof v === 'string').map(([k, v]) => `\\newcommand{\\${k}}{${v}}`).join('');
+  }
+  async function makeSvg() {
+    await loadMathJax();
+    const latex = fieldLatex(output.value);
+    try { MathJax.texReset(); } catch (e) {}
+    const node = MathJax.tex2svg(macroPreamble() + '\n' + latex, { display: true });
+    const svg = node.querySelector('svg');
+    const err = svg.querySelector('[data-mjx-error]');
+    if (err) throw new Error('Could not draw: ' + err.getAttribute('data-mjx-error'));
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svg.removeAttribute('role'); svg.removeAttribute('focusable');
+    const color = document.getElementById('expColor').value;
+    svg.setAttribute('color', color);
+    svg.style.color = color;
+    return svg;
+  }
+  async function svgToPng(svg) {
+    const scale = +document.getElementById('expScale').value || 4;
+    // MathJax sizes in ex units; convert using 1ex ≈ 0.45em at 16px
+    const exPx = 7.2;
+    const w = parseFloat(svg.getAttribute('width')) * exPx, h = parseFloat(svg.getAttribute('height')) * exPx;
+    const clone = svg.cloneNode(true);
+    clone.setAttribute('width', w + 'px'); clone.setAttribute('height', h + 'px');
+    clone.querySelectorAll('[fill="currentColor"]').forEach(n => n.setAttribute('fill', svg.getAttribute('color')));
+    clone.querySelectorAll('[stroke="currentColor"]').forEach(n => n.setAttribute('stroke', svg.getAttribute('color')));
+    const data = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(clone));
+    const img = new Image();
+    await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(new Error('Could not draw the image.')); img.src = data; });
+    const pad = 8;
+    const cv = document.createElement('canvas');
+    cv.width = Math.ceil((w + pad * 2) * scale); cv.height = Math.ceil((h + pad * 2) * scale);
+    const ctx = cv.getContext('2d');
+    if (!document.getElementById('expTransparent').checked) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height); }
+    ctx.scale(scale, scale);
+    ctx.drawImage(img, pad, pad, w, h);
+    return new Promise(res => cv.toBlob(res, 'image/png'));
+  }
+  function svgText(svg) {
+    const clone = svg.cloneNode(true);
+    const c = svg.getAttribute('color');
+    clone.querySelectorAll('[fill="currentColor"]').forEach(n => n.setAttribute('fill', c));
+    clone.querySelectorAll('[stroke="currentColor"]').forEach(n => n.setAttribute('stroke', c));
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(clone);
+  }
+  function download(blob, name) {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  async function doExport(kind) {
+    expStatus.textContent = 'Drawing…';
+    try {
+      const svg = await makeSvg();
+      if (kind === 'copy') {
+        const png = await svgToPng(svg);
+        try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]); expStatus.textContent = 'Image copied ✓ — paste it into Word, PowerPoint, etc.'; }
+        catch (e) { download(png, 'equation.png'); expStatus.textContent = 'Your browser blocked copying images here, so it was downloaded instead.'; }
+      } else if (kind === 'png') { download(await svgToPng(svg), 'equation.png'); expStatus.textContent = 'PNG downloaded ✓'; }
+      else { download(new Blob([svgText(svg)], { type: 'image/svg+xml' }), 'equation.svg'); expStatus.textContent = 'SVG downloaded ✓ (sharp at any size — works in Word & PowerPoint)'; }
+      document.getElementById('expPrev').innerHTML = ''; document.getElementById('expPrev').appendChild(svg);
+    } catch (e) { expStatus.textContent = '⚠ ' + e.message; }
+  }
+  document.getElementById('expBtn').onclick = () => document.getElementById('expPanel').classList.toggle('on');
+  document.getElementById('expCopy').onclick = () => doExport('copy');
+  document.getElementById('expPng').onclick = () => doExport('png');
+  document.getElementById('expSvg').onclick = () => doExport('svg');
+
+  // ================= 5. Paste from Word / MathML / Unicode maths =================
+  const UNI = {
+    '≤': '\\leq', '≥': '\\geq', '≠': '\\neq', '≈': '\\approx', '×': '\\times', '·': '\\cdot', '⋅': '\\cdot', '±': '\\pm', '∓': '\\mp', '÷': '\\div',
+    '→': '\\to', '←': '\\leftarrow', '↔': '\\leftrightarrow', '⇒': '\\Rightarrow', '⇐': '\\Leftarrow', '⇔': '\\Leftrightarrow', '↦': '\\mapsto', '↑': '\\uparrow', '↓': '\\downarrow',
+    '∞': '\\infty', '∂': '\\partial', '∇': '\\nabla', '∑': '\\sum', '∏': '\\prod', '∫': '\\int', '∬': '\\iint', '∭': '\\iiint', '∮': '\\oint', '√': '\\sqrt',
+    '∈': '\\in', '∉': '\\notin', '∋': '\\ni', '⊂': '\\subset', '⊆': '\\subseteq', '⊃': '\\supset', '⊇': '\\supseteq', '∪': '\\cup', '∩': '\\cap', '∅': '\\emptyset', '∖': '\\setminus',
+    '∀': '\\forall', '∃': '\\exists', '∄': '\\nexists', '¬': '\\neg', '∧': '\\land', '∨': '\\lor', '≡': '\\equiv', '∼': '\\sim', '≃': '\\simeq', '≅': '\\cong', '∝': '\\propto',
+    '≪': '\\ll', '≫': '\\gg', '′': "'", '″': "''", '…': '\\ldots', '⋯': '\\cdots', '⋮': '\\vdots', '⋱': '\\ddots', '°': '^{\\circ}', 'ℏ': '\\hbar', 'ℓ': '\\ell',
+    '⟨': '\\langle', '⟩': '\\rangle', '‖': '\\|', '−': '-', '∗': '*', '⊗': '\\otimes', '⊕': '\\oplus', '⊙': '\\odot', '∘': '\\circ', '†': '\\dagger', '⊥': '\\perp', '∥': '\\parallel', '∠': '\\angle',
+    'ℝ': '\\mathbb{R}', 'ℕ': '\\mathbb{N}', 'ℤ': '\\mathbb{Z}', 'ℚ': '\\mathbb{Q}', 'ℂ': '\\mathbb{C}', '∴': '\\therefore', '∵': '\\because',
+    '⁡': '', '⁢': '', '⁣': ',', '​': '', '\u2009': '\\,', '\u2005': '\\;', '\u2003': '\\quad', '{': '\\{', '}': '\\}', '%': '\\%', '#': '\\#', '&': '\\&', '_': '\\_',
+    'ε': '\\varepsilon', 'ϵ': '\\epsilon', 'ϕ': '\\phi', 'φ': '\\varphi', 'ϑ': '\\vartheta', 'ς': '\\varsigma', 'ϖ': '\\varpi', 'ϱ': '\\varrho', 'ο': 'o', 'ο': 'o',
+  };
+  'alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron pi rho - sigma tau upsilon phi chi psi omega'.split(' ').forEach((n, i) => {
+    const ch = String.fromCodePoint(0x3B1 + i);
+    if (n !== '-' && !(ch in UNI)) UNI[ch] = n === 'omicron' ? 'o' : '\\' + n;
+    const C = String.fromCodePoint(0x391 + i);
+    if (n !== '-') UNI[C] = /^(gamma|delta|theta|lambda|xi|pi|sigma|upsilon|phi|psi|omega)$/.test(n) ? '\\' + n[0].toUpperCase() + n.slice(1) : ({ alpha: 'A', beta: 'B', epsilon: 'E', zeta: 'Z', eta: 'H', iota: 'I', kappa: 'K', mu: 'M', nu: 'N', omicron: 'O', rho: 'P', tau: 'T', chi: 'X' })[n];
+  });
+  const FUNC_NAMES = new RegExp(`^(${FUNCS})$`);
+  function texJoin(parts) {
+    let out = '';
+    for (const p of parts) {
+      if (!p) continue;
+      if (/\\[a-zA-Z]+$/.test(out) && /^[a-zA-Z0-9]/.test(p)) out += ' ';
+      out += p;
+    }
+    return out;
+  }
+  const SUPS = '⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ⁿⁱ', SUBS = '₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎ₐₑₒₓₙᵢⱼₖ';
+  const SUP_TO = '0123456789+-=()ni', SUB_TO = '0123456789+-=()aeoxnijk';
+  function scripts(s) {
+    return s.replace(new RegExp(`[${SUPS}]+`, 'g'), m => `^{${[...m].map(c => SUP_TO[[...SUPS].indexOf(c)]).join('')}}`)
+            .replace(new RegExp(`[${SUBS}]+`, 'g'), m => `_{${[...m].map(c => SUB_TO[[...SUBS].indexOf(c)]).join('')}}`);
+  }
+  function mapWithScripts(s) {
+    const re = new RegExp(`([${SUPS}]+|[${SUBS}]+)`, 'g');
+    return texJoin(s.split(re).map(part => !part ? '' : new RegExp(`^[${SUPS}]+$`).test(part) || new RegExp(`^[${SUBS}]+$`).test(part) ? scripts(part) : mapText(part)));
+  }
+  function mapText(s) {
+    const t = s.normalize('NFKC');
+    return texJoin([...t].map(c => UNI[c] !== undefined ? UNI[c] : (s.includes('ℎ') && c === 'h') ? 'h' : c));
+  }
+  const grp = (x) => (x.length === 1 || /^\\[a-zA-Z]+$/.test(x)) ? x : `{${x}}`;
+
+  // --- MathML ---
+  const kids = (n) => [...n.children];
+  function mml(n) {
+    const tag = n.localName, ch = kids(n), cv = () => texJoin(ch.map(mml));
+    switch (tag) {
+      case 'math': case 'mrow': case 'mstyle': case 'mpadded': case 'mphantom': case 'menclose': case 'merror': {
+        // ( mtable ) -> pmatrix etc.
+        if (ch.length === 3 && ch[1].localName === 'mtable' && ch[0].localName === 'mo' && ch[2].localName === 'mo') {
+          const env = { '(': 'pmatrix', '[': 'bmatrix', '|': 'vmatrix', '{': 'Bmatrix', '‖': 'Vmatrix' }[ch[0].textContent.trim()];
+          if (env) return mtable(ch[1], env);
+        }
+        if (tag === 'menclose' && /box/.test(n.getAttribute('notation') || '')) return `\\boxed{${cv()}}`;
+        return cv();
+      }
+      case 'semantics': {
+        const ann = ch.find(c => c.localName === 'annotation' && /tex/i.test(c.getAttribute('encoding') || ''));
+        return ann ? ann.textContent.trim() : (ch[0] ? mml(ch[0]) : '');
+      }
+      case 'annotation': case 'annotation-xml': return '';
+      case 'mi': {
+        const t = n.textContent.trim(), v = n.getAttribute('mathvariant');
+        if (FUNC_NAMES.test(t)) return '\\' + t;
+        const m = mapText(t);
+        if (v === 'bold' || v === 'bold-italic') return `\\mathbf{${m}}`;
+        if (v === 'double-struck') return `\\mathbb{${m}}`;
+        if (v === 'script') return `\\mathcal{${m}}`;
+        if ((v === 'normal' && t.length === 1 && /[a-zA-Z]/.test(t)) || (t.normalize('NFKC').length > 1 && /^[a-zA-Z]+$/.test(t.normalize('NFKC')))) return `\\mathrm{${m}}`;
+        return m;
+      }
+      case 'mn': return mapText(n.textContent.trim());
+      case 'mo': { const t = n.textContent.trim(); if (FUNC_NAMES.test(t)) return '\\' + t; return t === '{' ? '\\{' : t === '}' ? '\\}' : mapText(t); }
+      case 'mtext': { const t = n.textContent; return t.trim() ? `\\text{${t}}` : '\\ '; }
+      case 'ms': return `\\text{"${n.textContent}"}`;
+      case 'mspace': return '\\,';
+      case 'mfrac': {
+        const [a, b] = ch.map(mml);
+        return (n.getAttribute('linethickness') === '0' || n.getAttribute('linethickness') === '0px') ? `\\genfrac{}{}{0pt}{}{${a}}{${b}}` : `\\frac{${a}}{${b}}`;
+      }
+      case 'msup': return `${grp(mml(ch[0]))}^{${mml(ch[1])}}`;
+      case 'msub': return `${grp(mml(ch[0]))}_{${mml(ch[1])}}`;
+      case 'msubsup': return `${grp(mml(ch[0]))}_{${mml(ch[1])}}^{${mml(ch[2])}}`;
+      case 'msqrt': return `\\sqrt{${cv()}}`;
+      case 'mroot': return `\\sqrt[${mml(ch[1])}]{${mml(ch[0])}}`;
+      case 'mover': case 'munder': case 'munderover': {
+        const base = mml(ch[0]), a = ch[1] ? mml(ch[1]) : '', b = ch[2] ? mml(ch[2]) : '';
+        const raw = (ch[1] && ch[1].textContent.trim()) || '';
+        const big = /^\\(sum|prod|int|iint|oint|bigcup|bigcap|lim|max|min|sup|inf|coprod)$/.test(base) || /^(lim|max|min)$/.test(ch[0].textContent.trim());
+        if (tag === 'munderover') return `${base}_{${a}}^{${b}}`;
+        if (tag === 'mover') {
+          const acc = { '¯': 'overline', '‾': 'overline', '^': 'hat', 'ˆ': 'hat', '~': 'tilde', '˜': 'tilde', '→': 'vec', '⃗': 'vec', '˙': 'dot', '¨': 'ddot', '⏞': 'overbrace', '︷': 'overbrace' }[raw];
+          if (acc) return `\\${acc}{${base}}`;
+          return big ? `${base}^{${a}}` : `\\overset{${a}}{${base}}`;
+        }
+        const acc = { '_': 'underline', '̲': 'underline', '¯': 'underline', '⏟': 'underbrace', '︸': 'underbrace' }[raw];
+        if (acc) return `\\${acc}{${base}}`;
+        return big ? `${base}_{${a}}` : `\\underset{${a}}{${base}}`;
+      }
+      case 'mfenced': {
+        const o = n.getAttribute('open') ?? '(', c = n.getAttribute('close') ?? ')', sep = n.getAttribute('separators') ?? ',';
+        const d = (x) => x === '{' ? '\\{' : x === '}' ? '\\}' : x === '' ? '.' : mapText(x);
+        return `\\left${d(o)} ${ch.map(mml).join(sep.trim()[0] || ',')} \\right${d(c)}`;
+      }
+      case 'mtable': return mtable(n, 'matrix');
+      case 'mmultiscripts': return cv();
+      default: return cv();
+    }
+  }
+  function mtable(n, env) {
+    const rows = kids(n).filter(r => /mtr|mlabeledtr/.test(r.localName)).map(r => kids(r).filter(c => c.localName === 'mtd').map(mml).join(' & '));
+    return `\\begin{${env}} ${rows.join(' \\\\ ')} \\end{${env}}`;
+  }
+
+  // --- Office Math (OMML, what Word puts on the clipboard) ---
+  const mchild = (n, name) => kids(n).find(c => c.localName === name);
+  const mval = (n, prop, attr) => { const p = n && mchild(n, prop); const a = p && mchild(p, attr); return a ? (a.getAttribute('m:val') ?? a.getAttribute('val')) : null; };
+  function om(n) {
+    if (!n) return '';
+    const tag = n.localName, ch = kids(n), cv = () => texJoin(ch.map(om));
+    switch (tag) {
+      case 'oMathPara': { const parts = ch.filter(c => c.localName === 'oMath').map(om); return parts.length > 1 ? `\\begin{gathered} ${parts.join(' \\\\ ')} \\end{gathered}` : parts.join(''); }
+      case 'oMath': case 'e': case 'num': case 'den': case 'sub': case 'sup': case 'deg': case 'lim': case 'fName': case 'box': case 'borderBox': case 'phant': return cv();
+      case 'r': {
+        const t = ch.filter(c => c.localName === 't').map(c => c.textContent).join('');
+        const plain = mval(n, 'rPr', 'sty') === 'p' || !!(mchild(n, 'rPr') && mchild(mchild(n, 'rPr'), 'nor'));
+        const nt = t.normalize('NFKC');
+        if (FUNC_NAMES.test(nt.trim())) return '\\' + nt.trim();
+        if (plain && /^[A-Za-z]{1,}$/.test(nt.trim())) return `\\mathrm{${nt.trim()}}`;
+        if (plain && /[A-Za-z]{2,}/.test(nt) && /\s/.test(nt)) return `\\text{${nt}}`;
+        return mapText(t);
+      }
+      case 'f': {
+        const type = mval(n, 'fPr', 'type'), a = om(mchild(n, 'num')), b = om(mchild(n, 'den'));
+        if (type === 'lin') return `${grp(a)}/${grp(b)}`;
+        if (type === 'noBar') return `\\genfrac{}{}{0pt}{}{${a}}{${b}}`;
+        return `\\frac{${a}}{${b}}`;
+      }
+      case 'sSup': return `${grp(om(mchild(n, 'e')))}^{${om(mchild(n, 'sup'))}}`;
+      case 'sSub': return `${grp(om(mchild(n, 'e')))}_{${om(mchild(n, 'sub'))}}`;
+      case 'sSubSup': return `${grp(om(mchild(n, 'e')))}_{${om(mchild(n, 'sub'))}}^{${om(mchild(n, 'sup'))}}`;
+      case 'sPre': return `{}_{${om(mchild(n, 'sub'))}}^{${om(mchild(n, 'sup'))}}${om(mchild(n, 'e'))}`;
+      case 'rad': { const hide = mval(n, 'radPr', 'degHide'); const d = om(mchild(n, 'deg')); return (d && hide !== '1' && hide !== 'on') ? `\\sqrt[${d}]{${om(mchild(n, 'e'))}}` : `\\sqrt{${om(mchild(n, 'e'))}}`; }
+      case 'd': {
+        const beg = mval(n, 'dPr', 'begChr') ?? '(', end = mval(n, 'dPr', 'endChr') ?? ')', sep = mval(n, 'dPr', 'sepChr') ?? '|';
+        const es = ch.filter(c => c.localName === 'e').map(om);
+        const only = ch.filter(c => c.localName === 'e');
+        // a delimiter around a single matrix -> pmatrix / bmatrix
+        if (only.length === 1 && kids(only[0]).length === 1 && kids(only[0])[0].localName === 'm') {
+          const env = { '(': 'pmatrix', '[': 'bmatrix', '|': 'vmatrix', '{': 'Bmatrix', '‖': 'Vmatrix' }[beg];
+          if (env && ({ '(': ')', '[': ']', '|': '|', '{': '}', '‖': '‖' })[beg] === end) return omMatrix(kids(only[0])[0], env);
+        }
+        if (beg === '{' && end === '' && only.length === 1 && kids(only[0]).length === 1 && kids(only[0])[0].localName === 'eqArr')
+          return `\\begin{cases} ${kids(kids(only[0])[0]).filter(c => c.localName === 'e').map(om).join(' \\\\ ')} \\end{cases}`;
+        const dl = (x) => x === '' ? '.' : x === '{' ? '\\{' : x === '}' ? '\\}' : x === '⟨' ? '\\langle' : x === '⟩' ? '\\rangle' : x === '‖' ? '\\|' : mapText(x);
+        return `\\left${dl(beg)} ${es.join(sep === '|' ? ' \\mid ' : mapText(sep))} \\right${dl(end)}`;
+      }
+      case 'nary': {
+        const chr = mval(n, 'naryPr', 'chr') ?? '∫';
+        const op = UNI[chr] || '\\int';
+        const s = om(mchild(n, 'sub')), p = om(mchild(n, 'sup'));
+        return texJoin([op, s ? `_{${s}}` : '', p ? `^{${p}}` : '', ' ', om(mchild(n, 'e'))]);
+      }
+      case 'func': { const f = om(mchild(n, 'fName')); return texJoin([f, /^\\[a-zA-Z]+$/.test(f) ? ' ' : '', om(mchild(n, 'e'))]); }
+      case 'acc': {
+        const chr = mval(n, 'accPr', 'chr') ?? '̂';
+        const a = { '̂': 'hat', '^': 'hat', '̃': 'tilde', '~': 'tilde', '⃗': 'vec', '→': 'vec', '̇': 'dot', '̈': 'ddot', '̄': 'bar', '¯': 'bar', '̅': 'overline', '́': 'acute', '̀': 'grave', '̆': 'breve', '̌': 'check' }[chr] || 'hat';
+        return `\\${a}{${om(mchild(n, 'e'))}}`;
+      }
+      case 'bar': return mval(n, 'barPr', 'pos') === 'bot' ? `\\underline{${om(mchild(n, 'e'))}}` : `\\overline{${om(mchild(n, 'e'))}}`;
+      case 'groupChr': {
+        const chr = mval(n, 'groupChrPr', 'chr') ?? '⏟', pos = mval(n, 'groupChrPr', 'pos') ?? 'bot';
+        return (chr === '⏞' || pos === 'top') ? `\\overbrace{${om(mchild(n, 'e'))}}` : `\\underbrace{${om(mchild(n, 'e'))}}`;
+      }
+      case 'limLow': { const e = om(mchild(n, 'e')), l = om(mchild(n, 'lim')); return /^\\(lim|max|min|sup|inf|arg\\max|arg\\min)$/.test(e) ? `${e}_{${l}}` : `\\underset{${l}}{${e}}`; }
+      case 'limUpp': return `\\overset{${om(mchild(n, 'lim'))}}{${om(mchild(n, 'e'))}}`;
+      case 'm': return omMatrix(n, 'matrix');
+      case 'eqArr': return `\\begin{aligned} ${ch.filter(c => c.localName === 'e').map(om).join(' \\\\ ')} \\end{aligned}`;
+      case 't': return mapText(n.textContent);
+      default: return /Pr$/.test(tag) ? '' : cv();
+    }
+  }
+  function omMatrix(n, env) {
+    const rows = kids(n).filter(r => r.localName === 'mr').map(r => kids(r).filter(c => c.localName === 'e').map(om).join(' & '));
+    return `\\begin{${env}} ${rows.join(' \\\\ ')} \\end{${env}}`;
+  }
+  function tidyConverted(t) { return t.replace(/\s+/g, ' ').replace(/\s*([{}^_])\s*/g, '$1').replace(/\\left\s+/g, '\\left').replace(/\s+\\right/g, ' \\right').trim(); }
+
+  function convertClipboard(html, text) {
+    // 1) Word: Office MathML inside the HTML
+    if (html && /<m:oMath/.test(html)) {
+      const blocks = html.match(/<m:oMathPara[\s\S]*?<\/m:oMathPara>|<m:oMath(?![a-zA-Z])[\s\S]*?<\/m:oMath>/g) || [];
+      const out = [];
+      for (const b of blocks) {
+        const xml = `<root xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">${b.replace(/&nbsp;/g, '&#160;')}</root>`;
+        const doc = new DOMParser().parseFromString(xml, 'application/xml');
+        if (doc.querySelector('parsererror')) continue;
+        out.push(tidyConverted(om(doc.documentElement.firstElementChild)));
+      }
+      if (out.length) return { latex: out.join(' \\\\ '), from: 'Word' };
+    }
+    // 2) MathML (as text, or inside HTML from a web page)
+    const src = /<(mml:)?math[\s>]/.test(text || '') ? text : (/<(mml:)?math[\s>]/.test(html || '') ? html : null);
+    if (src) {
+      const m = src.match(/<(mml:)?math[\s\S]*?<\/(mml:)?math>/);
+      if (m) {
+        let x = m[0];
+        if (!/xmlns/.test(x.slice(0, 200))) x = x.replace(/^<(mml:)?math/, (s, p) => `<${p || ''}math xmlns${p ? ':mml' : ''}="http://www.w3.org/1998/Math/MathML"`);
+        let doc = new DOMParser().parseFromString(x, 'application/xml');
+        if (doc.querySelector('parsererror')) doc = new DOMParser().parseFromString(x, 'text/html');
+        const root = doc.documentElement.localName === 'math' ? doc.documentElement : doc.querySelector('math') || [...doc.getElementsByTagName('*')].find(e => e.localName === 'math');
+        if (root) return { latex: tidyConverted(mml(root)), from: 'MathML' };
+      }
+    }
+    // 3) Unicode maths (e.g. Word's plain-text copy, or 𝑥² from websites)
+    if (text && /[\u{1D400}-\u{1D7FF}\u2200-\u22FF\u0391-\u03C9²³¹⁰-⁹₀-₉ₐ-ₜ√∑∫]/u.test(text) && !/\\[a-zA-Z]/.test(text)) {
+      const t = mapWithScripts(text).replace(/\\sqrt\s*\(([^()]*)\)/g, '\\sqrt{$1}').replace(/\\sqrt\s*([a-zA-Z0-9])/g, '\\sqrt{$1}');
+      return { latex: tidyConverted(t), from: 'Unicode text' };
+    }
+    return null;
+  }
+  function insertAtCursor(ta, txt) {
+    const s = ta.selectionStart, e = ta.selectionEnd;
+    pushUndo(ta.value);
+    ta.value = ta.value.slice(0, s) + txt + ta.value.slice(e);
+    ta.setSelectionRange(s + txt.length, s + txt.length);
+  }
+  input.addEventListener('paste', (ev) => {
+    const cd = ev.clipboardData; if (!cd) return;
+    const r = convertClipboard(cd.getData('text/html'), cd.getData('text/plain'));
+    if (!r) return;
+    ev.preventDefault();
+    insertAtCursor(input, r.latex);
+    load();
+    showNote(`Converted from ${r.from} ✓ — check it looks right.`);
+  });
+  window.__olveConvert = convertClipboard; // used by the tests
+
+  // ================= 6. Dark mode + keyboard shortcuts =================
+  const themeBtn = document.getElementById('themeBtn');
+  function setTheme(t) {
+    document.documentElement.dataset.theme = t;
+    themeBtn.textContent = t === 'dark' ? '☀️ Light' : '🌙 Dark';
+    store('olve-theme', t);
+  }
+  setTheme(recall('olve-theme', null) || (matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  themeBtn.onclick = () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+
+  const SHORTCUTS = [
+    ['Ctrl + Enter', 'Copy LaTeX', () => document.getElementById('copy').click()],
+    ['Alt + C', 'Clean up', () => document.getElementById('cleanBtn').click()],
+    ['Alt + F', 'Find symbol', () => document.getElementById('symBtn').click()],
+    ['Alt + M', 'Matrix builder', () => document.getElementById('matBtn').click()],
+    ['Alt + U', 'Units', () => document.getElementById('unitsBtn').click()],
+    ['Alt + A', 'Align columns', () => document.getElementById('alignBtn').click()],
+    ['Alt + N', 'Numbering on/off', () => document.getElementById('numBtn').click()],
+    ['Alt + I', 'Export as image', () => document.getElementById('expBtn').click()],
+    ['Alt + Z', 'Undo last tool change', () => undoBtn.click()],
+    ['Alt + E', 'Jump to the visual editor', () => mf.focus()],
+    ['Alt + L', 'Jump to the LaTeX box', () => input.focus()],
+    ['Alt + D', 'Dark / light mode', () => themeBtn.click()],
+    ['Alt + K', 'Show these shortcuts', () => document.getElementById('keysBtn').click()],
+    ['Esc', 'Close open panels', null],
+  ];
+  const KEYMAP = { Enter: 0, KeyC: 1, KeyF: 2, KeyM: 3, KeyU: 4, KeyA: 5, KeyN: 6, KeyI: 7, KeyZ: 8, KeyE: 9, KeyL: 10, KeyD: 11, KeyK: 12 };
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); SHORTCUTS[0][2](); return; }
+    if (e.altKey && !e.ctrlKey && !e.metaKey && KEYMAP[e.code] > 0) { e.preventDefault(); e.stopPropagation(); SHORTCUTS[KEYMAP[e.code]][2](); return; }
+    if (e.key === 'Escape') {
+      const open = [...document.querySelectorAll('.clean.on, .symp.on, #keysPanel.on')];
+      if (open.length) { open.forEach(p => p.classList.remove('on')); clearHl(); }
+    }
+  }, true);
+  const keysPanel = document.getElementById('keysPanel');
+  keysPanel.innerHTML = '<h3>⌨ Keyboard shortcuts</h3><table>' + SHORTCUTS.map(([k, d]) => `<tr><td><kbd>${k.split(' + ').join('</kbd> + <kbd>')}</kbd></td><td>${d}</td></tr>`).join('') +
+    '</table><p class="muted">On a Mac, use <kbd>⌥ Option</kbd> for Alt and <kbd>⌘</kbd> for Ctrl.</p><div class="row"><button id="keysClose">Close</button></div>';
+  document.getElementById('keysBtn').onclick = () => keysPanel.classList.toggle('on');
+  document.getElementById('keysClose').onclick = () => keysPanel.classList.remove('on');
 
   input.value = '\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}';
   load();
