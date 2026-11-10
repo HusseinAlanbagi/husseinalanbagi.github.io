@@ -197,6 +197,18 @@
   .selbar .sep { width:1px; align-self:stretch; background:var(--line); margin:2px 3px; }
   #spaceBtn.sel { background:#e9f6e8; border-color:#9fd39b; }
   [data-theme=dark] #spaceBtn.sel { background:#1f3a22; border-color:#3f7a3b; }
+
+  .codecards { flex:1; display:flex; flex-direction:column; gap:6px; max-height:60vh; overflow:auto; padding:1px; }
+  .codecard { position:relative; }
+  .codecard .eqcode { width:100%; min-height:46px; resize:none; overflow:hidden; display:block; font:13px/1.5 ui-monospace,Menlo,Consolas,monospace; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--field); color:var(--ink); }
+  .codecards .codecard:only-child .eqcode { min-height:150px; }
+  .codecard.active .eqcode { border-color:#9fd39b; }
+  .codecard .eqcode:focus { outline:2px solid var(--green); outline-offset:1px; }
+  .codecard .cnum { position:absolute; left:-2px; top:-6px; z-index:2; font-size:10px; font-weight:700; background:var(--panel); border:1px solid var(--line); color:var(--muted); border-radius:8px; padding:0 6px; }
+  .codecard.active .cnum { background:var(--green); border-color:var(--green); color:#fff; }
+  .codecards:has(.cnum) .eqcode { padding-top:10px; }
+  .pane .plabel #copy, .pane .plabel #addEq { padding:2px 9px; font-size:12px; }
+  .hov { position:fixed; pointer-events:none; z-index:4; display:none; border:1.5px dashed rgba(47,111,222,.75); border-radius:4px; background:rgba(47,111,222,.06); }
   .wrapinfo { font-size:12px; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; }
 </style>
 <style id="ml-static">/* MathLive static rendering styles (MIT licence) */
@@ -242,11 +254,11 @@
     </div>
     <div class="panes">
       <div class="pane">
-        <div class="plabel">LaTeX <span class="wrapinfo" id="wrapinfo"></span></div>
-        <div class="codewrap">
-          <textarea id="code" spellcheck="false" placeholder="Paste from Overleaf (or a Word equation)…  e.g. \frac{a+b}{c^2}   $E=mc^2$   \begin{equation} … \end{equation}&#10;&#10;Several equations? Put each on its own line."></textarea>
-          <button class="primary copycorner" id="copy" title="Copy all the LaTeX (Ctrl+Enter)">📋 Copy</button>
-        </div>
+        <div class="plabel">LaTeX <span class="wrapinfo" id="wrapinfo"></span>
+          <span class="row nowrap" style="margin-left:auto">
+            <button id="addEq" title="Add another equation (Alt+Enter)">＋ Equation</button>
+            <button class="primary" id="copy" title="Copy all the LaTeX (Ctrl+Enter)">📋 Copy</button></span></div>
+        <div class="codecards" id="codecards"></div>
         <textarea id="input" class="shadowta" tabindex="-1" aria-hidden="true"></textarea>
       </div>
       <div class="pane">
@@ -271,7 +283,7 @@
     </div>
     <div class="tips" id="tips">
       <kbd>/</kbd> fraction · <kbd>^</kbd> superscript · <kbd>_</kbd> subscript · <kbd>sqrt</kbd> root · <kbd>\alpha</kbd> Greek · <kbd>Tab</kbd> next part ·
-      select code on the left to shade it on the right · <kbd>Alt</kbd>+<kbd>K</kbd> all shortcuts
+      double-click a symbol to select it (again to grow) · select code on the left to shade it on the right · <kbd>Alt</kbd>+<kbd>K</kbd> all shortcuts
     </div>
     <div class="clean" id="clean"></div>
     <div class="symp" id="symPanel">
@@ -396,7 +408,11 @@ function start() {
 
   function buildOutput() {
     let body = mf.getValue('latex');
-    if (wrap.multi) body = body.replace(/^\\begin\{aligned\}/, '').replace(/\\end\{aligned\}$/, '');
+    if (wrap.multi) {
+      // unwrap the aligned block; anything typed after it joins the last row
+      const m = body.match(/^\\begin\{aligned\}([\s\S]*?)\\end\{aligned\}([\s\S]*)$/);
+      if (m) body = m[1] + (m[2].trim() ? ' ' + m[2].trim() : '');
+    }
     const extras = wrap.extras.length ? ' ' + wrap.extras.join(' ') : '';
     output.value = wrap.pre + body + extras + wrap.post;
   }
@@ -512,7 +528,16 @@ function start() {
   // same transformation load() applies, so the hidden copy matches the real field
   function fieldLatex(raw) {
     const p = parse(raw);
-    return p.multi ? `\\begin{aligned}${p.body}\\end{aligned}` : p.body;
+    let out = p.multi ? `\\begin{aligned}${p.body}\\end{aligned}` : p.body;
+    out = out.replace(/\\begin\s*\{[^}]*$/, ''); // a \begin{… still being typed
+    // never give the visual editor a top-level align/gather/… (MathLive then stays stuck in it):
+    // also covers an environment that is still being typed (no \end yet)
+    const m = out.match(/^\s*\\begin\{(align|gather|multline|flalign|alignat|eqnarray|equation|displaymath)\*?\}(?:\{[^}]*\})?/);
+    if (m) {
+      let inner = out.slice(m[0].length).replace(new RegExp(`\\\\end\\{${m[1]}\\*?\\}\\s*$`), '');
+      out = /^(align|flalign|alignat|eqnarray)$/.test(m[1]) ? `\\begin{aligned}${inner}\\end{aligned}` : /^(gather|multline)$/.test(m[1]) ? `\\begin{gathered}${inner}\\end{gathered}` : inner;
+    }
+    return out;
   }
   let ghost = null;
   function getGhost() {
@@ -2004,12 +2029,14 @@ function start() {
     ['Alt + I', 'Export as image', () => document.getElementById('expBtn').click()],
     ['Alt + Z', 'Undo last tool change', () => undoBtn.click()],
     ['Alt + E', 'Jump to the visual editor', () => mf.focus()],
-    ['Alt + L', 'Jump to the LaTeX box', () => document.getElementById('code').focus()],
+    ['Alt + L', 'Jump to the LaTeX box', () => input.focus()],
     ['Alt + D', 'Dark / light mode', () => themeBtn.click()],
     ['Alt + K', 'Show these shortcuts', () => document.getElementById('keysBtn').click()],
     ['Alt + H / T / B', 'Hat / tilde / bar on the selection', null],
     ['Alt + V / P / O', 'Vector arrow / prime / overline', null],
     ['Ctrl + wheel', 'Zoom the visual equation (over the visual pane)', null],
+    ['Alt + Enter', 'New equation box (in the LaTeX pane)', null],
+    ['Double-click', 'Select a symbol; again to grow the selection', null],
     ['Esc', 'Close open panels', null],
   ];
   const KEYMAP = { Enter: 0, KeyC: 1, KeyF: 2, KeyM: 3, KeyU: 4, KeyA: 5, KeyN: 6, KeyI: 7, KeyZ: 8, KeyE: 9, KeyL: 10, KeyD: 11, KeyK: 12 };
@@ -2027,24 +2054,25 @@ function start() {
   document.getElementById('keysBtn').onclick = () => keysPanel.classList.toggle('on');
   document.getElementById('keysClose').onclick = () => keysPanel.classList.remove('on');
 
-  // =================== Several equations in the code pane ===================
-  // The visible #code box holds all equations (one per line; multi-line environments
-  // and \[ … \] blocks stay together). The hidden #input always mirrors the *active*
-  // equation, so every existing tool keeps working on "the equation".
-  const code = document.getElementById('code');
+
+  // =================== One LaTeX box per equation ===================
+  // Each equation has its own box (#codecards). The hidden #input always mirrors the
+  // *active* box, so every existing tool keeps working on "the equation".
+  const cardsEl = document.getElementById('codecards');
   const eqlist = document.getElementById('eqlist');
   const mfwrapEl = document.querySelector('.mfwrap');
   const eqcount = document.getElementById('eqcount');
   const NV = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value');
-  let blocks = [], active = 0, syncing = false;
+  let cards = [], active = 0, syncing = false;
 
+  // split text into equations: one per line; environments and \[ … \] / $$ … $$ blocks stay together
   function splitBlocks(t) {
     const lines = [];
     for (let i = 0; ;) { const j = t.indexOf('\n', i), e = j < 0 ? t.length : j; lines.push({ s: i, e, txt: t.slice(i, e) }); if (j < 0) break; i = j + 1; }
     const out = [];
     for (let k = 0; k < lines.length; k++) {
       const L = lines[k], tr = L.txt.trim();
-      if (!tr || /^%/.test(tr)) continue;
+      if (!tr) continue;
       let endK = k;
       const env = tr.match(/^\\begin\s*\{([^}]+)\}/);
       if (env) {
@@ -2056,129 +2084,250 @@ function start() {
       } else if (tr.startsWith('$$') && tr.indexOf('$$', 2) < 0) {
         for (let m = k + 1; m < lines.length; m++) { endK = m; if (lines[m].txt.includes('$$')) break; }
       }
-      const s = L.s + (L.txt.length - L.txt.trimStart().length);
-      const last = lines[endK], e = last.e - (last.txt.length - last.txt.trimEnd().length);
-      out.push({ s, e });
+      const s = L.s + (L.txt.length - L.txt.trimStart().length), last = lines[endK];
+      out.push(t.slice(s, last.e - (last.txt.length - last.txt.trimEnd().length)));
       k = endK;
     }
     return out;
   }
-  const blk = () => blocks[active] || { s: code.value.length, e: code.value.length };
-  function pickActive(caret) {
-    if (!blocks.length) return 0;
-    let i = blocks.findIndex(b => caret >= b.s && caret <= b.e);
-    if (i < 0) { i = -1; blocks.forEach((b, j) => { if (b.e < caret) i = j; }); if (i < 0) i = 0; }
-    return i;
+  const autosize = (ta) => { ta.style.height = 'auto'; ta.style.height = Math.max(46, ta.scrollHeight + 2) + 'px'; };
+  const cur = () => cards[active];
+
+  function makeCard(text) {
+    const ta = document.createElement('textarea');
+    ta.className = 'eqcode';
+    ta.spellcheck = false;
+    NV.set.call(ta, text || '');
+    ta.addEventListener('focus', () => { setActive(cards.indexOf(ta)); input.dispatchEvent(new Event('focus')); });
+    ta.addEventListener('blur', () => {
+      input.dispatchEvent(new Event('blur'));
+      // an emptied box disappears (unless it's the only one)
+      setTimeout(() => { if (!ta.value.trim() && cards.length > 1 && document.activeElement !== ta) removeCard(cards.indexOf(ta), false); }, 150);
+    });
+    ta.addEventListener('input', () => {
+      autosize(ta);
+      if (!maybeSplit(ta)) { syncing = true; NV.set.call(input, ta.value); syncing = false; renderList(); }
+      input.dispatchEvent(new Event('input'));
+    });
+    // wait until the visual pane has drawn this equation before shading
+    ['keyup', 'mouseup', 'select'].forEach(ev => ta.addEventListener(ev, () => requestAnimationFrame(() => requestAnimationFrame(() => input.dispatchEvent(new Event(ev))))));
+    ta.addEventListener('paste', (e) => {
+      const ev = new ClipboardEvent('paste', { clipboardData: e.clipboardData, cancelable: true });
+      input.dispatchEvent(ev);                       // Word / MathML conversion
+      if (ev.defaultPrevented) { e.preventDefault(); setTimeout(() => maybeSplit(ta), 0); }
+    });
+    ta.addEventListener('keydown', (e) => {
+      const i = cards.indexOf(ta);
+      if (e.key === 'Enter' && e.altKey) { e.preventDefault(); addCard(i + 1, '', true); return; }
+      if (e.key === 'Backspace' && !ta.value && cards.length > 1) { e.preventDefault(); removeCard(i, true); return; }
+      const atStart = ta.selectionStart === 0 && ta.selectionEnd === 0, atEnd = ta.selectionStart === ta.value.length;
+      if (e.key === 'ArrowUp' && !e.shiftKey && i > 0 && !ta.value.slice(0, ta.selectionStart).includes('\n')) { e.preventDefault(); focusCard(i - 1, 'end'); }
+      else if (e.key === 'ArrowDown' && !e.shiftKey && i < cards.length - 1 && !ta.value.slice(ta.selectionEnd).includes('\n')) { e.preventDefault(); focusCard(i + 1, 'start'); }
+      else if (e.key === 'ArrowLeft' && atStart && i > 0) { e.preventDefault(); focusCard(i - 1, 'end'); }
+      else if (e.key === 'ArrowRight' && atEnd && !e.shiftKey && i < cards.length - 1) { e.preventDefault(); focusCard(i + 1, 'start'); }
+    });
+    return ta;
   }
-  function refresh(byCaret) {
-    blocks = splitBlocks(code.value);
-    if (byCaret) active = pickActive(code.selectionStart);
-    active = Math.max(0, Math.min(active, Math.max(0, blocks.length - 1)));
-    const b = blk();
-    const txt = blocks.length ? code.value.slice(b.s, b.e) : '';
-    const changed = NV.get.call(input) !== txt;
-    NV.set.call(input, txt);
+  // a box that now holds several equations (paste, or a new line) is split into several boxes
+  function maybeSplit(ta) {
+    const parts = splitBlocks(ta.value);
+    if (parts.length <= 1) return false;
+    const i = cards.indexOf(ta);
+    NV.set.call(ta, parts[0]); autosize(ta);
+    parts.slice(1).forEach((t, k) => addCard(i + 1 + k, t, false));
+    renderCards();
+    focusCard(i + parts.length - 1, 'end');
+    showNote(`Split into ${parts.length} equations.`);
+    return true;
+  }
+  function renderCards() {
+    cardsEl.innerHTML = '';
+    cards.forEach((ta, i) => {
+      const w = document.createElement('div');
+      w.className = 'codecard' + (i === active ? ' active' : '');
+      if (cards.length > 1) { const n = document.createElement('span'); n.className = 'cnum'; n.textContent = i + 1; w.appendChild(n); }
+      w.appendChild(ta);
+      cardsEl.appendChild(w);
+    });
+    cards.forEach(autosize); // size them once they are all in place
+    cards[0].placeholder = cards.length === 1 ? 'Paste from Overleaf (or a Word equation)…  e.g. \\frac{a+b}{c^2}   $E=mc^2$   \\begin{equation} … \\end{equation}\n\nSeveral equations? Paste them all — each gets its own box.' : '';
     renderList();
-    return changed;
   }
-  // writing to the active equation (from any tool) updates its place in the code box
+  function addCard(at, text, focus) {
+    const ta = makeCard(text);
+    cards.splice(at, 0, ta);
+    renderCards();
+    if (focus) focusCard(at, 'end');
+    return ta;
+  }
+  function removeCard(i, focusPrev) {
+    if (i < 0 || cards.length <= 1) return;
+    cards.splice(i, 1);
+    if (active >= cards.length) active = cards.length - 1;
+    renderCards();
+    if (focusPrev) focusCard(Math.max(0, i - 1), 'end');
+    else setActive(active, true);
+  }
+  function focusCard(i, where) {
+    const ta = cards[i]; if (!ta) return;
+    ta.focus();
+    const p = where === 'start' ? 0 : ta.value.length;
+    ta.setSelectionRange(p, p);
+  }
+  function setActive(i, force) {
+    if (i < 0 || i >= cards.length) return;
+    if (i === active && !force && NV.get.call(input) === cards[i].value) return;
+    active = i;
+    syncing = true; NV.set.call(input, cards[i].value); syncing = false;
+    cardsEl.querySelectorAll('.codecard').forEach((w, k) => w.classList.toggle('active', k === i));
+    renderList();
+    load(); clearHl();
+  }
+
+  // the hidden #input is a window onto the active box
   Object.defineProperty(input, 'value', {
     configurable: true,
     get() { return NV.get.call(input); },
     set(v) {
       NV.set.call(input, v);
       if (syncing) return;
-      let b = blk();
-      if (!blocks.length) { // empty box (or only blank lines): the equation becomes the content
-        const keep = code.value.trim() ? code.value.replace(/\s*$/, '\n') : '';
-        b = { s: keep.length, e: code.value.length };
-      }
-      const top = code.scrollTop;
-      NV.set.call(code, code.value.slice(0, b.s) + v + code.value.slice(b.e));
-      code.scrollTop = top;
-      blocks = splitBlocks(code.value);
-      active = pickActive(b.s);
+      if (!cards.length) { cards.push(makeCard('')); active = 0; renderCards(); }
+      NV.set.call(cur(), v); autosize(cur());
       renderList();
     },
   });
-  // selection and focus of the hidden box map onto the active equation in the code box
-  // if the cursor moved to another equation without an event we saw, switch first
-  function ensureActive() {
-    if (document.activeElement !== code && !code.contains(document.activeElement)) return;
-    const want = pickActive(code.selectionStart);
-    if (want !== active || splitBlocks(code.value).length !== blocks.length) caretMoved();
-  }
-  Object.defineProperty(input, 'selectionStart', { configurable: true, get() { ensureActive(); const b = blk(); return Math.max(0, Math.min(NV.get.call(input).length, code.selectionStart - b.s)); } });
-  Object.defineProperty(input, 'selectionEnd', { configurable: true, get() { ensureActive(); const b = blk(); return Math.max(0, Math.min(NV.get.call(input).length, code.selectionEnd - b.s)); } });
-  input.setSelectionRange = (a, b2) => { const b = blk(); code.setSelectionRange(b.s + a, b.s + b2); };
-  input.focus = () => code.focus();
-  input.select = () => code.select();
+  Object.defineProperty(input, 'selectionStart', { configurable: true, get() { return cur() ? cur().selectionStart : 0; } });
+  Object.defineProperty(input, 'selectionEnd', { configurable: true, get() { return cur() ? cur().selectionEnd : 0; } });
+  input.setSelectionRange = (a, b) => { if (cur()) cur().setSelectionRange(a, b); };
+  input.focus = () => { if (cur()) cur().focus(); };
+  input.select = () => { if (cur()) cur().select(); };
 
-  // typing / moving the cursor in the code box
-  code.addEventListener('input', () => {
-    syncing = true; refresh(true); syncing = false;
-    input.dispatchEvent(new Event('input'));
-  });
-  function caretMoved() {
-    const before = active;
-    syncing = true; const changed = refresh(true); syncing = false;
-    if (before !== active || changed) { load(); clearHl(); return true; }
-    return false;
-  }
-  ['keyup', 'mouseup', 'select', 'focus'].forEach(ev => code.addEventListener(ev, () => {
-    const switched = caretMoved();
-    // after switching equation, wait for the visual pane to redraw before shading
-    if (switched && ev !== 'focus') requestAnimationFrame(() => requestAnimationFrame(() => input.dispatchEvent(new Event(ev))));
-    else input.dispatchEvent(new Event(ev));
-  }));
-  code.addEventListener('blur', () => input.dispatchEvent(new Event('blur')));
-  code.addEventListener('paste', (e) => {
-    caretMoved();
-    const ev = new ClipboardEvent('paste', { clipboardData: e.clipboardData, cancelable: true });
-    input.dispatchEvent(ev);
-    if (ev.defaultPrevented) e.preventDefault();
-  });
-
-  // the visual pane: the active equation is editable, the others are shown and clickable
+  // the visual pane mirrors the boxes: the active one is editable, the others are clickable
   function renderList() {
     eqlist.querySelectorAll('.eqstatic').forEach(n => n.remove());
-    const many = blocks.length > 1;
+    const many = cards.length > 1;
     eqlist.classList.toggle('many', many);
-    eqcount.textContent = many ? `· equation ${active + 1} of ${blocks.length}` : '';
+    eqcount.textContent = many ? `· equation ${active + 1} of ${cards.length}` : '';
     if (!many) return;
-    blocks.forEach((b, i) => {
+    cards.forEach((ta, i) => {
       if (i === active) return;
       const d = document.createElement('div');
       d.className = 'eqstatic';
       d.title = 'Click to edit this equation';
-      d.innerHTML = `<span class="eqn">${i + 1}</span><span class="eqm">${renderStatic(fieldLatex(code.value.slice(b.s, b.e)))}</span>`;
-      d.onclick = () => activate(i);
+      d.innerHTML = `<span class="eqn">${i + 1}</span><span class="eqm">${ta.value.trim() ? renderStatic(fieldLatex(ta.value)) : '<span class="muted">(empty)</span>'}</span>`;
+      d.onclick = () => { setActive(i); mf.focus(); setTimeout(() => mf.executeCommand('moveToMathfieldEnd'), 0); };
       eqlist.insertBefore(d, i < active ? mfwrapEl : null);
     });
     mfwrapEl.dataset.n = active + 1;
   }
-  function activate(i) {
-    if (!blocks[i]) return;
-    active = i;
-    code.setSelectionRange(blocks[i].e, blocks[i].e);
-    syncing = true; refresh(false); syncing = false;
-    load(); clearHl();
-    mf.focus(); mf.executeCommand('moveToMathfieldEnd');
-  }
-  // Copy and Clear work on everything; history keeps the active equation
+  const allText = () => cards.map(t => t.value.trim()).filter(Boolean).join('\n');
+
+  document.getElementById('addEq').addEventListener('mousedown', e => e.preventDefault());
+  document.getElementById('addEq').onclick = () => addCard(active + 1, '', true);
   document.getElementById('copy').onclick = async () => {
-    const t = code.value.trim();
-    try { await navigator.clipboard.writeText(t); status.textContent = 'Copied ✓'; }
-    catch (e) { code.select(); status.textContent = 'Selected — press Ctrl+C'; }
+    try { await navigator.clipboard.writeText(allText()); status.textContent = cards.length > 1 ? `Copied ${cards.length} equations ✓` : 'Copied ✓'; }
+    catch (e) { cur().select(); status.textContent = 'Selected — press Ctrl+C'; }
     setTimeout(() => (status.textContent = ''), 2500);
   };
-  document.getElementById('copy').addEventListener('click', () => saveHistory(input.value));
   document.getElementById('clear').onclick = () => {
     saveHistory(input.value);
     pushUndo(input.value);
-    syncing = true; NV.set.call(code, ''); refresh(false); syncing = false;
-    load(); clearHl(); code.focus();
+    cards = [makeCard('')]; active = 0; renderCards();
+    syncing = true; NV.set.call(input, ''); syncing = false;
+    load(); clearHl(); cur().focus();
   };
+  window.__olveCards = { all: allText, count: () => cards.length, active: () => active, box: (i) => cards[i] };
+
+  // =================== Easier selection in the visual box ===================
+  const hov = document.createElement('div');
+  hov.className = 'hov';
+  document.body.appendChild(hov);
+  const normL = (s) => (s || '').replace(/\s+/g, '');
+  function atomsList() {
+    const out = [];
+    for (let i = 1; i <= mf.lastOffset; i++) {
+      const x = mf.getElementInfo(i);
+      if (x && x.bounds && x.bounds.width > 0 && x.latex) out.push({ i, latex: x.latex, r: x.bounds });
+    }
+    return out;
+  }
+  function atomAt(x, y) {
+    // prefer a symbol the pointer is really inside; only then allow a small margin
+    const list = atomsList();
+    for (const tol of [0, 3]) {
+      let best = null;
+      for (const a of list) {
+        const r = a.r;
+        if (x >= r.left - tol && x <= r.right + tol && y >= r.top - tol && y <= r.bottom + tol) {
+          const area = r.width * r.height;
+          if (!best || area < best.area) best = { ...a, area };
+        }
+      }
+      if (best) return best;
+    }
+    return null;
+  }
+  function atomRange(at) {
+    for (let k = at.i - 1; k >= 0; k--) if (normL(mf.getValue(k, at.i, 'latex')) === normL(at.latex)) return [k, at.i];
+    return [at.i - 1, at.i];
+  }
+  function selRect() {
+    const r = mf.selection && mf.selection.ranges && mf.selection.ranges[0];
+    if (!r || r[0] === r[1]) return null;
+    return rangeRect([Math.min(...r), Math.max(...r)]);
+  }
+  // hover: outline what a double-click would select
+  mf.addEventListener('pointermove', (e) => {
+    if (e.buttons) { hov.style.display = 'none'; return; }
+    const a = atomAt(e.clientX, e.clientY);
+    if (!a) { hov.style.display = 'none'; return; }
+    Object.assign(hov.style, { display: 'block', left: (a.r.left - 2) + 'px', top: (a.r.top - 2) + 'px', width: (a.r.width + 4) + 'px', height: (a.r.height + 4) + 'px' });
+  });
+  mf.addEventListener('pointerleave', () => { hov.style.display = 'none'; });
+  addEventListener('scroll', () => { hov.style.display = 'none'; }, true);
+  // double-click: select the symbol; double-click again: grow to the enclosing part, then everything
+  let lastDbl = null;
+  mf.addEventListener('dblclick', (e) => {
+    const x = e.clientX, y = e.clientY;
+    setTimeout(() => {
+      let range = null;
+      const lr = lastDbl && rangeRect(lastDbl.range);
+      const again = lastDbl && lr && Date.now() - lastDbl.t < 2500 && lastDbl.value === mf.getValue('latex') &&
+        x >= lr.left - 2 && x <= lr.right + 2 && y >= lr.top - 2 && y <= lr.bottom + 2;   // double-clicked inside the last selection
+      if (again) {
+        // grow: smallest atom that contains what we selected last time
+        const sr = rangeRect(lastDbl.range);
+        let best = null;
+        if (sr) for (const a of atomsList()) {
+          const r = a.r, area = r.width * r.height;
+          if (r.left <= sr.left + 1 && r.right >= sr.right - 1 && r.top <= sr.top + 1 && r.bottom >= sr.bottom - 1 && area > sr.width * sr.height + 1)
+            if (!best || area < best.area) best = { ...a, area };
+        }
+        range = best ? atomRange(best) : [0, mf.lastOffset];
+      } else {
+        const a = atomAt(x, y);
+        if (a) range = atomRange(a);
+      }
+      if (!range) return;
+      mf.selection = { ranges: [range] };
+      lastDbl = { range, x, y, t: Date.now(), value: mf.getValue('latex') };
+      hov.style.display = 'none';
+      const rr = rangeRect(range);
+      if (rr) showSelbarAt(rr);
+    }, 0);
+  });
+  // shift+click: extend the selection from the cursor to the clicked symbol
+  let shiftAnchor = null;
+  mf.addEventListener('pointerdown', (e) => {
+    shiftAnchor = e.shiftKey ? (mf.selection && mf.selection.ranges ? mf.selection.ranges[0][0] : mf.position) : null;
+  }, true);
+  mf.addEventListener('click', (e) => {
+    if (shiftAnchor === null || !e.shiftKey) return;
+    const a = atomAt(e.clientX, e.clientY);
+    if (!a) return;
+    const [s0, e0] = atomRange(a), anchor = shiftAnchor;
+    setTimeout(() => { mf.selection = { ranges: [[Math.min(anchor, s0), Math.max(anchor, e0)]] }; }, 0);
+  });
 
   // ---------- tips line can be hidden ----------
   const tipsEl = document.getElementById('tips');
@@ -2237,13 +2386,17 @@ function start() {
     const w = selbar.offsetWidth, h = selbar.offsetHeight;
     // stay inside the visual pane (never over the code pane or its Copy button), just below the selection
     const pane = mf.getBoundingClientRect();
-    let x = rect.left + rect.width / 2 - w / 2, y = rect.bottom + 8;
+    // go below the whole equation (not just the selection), so it never covers a denominator or subscript
+    let bottom = rect.bottom;
+    try { for (const a of atomsList()) bottom = Math.max(bottom, a.r.bottom); } catch (e) {}
+    let x = rect.left + rect.width / 2 - w / 2, y = bottom + 6;
     if (y + h > Math.min(innerHeight - 6, pane.bottom + h + 12)) y = rect.top - h - 8;
     const minX = Math.max(6, pane.left), maxX = Math.min(innerWidth - 6, Math.max(pane.right, pane.left + w)) - w;
     x = Math.max(minX, Math.min(x, maxX));
     selbar.style.left = x + 'px'; selbar.style.top = y + 'px';
   }
-  function hideSelbar() { selbar.classList.remove('on'); }
+  function hideSelbar() { clearTimeout(selbarHideT); selbar.classList.remove('on'); }
+  function scheduleHide(ms) { clearTimeout(selbarHideT); selbarHideT = setTimeout(hideSelbar, ms); }
   function rangeRect([a, b]) {
     let L = Infinity, T = Infinity, R = -Infinity, B = -Infinity;
     for (let i = a + 1; i <= b; i++) { const r = mf.getElementInfo(i)?.bounds; if (!r || r.width <= 0) continue; L = Math.min(L, r.left); T = Math.min(T, r.top); R = Math.max(R, r.right); B = Math.max(B, r.bottom); }
@@ -2252,22 +2405,23 @@ function start() {
   // selection made in the visual box
   mf.addEventListener('selection-change', () => {
     const r = mf.selection && mf.selection.ranges && mf.selection.ranges[0];
-    if (!r || r[0] === r[1] || document.activeElement !== mf) { selbarHideT = setTimeout(hideSelbar, 120); return; }
+    if (!r || r[0] === r[1] || document.activeElement !== mf) { scheduleHide(120); return; }
     const rect = rangeRect([Math.min(...r), Math.max(...r)]);
     if (rect) showSelbarAt(rect);
   });
-  mf.addEventListener('blur', () => { selbarHideT = setTimeout(hideSelbar, 150); });
+  mf.addEventListener('blur', () => { scheduleHide(150); });
   // selection made in the code box: show the bar above the shaded part
-  const codeBox = document.getElementById('code');
+  const codeBoxes = document.getElementById('codecards');
   const codeSel = () => {
     setTimeout(() => {
-      if (document.activeElement !== codeBox || codeBox.selectionStart === codeBox.selectionEnd || hl.style.display !== 'block') { hideSelbar(); return; }
+      const ta = document.activeElement;
+      if (!ta || !codeBoxes.contains(ta) || ta.selectionStart === ta.selectionEnd || hl.style.display !== 'block') { hideSelbar(); return; }
       showSelbarAt(hl.getBoundingClientRect());
-    }, 60);
+    }, 120);
   };
-  ['mouseup', 'keyup', 'select'].forEach(ev => codeBox.addEventListener(ev, codeSel));
-  codeBox.addEventListener('blur', () => { selbarHideT = setTimeout(hideSelbar, 150); });
-  addEventListener('scroll', hideSelbar, true);
+  ['mouseup', 'keyup', 'select'].forEach(ev => codeBoxes.addEventListener(ev, codeSel, true));
+  codeBoxes.addEventListener('focusout', () => { scheduleHide(150); });
+  addEventListener('scroll', (e) => { if (e.composedPath && e.composedPath().includes(mf)) return; hideSelbar(); }, true);
   // clicking anywhere else (or Esc) closes it; a new selection shows it again
   document.addEventListener('pointerdown', (e) => { if (!selbar.contains(e.target)) hideSelbar(); }, true);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideSelbar(); });
