@@ -1,0 +1,1272 @@
+{
+  "name": "tex-lualatex",
+  "files": [
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/addliga",
+      "name": "addliga.sty",
+      "start": 0,
+      "end": 527
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/bezierplot",
+      "name": "bezierplot.lua",
+      "start": 527,
+      "end": 30325
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/bezierplot",
+      "name": "bezierplot.sty",
+      "start": 30325,
+      "end": 30998
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/combofont",
+      "name": "combofont.sty",
+      "start": 30998,
+      "end": 34279
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/cstypo",
+      "name": "cstypo.sty",
+      "start": 34279,
+      "end": 35157
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/ekdosis",
+      "name": "ekdosis.lua",
+      "start": 35157,
+      "end": 103930
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/ekdosis",
+      "name": "ekdosis.sty",
+      "start": 103930,
+      "end": 155868
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/emojicite",
+      "name": "emojicite.sty",
+      "start": 155868,
+      "end": 159001
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag",
+      "name": "fancymag.sty",
+      "start": 159001,
+      "end": 192915
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag/img",
+      "name": "fancymag-about_bg_1.jpg",
+      "start": 192915,
+      "end": 481947
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag/img",
+      "name": "fancymag-about_bg_2.jpg",
+      "start": 481947,
+      "end": 772715
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag/img",
+      "name": "fancymag-back.jpg",
+      "start": 772715,
+      "end": 875689
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag/img",
+      "name": "fancymag-bg_all.jpg",
+      "start": 875689,
+      "end": 889446
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag/img",
+      "name": "fancymag-bgw.jpg",
+      "start": 889446,
+      "end": 921345
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag/img",
+      "name": "fancymag-blank.png",
+      "start": 921345,
+      "end": 921488
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag/img",
+      "name": "fancymag-di.png",
+      "start": 921488,
+      "end": 932442
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag/img",
+      "name": "fancymag-di1.png",
+      "start": 932442,
+      "end": 942458
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag/img",
+      "name": "fancymag-front.jpg",
+      "start": 942458,
+      "end": 1147519
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag/img",
+      "name": "fancymag-logo.png",
+      "start": 1147519,
+      "end": 1265007
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag/img",
+      "name": "fancymag-m1_sig.png",
+      "start": 1265007,
+      "end": 1269687
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag/img",
+      "name": "fancymag-m_sig.png",
+      "start": 1269687,
+      "end": 1274367
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag/img",
+      "name": "fancymag-msg.png",
+      "start": 1274367,
+      "end": 1636224
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag/img",
+      "name": "fancymag-msg1.png",
+      "start": 1636224,
+      "end": 1897275
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag/img",
+      "name": "fancymag-msg_bg.jpg",
+      "start": 1897275,
+      "end": 2061487
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag/img",
+      "name": "fancymag-msg_bg_b.jpg",
+      "start": 2061487,
+      "end": 2262324
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/fancymag/img",
+      "name": "fancymag-side.jpeg",
+      "start": 2262324,
+      "end": 2347786
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/gitinfo-lua",
+      "name": "gitinfo-lua.sty",
+      "start": 2347786,
+      "end": 2351167
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/ideavault",
+      "name": "ideavault-lua.lua",
+      "start": 2351167,
+      "end": 2360226
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/ideavault",
+      "name": "ideavault.sty",
+      "start": 2360226,
+      "end": 2362458
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/innerscript",
+      "name": "innerscript.sty",
+      "start": 2362458,
+      "end": 2372559
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/kkluaverb",
+      "name": "KKluaverb.lua",
+      "start": 2372559,
+      "end": 2388921
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/kkluaverb",
+      "name": "KKluaverb.sty",
+      "start": 2388921,
+      "end": 2392368
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/ligtype",
+      "name": "ligtype.lua",
+      "start": 2392368,
+      "end": 2490548
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/ligtype",
+      "name": "ligtype.sty",
+      "start": 2490548,
+      "end": 2492649
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/linebreaker",
+      "name": "linebreaker.lua",
+      "start": 2492649,
+      "end": 2510501
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/linebreaker",
+      "name": "linebreaker.sty",
+      "start": 2510501,
+      "end": 2511898
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/longmath",
+      "name": "longmath.lua",
+      "start": 2511898,
+      "end": 2528610
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/longmath",
+      "name": "longmath.sty",
+      "start": 2528610,
+      "end": 2537664
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/lua-placeholders",
+      "name": "lua-placeholders.sty",
+      "start": 2537664,
+      "end": 2540503
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/lua-typo",
+      "name": "lua-typo-2021-04-18.sty",
+      "start": 2540503,
+      "end": 2566145
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/lua-typo",
+      "name": "lua-typo-2023-03-08.sty",
+      "start": 2566145,
+      "end": 2607461
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/lua-typo",
+      "name": "lua-typo.cfg",
+      "start": 2607461,
+      "end": 2609963
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/lua-typo",
+      "name": "lua-typo.sty",
+      "start": 2609963,
+      "end": 2660972
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/lua-ul",
+      "name": "docstrip-luacode.sty",
+      "start": 2660972,
+      "end": 2662404
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/lua-ul",
+      "name": "lua-ul-patches-preserve-attr.lua",
+      "start": 2662404,
+      "end": 2664698
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/lua-ul",
+      "name": "lua-ul.lua",
+      "start": 2664698,
+      "end": 2680614
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/lua-ul",
+      "name": "lua-ul.sty",
+      "start": 2680614,
+      "end": 2689034
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/lua-ul",
+      "name": "pre_append_to_vlist_filter.lua",
+      "start": 2689034,
+      "end": 2691237
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/lua-widow-control",
+      "name": "lua-widow-control-2022-02-22.sty",
+      "start": 2691237,
+      "end": 2694259
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/lua-widow-control",
+      "name": "lua-widow-control.sty",
+      "start": 2694259,
+      "end": 2704694
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/_lib",
+      "name": "luacas-inspect.lua",
+      "start": 2704694,
+      "end": 2714299
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/_lib",
+      "name": "luacas-pepperfish.lua",
+      "start": 2714299,
+      "end": 2734271
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/_lib",
+      "name": "luacas-table.lua",
+      "start": 2734271,
+      "end": 2738853
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/algebra",
+      "name": "luacas-absexpression.lua",
+      "start": 2738853,
+      "end": 2740810
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/algebra",
+      "name": "luacas-equation.lua",
+      "start": 2740810,
+      "end": 2746584
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/algebra",
+      "name": "luacas-euclideandomain.lua",
+      "start": 2746584,
+      "end": 2748360
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/algebra",
+      "name": "luacas-factorialexpression.lua",
+      "start": 2748360,
+      "end": 2751098
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/algebra",
+      "name": "luacas-field.lua",
+      "start": 2751098,
+      "end": 2752671
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/algebra",
+      "name": "luacas-integer.lua",
+      "start": 2752671,
+      "end": 2777741
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/algebra",
+      "name": "luacas-integerquotientring.lua",
+      "start": 2777741,
+      "end": 2782650
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/algebra",
+      "name": "luacas-logarithm.lua",
+      "start": 2782650,
+      "end": 2787895
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/algebra",
+      "name": "luacas-polynomialring.lua",
+      "start": 2787895,
+      "end": 2816636
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/algebra",
+      "name": "luacas-rational.lua",
+      "start": 2816636,
+      "end": 2823966
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/algebra",
+      "name": "luacas-ring.lua",
+      "start": 2823966,
+      "end": 2833606
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/algebra",
+      "name": "luacas-rootexpression.lua",
+      "start": 2833606,
+      "end": 2838484
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/algebra",
+      "name": "luacas-sqrtexpression.lua",
+      "start": 2838484,
+      "end": 2845610
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/algebra",
+      "name": "luacas-trigexpression.lua",
+      "start": 2845610,
+      "end": 2857745
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/algebra/polynomialring",
+      "name": "luacas-berlekampfactoring.lua",
+      "start": 2857745,
+      "end": 2863367
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/algebra/polynomialring",
+      "name": "luacas-decomposition.lua",
+      "start": 2863367,
+      "end": 2866434
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/algebra/polynomialring",
+      "name": "luacas-zassenhausfactoring.lua",
+      "start": 2866434,
+      "end": 2873766
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/calculus",
+      "name": "luacas-derivativeexpression.lua",
+      "start": 2873766,
+      "end": 2883480
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/calculus",
+      "name": "luacas-diffexpression.lua",
+      "start": 2883480,
+      "end": 2889187
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/calculus",
+      "name": "luacas-integralexpression.lua",
+      "start": 2889187,
+      "end": 2922485
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/core/binaryoperation",
+      "name": "luacas-difference.lua",
+      "start": 2922485,
+      "end": 2923043
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/core/binaryoperation",
+      "name": "luacas-power.lua",
+      "start": 2923043,
+      "end": 2929452
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/core/binaryoperation",
+      "name": "luacas-product.lua",
+      "start": 2929452,
+      "end": 2939378
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/core/binaryoperation",
+      "name": "luacas-quotient.lua",
+      "start": 2939378,
+      "end": 2939935
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/core/binaryoperation",
+      "name": "luacas-sum.lua",
+      "start": 2939935,
+      "end": 2948557
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/core",
+      "name": "luacas-atomicexpression.lua",
+      "start": 2948557,
+      "end": 2950157
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/core",
+      "name": "luacas-binaryoperation.lua",
+      "start": 2950157,
+      "end": 2982048
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/core",
+      "name": "luacas-compoundexpression.lua",
+      "start": 2982048,
+      "end": 2983325
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/core",
+      "name": "luacas-constantexpression.lua",
+      "start": 2983325,
+      "end": 2984886
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/core",
+      "name": "luacas-expression.lua",
+      "start": 2984886,
+      "end": 2993826
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/core",
+      "name": "luacas-functionexpression.lua",
+      "start": 2993826,
+      "end": 3003722
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/core",
+      "name": "luacas-symbolexpression.lua",
+      "start": 3003722,
+      "end": 3007191
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas",
+      "name": "luacas.sty",
+      "start": 3007191,
+      "end": 3014929
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas",
+      "name": "luacas_init.lua",
+      "start": 3014929,
+      "end": 3024721
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test/calculus",
+      "name": "luacas-derivatives.lua",
+      "start": 3024721,
+      "end": 3026362
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test/calculus",
+      "name": "luacas-integrals.lua",
+      "start": 3026362,
+      "end": 3033298
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test/expressions",
+      "name": "luacas-autosimplify.lua",
+      "start": 3033298,
+      "end": 3039596
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test/expressions",
+      "name": "luacas-collect.lua",
+      "start": 3039596,
+      "end": 3040433
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test/expressions",
+      "name": "luacas-equations.lua",
+      "start": 3040433,
+      "end": 3041335
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test/expressions",
+      "name": "luacas-functions.lua",
+      "start": 3041335,
+      "end": 3041885
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test/expressions",
+      "name": "luacas-logarithms.lua",
+      "start": 3041885,
+      "end": 3042892
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test/expressions",
+      "name": "luacas-rationalexponent.lua",
+      "start": 3042892,
+      "end": 3043727
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test/expressions",
+      "name": "luacas-simplify.lua",
+      "start": 3043727,
+      "end": 3044657
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test/expressions",
+      "name": "luacas-substitute.lua",
+      "start": 3044657,
+      "end": 3045053
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test",
+      "name": "luacas-helper.lua",
+      "start": 3045053,
+      "end": 3056525
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test",
+      "name": "luacas-main.lua",
+      "start": 3056525,
+      "end": 3061623
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test",
+      "name": "luacas-parser.lua",
+      "start": 3061623,
+      "end": 3070405
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test/polynomials",
+      "name": "luacas-partialfractions.lua",
+      "start": 3070405,
+      "end": 3071006
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test/polynomials",
+      "name": "luacas-polynomial.lua",
+      "start": 3071006,
+      "end": 3078340
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test/polynomials",
+      "name": "luacas-polynomialmod.lua",
+      "start": 3078340,
+      "end": 3084608
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test/polynomials",
+      "name": "luacas-roots.lua",
+      "start": 3084608,
+      "end": 3088662
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test/rings",
+      "name": "luacas-conversion.lua",
+      "start": 3088662,
+      "end": 3101680
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test/rings",
+      "name": "luacas-modulararithmetic.lua",
+      "start": 3101680,
+      "end": 3102217
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacas/test/rings",
+      "name": "luacas-number.lua",
+      "start": 3102217,
+      "end": 3105610
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacensor",
+      "name": "luacensor.sty",
+      "start": 3105610,
+      "end": 3120002
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacode",
+      "name": "luacode.sty",
+      "start": 3120002,
+      "end": 3125158
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luacomplex",
+      "name": "luacomplex.sty",
+      "start": 3125158,
+      "end": 3129396
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luagcd",
+      "name": "luagcd.sty",
+      "start": 3129396,
+      "end": 3138593
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luahttp",
+      "name": "luahttp-display.lua",
+      "start": 3138593,
+      "end": 3147664
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luahttp",
+      "name": "luahttp-fetch.lua",
+      "start": 3147664,
+      "end": 3153568
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luahttp",
+      "name": "luahttp.sty",
+      "start": 3153568,
+      "end": 3157929
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luahyphenrules",
+      "name": "luahyphenrules.sty",
+      "start": 3157929,
+      "end": 3163117
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luaimageembed",
+      "name": "luaimageembed.sty",
+      "start": 3163117,
+      "end": 3165266
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luaindex",
+      "name": "luaindex.sty",
+      "start": 3165266,
+      "end": 3174700
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luainputenc",
+      "name": "luainputenc.lua",
+      "start": 3174700,
+      "end": 3183084
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luainputenc",
+      "name": "luainputenc.sty",
+      "start": 3183084,
+      "end": 3189332
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luainputenc",
+      "name": "lutf8.def",
+      "start": 3189332,
+      "end": 3192652
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luainputenc",
+      "name": "lutf8x.def",
+      "start": 3192652,
+      "end": 3197076
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/lualatex-math",
+      "name": "lualatex-math.lua",
+      "start": 3197076,
+      "end": 3198389
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/lualatex-math",
+      "name": "lualatex-math.sty",
+      "start": 3198389,
+      "end": 3207046
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/lualatex-truncate",
+      "name": "lualatex-truncate.sty",
+      "start": 3207046,
+      "end": 3210640
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/lualinalg",
+      "name": "lualinalg.sty",
+      "start": 3210640,
+      "end": 3249241
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamathalign",
+      "name": "luamathalign-luacmd.lua",
+      "start": 3249241,
+      "end": 3249924
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamathalign",
+      "name": "luamathalign.lua",
+      "start": 3249924,
+      "end": 3263239
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamathalign",
+      "name": "luamathalign.sty",
+      "start": 3263239,
+      "end": 3266141
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamaths",
+      "name": "luamaths-complex.lua",
+      "start": 3266141,
+      "end": 3276602
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamaths",
+      "name": "luamaths-fractions.lua",
+      "start": 3276602,
+      "end": 3283178
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamaths",
+      "name": "luamaths.sty",
+      "start": 3283178,
+      "end": 3285508
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamml",
+      "name": "luamml-amsmath.lua",
+      "start": 3285508,
+      "end": 3294893
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamml",
+      "name": "luamml-array.lua",
+      "start": 3294893,
+      "end": 3300056
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamml",
+      "name": "luamml-convert.lua",
+      "start": 3300056,
+      "end": 3327311
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamml",
+      "name": "luamml-data-combining.lua",
+      "start": 3327311,
+      "end": 3328137
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamml",
+      "name": "luamml-data-stretchy.lua",
+      "start": 3328137,
+      "end": 3339654
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamml",
+      "name": "luamml-legacy-mappings.lua",
+      "start": 3339654,
+      "end": 3343267
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamml",
+      "name": "luamml-lr.lua",
+      "start": 3343267,
+      "end": 3345881
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamml",
+      "name": "luamml-patches-amsmath.sty",
+      "start": 3345881,
+      "end": 3346027
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamml",
+      "name": "luamml-patches-kernel.sty",
+      "start": 3346027,
+      "end": 3347301
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamml",
+      "name": "luamml-pdf.sty",
+      "start": 3347301,
+      "end": 3353660
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamml",
+      "name": "luamml-structelemwriter.lua",
+      "start": 3353660,
+      "end": 3359807
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamml",
+      "name": "luamml-table.lua",
+      "start": 3359807,
+      "end": 3363650
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamml",
+      "name": "luamml-tex-annotate.lua",
+      "start": 3363650,
+      "end": 3373837
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamml",
+      "name": "luamml-tex.lua",
+      "start": 3373837,
+      "end": 3386398
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamml",
+      "name": "luamml-xmlwriter.lua",
+      "start": 3386398,
+      "end": 3388493
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamml",
+      "name": "luamml.sty",
+      "start": 3388493,
+      "end": 3398338
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luamodulartables",
+      "name": "luamodulartables.sty",
+      "start": 3398338,
+      "end": 3401114
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luaoptions",
+      "name": "luaoptions-lib.lua",
+      "start": 3401114,
+      "end": 3407492
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luaoptions",
+      "name": "luaoptions.lua",
+      "start": 3407492,
+      "end": 3417653
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luaoptions",
+      "name": "luaoptions.sty",
+      "start": 3417653,
+      "end": 3418480
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luaplot",
+      "name": "luaplot.sty",
+      "start": 3418480,
+      "end": 3422830
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luaprogtable",
+      "name": "luaprogtable-parse.lua",
+      "start": 3422830,
+      "end": 3426272
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luaprogtable",
+      "name": "luaprogtable-stringbuffer.lua",
+      "start": 3426272,
+      "end": 3428415
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luaprogtable",
+      "name": "luaprogtable-utility.lua",
+      "start": 3428415,
+      "end": 3431065
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luaprogtable",
+      "name": "luaprogtable.lua",
+      "start": 3431065,
+      "end": 3447928
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luaprogtable",
+      "name": "luaprogtable.sty",
+      "start": 3447928,
+      "end": 3455151
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luaquotes",
+      "name": "luaquotes.sty",
+      "start": 3455151,
+      "end": 3474491
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luarandom",
+      "name": "luarandom.sty",
+      "start": 3474491,
+      "end": 3476566
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luaset",
+      "name": "luaset.sty",
+      "start": 3476566,
+      "end": 3480026
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luatbls",
+      "name": "luatbls.lua",
+      "start": 3480026,
+      "end": 3491860
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luatbls",
+      "name": "luatbls.sty",
+      "start": 3491860,
+      "end": 3500077
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luatextra",
+      "name": "luatextra.sty",
+      "start": 3500077,
+      "end": 3501001
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/luatruthtable",
+      "name": "luatruthtable.sty",
+      "start": 3501001,
+      "end": 3507052
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/marginalia",
+      "name": "marginalia.lua",
+      "start": 3507052,
+      "end": 3529564
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/marginalia",
+      "name": "marginalia.sty",
+      "start": 3529564,
+      "end": 3551802
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/odsfile",
+      "name": "odsfile.lua",
+      "start": 3551802,
+      "end": 3561631
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/odsfile",
+      "name": "odsfile.sty",
+      "start": 3561631,
+      "end": 3570993
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/pdfarticle",
+      "name": "pdfArticle.cls",
+      "start": 3570993,
+      "end": 3579274
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/piton",
+      "name": "piton.lua",
+      "start": 3579274,
+      "end": 3651582
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/piton",
+      "name": "piton.sty",
+      "start": 3651582,
+      "end": 3740557
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/placeat",
+      "name": "placeat.sty",
+      "start": 3740557,
+      "end": 3748041
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/plantuml",
+      "name": "plantuml.lua",
+      "start": 3748041,
+      "end": 3751332
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/plantuml",
+      "name": "plantuml.sty",
+      "start": 3751332,
+      "end": 3755063
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/pyluatex",
+      "name": "pyluatex-interpreter.py",
+      "start": 3755063,
+      "end": 3760174
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/pyluatex",
+      "name": "pyluatex.lua",
+      "start": 3760174,
+      "end": 3767018
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/pyluatex",
+      "name": "pyluatex.sty",
+      "start": 3767018,
+      "end": 3770126
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/scikgtex",
+      "name": "scikgtex.lua",
+      "start": 3770126,
+      "end": 3792585
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/scikgtex",
+      "name": "scikgtex.sty",
+      "start": 3792585,
+      "end": 3796880
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/seatingchart",
+      "name": "seatingchart-tu-chemnitz.sc",
+      "start": 3796880,
+      "end": 3798452
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/seatingchart",
+      "name": "seatingchart.lua",
+      "start": 3798452,
+      "end": 3808092
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/seatingchart",
+      "name": "seatingchart.sty",
+      "start": 3808092,
+      "end": 3825065
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/selnolig",
+      "name": "selnolig-english-hyphex.sty",
+      "start": 3825065,
+      "end": 3833876
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/selnolig",
+      "name": "selnolig-english-patterns.sty",
+      "start": 3833876,
+      "end": 3858054
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/selnolig",
+      "name": "selnolig-german-hyphex.sty",
+      "start": 3858054,
+      "end": 3991244
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/selnolig",
+      "name": "selnolig-german-patterns.sty",
+      "start": 3991244,
+      "end": 4042766
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/selnolig",
+      "name": "selnolig.lua",
+      "start": 4042766,
+      "end": 4048620
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/selnolig",
+      "name": "selnolig.sty",
+      "start": 4048620,
+      "end": 4056295
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/semesterplannerlua",
+      "name": "semesterplannerlua.sty",
+      "start": 4056295,
+      "end": 4068485
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/semesterplannerlua",
+      "name": "semesterplannerlua_calendar.lua",
+      "start": 4068485,
+      "end": 4073550
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/semesterplannerlua",
+      "name": "semesterplannerlua_dmenu.lua",
+      "start": 4073550,
+      "end": 4079469
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/semesterplannerlua",
+      "name": "semesterplannerlua_timetable.lua",
+      "start": 4079469,
+      "end": 4087131
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/showhyphenation",
+      "name": "showhyphenation.lua",
+      "start": 4087131,
+      "end": 4100001
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/showhyphenation",
+      "name": "showhyphenation.sty",
+      "start": 4100001,
+      "end": 4101034
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/showkerning",
+      "name": "showkerning.lua",
+      "start": 4101034,
+      "end": 4110163
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/showkerning",
+      "name": "showkerning.sty",
+      "start": 4110163,
+      "end": 4111011
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/spacekern",
+      "name": "spacekern.lua",
+      "start": 4111011,
+      "end": 4120341
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/spacekern",
+      "name": "spacekern.sty",
+      "start": 4120341,
+      "end": 4121376
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/stricttex",
+      "name": "stricttex.lua",
+      "start": 4121376,
+      "end": 4125870
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/stricttex",
+      "name": "stricttex.sty",
+      "start": 4125870,
+      "end": 4127259
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/sympycalc",
+      "name": "SympyCalc.sty",
+      "start": 4127259,
+      "end": 4138587
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/tango",
+      "name": "tango.cls",
+      "start": 4138587,
+      "end": 4205617
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/truthtable",
+      "name": "truthtable.sty",
+      "start": 4205617,
+      "end": 4210434
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/typewriter",
+      "name": "typewriter.lua",
+      "start": 4210434,
+      "end": 4216747
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/typewriter",
+      "name": "typewriter.sty",
+      "start": 4216747,
+      "end": 4470186
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/uninormalize",
+      "name": "unicode-normalization.lua",
+      "start": 4470186,
+      "end": 4480934
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/uninormalize",
+      "name": "unicode-normalize-names.lua",
+      "start": 4480934,
+      "end": 4482787
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/uninormalize",
+      "name": "unicode-normalize.lua",
+      "start": 4482787,
+      "end": 4488082
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/uninormalize",
+      "name": "uninormalize.sty",
+      "start": 4488082,
+      "end": 4489044
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/yamlvars",
+      "name": "yamlvars.lua",
+      "start": 4489044,
+      "end": 4506237
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/lualatex/yamlvars",
+      "name": "yamlvars.sty",
+      "start": 4506237,
+      "end": 4511059
+    }
+  ],
+  "totalSize": 4511059
+}

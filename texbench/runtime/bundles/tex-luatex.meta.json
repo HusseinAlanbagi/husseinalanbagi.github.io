@@ -1,0 +1,1698 @@
+{
+  "name": "tex-luatex",
+  "files": [
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/addtoluatexpath",
+      "name": "addtoluatexpath.sty",
+      "start": 0,
+      "end": 4227
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/barracuda",
+      "name": "barracuda.sty",
+      "start": 4227,
+      "end": 4738
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/blopentype",
+      "name": "blot-base.lua",
+      "start": 4738,
+      "end": 6877
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/blopentype",
+      "name": "blot-files.tex",
+      "start": 6877,
+      "end": 7676
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/blopentype",
+      "name": "blot-fonts.lua",
+      "start": 7676,
+      "end": 43017
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/blopentype",
+      "name": "blot-fonts.tex",
+      "start": 43017,
+      "end": 52596
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/blopentype",
+      "name": "blot-lua.tex",
+      "start": 52596,
+      "end": 53240
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/blopentype",
+      "name": "blot-sets.lua",
+      "start": 53240,
+      "end": 53514
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/blopentype",
+      "name": "blot.tex",
+      "start": 53514,
+      "end": 61029
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/chickenize",
+      "name": "chickenize.lua",
+      "start": 61029,
+      "end": 103102
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/chickenize",
+      "name": "chickenize.sty",
+      "start": 103102,
+      "end": 104136
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/chickenize",
+      "name": "chickenize.tex",
+      "start": 104136,
+      "end": 124323
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/chinese-jfm",
+      "name": "jfm-ja_JP.lua",
+      "start": 124323,
+      "end": 131613
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/chinese-jfm",
+      "name": "jfm-zh_CN.lua",
+      "start": 131613,
+      "end": 140927
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/chinese-jfm",
+      "name": "jfm-zh_TW.lua",
+      "start": 140927,
+      "end": 150440
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/cloze",
+      "name": "cloze-doc.tex",
+      "start": 150440,
+      "end": 214696
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/cloze",
+      "name": "cloze.sty",
+      "start": 214696,
+      "end": 219002
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/cloze",
+      "name": "cloze.tex",
+      "start": 219002,
+      "end": 224574
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/cstypo",
+      "name": "cstypo-tex.tex",
+      "start": 224574,
+      "end": 225302
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/cstypo",
+      "name": "cstypo.lua",
+      "start": 225302,
+      "end": 230968
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/ctablestack",
+      "name": "ctablestack.sty",
+      "start": 230968,
+      "end": 232478
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/farbe",
+      "name": "farbe.lua",
+      "start": 232478,
+      "end": 299760
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/farbe",
+      "name": "farbe.sty",
+      "start": 299760,
+      "end": 300525
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/farbe",
+      "name": "farbe.tex",
+      "start": 300525,
+      "end": 301814
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/hyph-utf8",
+      "name": "etex.src",
+      "start": 301814,
+      "end": 335100
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/hyph-utf8",
+      "name": "luatex-hyphen.lua",
+      "start": 335100,
+      "end": 338085
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/interpreter",
+      "name": "interpreter.lua",
+      "start": 338085,
+      "end": 358584
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/interpreter",
+      "name": "interpreter.sty",
+      "start": 358584,
+      "end": 359251
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/interpreter",
+      "name": "interpreter.tex",
+      "start": 359251,
+      "end": 360497
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/kanaparser",
+      "name": "kanaparser.lua",
+      "start": 360497,
+      "end": 375202
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/kanaparser",
+      "name": "kanaparser.tex",
+      "start": 375202,
+      "end": 376124
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lparse",
+      "name": "lparse.lua",
+      "start": 376124,
+      "end": 394398
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lparse",
+      "name": "lparse.sty",
+      "start": 394398,
+      "end": 395197
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lparse",
+      "name": "lparse.tex",
+      "start": 395197,
+      "end": 395861
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lua-uni-algos",
+      "name": "lua-uni-algos.lua",
+      "start": 395861,
+      "end": 396580
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lua-uni-algos",
+      "name": "lua-uni-case.lua",
+      "start": 396580,
+      "end": 398496
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lua-uni-algos",
+      "name": "lua-uni-data-parser.lua",
+      "start": 398496,
+      "end": 404175
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lua-uni-algos",
+      "name": "lua-uni-data-preload.lua",
+      "start": 404175,
+      "end": 406812
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lua-uni-algos",
+      "name": "lua-uni-data.lua",
+      "start": 406812,
+      "end": 407526
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lua-uni-algos",
+      "name": "lua-uni-graphemes.lua",
+      "start": 407526,
+      "end": 412070
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lua-uni-algos",
+      "name": "lua-uni-normalize.lua",
+      "start": 412070,
+      "end": 433345
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lua-uni-algos",
+      "name": "lua-uni-parse.lua",
+      "start": 433345,
+      "end": 435653
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lua-uni-algos",
+      "name": "lua-uni-stage-tables.lua",
+      "start": 435653,
+      "end": 445024
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lua-uni-algos",
+      "name": "lua-uni-words.lua",
+      "start": 445024,
+      "end": 453215
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lua-visual-debug",
+      "name": "lua-visual-debug-keys.lua",
+      "start": 453215,
+      "end": 456932
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lua-visual-debug",
+      "name": "lua-visual-debug.lua",
+      "start": 456932,
+      "end": 467031
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lua-visual-debug",
+      "name": "lua-visual-debug.opm",
+      "start": 467031,
+      "end": 467271
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lua-visual-debug",
+      "name": "lua-visual-debug.sty",
+      "start": 467271,
+      "end": 468318
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lua-widow-control",
+      "name": "lua-widow-control.lua",
+      "start": 468318,
+      "end": 524533
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lua-widow-control",
+      "name": "lua-widow-control.tex",
+      "start": 524533,
+      "end": 527249
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaaddplot",
+      "name": "luaaddplot.lua",
+      "start": 527249,
+      "end": 528851
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaaddplot",
+      "name": "luaaddplot.sty",
+      "start": 528851,
+      "end": 529708
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaaddplot",
+      "name": "luaaddplot.tex",
+      "start": 529708,
+      "end": 530669
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luakeys",
+      "name": "luakeys-debug.sty",
+      "start": 530669,
+      "end": 531681
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luakeys",
+      "name": "luakeys-debug.tex",
+      "start": 531681,
+      "end": 533057
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luakeys",
+      "name": "luakeys.lua",
+      "start": 533057,
+      "end": 605954
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luakeys",
+      "name": "luakeys.sty",
+      "start": 605954,
+      "end": 606998
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luakeys",
+      "name": "luakeys.tex",
+      "start": 606998,
+      "end": 607779
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luakeyval",
+      "name": "luakeyval.lua",
+      "start": 607779,
+      "end": 611226
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-basic-merged.lua",
+      "start": 611226,
+      "end": 742686
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-basic.lua",
+      "start": 742686,
+      "end": 745371
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-boolean.lua",
+      "start": 745371,
+      "end": 747221
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-compat.lua",
+      "start": 747221,
+      "end": 747824
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-dir.lua",
+      "start": 747824,
+      "end": 766963
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-extended-merged.lua",
+      "start": 766963,
+      "end": 907323
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-extended.lua",
+      "start": 907323,
+      "end": 912323
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-file.lua",
+      "start": 912323,
+      "end": 934960
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-function.lua",
+      "start": 934960,
+      "end": 935321
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-io.lua",
+      "start": 935321,
+      "end": 947309
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-lpeg.lua",
+      "start": 947309,
+      "end": 986051
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-lua.lua",
+      "start": 986051,
+      "end": 992456
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-math.lua",
+      "start": 992456,
+      "end": 995135
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-md5.lua",
+      "start": 995135,
+      "end": 998549
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-number.lua",
+      "start": 998549,
+      "end": 1003137
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-os.lua",
+      "start": 1003137,
+      "end": 1023722
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-package.lua",
+      "start": 1023722,
+      "end": 1036288
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-set.lua",
+      "start": 1036288,
+      "end": 1038211
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-string.lua",
+      "start": 1038211,
+      "end": 1045166
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-table.lua",
+      "start": 1045166,
+      "end": 1086924
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-trac-inf.lua",
+      "start": 1086924,
+      "end": 1096664
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-unicode.lua",
+      "start": 1096664,
+      "end": 1137953
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-url.lua",
+      "start": 1137953,
+      "end": 1152666
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-util-deb.lua",
+      "start": 1152666,
+      "end": 1163259
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-util-dim.lua",
+      "start": 1163259,
+      "end": 1176841
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-util-fil.lua",
+      "start": 1176841,
+      "end": 1185875
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-util-jsn.lua",
+      "start": 1185875,
+      "end": 1202596
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-util-lua.lua",
+      "start": 1202596,
+      "end": 1209745
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-util-prs.lua",
+      "start": 1209745,
+      "end": 1235979
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-util-sac.lua",
+      "start": 1235979,
+      "end": 1250086
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-util-sta.lua",
+      "start": 1250086,
+      "end": 1259498
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-util-sto.lua",
+      "start": 1259498,
+      "end": 1266159
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-util-str.lua",
+      "start": 1266159,
+      "end": 1312719
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-util-tab.lua",
+      "start": 1312719,
+      "end": 1346867
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-util-tpl.lua",
+      "start": 1346867,
+      "end": 1354589
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs-util-zip.lua",
+      "start": 1354589,
+      "end": 1387643
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualibs",
+      "name": "lualibs.lua",
+      "start": 1387643,
+      "end": 1391423
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualineno",
+      "name": "lualineno.lua",
+      "start": 1391423,
+      "end": 1417439
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualineno",
+      "name": "lualineno.opm",
+      "start": 1417439,
+      "end": 1434453
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lualineno",
+      "name": "lualineno.sty",
+      "start": 1434453,
+      "end": 1438303
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luamplib",
+      "name": "luamplib.lua",
+      "start": 1438303,
+      "end": 1550289
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luamplib",
+      "name": "luamplib.sty",
+      "start": 1550289,
+      "end": 1577070
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-2023-12-28.lua",
+      "start": 1577070,
+      "end": 2462817
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-basics-chr.lua",
+      "start": 2462817,
+      "end": 2511545
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-basics-gen.lua",
+      "start": 2511545,
+      "end": 2524333
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-basics-nod.lua",
+      "start": 2524333,
+      "end": 2534540
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-data-con.lua",
+      "start": 2534540,
+      "end": 2540017
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-afk.lua",
+      "start": 2540017,
+      "end": 2546865
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-cff.lua",
+      "start": 2546865,
+      "end": 2641327
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-cid.lua",
+      "start": 2641327,
+      "end": 2646829
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-con.lua",
+      "start": 2646829,
+      "end": 2710334
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-def.lua",
+      "start": 2710334,
+      "end": 2730061
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-dsp.lua",
+      "start": 2730061,
+      "end": 2886089
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-imp-effects.lua",
+      "start": 2886089,
+      "end": 2898793
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-imp-italics.lua",
+      "start": 2898793,
+      "end": 2902835
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-imp-ligatures.lua",
+      "start": 2902835,
+      "end": 2906429
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-imp-tex.lua",
+      "start": 2906429,
+      "end": 2909784
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-ini.lua",
+      "start": 2909784,
+      "end": 2911554
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-lua.lua",
+      "start": 2911554,
+      "end": 2913003
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-map.lua",
+      "start": 2913003,
+      "end": 2932573
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-ocl.lua",
+      "start": 2932573,
+      "end": 2957837
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-one.lua",
+      "start": 2957837,
+      "end": 2988938
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-onr.lua",
+      "start": 2988938,
+      "end": 3007542
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-osd.lua",
+      "start": 3007542,
+      "end": 3126154
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-ota.lua",
+      "start": 3126154,
+      "end": 3144544
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-otc.lua",
+      "start": 3144544,
+      "end": 3180663
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-oti.lua",
+      "start": 3180663,
+      "end": 3188567
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-otj.lua",
+      "start": 3188567,
+      "end": 3253846
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-otl.lua",
+      "start": 3253846,
+      "end": 3288041
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-oto.lua",
+      "start": 3288041,
+      "end": 3311667
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-otr.lua",
+      "start": 3311667,
+      "end": 3406524
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-ots.lua",
+      "start": 3406524,
+      "end": 3594308
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-ott.lua",
+      "start": 3594308,
+      "end": 3630665
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-oup.lua",
+      "start": 3630665,
+      "end": 3759442
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-shp.lua",
+      "start": 3759442,
+      "end": 3773414
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-ttf.lua",
+      "start": 3773414,
+      "end": 3841031
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-font-vfc.lua",
+      "start": 3841031,
+      "end": 3843698
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-fonts-def.lua",
+      "start": 3843698,
+      "end": 3847519
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-fonts-enc.lua",
+      "start": 3847519,
+      "end": 3850144
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-fonts-ext.lua",
+      "start": 3850144,
+      "end": 3857404
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-fonts-gbn.lua",
+      "start": 3857404,
+      "end": 3867285
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-fonts-lig.lua",
+      "start": 3867285,
+      "end": 3924627
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-fonts-mis.lua",
+      "start": 3924627,
+      "end": 3925539
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-fonts-syn.lua",
+      "start": 3925539,
+      "end": 3929213
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-fonts-tfm.lua",
+      "start": 3929213,
+      "end": 3952612
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-l-boolean.lua",
+      "start": 3952612,
+      "end": 3954462
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-l-file.lua",
+      "start": 3954462,
+      "end": 3977099
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-l-function.lua",
+      "start": 3977099,
+      "end": 3977460
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-l-io.lua",
+      "start": 3977460,
+      "end": 3989448
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-l-lpeg.lua",
+      "start": 3989448,
+      "end": 4028190
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-l-lua.lua",
+      "start": 4028190,
+      "end": 4034595
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-l-math.lua",
+      "start": 4034595,
+      "end": 4037274
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-l-string.lua",
+      "start": 4037274,
+      "end": 4044229
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-l-table.lua",
+      "start": 4044229,
+      "end": 4086825
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-l-unicode.lua",
+      "start": 4086825,
+      "end": 4128128
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-reference.lua",
+      "start": 4128128,
+      "end": 5116822
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-util-fil.lua",
+      "start": 5116822,
+      "end": 5128296
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "fontloader-util-str.lua",
+      "start": 5128296,
+      "end": 5175208
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-arabic.lua",
+      "start": 5175208,
+      "end": 5180572
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-auxiliary.lua",
+      "start": 5180572,
+      "end": 5214926
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-bcp47.lua",
+      "start": 5214926,
+      "end": 5218601
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-blacklist.cnf",
+      "start": 5218601,
+      "end": 5218653
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-case.lua",
+      "start": 5218653,
+      "end": 5234769
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-characters.lua",
+      "start": 5234769,
+      "end": 8522103
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-colors.lua",
+      "start": 8522103,
+      "end": 8540476
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-configuration.lua",
+      "start": 8540476,
+      "end": 8574556
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-database.lua",
+      "start": 8574556,
+      "end": 8709938
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-diagnostics.lua",
+      "start": 8709938,
+      "end": 8731907
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-dvi.lua",
+      "start": 8731907,
+      "end": 8739184
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-embolden.lua",
+      "start": 8739184,
+      "end": 8740188
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-fallback.lua",
+      "start": 8740188,
+      "end": 8744234
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-features.lua",
+      "start": 8744234,
+      "end": 8780000
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-filelist.lua",
+      "start": 8780000,
+      "end": 8805317
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-glyphlist.lua",
+      "start": 8805317,
+      "end": 8907819
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-harf-define.lua",
+      "start": 8907819,
+      "end": 8927522
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-harf-plug.lua",
+      "start": 8927522,
+      "end": 8970204
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-harf-var-cff2.lua",
+      "start": 8970204,
+      "end": 8984329
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-harf-var-t2-writer.lua",
+      "start": 8984329,
+      "end": 8988379
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-harf-var-ttf.lua",
+      "start": 8988379,
+      "end": 9008903
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-init.lua",
+      "start": 9008903,
+      "end": 9028649
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-letterspace.lua",
+      "start": 9028649,
+      "end": 9048870
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-loaders.lua",
+      "start": 9048870,
+      "end": 9059603
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-log.lua",
+      "start": 9059603,
+      "end": 9070926
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-main.lua",
+      "start": 9070926,
+      "end": 9071201
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-multiscript.lua",
+      "start": 9071201,
+      "end": 9086268
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-notdef.lua",
+      "start": 9086268,
+      "end": 9098526
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-parsers.lua",
+      "start": 9098526,
+      "end": 9128964
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-realpath.lua",
+      "start": 9128964,
+      "end": 9133656
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-resolvers.lua",
+      "start": 9133656,
+      "end": 9144866
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-scripts.lua",
+      "start": 9144866,
+      "end": 9147372
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-status.lua",
+      "start": 9147372,
+      "end": 9153413
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-suppress.lua",
+      "start": 9153413,
+      "end": 9155995
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-szss.lua",
+      "start": 9155995,
+      "end": 9162304
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-tounicode.lua",
+      "start": 9162304,
+      "end": 9169833
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload-unicode.lua",
+      "start": 9169833,
+      "end": 9177751
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload.lua",
+      "start": 9177751,
+      "end": 9191317
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaotfload",
+      "name": "luaotfload.sty",
+      "start": 9191317,
+      "end": 9193129
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luapackageloader",
+      "name": "luapackageloader.lua",
+      "start": 9193129,
+      "end": 9195604
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luapackageloader",
+      "name": "luapackageloader.sty",
+      "start": 9195604,
+      "end": 9196618
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luatex-type-definitions",
+      "name": "luatex-type-definitions.lua",
+      "start": 9196618,
+      "end": 10504373
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luatexbase",
+      "name": "luatexbase-attr.sty",
+      "start": 10504373,
+      "end": 10504701
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luatexbase",
+      "name": "luatexbase-cctb.sty",
+      "start": 10504701,
+      "end": 10505029
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luatexbase",
+      "name": "luatexbase-compat.sty",
+      "start": 10505029,
+      "end": 10505359
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luatexbase",
+      "name": "luatexbase-loader.sty",
+      "start": 10505359,
+      "end": 10505689
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luatexbase",
+      "name": "luatexbase-mcb.sty",
+      "start": 10505689,
+      "end": 10506016
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luatexbase",
+      "name": "luatexbase-modutils.sty",
+      "start": 10506016,
+      "end": 10506348
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luatexbase",
+      "name": "luatexbase-regs.sty",
+      "start": 10506348,
+      "end": 10506676
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luatexbase",
+      "name": "luatexbase.loader.lua",
+      "start": 10506676,
+      "end": 10506707
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luatexbase",
+      "name": "luatexbase.sty",
+      "start": 10506707,
+      "end": 10516877
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luatexko",
+      "name": "luatexko-normalize.lua",
+      "start": 10516877,
+      "end": 10523327
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luatexko",
+      "name": "luatexko-uhc2utf8.lua",
+      "start": 10523327,
+      "end": 10527116
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luatexko",
+      "name": "luatexko.lua",
+      "start": 10527116,
+      "end": 10625272
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luatexko",
+      "name": "luatexko.sty",
+      "start": 10625272,
+      "end": 10667590
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luavlna",
+      "name": "luavlna-csplain-langs.lua",
+      "start": 10667590,
+      "end": 10668039
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luavlna",
+      "name": "luavlna-langno.lua",
+      "start": 10668039,
+      "end": 10671259
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luavlna",
+      "name": "luavlna-predegrees.lua",
+      "start": 10671259,
+      "end": 10671964
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luavlna",
+      "name": "luavlna-presi.lua",
+      "start": 10671964,
+      "end": 10672181
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luavlna",
+      "name": "luavlna-si.lua",
+      "start": 10672181,
+      "end": 10672470
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luavlna",
+      "name": "luavlna-sufdegrees.lua",
+      "start": 10672470,
+      "end": 10672674
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luavlna",
+      "name": "luavlna.4ht",
+      "start": 10672674,
+      "end": 10672720
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luavlna",
+      "name": "luavlna.lua",
+      "start": 10672720,
+      "end": 10689535
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luavlna",
+      "name": "luavlna.sty",
+      "start": 10689535,
+      "end": 10691096
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luavlna",
+      "name": "luavlna.tex",
+      "start": 10691096,
+      "end": 10695441
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaxml",
+      "name": "luaxml-cssquery.lua",
+      "start": 10695441,
+      "end": 10711206
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaxml",
+      "name": "luaxml-domobject.lua",
+      "start": 10711206,
+      "end": 10735338
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaxml",
+      "name": "luaxml-encodings.lua",
+      "start": 10735338,
+      "end": 10745693
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaxml",
+      "name": "luaxml-entities.lua",
+      "start": 10745693,
+      "end": 10747139
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaxml",
+      "name": "luaxml-htmltemplates.lua",
+      "start": 10747139,
+      "end": 10750851
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaxml",
+      "name": "luaxml-mod-handler.lua",
+      "start": 10750851,
+      "end": 10762308
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaxml",
+      "name": "luaxml-mod-html.lua",
+      "start": 10762308,
+      "end": 10828428
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaxml",
+      "name": "luaxml-mod-xml.lua",
+      "start": 10828428,
+      "end": 10849147
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaxml",
+      "name": "luaxml-namedentities.lua",
+      "start": 10849147,
+      "end": 10890179
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaxml",
+      "name": "luaxml-parse-query.lua",
+      "start": 10890179,
+      "end": 10892347
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaxml",
+      "name": "luaxml-pretty.lua",
+      "start": 10892347,
+      "end": 10894612
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaxml",
+      "name": "luaxml-stack.lua",
+      "start": 10894612,
+      "end": 10895842
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaxml",
+      "name": "luaxml-sty.lua",
+      "start": 10895842,
+      "end": 10901331
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaxml",
+      "name": "luaxml-testxml.lua",
+      "start": 10901331,
+      "end": 10904765
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaxml",
+      "name": "luaxml-transform.lua",
+      "start": 10904765,
+      "end": 10915310
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/luaxml",
+      "name": "luaxml.sty",
+      "start": 10915310,
+      "end": 10918859
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lutabulartools",
+      "name": "lutabulartools.lua",
+      "start": 10918859,
+      "end": 10934425
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/lutabulartools",
+      "name": "lutabulartools.sty",
+      "start": 10934425,
+      "end": 10943158
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim-math",
+      "name": "minim-math-table.lua",
+      "start": 10943158,
+      "end": 11284125
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim-math",
+      "name": "minim-math.lua",
+      "start": 11284125,
+      "end": 11298677
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim-math",
+      "name": "minim-math.tex",
+      "start": 11298677,
+      "end": 11317208
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim-mp",
+      "name": "minim-lamp.ini",
+      "start": 11317208,
+      "end": 11317907
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim-mp",
+      "name": "minim-mp.ini",
+      "start": 11317907,
+      "end": 11318345
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim-mp",
+      "name": "minim-mp.lua",
+      "start": 11318345,
+      "end": 11375091
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim-mp",
+      "name": "minim-mp.sty",
+      "start": 11375091,
+      "end": 11378158
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim-mp",
+      "name": "minim-mp.tex",
+      "start": 11378158,
+      "end": 11382425
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim-pdf",
+      "name": "minim-languagecodes.lua",
+      "start": 11382425,
+      "end": 11387477
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim-pdf",
+      "name": "minim-pdf.lua",
+      "start": 11387477,
+      "end": 11432320
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim-pdf",
+      "name": "minim-pdf.tex",
+      "start": 11432320,
+      "end": 11454270
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim-xmp",
+      "name": "minim-xmp.lua",
+      "start": 11454270,
+      "end": 11477135
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim-xmp",
+      "name": "minim-xmp.tex",
+      "start": 11477135,
+      "end": 11477962
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim",
+      "name": "minim-alloc.lua",
+      "start": 11477962,
+      "end": 11488776
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim",
+      "name": "minim-alloc.tex",
+      "start": 11488776,
+      "end": 11497036
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim",
+      "name": "minim-callbacks.lua",
+      "start": 11497036,
+      "end": 11505328
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim",
+      "name": "minim-doc.sty",
+      "start": 11505328,
+      "end": 11513026
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim",
+      "name": "minim-etex.tex",
+      "start": 11513026,
+      "end": 11527791
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim",
+      "name": "minim-lmodern.tex",
+      "start": 11527791,
+      "end": 11528992
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim",
+      "name": "minim-pdfresources.lua",
+      "start": 11528992,
+      "end": 11534253
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim",
+      "name": "minim-pdfresources.tex",
+      "start": 11534253,
+      "end": 11536500
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim",
+      "name": "minim-plain.tex",
+      "start": 11536500,
+      "end": 11566330
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim",
+      "name": "minim.ini",
+      "start": 11566330,
+      "end": 11566709
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/minim",
+      "name": "minim.tex",
+      "start": 11566709,
+      "end": 11566799
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/nodetree",
+      "name": "nodetree-embed.sty",
+      "start": 11566799,
+      "end": 11572891
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/nodetree",
+      "name": "nodetree.lua",
+      "start": 11572891,
+      "end": 11652317
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/nodetree",
+      "name": "nodetree.sty",
+      "start": 11652317,
+      "end": 11654050
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/nodetree",
+      "name": "nodetree.tex",
+      "start": 11654050,
+      "end": 11655734
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/pdfextra",
+      "name": "pdfextra.sty",
+      "start": 11655734,
+      "end": 11655803
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/pdfextra",
+      "name": "pdfextra.tex",
+      "start": 11655803,
+      "end": 11665532
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/penlight",
+      "name": "penlight.lua",
+      "start": 11665532,
+      "end": 12094486
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/penlight",
+      "name": "penlight.sty",
+      "start": 12094486,
+      "end": 12096055
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/penlightplus",
+      "name": "penlightplus.lua",
+      "start": 12096055,
+      "end": 12133340
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/penlightplus",
+      "name": "penlightplus.sty",
+      "start": 12133340,
+      "end": 12136794
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/spelling",
+      "name": "spelling.sty",
+      "start": 12136794,
+      "end": 12141470
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/tsvtemplate",
+      "name": "tsvtemplate.sty",
+      "start": 12141470,
+      "end": 12141639
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/tsvtemplate",
+      "name": "tsvtemplate.tex",
+      "start": 12141639,
+      "end": 12142987
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/unibidi-lua",
+      "name": "unibidi-lua-data.lua",
+      "start": 12142987,
+      "end": 12826767
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/unibidi-lua",
+      "name": "unibidi-lua.lua",
+      "start": 12826767,
+      "end": 12872492
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/unibidi-lua",
+      "name": "unibidi-lua.opm",
+      "start": 12872492,
+      "end": 12876242
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/unibidi-lua",
+      "name": "unibidi-lua.sty",
+      "start": 12876242,
+      "end": 12876378
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/luatex/unibidi-lua",
+      "name": "unibidi-lua.tex",
+      "start": 12876378,
+      "end": 12876488
+    }
+  ],
+  "totalSize": 12876488
+}

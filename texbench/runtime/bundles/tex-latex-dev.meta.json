@@ -1,0 +1,1218 @@
+{
+  "name": "tex-latex-dev",
+  "files": [
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "alltt.sty",
+      "start": 0,
+      "end": 3137
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ansinew.def",
+      "start": 3137,
+      "end": 9966
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "applemac.def",
+      "start": 9966,
+      "end": 16370
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "article.cls",
+      "start": 16370,
+      "end": 36514
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "article.sty",
+      "start": 36514,
+      "end": 38254
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ascii.def",
+      "start": 38254,
+      "end": 39985
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "atbegshi-ltx.sty",
+      "start": 39985,
+      "end": 42948
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "atveryend-ltx.sty",
+      "start": 42948,
+      "end": 45326
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "bezier.sty",
+      "start": 45326,
+      "end": 47386
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "bk10.clo",
+      "start": 47386,
+      "end": 55674
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "bk11.clo",
+      "start": 55674,
+      "end": 63977
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "bk12.clo",
+      "start": 63977,
+      "end": 72262
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "book.cls",
+      "start": 72262,
+      "end": 95530
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "book.sty",
+      "start": 95530,
+      "end": 97252
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "checkencodingsubset.tex",
+      "start": 97252,
+      "end": 114229
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "cp1250.def",
+      "start": 114229,
+      "end": 120465
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "cp1252.def",
+      "start": 120465,
+      "end": 127283
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "cp1257.def",
+      "start": 127283,
+      "end": 133732
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "cp437.def",
+      "start": 133732,
+      "end": 138529
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "cp437de.def",
+      "start": 138529,
+      "end": 143332
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "cp850.def",
+      "start": 143332,
+      "end": 149388
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "cp852.def",
+      "start": 149388,
+      "end": 154897
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "cp858.def",
+      "start": 154897,
+      "end": 160905
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "cp865.def",
+      "start": 160905,
+      "end": 165770
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "decmulti.def",
+      "start": 165770,
+      "end": 170770
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "doc-2016-02-15.sty",
+      "start": 170770,
+      "end": 200735
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "doc-2021-06-01.sty",
+      "start": 200735,
+      "end": 231234
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "doc.sty",
+      "start": 231234,
+      "end": 274221
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "docstrip.tex",
+      "start": 274221,
+      "end": 309553
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "exscale.sty",
+      "start": 309553,
+      "end": 312175
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "fix-cm.sty",
+      "start": 312175,
+      "end": 326916
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "fixltx2e.sty",
+      "start": 326916,
+      "end": 342425
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "flafter.sty",
+      "start": 342425,
+      "end": 356128
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "fleqn.clo",
+      "start": 356128,
+      "end": 360960
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "fleqn.sty",
+      "start": 360960,
+      "end": 362663
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "fltrace.sty",
+      "start": 362663,
+      "end": 409771
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "fontenc.sty",
+      "start": 409771,
+      "end": 415046
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "fontmath.cfg",
+      "start": 415046,
+      "end": 417024
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "fontmath.ltx",
+      "start": 417024,
+      "end": 441968
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "fonttext.cfg",
+      "start": 441968,
+      "end": 443946
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "fonttext.ltx",
+      "start": 443946,
+      "end": 447263
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "graphpap.sty",
+      "start": 447263,
+      "end": 450653
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "hyphen.ltx",
+      "start": 450653,
+      "end": 452591
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "idx.tex",
+      "start": 452591,
+      "end": 455296
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ifthen.sty",
+      "start": 455296,
+      "end": 460821
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "inputenc.sty",
+      "start": 460821,
+      "end": 465869
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "l3in2edoc.cls",
+      "start": 465869,
+      "end": 467586
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "lablst.tex",
+      "start": 467586,
+      "end": 471665
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "latex.ltx",
+      "start": 471665,
+      "end": 1240179
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "latex209.def",
+      "start": 1240179,
+      "end": 1252683
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "latexrelease.sty",
+      "start": 1252683,
+      "end": 2143673
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "latexsym.sty",
+      "start": 2143673,
+      "end": 2146526
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "latin1.def",
+      "start": 2146526,
+      "end": 2152201
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "latin10.def",
+      "start": 2152201,
+      "end": 2157592
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "latin2.def",
+      "start": 2157592,
+      "end": 2162546
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "latin3.def",
+      "start": 2162546,
+      "end": 2167613
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "latin4.def",
+      "start": 2167613,
+      "end": 2172804
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "latin5.def",
+      "start": 2172804,
+      "end": 2178456
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "latin9.def",
+      "start": 2178456,
+      "end": 2183777
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "lcyenc.dfu",
+      "start": 2183777,
+      "end": 2190973
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "leqno.clo",
+      "start": 2190973,
+      "end": 2192931
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "leqno.sty",
+      "start": 2192931,
+      "end": 2194634
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "letter.cls",
+      "start": 2194634,
+      "end": 2208362
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "letter.sty",
+      "start": 2208362,
+      "end": 2210096
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "lppl.tex",
+      "start": 2210096,
+      "end": 2233482
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ltluatex.lua",
+      "start": 2233482,
+      "end": 2258077
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ltluatex.tex",
+      "start": 2258077,
+      "end": 2266859
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ltnews.cls",
+      "start": 2266859,
+      "end": 2288340
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ltxcheck.tex",
+      "start": 2288340,
+      "end": 2315462
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ltxdoc-extra.ltx",
+      "start": 2315462,
+      "end": 2318422
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ltxdoc.cfg",
+      "start": 2318422,
+      "end": 2320656
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ltxdoc.cls",
+      "start": 2320656,
+      "end": 2329504
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ltxguide.cls",
+      "start": 2329504,
+      "end": 2337032
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ly1enc.dfu",
+      "start": 2337032,
+      "end": 2344069
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "macce.def",
+      "start": 2344069,
+      "end": 2347835
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "makeidx.sty",
+      "start": 2347835,
+      "end": 2349774
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "minimal.cls",
+      "start": 2349774,
+      "end": 2351715
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "newlfont.sty",
+      "start": 2351715,
+      "end": 2354626
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "next.def",
+      "start": 2354626,
+      "end": 2361334
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "nfssfont.tex",
+      "start": 2361334,
+      "end": 2374654
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "oldlfont.sty",
+      "start": 2374654,
+      "end": 2378104
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "omlcmm.fd",
+      "start": 2378104,
+      "end": 2380436
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "omlcmr.fd",
+      "start": 2380436,
+      "end": 2382906
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "omlenc.def",
+      "start": 2382906,
+      "end": 2384853
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "omllcmm.fd",
+      "start": 2384853,
+      "end": 2387095
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "omscmr.fd",
+      "start": 2387095,
+      "end": 2389564
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "omscmsy.fd",
+      "start": 2389564,
+      "end": 2391826
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "omsenc.def",
+      "start": 2391826,
+      "end": 2394565
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "omsenc.dfu",
+      "start": 2394565,
+      "end": 2396555
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "omslcmsy.fd",
+      "start": 2396555,
+      "end": 2398801
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "omxcmex.fd",
+      "start": 2398801,
+      "end": 2400841
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "omxlcmex.fd",
+      "start": 2400841,
+      "end": 2402990
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "openbib.sty",
+      "start": 2402990,
+      "end": 2404911
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ot1cmdh.fd",
+      "start": 2404911,
+      "end": 2406970
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ot1cmfib.fd",
+      "start": 2406970,
+      "end": 2409032
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ot1cmfr.fd",
+      "start": 2409032,
+      "end": 2411153
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ot1cmr.fd",
+      "start": 2411153,
+      "end": 2414858
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ot1cmss.fd",
+      "start": 2414858,
+      "end": 2418010
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ot1cmtt.fd",
+      "start": 2418010,
+      "end": 2420919
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ot1cmvtt.fd",
+      "start": 2420919,
+      "end": 2423190
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ot1enc.def",
+      "start": 2423190,
+      "end": 2427971
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ot1enc.dfu",
+      "start": 2427971,
+      "end": 2431505
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ot1lcmss.fd",
+      "start": 2431505,
+      "end": 2434502
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ot1lcmtt.fd",
+      "start": 2434502,
+      "end": 2436989
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ot2enc.dfu",
+      "start": 2436989,
+      "end": 2444405
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ot4enc.def",
+      "start": 2444405,
+      "end": 2449187
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "preload.cfg",
+      "start": 2449187,
+      "end": 2451164
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "preload.ltx",
+      "start": 2451164,
+      "end": 2453188
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "proc.cls",
+      "start": 2453188,
+      "end": 2457179
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "proc.sty",
+      "start": 2457179,
+      "end": 2460986
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "report.cls",
+      "start": 2460986,
+      "end": 2484189
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "report.sty",
+      "start": 2484189,
+      "end": 2485923
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "sample2e.tex",
+      "start": 2485923,
+      "end": 2493123
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "sfonts.def",
+      "start": 2493123,
+      "end": 2494723
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "shortvrb.sty",
+      "start": 2494723,
+      "end": 2498866
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "showidx.sty",
+      "start": 2498866,
+      "end": 2502232
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "size10.clo",
+      "start": 2502232,
+      "end": 2510680
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "size11.clo",
+      "start": 2510680,
+      "end": 2519144
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "size12.clo",
+      "start": 2519144,
+      "end": 2527593
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "slides.cls",
+      "start": 2527593,
+      "end": 2544321
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "slides.def",
+      "start": 2544321,
+      "end": 2562576
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "slides.sty",
+      "start": 2562576,
+      "end": 2564310
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "small2e.tex",
+      "start": 2564310,
+      "end": 2566004
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "source2edoc.cls",
+      "start": 2566004,
+      "end": 2573207
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "structuredlog.sty",
+      "start": 2573207,
+      "end": 2575993
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "syntonly.sty",
+      "start": 2575993,
+      "end": 2578834
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "t1cmdh.fd",
+      "start": 2578834,
+      "end": 2581004
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "t1cmfib.fd",
+      "start": 2581004,
+      "end": 2583215
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "t1cmfr.fd",
+      "start": 2583215,
+      "end": 2585419
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "t1cmr.fd",
+      "start": 2585419,
+      "end": 2587988
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "t1cmss.fd",
+      "start": 2587988,
+      "end": 2590629
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "t1cmtt.fd",
+      "start": 2590629,
+      "end": 2593072
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "t1cmvtt.fd",
+      "start": 2593072,
+      "end": 2595301
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "t1enc.def",
+      "start": 2595301,
+      "end": 2606313
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "t1enc.dfu",
+      "start": 2606313,
+      "end": 2619099
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "t1enc.sty",
+      "start": 2619099,
+      "end": 2620896
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "t1lcmss.fd",
+      "start": 2620896,
+      "end": 2624109
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "t1lcmtt.fd",
+      "start": 2624109,
+      "end": 2626470
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "t2aenc.dfu",
+      "start": 2626470,
+      "end": 2636435
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "t2benc.dfu",
+      "start": 2636435,
+      "end": 2646170
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "t2cenc.dfu",
+      "start": 2646170,
+      "end": 2655765
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "testpage.tex",
+      "start": 2655765,
+      "end": 2668285
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "texsys.cfg",
+      "start": 2668285,
+      "end": 2676352
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "textcomp-2018-08-11.sty",
+      "start": 2676352,
+      "end": 2692464
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "textcomp.sty",
+      "start": 2692464,
+      "end": 2695310
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "tracefnt.sty",
+      "start": 2695310,
+      "end": 2705739
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ts1cmr.fd",
+      "start": 2705739,
+      "end": 2708205
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ts1cmss.fd",
+      "start": 2708205,
+      "end": 2710616
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ts1cmtt.fd",
+      "start": 2710616,
+      "end": 2712940
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ts1cmvtt.fd",
+      "start": 2712940,
+      "end": 2715214
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ts1enc.def",
+      "start": 2715214,
+      "end": 2723304
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ts1enc.dfu",
+      "start": 2723304,
+      "end": 2728437
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "tuenc.def",
+      "start": 2728437,
+      "end": 2754882
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "tulmdh.fd",
+      "start": 2754882,
+      "end": 2757156
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "tulmr.fd",
+      "start": 2757156,
+      "end": 2761978
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "tulmss.fd",
+      "start": 2761978,
+      "end": 2765641
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "tulmssq.fd",
+      "start": 2765641,
+      "end": 2768385
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "tulmtt.fd",
+      "start": 2768385,
+      "end": 2772959
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "tulmvtt.fd",
+      "start": 2772959,
+      "end": 2776349
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ucmr.fd",
+      "start": 2776349,
+      "end": 2780029
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ucmss.fd",
+      "start": 2780029,
+      "end": 2783163
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ucmtt.fd",
+      "start": 2783163,
+      "end": 2786040
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ulasy.fd",
+      "start": 2786040,
+      "end": 2788273
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "ullasy.fd",
+      "start": 2788273,
+      "end": 2790462
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "utf8-2018.def",
+      "start": 2790462,
+      "end": 2800378
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "utf8.def",
+      "start": 2800378,
+      "end": 2811884
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "utf8enc.dfu",
+      "start": 2811884,
+      "end": 2837042
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/base",
+      "name": "x2enc.dfu",
+      "start": 2837042,
+      "end": 2848254
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/firstaid",
+      "name": "filehook-ltx.sty",
+      "start": 2848254,
+      "end": 2851468
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/firstaid",
+      "name": "latex2e-first-aid-for-external-files.ltx",
+      "start": 2851468,
+      "end": 2865487
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/firstaid",
+      "name": "underscore-ltx.sty",
+      "start": 2865487,
+      "end": 2867388
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3backend",
+      "name": "l3backend-dvipdfmx.def",
+      "start": 2867388,
+      "end": 2898632
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3backend",
+      "name": "l3backend-dvips.def",
+      "start": 2898632,
+      "end": 2935139
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3backend",
+      "name": "l3backend-dvips.pro",
+      "start": 2935139,
+      "end": 2944706
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3backend",
+      "name": "l3backend-dvisvgm.def",
+      "start": 2944706,
+      "end": 2968801
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3backend",
+      "name": "l3backend-luatex.def",
+      "start": 2968801,
+      "end": 3000169
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3backend",
+      "name": "l3backend-luatex.lua",
+      "start": 3000169,
+      "end": 3004008
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3backend",
+      "name": "l3backend-pdftex.def",
+      "start": 3004008,
+      "end": 3034917
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3backend",
+      "name": "l3backend-xetex.def",
+      "start": 3034917,
+      "end": 3067846
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "expl3-code.tex",
+      "start": 3067846,
+      "end": 4431262
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "expl3-generic.tex",
+      "start": 4431262,
+      "end": 4434302
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "expl3.ltx",
+      "start": 4434302,
+      "end": 4439934
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "expl3.lua",
+      "start": 4439934,
+      "end": 4460605
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "expl3.sty",
+      "start": 4460605,
+      "end": 4467163
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3debug.def",
+      "start": 4467163,
+      "end": 4496517
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3doc.cls",
+      "start": 4496517,
+      "end": 4579261
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3docstrip.tex",
+      "start": 4579261,
+      "end": 4579984
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3str-enc-iso88591.def",
+      "start": 4579984,
+      "end": 4580789
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3str-enc-iso885910.def",
+      "start": 4580789,
+      "end": 4582518
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3str-enc-iso885911.def",
+      "start": 4582518,
+      "end": 4585111
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3str-enc-iso885913.def",
+      "start": 4585111,
+      "end": 4587040
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3str-enc-iso885914.def",
+      "start": 4587040,
+      "end": 4588469
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3str-enc-iso885915.def",
+      "start": 4588469,
+      "end": 4589438
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3str-enc-iso885916.def",
+      "start": 4589438,
+      "end": 4591047
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3str-enc-iso88592.def",
+      "start": 4591047,
+      "end": 4592992
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3str-enc-iso88593.def",
+      "start": 4592992,
+      "end": 4594434
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3str-enc-iso88594.def",
+      "start": 4594434,
+      "end": 4596239
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3str-enc-iso88595.def",
+      "start": 4596239,
+      "end": 4598924
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3str-enc-iso88596.def",
+      "start": 4598924,
+      "end": 4601041
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3str-enc-iso88597.def",
+      "start": 4601041,
+      "end": 4603408
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3str-enc-iso88598.def",
+      "start": 4603408,
+      "end": 4605238
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex-dev/l3kernel",
+      "name": "l3str-enc-iso88599.def",
+      "start": 4605238,
+      "end": 4606163
+    }
+  ],
+  "totalSize": 4606163
+}

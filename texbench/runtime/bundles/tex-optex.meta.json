@@ -1,0 +1,894 @@
+{
+  "name": "tex-optex",
+  "files": [
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "alloc.opm",
+      "start": 0,
+      "end": 6949
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "basic-macros.opm",
+      "start": 6949,
+      "end": 13669
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "bib-iso690.opm",
+      "start": 13669,
+      "end": 49179
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "bib-simple.opm",
+      "start": 49179,
+      "end": 55701
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "cite-bib.opm",
+      "start": 55701,
+      "end": 69606
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "colors.opm",
+      "start": 69606,
+      "end": 90102
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "doc.opm",
+      "start": 90102,
+      "end": 109117
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-adventor.opm",
+      "start": 109117,
+      "end": 109774
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-alegreya.opm",
+      "start": 109774,
+      "end": 110967
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-antt.opm",
+      "start": 110967,
+      "end": 112123
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-baskervald.opm",
+      "start": 112123,
+      "end": 112776
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-baskerville.opm",
+      "start": 112776,
+      "end": 113442
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-besley.opm",
+      "start": 113442,
+      "end": 114928
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-bodonimoda.opm",
+      "start": 114928,
+      "end": 116311
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-bonum.opm",
+      "start": 116311,
+      "end": 116990
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-cabin.opm",
+      "start": 116990,
+      "end": 118668
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-clara.opm",
+      "start": 118668,
+      "end": 119350
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-comicneue.opm",
+      "start": 119350,
+      "end": 120068
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-concrete.opm",
+      "start": 120068,
+      "end": 120847
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-culmus.opm",
+      "start": 120847,
+      "end": 121923
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-cursor.opm",
+      "start": 121923,
+      "end": 122569
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-dejavu.opm",
+      "start": 122569,
+      "end": 123760
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-draftingmono.opm",
+      "start": 123760,
+      "end": 124849
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-ebgaramond.opm",
+      "start": 124849,
+      "end": 126114
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-eczar.opm",
+      "start": 126114,
+      "end": 126937
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-erewhon.opm",
+      "start": 126937,
+      "end": 127908
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-etbb.opm",
+      "start": 127908,
+      "end": 128523
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-fbb.opm",
+      "start": 128523,
+      "end": 129425
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-fira.opm",
+      "start": 129425,
+      "end": 131868
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-fraunces.opm",
+      "start": 131868,
+      "end": 134941
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-garamondl.opm",
+      "start": 134941,
+      "end": 135823
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-gentium.opm",
+      "start": 135823,
+      "end": 136749
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-gfsbodoni.opm",
+      "start": 136749,
+      "end": 137384
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-heros.opm",
+      "start": 137384,
+      "end": 148363
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-heuristica.opm",
+      "start": 148363,
+      "end": 149018
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-inconsolata.opm",
+      "start": 149018,
+      "end": 149571
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-iwona.opm",
+      "start": 149571,
+      "end": 150629
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-jost.opm",
+      "start": 150629,
+      "end": 151874
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-kerkis.opm",
+      "start": 151874,
+      "end": 153076
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-kpfonts.opm",
+      "start": 153076,
+      "end": 154544
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-kurier.opm",
+      "start": 154544,
+      "end": 155598
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-lato.opm",
+      "start": 155598,
+      "end": 157006
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-libertine-s.opm",
+      "start": 157006,
+      "end": 159173
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-libertine.opm",
+      "start": 159173,
+      "end": 161566
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-libertinus.opm",
+      "start": 161566,
+      "end": 163093
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-librecaslon.opm",
+      "start": 163093,
+      "end": 163751
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-lido.opm",
+      "start": 163751,
+      "end": 165288
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-lmfonts.opm",
+      "start": 165288,
+      "end": 174105
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-merriweather.opm",
+      "start": 174105,
+      "end": 175305
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-montserrat.opm",
+      "start": 175305,
+      "end": 176728
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-neohellenic.opm",
+      "start": 176728,
+      "end": 177431
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-newcm.opm",
+      "start": 177431,
+      "end": 179376
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-noto.opm",
+      "start": 179376,
+      "end": 181464
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-oldstandard.opm",
+      "start": 181464,
+      "end": 182187
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-overlock.opm",
+      "start": 182187,
+      "end": 183080
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-pagella.opm",
+      "start": 183080,
+      "end": 183774
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-plex.opm",
+      "start": 183774,
+      "end": 185698
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-poltawski.opm",
+      "start": 185698,
+      "end": 187214
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-raleway.opm",
+      "start": 187214,
+      "end": 188850
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-roboto.opm",
+      "start": 188850,
+      "end": 191467
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-schola.opm",
+      "start": 191467,
+      "end": 192157
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-sourcepro.opm",
+      "start": 192157,
+      "end": 193682
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-stix.opm",
+      "start": 193682,
+      "end": 194370
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-stixtwo.opm",
+      "start": 194370,
+      "end": 195274
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-technika.opm",
+      "start": 195274,
+      "end": 196390
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-termes.opm",
+      "start": 196390,
+      "end": 197074
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-xcharter.opm",
+      "start": 197074,
+      "end": 197930
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "f-xits.opm",
+      "start": 197930,
+      "end": 198672
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "fams-ini.opm",
+      "start": 198672,
+      "end": 215675
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "fnotes.opm",
+      "start": 215675,
+      "end": 224891
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "fonts-catalog.opm",
+      "start": 224891,
+      "end": 230182
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "fonts-opmac.opm",
+      "start": 230182,
+      "end": 239860
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "fonts-preload.opm",
+      "start": 239860,
+      "end": 242290
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "fonts-resize.opm",
+      "start": 242290,
+      "end": 259041
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "fonts-select.opm",
+      "start": 259041,
+      "end": 303124
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "graphics.opm",
+      "start": 303124,
+      "end": 323997
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "hi-syntax.opm",
+      "start": 323997,
+      "end": 333677
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "hisyntax-c.opm",
+      "start": 333677,
+      "end": 336828
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "hisyntax-html.opm",
+      "start": 336828,
+      "end": 337937
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "hisyntax-kt.opm",
+      "start": 337937,
+      "end": 344116
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "hisyntax-lua.opm",
+      "start": 344116,
+      "end": 347713
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "hisyntax-python.opm",
+      "start": 347713,
+      "end": 350800
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "hisyntax-tex.opm",
+      "start": 350800,
+      "end": 352366
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "hyperlinks.opm",
+      "start": 352366,
+      "end": 362382
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "if-macros.opm",
+      "start": 362382,
+      "end": 381746
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "keyval.opm",
+      "start": 381746,
+      "end": 388418
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "lang-data.opm",
+      "start": 388418,
+      "end": 400143
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "lang-decl.opm",
+      "start": 400143,
+      "end": 416772
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "languages.opm",
+      "start": 416772,
+      "end": 424086
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "lists.opm",
+      "start": 424086,
+      "end": 429513
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "logos.opm",
+      "start": 429513,
+      "end": 432562
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "luatex-ini.opm",
+      "start": 432562,
+      "end": 440454
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "makeindex.opm",
+      "start": 440454,
+      "end": 466959
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "maketoc.opm",
+      "start": 466959,
+      "end": 473482
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "margins.opm",
+      "start": 473482,
+      "end": 479305
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "math-macros.opm",
+      "start": 479305,
+      "end": 527064
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "math-preload.opm",
+      "start": 527064,
+      "end": 538280
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "mathclass.opm",
+      "start": 538280,
+      "end": 551849
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "more-macros.opm",
+      "start": 551849,
+      "end": 572140
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "multicolumns.opm",
+      "start": 572140,
+      "end": 579729
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "optex-tricks.opm",
+      "start": 579729,
+      "end": 637848
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "optex.ini",
+      "start": 637848,
+      "end": 641922
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "optex.lua",
+      "start": 641922,
+      "end": 677053
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "others.opm",
+      "start": 677053,
+      "end": 688922
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "outlines.opm",
+      "start": 688922,
+      "end": 693546
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "output.opm",
+      "start": 693546,
+      "end": 705373
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "parameters.opm",
+      "start": 705373,
+      "end": 732937
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "pdfuni-string.opm",
+      "start": 732937,
+      "end": 737554
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "plain-macros.opm",
+      "start": 737554,
+      "end": 752749
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "prefixed.opm",
+      "start": 752749,
+      "end": 771586
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "print-unimath.opm",
+      "start": 771586,
+      "end": 773895
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "ref-file.opm",
+      "start": 773895,
+      "end": 780676
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "references.opm",
+      "start": 780676,
+      "end": 786195
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "sections.opm",
+      "start": 786195,
+      "end": 808697
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "slides.opm",
+      "start": 808697,
+      "end": 821772
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "styles.opm",
+      "start": 821772,
+      "end": 824527
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "table.opm",
+      "start": 824527,
+      "end": 852761
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "uni-lcuc.opm",
+      "start": 852761,
+      "end": 975590
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "unimath-codes.opm",
+      "start": 975590,
+      "end": 1002796
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "unimath-macros.opm",
+      "start": 1002796,
+      "end": 1020478
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "unimath-table.opm",
+      "start": 1020478,
+      "end": 1261927
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "usebib.opm",
+      "start": 1261927,
+      "end": 1292688
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/base",
+      "name": "verbatim.opm",
+      "start": 1292688,
+      "end": 1311362
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/demo",
+      "name": "op-biblist.bib",
+      "start": 1311362,
+      "end": 1320940
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/demo",
+      "name": "op-demo.tex",
+      "start": 1320940,
+      "end": 1324438
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/demo",
+      "name": "op-letter-cs.tex",
+      "start": 1324438,
+      "end": 1325630
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/demo",
+      "name": "op-letter-en.tex",
+      "start": 1325630,
+      "end": 1326203
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/demo",
+      "name": "op-letter-he.tex",
+      "start": 1326203,
+      "end": 1329004
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/demo",
+      "name": "op-letter-src.tex",
+      "start": 1329004,
+      "end": 1331725
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/demo",
+      "name": "op-letter-srl.tex",
+      "start": 1331725,
+      "end": 1333003
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/demo",
+      "name": "op-mathalign.tex",
+      "start": 1333003,
+      "end": 1341270
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/demo",
+      "name": "op-ring.png",
+      "start": 1341270,
+      "end": 1854254
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/demo",
+      "name": "op-slides-bg.png",
+      "start": 1854254,
+      "end": 1916639
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/demo",
+      "name": "op-slides.tex",
+      "start": 1916639,
+      "end": 1926989
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/lua-widow-control",
+      "name": "lua-widow-control.opm",
+      "start": 1926989,
+      "end": 1928955
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/parstat",
+      "name": "parstat.lua",
+      "start": 1928955,
+      "end": 1935369
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/parstat",
+      "name": "parstat.opm",
+      "start": 1935369,
+      "end": 1936718
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/pdfextra",
+      "name": "pdfextra.opm",
+      "start": 1936718,
+      "end": 2005861
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/pkg",
+      "name": "emoji.opm",
+      "start": 2005861,
+      "end": 2007811
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/pkg",
+      "name": "math.opm",
+      "start": 2007811,
+      "end": 2069929
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/pkg",
+      "name": "minim-mp.opm",
+      "start": 2069929,
+      "end": 2070256
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/pkg",
+      "name": "minim-pdf.opm",
+      "start": 2070256,
+      "end": 2073454
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/pkg",
+      "name": "minim.opm",
+      "start": 2073454,
+      "end": 2081009
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/pkg",
+      "name": "mte.opm",
+      "start": 2081009,
+      "end": 2103065
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/pkg",
+      "name": "plain-at.opm",
+      "start": 2103065,
+      "end": 2104347
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/pkg",
+      "name": "qrcode.opm",
+      "start": 2104347,
+      "end": 2189470
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/pkg",
+      "name": "tikz.opm",
+      "start": 2189470,
+      "end": 2194760
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/optex/pkg",
+      "name": "vlna.opm",
+      "start": 2194760,
+      "end": 2202303
+    }
+  ],
+  "totalSize": 2202303
+}
