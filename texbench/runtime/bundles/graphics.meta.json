@@ -1,0 +1,180 @@
+{
+  "name": "graphics",
+  "files": [
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics-cfg",
+      "name": "color.cfg",
+      "start": 0,
+      "end": 1213
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics-cfg",
+      "name": "graphics.cfg",
+      "start": 1213,
+      "end": 2437
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics-def",
+      "name": "dvipdfmx.def",
+      "start": 2437,
+      "end": 14903
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics-def",
+      "name": "dvips.def",
+      "start": 14903,
+      "end": 21692
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics-def",
+      "name": "dvisvgm.def",
+      "start": 21692,
+      "end": 30893
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics-def",
+      "name": "luatex.def",
+      "start": 30893,
+      "end": 50531
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics-def",
+      "name": "pdftex.def",
+      "start": 50531,
+      "end": 70157
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics-def",
+      "name": "xetex.def",
+      "start": 70157,
+      "end": 84945
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "color.sty",
+      "start": 84945,
+      "end": 92201
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "dvipdf.def",
+      "start": 92201,
+      "end": 96780
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "dvipsnam.def",
+      "start": 96780,
+      "end": 101789
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "dvipsone.def",
+      "start": 101789,
+      "end": 106397
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "dviwin.def",
+      "start": 106397,
+      "end": 107659
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "emtex.def",
+      "start": 107659,
+      "end": 108902
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "epsfig.sty",
+      "start": 108902,
+      "end": 112351
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "graphics-2017-06-25.sty",
+      "start": 112351,
+      "end": 127928
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "graphics.sty",
+      "start": 127928,
+      "end": 146513
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "graphicx.sty",
+      "start": 146513,
+      "end": 154631
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "keyval.sty",
+      "start": 154631,
+      "end": 157302
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "lscape.sty",
+      "start": 157302,
+      "end": 159124
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "mathcolor.ltx",
+      "start": 159124,
+      "end": 162009
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "pctex32.def",
+      "start": 162009,
+      "end": 166465
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "pctexhp.def",
+      "start": 166465,
+      "end": 167718
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "pctexps.def",
+      "start": 167718,
+      "end": 171706
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "pctexwin.def",
+      "start": 171706,
+      "end": 174236
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "rotating.sty",
+      "start": 174236,
+      "end": 181516
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "tcidvi.def",
+      "start": 181516,
+      "end": 186377
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "trig.sty",
+      "start": 186377,
+      "end": 190400
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/graphics",
+      "name": "truetex.def",
+      "start": 190400,
+      "end": 193995
+    }
+  ],
+  "totalSize": 193995
+}

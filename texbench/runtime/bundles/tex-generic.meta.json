@@ -1,0 +1,1110 @@
+{
+  "name": "tex-generic",
+  "files": [
+    {
+      "path": "/texlive/texmf-dist/tex/generic/bibtex",
+      "name": "apalike.sty",
+      "start": 0,
+      "end": 3180
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/bibtex",
+      "name": "apalike.tex",
+      "start": 3180,
+      "end": 7809
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/bigintcalc",
+      "name": "bigintcalc.sty",
+      "start": 7809,
+      "end": 48444
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/colorprofiles",
+      "name": "FOGRA39L_coated.icc",
+      "start": 48444,
+      "end": 169812
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/colorprofiles",
+      "name": "colorprofiles.sty",
+      "start": 169812,
+      "end": 171937
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/colorprofiles",
+      "name": "colorprofiles.tex",
+      "start": 171937,
+      "end": 173976
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/colorprofiles",
+      "name": "sRGB.icc",
+      "start": 173976,
+      "end": 177244
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/config",
+      "name": "language.dat",
+      "start": 177244,
+      "end": 184125
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/config",
+      "name": "language.dat.lua",
+      "start": 184125,
+      "end": 202498
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/config",
+      "name": "language.def",
+      "start": 202498,
+      "end": 210627
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/config",
+      "name": "language.us",
+      "start": 210627,
+      "end": 213401
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/config",
+      "name": "language.us.def",
+      "start": 213401,
+      "end": 214753
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/config",
+      "name": "language.us.lua",
+      "start": 214753,
+      "end": 216244
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/config",
+      "name": "luatex-unicode-letters.tex",
+      "start": 216244,
+      "end": 349835
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/config",
+      "name": "pdftex-dvi.tex",
+      "start": 349835,
+      "end": 351937
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/context/mptopdf",
+      "name": "mptopdf.tex",
+      "start": 351937,
+      "end": 357259
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/dehyph",
+      "name": "README",
+      "start": 357259,
+      "end": 359799
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/dehyph",
+      "name": "dehyphn.tex",
+      "start": 359799,
+      "end": 411433
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/dehyph",
+      "name": "dehypht.tex",
+      "start": 411433,
+      "end": 462778
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/dehyph",
+      "name": "dehyphtex.tex",
+      "start": 462778,
+      "end": 583835
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/dvips",
+      "name": "blackdvi.sty",
+      "start": 583835,
+      "end": 586808
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/dvips",
+      "name": "blackdvi.tex",
+      "start": 586808,
+      "end": 589781
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/dvips",
+      "name": "colordvi.sty",
+      "start": 589781,
+      "end": 598082
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/dvips",
+      "name": "colordvi.tex",
+      "start": 598082,
+      "end": 606383
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/dvips",
+      "name": "rotate.sty",
+      "start": 606383,
+      "end": 608668
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/dvips",
+      "name": "rotate.tex",
+      "start": 608668,
+      "end": 610604
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "1250-csf.tex",
+      "start": 610604,
+      "end": 618841
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "1250-il2.tex",
+      "start": 618841,
+      "end": 619700
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "1250-latex.tex",
+      "start": 619700,
+      "end": 622158
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "1250-t1.tex",
+      "start": 622158,
+      "end": 629805
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "852-csf.tex",
+      "start": 629805,
+      "end": 636331
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "852-il2.tex",
+      "start": 636331,
+      "end": 638514
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "852-latex.tex",
+      "start": 638514,
+      "end": 640961
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "852-t1.tex",
+      "start": 640961,
+      "end": 646875
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "csfmacro.tex",
+      "start": 646875,
+      "end": 648832
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "enc-u.tex",
+      "start": 648832,
+      "end": 652781
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "encmacro.tex",
+      "start": 652781,
+      "end": 654111
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "il2-1250.tex",
+      "start": 654111,
+      "end": 654971
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "il2-852.tex",
+      "start": 654971,
+      "end": 657154
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "il2-csf.tex",
+      "start": 657154,
+      "end": 664743
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "il2-kam.tex",
+      "start": 664743,
+      "end": 666930
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "il2-t1.tex",
+      "start": 666930,
+      "end": 672884
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "kam-csf.tex",
+      "start": 672884,
+      "end": 676396
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "kam-il2.tex",
+      "start": 676396,
+      "end": 678584
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "kam-latex.tex",
+      "start": 678584,
+      "end": 681038
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "kam-t1.tex",
+      "start": 681038,
+      "end": 684614
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "mixcodes.tex",
+      "start": 684614,
+      "end": 688473
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "noprefnt.tex",
+      "start": 688473,
+      "end": 689477
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "plain-1250-cs.tex",
+      "start": 689477,
+      "end": 689948
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "plain-852-cs.tex",
+      "start": 689948,
+      "end": 690417
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "plain-il2-cs.tex",
+      "start": 690417,
+      "end": 690890
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "plain-kam-cs.tex",
+      "start": 690890,
+      "end": 691363
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "plain-utf8-cs.tex",
+      "start": 691363,
+      "end": 691833
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "plain-utf8-ec.tex",
+      "start": 691833,
+      "end": 692440
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "polyset.tex",
+      "start": 692440,
+      "end": 695554
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "t1macro.tex",
+      "start": 695554,
+      "end": 697470
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "utf8-csf.tex",
+      "start": 697470,
+      "end": 706288
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "utf8-t1.tex",
+      "start": 706288,
+      "end": 724277
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "utf8cseq.tex",
+      "start": 724277,
+      "end": 727133
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "utf8lat1.tex",
+      "start": 727133,
+      "end": 734445
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "utf8lata.tex",
+      "start": 734445,
+      "end": 742167
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "utf8math.tex",
+      "start": 742167,
+      "end": 744141
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "utf8off.tex",
+      "start": 744141,
+      "end": 744907
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "utf8raw.tex",
+      "start": 744907,
+      "end": 771478
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "utf8unkn.tex",
+      "start": 771478,
+      "end": 774690
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enctex",
+      "name": "utf8warn.tex",
+      "start": 774690,
+      "end": 782126
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/enigma",
+      "name": "enigma.lua",
+      "start": 782126,
+      "end": 836703
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/etexcmds",
+      "name": "etexcmds.sty",
+      "start": 836703,
+      "end": 844437
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/gates",
+      "name": "gates.lua",
+      "start": 844437,
+      "end": 863136
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/gates",
+      "name": "gates.sty",
+      "start": 863136,
+      "end": 863542
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/gates",
+      "name": "gates.tex",
+      "start": 863542,
+      "end": 895128
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/gates",
+      "name": "t-gates.tex",
+      "start": 895128,
+      "end": 895808
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/gettitlestring",
+      "name": "gettitlestring.sty",
+      "start": 895808,
+      "end": 904179
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyph-utf8/conversions",
+      "name": "conv-utf8-ec.tex",
+      "start": 904179,
+      "end": 910732
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyph-utf8/conversions",
+      "name": "conv-utf8-il2.tex",
+      "start": 910732,
+      "end": 915124
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyph-utf8/conversions",
+      "name": "conv-utf8-il3.tex",
+      "start": 915124,
+      "end": 916356
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyph-utf8/conversions",
+      "name": "conv-utf8-l7x.tex",
+      "start": 916356,
+      "end": 920513
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyph-utf8/conversions",
+      "name": "conv-utf8-lmc.tex",
+      "start": 920513,
+      "end": 924409
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyph-utf8/conversions",
+      "name": "conv-utf8-lth.tex",
+      "start": 924409,
+      "end": 928706
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyph-utf8/conversions",
+      "name": "conv-utf8-qx.tex",
+      "start": 928706,
+      "end": 933964
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyph-utf8/conversions",
+      "name": "conv-utf8-t2a.tex",
+      "start": 933964,
+      "end": 940355
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyph-utf8/conversions",
+      "name": "conv-utf8-t8m.tex",
+      "start": 940355,
+      "end": 943590
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyph-utf8/loadhyph",
+      "name": "loadhyph-en-gb.tex",
+      "start": 943590,
+      "end": 944222
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyph-utf8/loadhyph",
+      "name": "loadhyph-en-us.tex",
+      "start": 944222,
+      "end": 944858
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyph-utf8/patterns/tex",
+      "name": "hyph-en-gb.tex",
+      "start": 944858,
+      "end": 1003332
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyph-utf8/patterns/tex",
+      "name": "hyph-en-us.tex",
+      "start": 1003332,
+      "end": 1037460
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyph-utf8/patterns/txt",
+      "name": "hyph-en-gb.hyp.txt",
+      "start": 1037460,
+      "end": 1037563
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyph-utf8/patterns/txt",
+      "name": "hyph-en-gb.pat.txt",
+      "start": 1037563,
+      "end": 1092332
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyph-utf8/patterns/txt",
+      "name": "hyph-en-us.hyp.txt",
+      "start": 1092332,
+      "end": 1092501
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyph-utf8/patterns/txt",
+      "name": "hyph-en-us.pat.txt",
+      "start": 1092501,
+      "end": 1123990
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyphenex",
+      "name": "ushyphex.tex",
+      "start": 1123990,
+      "end": 1150285
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/intcalc",
+      "name": "intcalc.sty",
+      "start": 1150285,
+      "end": 1182054
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/knuth-lib",
+      "name": "null.tex",
+      "start": 1182054,
+      "end": 1182266
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/librarian",
+      "name": "librarian.sty",
+      "start": 1182266,
+      "end": 1182705
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/librarian",
+      "name": "librarian.tex",
+      "start": 1182705,
+      "end": 1214515
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/librarian",
+      "name": "t-librarian.tex",
+      "start": 1214515,
+      "end": 1215301
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/lt3luabridge",
+      "name": "lt3luabridge.sty",
+      "start": 1215301,
+      "end": 1217216
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/lt3luabridge",
+      "name": "lt3luabridge.tex",
+      "start": 1217216,
+      "end": 1227621
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/lt3luabridge",
+      "name": "t-lt3luabridge.tex",
+      "start": 1227621,
+      "end": 1229432
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/luatex85",
+      "name": "luatex85.sty",
+      "start": 1229432,
+      "end": 1235302
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/oberdiek",
+      "name": "engord.sty",
+      "start": 1235302,
+      "end": 1242100
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/oberdiek",
+      "name": "eolgrab.sty",
+      "start": 1242100,
+      "end": 1247903
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/oberdiek",
+      "name": "fibnum.sty",
+      "start": 1247903,
+      "end": 1256497
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/oberdiek",
+      "name": "hyphsubst.sty",
+      "start": 1256497,
+      "end": 1263037
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/oberdiek",
+      "name": "iflang.sty",
+      "start": 1263037,
+      "end": 1271796
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/oberdiek",
+      "name": "pdfcrypt.sty",
+      "start": 1271796,
+      "end": 1283556
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/oberdiek",
+      "name": "protecteddef.sty",
+      "start": 1283556,
+      "end": 1290983
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/oberdiek",
+      "name": "rotchiffre.sty",
+      "start": 1290983,
+      "end": 1299188
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/oberdiek",
+      "name": "setouterhbox.sty",
+      "start": 1299188,
+      "end": 1307658
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/oberdiek",
+      "name": "thepdfnumber.sty",
+      "start": 1307658,
+      "end": 1321275
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/pdfescape",
+      "name": "pdfescape.sty",
+      "start": 1321275,
+      "end": 1340282
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/pdftex",
+      "name": "glyphtounicode.tex",
+      "start": 1340282,
+      "end": 1557029
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/pdftex",
+      "name": "pdfcolor.tex",
+      "start": 1557029,
+      "end": 1562716
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-ascii-print.def",
+      "start": 1562716,
+      "end": 1565973
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-ascii.def",
+      "start": 1565973,
+      "end": 1568843
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-clean7bit.def",
+      "start": 1568843,
+      "end": 1572608
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-cp1250.def",
+      "start": 1572608,
+      "end": 1582885
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-cp1251.def",
+      "start": 1582885,
+      "end": 1593013
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-cp1252.def",
+      "start": 1593013,
+      "end": 1597871
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-cp1257.def",
+      "start": 1597871,
+      "end": 1607528
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-cp437.def",
+      "start": 1607528,
+      "end": 1618113
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-cp850.def",
+      "start": 1618113,
+      "end": 1628547
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-cp852.def",
+      "start": 1628547,
+      "end": 1639280
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-cp855.def",
+      "start": 1639280,
+      "end": 1649629
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-cp858.def",
+      "start": 1649629,
+      "end": 1660044
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-cp865.def",
+      "start": 1660044,
+      "end": 1670649
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-cp866.def",
+      "start": 1670649,
+      "end": 1681180
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-dec-mcs.def",
+      "start": 1681180,
+      "end": 1689044
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-iso-8859-1.def",
+      "start": 1689044,
+      "end": 1692401
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-iso-8859-10.def",
+      "start": 1692401,
+      "end": 1701909
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-iso-8859-11.def",
+      "start": 1701909,
+      "end": 1709955
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-iso-8859-13.def",
+      "start": 1709955,
+      "end": 1719145
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-iso-8859-14.def",
+      "start": 1719145,
+      "end": 1728716
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-iso-8859-15.def",
+      "start": 1728716,
+      "end": 1737847
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-iso-8859-16.def",
+      "start": 1737847,
+      "end": 1747323
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-iso-8859-2.def",
+      "start": 1747323,
+      "end": 1756547
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-iso-8859-3.def",
+      "start": 1756547,
+      "end": 1765281
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-iso-8859-4.def",
+      "start": 1765281,
+      "end": 1774477
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-iso-8859-5.def",
+      "start": 1774477,
+      "end": 1783312
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-iso-8859-6.def",
+      "start": 1783312,
+      "end": 1788840
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-iso-8859-7.def",
+      "start": 1788840,
+      "end": 1797429
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-iso-8859-8.def",
+      "start": 1797429,
+      "end": 1803385
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-iso-8859-9.def",
+      "start": 1803385,
+      "end": 1812361
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-koi8-r.def",
+      "start": 1812361,
+      "end": 1822961
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-mac-centeuro.def",
+      "start": 1822961,
+      "end": 1834559
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-mac-cyrillic.def",
+      "start": 1834559,
+      "end": 1845501
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-mac-roman.def",
+      "start": 1845501,
+      "end": 1856076
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-nextstep.def",
+      "start": 1856076,
+      "end": 1866540
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-pdfdoc.def",
+      "start": 1866540,
+      "end": 1871648
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-utf16le.def",
+      "start": 1871648,
+      "end": 1874412
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-utf32be.def",
+      "start": 1874412,
+      "end": 1878934
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-utf32le.def",
+      "start": 1878934,
+      "end": 1883652
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "se-utf8.def",
+      "start": 1883652,
+      "end": 1895287
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/stringenc",
+      "name": "stringenc.sty",
+      "start": 1895287,
+      "end": 1916801
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/tex-ini-files",
+      "name": "dviluatex.ini",
+      "start": 1916801,
+      "end": 1916883
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/tex-ini-files",
+      "name": "luatex.ini",
+      "start": 1916883,
+      "end": 1917172
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/tex-ini-files",
+      "name": "luatexconfig.tex",
+      "start": 1917172,
+      "end": 1919208
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/tex-ini-files",
+      "name": "luatexiniconfig.tex",
+      "start": 1919208,
+      "end": 1919814
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/tex-ini-files",
+      "name": "pdftexconfig.tex",
+      "start": 1919814,
+      "end": 1920363
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/tex-ini-files",
+      "name": "pdfxmltex.ini",
+      "start": 1920363,
+      "end": 1920606
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/tex-ini-files",
+      "name": "xetex.ini",
+      "start": 1920606,
+      "end": 1924034
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/tex-ini-files",
+      "name": "xmltex.ini",
+      "start": 1924034,
+      "end": 1924194
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/texapi",
+      "name": "texapi.tex",
+      "start": 1924194,
+      "end": 1955114
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "BidiBrackets.txt",
+      "start": 1955114,
+      "end": 1964005
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "BidiMirroring-5-1-0.txt",
+      "start": 1964005,
+      "end": 1988009
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "BidiMirroring.txt",
+      "start": 1988009,
+      "end": 2014836
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "CaseFolding.txt",
+      "start": 2014836,
+      "end": 2102375
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "EastAsianWidth.txt",
+      "start": 2102375,
+      "end": 2303970
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "GraphemeBreakProperty.txt",
+      "start": 2303970,
+      "end": 2403347
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "LineBreak.txt",
+      "start": 2403347,
+      "end": 2666527
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "MathClass-15.txt",
+      "start": 2666527,
+      "end": 2680096
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "PropList.txt",
+      "start": 2680096,
+      "end": 2825561
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "ScriptExtensions.txt",
+      "start": 2825561,
+      "end": 2846268
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "Scripts.txt",
+      "start": 2846268,
+      "end": 3038728
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "SpecialCasing.txt",
+      "start": 3038728,
+      "end": 3055777
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "UnicodeData.txt",
+      "start": 3055777,
+      "end": 5253986
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "WordBreakProperty.txt",
+      "start": 5253986,
+      "end": 5368431
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "emoji-data.txt",
+      "start": 5368431,
+      "end": 5475755
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "load-unicode-data.tex",
+      "start": 5475755,
+      "end": 5482813
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "load-unicode-math-classes.tex",
+      "start": 5482813,
+      "end": 5486562
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/unicode-data",
+      "name": "load-unicode-xetex-classes.tex",
+      "start": 5486562,
+      "end": 5493701
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/yax",
+      "name": "t-yax.tex",
+      "start": 5493701,
+      "end": 5494355
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/yax",
+      "name": "yax.sty",
+      "start": 5494355,
+      "end": 5494740
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/yax",
+      "name": "yax.tex",
+      "start": 5494740,
+      "end": 5517769
+    }
+  ],
+  "totalSize": 5517769
+}

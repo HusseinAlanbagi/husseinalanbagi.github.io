@@ -1,0 +1,240 @@
+{
+  "name": "l3",
+  "files": [
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3backend",
+      "name": "l3backend-dvipdfmx.def",
+      "start": 0,
+      "end": 31244
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3backend",
+      "name": "l3backend-dvips.def",
+      "start": 31244,
+      "end": 67751
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3backend",
+      "name": "l3backend-dvisvgm.def",
+      "start": 67751,
+      "end": 91846
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3backend",
+      "name": "l3backend-luatex.def",
+      "start": 91846,
+      "end": 123214
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3backend",
+      "name": "l3backend-luatex.lua",
+      "start": 123214,
+      "end": 127053
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3backend",
+      "name": "l3backend-pdftex.def",
+      "start": 127053,
+      "end": 157962
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3backend",
+      "name": "l3backend-xetex.def",
+      "start": 157962,
+      "end": 190891
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "expl3-code.tex",
+      "start": 190891,
+      "end": 1572963
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "expl3-generic.tex",
+      "start": 1572963,
+      "end": 1576003
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "expl3.ltx",
+      "start": 1576003,
+      "end": 1581635
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "expl3.lua",
+      "start": 1581635,
+      "end": 1602306
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "expl3.sty",
+      "start": 1602306,
+      "end": 1608864
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3debug.def",
+      "start": 1608864,
+      "end": 1639634
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3doc.cls",
+      "start": 1639634,
+      "end": 1722378
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3docstrip.tex",
+      "start": 1722378,
+      "end": 1723101
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3str-enc-iso88591.def",
+      "start": 1723101,
+      "end": 1723906
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3str-enc-iso885910.def",
+      "start": 1723906,
+      "end": 1725635
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3str-enc-iso885911.def",
+      "start": 1725635,
+      "end": 1728228
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3str-enc-iso885913.def",
+      "start": 1728228,
+      "end": 1730157
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3str-enc-iso885914.def",
+      "start": 1730157,
+      "end": 1731586
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3str-enc-iso885915.def",
+      "start": 1731586,
+      "end": 1732555
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3str-enc-iso885916.def",
+      "start": 1732555,
+      "end": 1734164
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3str-enc-iso88592.def",
+      "start": 1734164,
+      "end": 1736109
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3str-enc-iso88593.def",
+      "start": 1736109,
+      "end": 1737551
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3str-enc-iso88594.def",
+      "start": 1737551,
+      "end": 1739356
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3str-enc-iso88595.def",
+      "start": 1739356,
+      "end": 1742041
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3str-enc-iso88596.def",
+      "start": 1742041,
+      "end": 1744158
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3str-enc-iso88597.def",
+      "start": 1744158,
+      "end": 1746525
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3str-enc-iso88598.def",
+      "start": 1746525,
+      "end": 1748355
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3kernel",
+      "name": "l3str-enc-iso88599.def",
+      "start": 1748355,
+      "end": 1749280
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3packages/l3keys2e",
+      "name": "l3keys2e.sty",
+      "start": 1749280,
+      "end": 1753954
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3packages/xfp",
+      "name": "xfp.sty",
+      "start": 1753954,
+      "end": 1755203
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3packages/xparse",
+      "name": "xparse-2018-04-12.sty",
+      "start": 1755203,
+      "end": 1839740
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3packages/xparse",
+      "name": "xparse-2020-10-01.sty",
+      "start": 1839740,
+      "end": 1845935
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3packages/xparse",
+      "name": "xparse-generic.tex",
+      "start": 1845935,
+      "end": 1926150
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3packages/xparse",
+      "name": "xparse.ltx",
+      "start": 1926150,
+      "end": 1927644
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3packages/xparse",
+      "name": "xparse.sty",
+      "start": 1927644,
+      "end": 1937820
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3packages/xtemplate",
+      "name": "xtemplate-2023-10-10.sty",
+      "start": 1937820,
+      "end": 1987573
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/l3packages/xtemplate",
+      "name": "xtemplate.sty",
+      "start": 1987573,
+      "end": 1988881
+    }
+  ],
+  "totalSize": 1988881
+}

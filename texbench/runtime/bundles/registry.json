@@ -1,0 +1,182 @@
+[
+  {
+    "name": "core",
+    "files": 484,
+    "size": 4537322
+  },
+  {
+    "name": "fmt-xelatex",
+    "files": 1,
+    "size": 4489547
+  },
+  {
+    "name": "fmt-pdflatex",
+    "files": 1,
+    "size": 2300766
+  },
+  {
+    "name": "fmt-lualatex",
+    "files": 1,
+    "size": 6746133
+  },
+  {
+    "name": "fonts-cm",
+    "files": 581,
+    "size": 5907701
+  },
+  {
+    "name": "fonts-lm-otf",
+    "files": 72,
+    "size": 7398528
+  },
+  {
+    "name": "fonts-lm-type1",
+    "files": 184,
+    "size": 9389591
+  },
+  {
+    "name": "fonts-lm-afm",
+    "files": 112,
+    "size": 19190567
+  },
+  {
+    "name": "fonts-lm-tfm",
+    "files": 596,
+    "size": 4952288
+  },
+  {
+    "name": "amsmath",
+    "files": 30,
+    "size": 538302
+  },
+  {
+    "name": "graphics",
+    "files": 29,
+    "size": 193995
+  },
+  {
+    "name": "hyperref",
+    "files": 40,
+    "size": 946816
+  },
+  {
+    "name": "babel",
+    "files": 1051,
+    "size": 2729198
+  },
+  {
+    "name": "bibtex",
+    "files": 35,
+    "size": 843151
+  },
+  {
+    "name": "dvips",
+    "files": 55,
+    "size": 62550
+  },
+  {
+    "name": "l3",
+    "files": 39,
+    "size": 1988881
+  },
+  {
+    "name": "fonts-euler",
+    "files": 22,
+    "size": 110203
+  },
+  {
+    "name": "fonts-cyrillic",
+    "files": 5,
+    "size": 55933
+  },
+  {
+    "name": "fonts-cmextra",
+    "files": 15,
+    "size": 149112
+  },
+  {
+    "name": "fonts-symbols",
+    "files": 15,
+    "size": 135594
+  },
+  {
+    "name": "extra-maps",
+    "files": 10,
+    "size": 565488
+  },
+  {
+    "name": "extra-xetex-lang",
+    "files": 132,
+    "size": 750107
+  },
+  {
+    "name": "fonts-misc",
+    "files": 750,
+    "size": 2283969
+  },
+  {
+    "name": "utils",
+    "files": 6,
+    "size": 79769
+  },
+  {
+    "name": "tex-generic",
+    "files": 184,
+    "size": 5517769
+  },
+  {
+    "name": "tex-latex-misc",
+    "files": 422,
+    "size": 4356692
+  },
+  {
+    "name": "tex-xetex",
+    "files": 16,
+    "size": 383993
+  },
+  {
+    "name": "tex-xelatex",
+    "files": 34,
+    "size": 2131860
+  },
+  {
+    "name": "tex-luatex",
+    "files": 282,
+    "size": 12876488
+  },
+  {
+    "name": "tex-lualatex",
+    "files": 211,
+    "size": 4511059
+  },
+  {
+    "name": "tex-latex-dev",
+    "files": 202,
+    "size": 4606163
+  },
+  {
+    "name": "fonts-source",
+    "files": 810,
+    "size": 2191751
+  },
+  {
+    "name": "tex-context",
+    "files": 7,
+    "size": 152346
+  },
+  {
+    "name": "tex-plain",
+    "files": 33,
+    "size": 237393
+  },
+  {
+    "name": "tex-optex",
+    "files": 148,
+    "size": 2202303
+  },
+  {
+    "name": "extra",
+    "files": 68,
+    "size": 608197
+  }
+]

@@ -1,0 +1,246 @@
+{
+  "name": "hyperref",
+  "files": [
+    {
+      "path": "/texlive/texmf-dist/tex/generic/atbegshi",
+      "name": "atbegshi.sty",
+      "start": 0,
+      "end": 24708
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/bitset",
+      "name": "bitset.sty",
+      "start": 24708,
+      "end": 58669
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/infwarerr",
+      "name": "infwarerr.sty",
+      "start": 58669,
+      "end": 67025
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/kvdefinekeys",
+      "name": "kvdefinekeys.sty",
+      "start": 67025,
+      "end": 72437
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/ltxcmds",
+      "name": "ltxcmds.sty",
+      "start": 72437,
+      "end": 90302
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/pdftexcmds",
+      "name": "pdftexcmds.lua",
+      "start": 90302,
+      "end": 99749
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/pdftexcmds",
+      "name": "pdftexcmds.sty",
+      "start": 99749,
+      "end": 119838
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "backref.sty",
+      "start": 119838,
+      "end": 133894
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "hdvipdfm.def",
+      "start": 133894,
+      "end": 176617
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "hdvips.def",
+      "start": 176617,
+      "end": 180597
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "hdvipson.def",
+      "start": 180597,
+      "end": 186389
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "hdviwind.def",
+      "start": 186389,
+      "end": 203942
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "hluatex.def",
+      "start": 203942,
+      "end": 254981
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "hpdftex.def",
+      "start": 254981,
+      "end": 303121
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "htex4ht.cfg",
+      "start": 303121,
+      "end": 304620
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "htex4ht.def",
+      "start": 304620,
+      "end": 312254
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "htexture.def",
+      "start": 312254,
+      "end": 318421
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "hvtex.def",
+      "start": 318421,
+      "end": 345125
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "hvtexhtm.def",
+      "start": 345125,
+      "end": 349294
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "hvtexmrk.def",
+      "start": 349294,
+      "end": 352168
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "hxetex.def",
+      "start": 352168,
+      "end": 396652
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "hyperref-patches.sty",
+      "start": 396652,
+      "end": 401513
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "hyperref.sty",
+      "start": 401513,
+      "end": 623837
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "hypertex.def",
+      "start": 623837,
+      "end": 630811
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "minitoc-hyper.sty",
+      "start": 630811,
+      "end": 631091
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "nameref.sty",
+      "start": 631091,
+      "end": 642550
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "nohyperref.sty",
+      "start": 642550,
+      "end": 644678
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "ntheorem-hyper.sty",
+      "start": 644678,
+      "end": 644962
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "pd1enc.def",
+      "start": 644962,
+      "end": 659211
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "pdfmark.def",
+      "start": 659211,
+      "end": 707484
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "psdextra.def",
+      "start": 707484,
+      "end": 746825
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "puarenc.def",
+      "start": 746825,
+      "end": 750696
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "puenc-extra.def",
+      "start": 750696,
+      "end": 752909
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "puenc.def",
+      "start": 752909,
+      "end": 870027
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "puvnenc.def",
+      "start": 870027,
+      "end": 879446
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/hyperref",
+      "name": "xr-hyper.sty",
+      "start": 879446,
+      "end": 882825
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/kvoptions",
+      "name": "kvoptions-patch.sty",
+      "start": 882825,
+      "end": 897650
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/kvoptions",
+      "name": "kvoptions.sty",
+      "start": 897650,
+      "end": 920205
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/kvsetkeys",
+      "name": "kvsetkeys.sty",
+      "start": 920205,
+      "end": 934020
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/url",
+      "name": "url.sty",
+      "start": 934020,
+      "end": 946816
+    }
+  ],
+  "totalSize": 946816
+}

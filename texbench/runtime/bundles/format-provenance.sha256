@@ -1,0 +1,6 @@
+f1ab9757fe8b4928f87ddf4cf141bd3b76be4826f0d6352c6043a85363a1c303  texlive-packages.lock.json
+76646057f2178846311c3ed121a0028ccf7e647f01a5df2d1d3b1523446d49f1  build/wasm/busytex.wasm
+036ecf65da27d4ac611d2864d60b3422af17d6093f386c260675e53c52c55636  build/wasm/busytex.js
+57b99c0e19801e9a34f5f5bcf4ebd74cdb6ce9bedd20510fe5251f8ec94d83bd  build/texlive-basic/texmf-dist/texmf-var/web2c/pdftex/pdflatex.fmt
+e4147725e823365348312436f2e4563107fb9b92b620418dfab78afc9388bfef  build/texlive-basic/texmf-dist/texmf-var/web2c/xetex/xelatex.fmt
+f2970233c6f9a2cf2839967631436edeee07784d73ebfdd8448ef61d9b169ab7  build/texlive-basic/texmf-dist/texmf-var/web2c/luahbtex/luahblatex.fmt
