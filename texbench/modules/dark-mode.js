@@ -7,10 +7,9 @@ export default {
   activate(ctx) {
     const mq = matchMedia('(prefers-color-scheme: dark)');
     const wanted = () => { const s = ctx.settings.get('theme', 'system'); return s === 'system' ? (mq.matches ? 'dark' : 'light') : s; };
-    let btn;
-    const apply = () => { ctx.ui.setTheme(wanted()); if (btn) btn.lastChild.textContent = wanted() === 'dark' ? 'Light' : 'Dark'; };
-    const toggle = () => { ctx.settings.set('theme', wanted() === 'dark' ? 'light' : 'dark'); apply(); };
-    btn = ctx.ui.addToolbarButton({ label: 'Dark', icon: '◐', title: 'Switch between the light and dark theme', onClick: toggle }).el;
+    let off = null, toggle;
+    const apply = () => { ctx.ui.setTheme(wanted()); off && off(); const dark = wanted() === 'dark'; off = ctx.ui.addToolbarButton({ label: dark ? 'Light theme' : 'Dark theme', icon: dark ? 'sun' : 'moon', where: 'top', title: dark ? 'Switch to the light theme' : 'Switch to the dark theme', onClick: () => toggle() }); };
+    toggle = () => { ctx.settings.set('theme', wanted() === 'dark' ? 'light' : 'dark'); apply(); };
     ctx.ui.addCommand({ id: 'theme.toggle', name: 'Switch between light and dark theme', run: toggle });
     ctx.ui.addCommand({ id: 'theme.system', name: 'Theme: follow the system setting', run: () => { ctx.settings.set('theme', 'system'); apply(); } });
     mq.addEventListener('change', apply);

@@ -5,47 +5,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TeXbench</title>
 <meta name="description" content="A free LaTeX editor that runs in your browser: compiles on your own machine, works offline, and every feature is a module you can switch on or off.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%233b4cca'/%3E%3Cpath d='M8 9h16v3.2h-6.3V24h-3.4V12.2H8z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230e6168'/%3E%3Cpath d='M8 10h16M16 10v13M11 23h10' stroke='%23fff' stroke-width='2.6' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
 <header id="top">
-  <button id="projBtn" class="proj" title="Projects: new, open, import, export" aria-haspopup="menu"><span class="logo" aria-hidden="true">T</span><span id="projName">…</span><span class="caret" aria-hidden="true">▾</span></button>
-  <div class="grp">
-    <button id="compileBtn" class="primary">▶ Compile</button>
-    <label class="check" title="Recompile shortly after you stop typing"><input type="checkbox" id="auto"> Auto</label>
-    <span id="status" class="status" role="status" aria-live="polite"></span>
-  </div>
-  <div id="toolbar" class="grp" role="toolbar" aria-label="Tools"></div>
+  <button id="projBtn" class="proj" title="Projects: new, open, import, export" aria-haspopup="menu"><span class="logo" aria-hidden="true"></span><span id="projName">…</span><span class="caret" aria-hidden="true"></span></button>
+  <button id="folderChip" class="chip" hidden></button>
   <span class="spacer"></span>
-  <button id="pdfModeBtn" title="Show the PDF beside the editor, hide it, or open it in its own tab" aria-haspopup="menu">PDF ▾</button>
-  <button id="paletteBtn">Commands</button>
-  <button id="featBtn" title="Switch features on or off, and other settings">⚙ Features</button>
+  <span id="status" class="status" role="status" aria-live="polite"></span>
+  <div class="compile">
+    <button id="compileBtn" class="primary"><span class="ic-slot" data-icon="play"></span>Compile</button>
+    <label class="check" title="Compile again shortly after you stop typing"><input type="checkbox" id="auto"> Auto</label>
+  </div>
+  <span class="vr" aria-hidden="true"></span>
+  <button id="pdfModeBtn" class="ghost" title="Show the PDF beside the editor, hide it, or open it in its own tab" aria-haspopup="menu">PDF</button>
+  <div id="topTools" class="grp"></div>
+  <button id="paletteBtn" class="ghost icon-only" aria-label="All commands"><span class="ic-slot" data-icon="command"></span></button>
+  <button id="featBtn" class="ghost" title="Switch features on or off, and other settings"><span class="ic-slot" data-icon="sliders"></span>Features</button>
 </header>
 <main id="work">
+  <nav id="rail" aria-label="Side panels"></nav>
   <aside id="side" aria-label="Project">
-    <details class="panel" open><summary>Files
-        <span class="sum-actions"><button id="newFileBtn" class="icon" title="New file" aria-label="New file">＋</button><button id="uploadBtn" class="icon" title="Upload files (or drop them here)" aria-label="Upload files">⇪</button></span></summary>
-      <div id="tree" class="panel-body tree"></div>
-    </details>
-    <div id="panels"></div>
+    <div class="side-head"><span id="sideTitle">Files</span><span class="spacer"></span><span id="sideActions" class="grp"><button id="newFileBtn" class="ghost icon-only" title="New file" aria-label="New file"><span class="ic-slot" data-icon="plus"></span></button><button id="uploadBtn" class="ghost icon-only" title="Upload files (or drop them here)" aria-label="Upload files"><span class="ic-slot" data-icon="upload"></span></button></span></div>
+    <div id="panels"><div class="panel-body tree" id="tree" data-panel="files"></div></div>
   </aside>
   <div class="split" id="split1" role="separator" aria-orientation="vertical"></div>
   <section id="edwrap" aria-label="Source">
-    <div class="bar"><span id="fileName" class="fname"></span><span class="spacer"></span><span id="cursorInfo" class="muted"></span>
-      <span id="edButtons" class="grp"></span><button id="syncBtn" class="small">Show in PDF →</button></div>
+    <div class="bar edbar"><span id="fileName" class="fname"></span><div id="toolbar" class="grp" role="toolbar" aria-label="Tools"></div><span class="spacer"></span>
+      <span id="edButtons" class="grp"></span><button id="syncBtn" class="ghost icon-only" aria-label="Show this line in the PDF"><span class="ic-slot" data-icon="locate"></span></button></div>
     <div id="ed"></div>
     <div id="binview" hidden></div>
+    <div id="dock" hidden><div id="dockGrip" role="separator" aria-orientation="horizontal" title="Drag to resize"></div><div class="bar dockbar"><span id="dockTitle" class="dock-title"></span><span id="dockInfo" class="muted"></span><span class="spacer"></span><span id="dockActions" class="grp"></span><button id="dockClose" class="ghost icon-only" title="Close" aria-label="Close"><span class="ic-slot" data-icon="close"></span></button></div><div id="dockBody"></div></div>
     <div id="bottom">
-      <div class="bar tabs"><button id="tabProblems" class="tab">Problems</button><button id="tabLog" class="tab">Log</button><span class="spacer"></span><span id="statusItems"></span></div>
+      <div class="bar statusbar"><button id="tabProblems" class="tab">Problems</button><button id="tabLog" class="tab">Log</button><span class="spacer"></span><span id="statusItems"></span><span id="cursorInfo" class="status-item"></span></div>
       <div id="bottomBody" hidden><div id="problemList" hidden></div><pre id="logText" hidden></pre></div>
     </div>
   </section>
   <div class="split" id="split2" role="separator" aria-orientation="vertical"></div>
   <section id="pdfwrap" aria-label="PDF preview">
-    <div class="bar"><button id="zoomOut" class="icon" title="Zoom out" aria-label="Zoom out">−</button><span id="zoomInfo" class="muted">100%</span><button id="zoomIn" class="icon" title="Zoom in" aria-label="Zoom in">＋</button>
-      <button id="zoomFit" class="small" title="Fit the page width">Fit</button><span class="spacer"></span><span id="pageInfo" class="muted"></span><button id="pdfDownload" class="small" title="Download the PDF">Download PDF</button><button id="pdfTabBtn" class="icon" title="Open the PDF in its own browser tab (handy on a second screen)" aria-label="Open the PDF in its own tab">⧉</button><button id="pdfHideBtn" class="icon" title="Hide the PDF (show it again from the PDF menu at the top)" aria-label="Hide the PDF">✕</button></div>
-    <div id="pdf"><div id="pdfEmpty" class="muted pad">The PDF appears here after the first compile. The first run downloads the TeX engine (about 35 MB) and keeps it for next time.</div></div>
+    <div class="bar"><button id="zoomOut" class="ghost icon-only" title="Zoom out" aria-label="Zoom out">−</button><span id="zoomInfo" class="muted num">100%</span><button id="zoomIn" class="ghost icon-only" title="Zoom in" aria-label="Zoom in">+</button>
+      <button id="zoomFit" class="ghost" title="Fit the page width">Fit</button><span class="spacer"></span><span id="pageInfo" class="muted num"></span><button id="pdfDownload" class="ghost" title="Download the PDF">Download</button><button id="pdfTabBtn" class="ghost icon-only" title="Open the PDF in its own browser tab (handy on a second screen)" aria-label="Open the PDF in its own tab"><span class="ic-slot" data-icon="external"></span></button><button id="pdfHideBtn" class="ghost icon-only" title="Hide the PDF (show it again from the PDF menu at the top)" aria-label="Hide the PDF"><span class="ic-slot" data-icon="close"></span></button></div>
+    <div id="pdf"><div id="pdfEmpty" class="pad">The PDF appears here after the first compile. The first run downloads the TeX engine (about 35 MB) and keeps it for next time.</div></div>
   </section>
 </main>
 <noscript>This editor needs JavaScript.</noscript>

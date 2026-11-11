@@ -8,6 +8,7 @@ await build({ entryPoints: ['src/pdfwin.js'], bundle: true, format: 'esm', outfi
 fs.cpSync('static', out, { recursive: true });
 fs.copyFileSync('node_modules/@siglum/engine/src/worker.js', out + '/engine-worker.js');
 for (const f of ['pdf.min.mjs', 'pdf.worker.min.mjs']) fs.copyFileSync('node_modules/pdfjs-dist/build/' + f, out + '/vendor/' + f);
-const mods = fs.readdirSync('static/modules').filter(f => f.endsWith('.js')).sort();
+const ORDER = ['dark-mode.js', 'visual-mode.js', 'equation-editor.js', 'snippets.js', 'dynare.js', 'irf-figures.js', 'outline.js', 'proofread.js', 'model-checks.js'];
+const mods = fs.readdirSync('static/modules').filter(f => f.endsWith('.js')).sort((a, b) => ((ORDER.indexOf(a) + 1) || 99) - ((ORDER.indexOf(b) + 1) || 99) || a.localeCompare(b));
 fs.writeFileSync(out + '/modules/index.json', JSON.stringify(mods, null, 1));
 console.log('built', out, '-', (fs.statSync(out + '/core.js').size / 1024).toFixed(0) + ' KB core,', mods.length, 'modules');

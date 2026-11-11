@@ -38,7 +38,7 @@ export default {
       };
       addEventListener('message', onMsg);
     };
-    ctx.ui.addToolbarButton({ label: 'IRF figure', icon: '∿', title: 'Build an impulse-response figure from Dynare results and insert it', onClick: open });
+    ctx.ui.addToolbarButton({ label: 'IRF figure', icon: 'wave', title: 'Build an impulse-response figure from Dynare results and insert it', onClick: open });
     ctx.ui.addCommand({ id: 'irf.figure', name: 'Insert an IRF figure', run: open });
   },
 };

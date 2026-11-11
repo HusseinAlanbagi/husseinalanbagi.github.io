@@ -53,7 +53,7 @@ export function createModuleHost(app) {
     async loadAll() {
       let names = [];
       try { names = await (await fetch(new URL('./modules/index.json', document.baseURI), { cache: 'no-cache' })).json(); } catch (e) { console.error('modules/index.json missing', e); }
-      await Promise.all(names.map(n => load(new URL('./modules/' + n, document.baseURI).href, 'built-in', n)));
+      for (const n of names) await load(new URL('./modules/' + n, document.baseURI).href, 'built-in', n);   // in order, so buttons keep their places
       for (const u of (await store.kvGet('userModules')) || []) await loadUser(u);
     },
     list: () => [...mods.values()].map(r => ({ id: r.mod.id, name: r.mod.name || r.mod.id, description: r.mod.description || '', category: r.mod.category || 'Other', enabled: r.enabled, source: r.source, fileName: r.fileName, error: r.error })),

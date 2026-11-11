@@ -50,7 +50,7 @@ export default {
     const general = (tpl) => { // CodeMirror snippet syntax: backslashes are literal, ${n:x} are fields
       ctx.editor.insertSnippet(tpl.replace(/\\\\\\\\/g, '\\\\'));
     };
-    const off = ctx.ui.addToolbarButton({ label: 'Snippets', icon: '❏', title: 'Insert a ready-made block', onClick: () => ctx.ui.menu(off.el, [
+    const off = ctx.ui.addToolbarButton({ label: 'Snippets', icon: 'braces', title: 'Insert a ready-made block', onClick: () => ctx.ui.menu(off.el, [
       { heading: 'DSGE equations' }, ...DSGE.map(([name, eq]) => ({ label: name, onClick: () => insertEq(name, eq) })),
       '-', { heading: 'General' }, ...GENERAL.map(([name, tpl, hint]) => ({ label: name, title: hint || '', onClick: () => general(tpl) })),
     ]) });

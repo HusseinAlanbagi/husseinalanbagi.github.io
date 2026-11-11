@@ -2,7 +2,7 @@ import { open } from './t_app.mjs'; import { MOD } from './t_dyn.mjs';
 const { b, p, errs, waitCompiled } = await open();
 await p.waitForSelector('body.ready', { timeout: 30000 }); console.log('first:', await waitCompiled());
 console.log('toolbar:', await p.$$eval('#toolbar button', e => e.map(x => x.textContent)));
-console.log('panel:', await p.$eval('#panel-model-checks', e => e.innerText.replace(/\n+/g, ' | ')));
+console.log('panel:', await p.$eval('[data-panel="model-checks"]', e => e.innerText.replace(/\n+/g, ' | ')));
 // Dynare import
 await p.evaluate((mod) => { const a = window.texbench.app; a.project.write('rbc.mod', mod); const t = a.editor.getText(); a.editor.setPos(t.indexOf('\\section{Calibration}')); }, MOD);
 await p.evaluate(() => [...document.querySelectorAll('#toolbar button')].find(x => /Dynare/.test(x.textContent)).click());

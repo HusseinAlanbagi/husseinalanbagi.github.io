@@ -82,7 +82,7 @@ export default {
       });
     }
 
-    const btn = ctx.ui.addToolbarButton({ label: 'Dynare', icon: '⇄', title: 'Import a .mod file as equations and tables, or turn equations into Dynare code', onClick: () => ctx.ui.menu(btn.el, [
+    const btn = ctx.ui.addToolbarButton({ label: 'Dynare', icon: 'swap', title: 'Import a .mod file as equations and tables, or turn equations into Dynare code', onClick: () => ctx.ui.menu(btn.el, [
       { heading: 'Dynare → LaTeX' },
       ...mods().map(p => ({ label: `Import from ${p}`, onClick: () => importDialog(p) })),
       { label: 'Import a .mod file from your computer…', onClick: upload },

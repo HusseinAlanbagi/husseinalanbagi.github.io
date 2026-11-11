@@ -26,7 +26,7 @@ export default {
       box.replaceChildren(...(rows.length ? rows : [ctx.h('p', { class: 'muted', style: { padding: '0 10px' } }, 'No sections yet.')]));
     };
     const later = () => { clearTimeout(timer); timer = setTimeout(draw, 300); };
-    ctx.ui.addPanel({ id: 'outline', title: 'Outline', render(el) { el.classList.add('side-list'); box = el; draw(); } });
+    ctx.ui.addPanel({ id: 'outline', title: 'Outline', icon: 'outline', render(el) { el.classList.add('side-list'); box = el; draw(); } });
     ctx.on('change', later); ctx.on('files', later); ctx.on('project', later);
     ctx.onDispose(() => clearTimeout(timer));
   },

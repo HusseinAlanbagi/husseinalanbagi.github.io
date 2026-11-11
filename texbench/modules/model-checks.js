@@ -82,7 +82,7 @@ export default {
         r.problems.length ? h('p', { style: { padding: '0 10px', margin: '6px 0 0' } }, `${r.problems.length} note${r.problems.length === 1 ? '' : 's'} in the Problems list below the editor.`) : null].filter(Boolean));
     };
     const later = () => { clearTimeout(timer); timer = setTimeout(run, 700); };
-    ctx.ui.addPanel({ id: 'model-checks', title: 'Model check', render(el) { box = el; run(); } });
+    ctx.ui.addPanel({ id: 'model-checks', title: 'Model check', icon: 'scale', render(el) { box = el; run(); } });
     ['change', 'files', 'project'].forEach(n => ctx.on(n, later));
     ctx.onDispose(() => { clearTimeout(timer); ctx.problems.clear(); });
   },

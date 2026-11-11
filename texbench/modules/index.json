@@ -1,13 +1,13 @@
 [
- "autocomplete.js",
  "dark-mode.js",
- "dynare.js",
- "equation-editor.js",
- "irf-figures.js",
- "model-checks.js",
- "outline.js",
- "snippets.js",
- "spell-check.js",
  "visual-mode.js",
+ "equation-editor.js",
+ "snippets.js",
+ "dynare.js",
+ "irf-figures.js",
+ "outline.js",
+ "proofread.js",
+ "model-checks.js",
+ "autocomplete.js",
  "word-count.js"
 ]

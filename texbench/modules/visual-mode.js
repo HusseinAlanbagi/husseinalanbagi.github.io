@@ -1,7 +1,7 @@
-// Visual mode for the source editor: equations are drawn as they will look, headings are large, bold
-// is bold, citations and references become small tags, figures show their image, and the preamble
-// folds away. Wherever the cursor or a selection is, the LaTeX source shows, so it can be edited.
-// Switch between Code and Visual with the buttons above the editor, or Ctrl+Shift+V.
+// Typeset view. The source stays one document; you choose which parts of it are shown the way they will
+// look: equations, headings and emphasis, citations and labels, the preamble, and a page layout with the
+// text set in a serif face on a sheet. Each part is a separate switch in the View menu above the editor,
+// so "source only" and "the whole page" are just the two ends. Wherever the cursor is, the LaTeX shows.
 
 const MATH_ENVS = 'equation|align|gather|multline|eqnarray|flalign|alignat|displaymath|math';
 const STAR_FOR = { equation: '', displaymath: '', math: '', align: 'align*', gather: 'gather*', multline: 'multline*', eqnarray: 'eqnarray*', flalign: 'flalign*', alignat: 'alignat*' };
@@ -184,13 +184,15 @@ export function parse(doc) {
 // ---------------------------------------------------------------- the module
 export default {
   id: 'visual-mode',
-  name: 'Visual mode',
-  description: 'A Code / Visual switch above the editor. Visual shows equations as they will look, headings, bold and italics, citation tags and figures; the source appears wherever you put the cursor.',
+  name: 'Typeset view',
+  description: 'A View menu above the editor: show equations, headings, citations or the whole text the way they will look, each on its own switch, up to a full page layout. The LaTeX appears wherever you put the cursor.',
   category: 'Writing',
   activate(ctx) {
     const { StateField, StateEffect, EditorView, Decoration, WidgetType, Compartment } = ctx.cm;
     const h = ctx.h;
-    let on = ctx.settings.get('on', false), ready = !!(window.MathJax && window.MathJax.tex2svg);
+    const LAYERS = [['math', 'Equations', 'Draw equations instead of showing their code'], ['format', 'Headings and emphasis', 'Section titles, bold, italics, lists, the title block and images'], ['tags', 'Citations and labels', 'Show \\cite, \\ref and \\label as small tags'], ['preamble', 'Fold the preamble', 'Collapse everything before \\begin{document} into one line'], ['page', 'Page layout', 'Set the text in a serif face on a sheet, without line numbers']];
+    let layers = ctx.settings.get('layers', {}), ready = !!(window.MathJax && window.MathJax.tex2svg);
+    const any = () => LAYERS.some(([k]) => layers[k]);
     const refresh = StateEffect.define();
 
     // ---- widgets
@@ -243,7 +245,9 @@ export default {
       // the cursor at the very start of the file (where it is when a file opens) leaves the preamble folded
       const touched = (it) => sel.some(r => r.from <= it.to && r.to >= it.from && !(it.kind === 'preamble' && r.to === 0));
       const add = (from, to, deco) => { if (to > from || deco.point) ranges.push(deco.range(from, to)); };
+      const L = layers, layerOf = { preamble: 'preamble', dmath: 'math', imath: 'math', ref: 'tags' };
       for (const it of items) {
+        if (!L[layerOf[it.kind] || 'format']) continue;
         if (touched(it)) { if (it.kind === 'dmath' || it.kind === 'imath') add(it.from, it.to, Decoration.mark({ class: 'vz-src-math' })); continue; }
         switch (it.kind) {
           case 'preamble': ranges.push(Decoration.replace({ block: true, widget: new BlockWidget('pre' + it.lines, () => h('div', { class: 'vz-preamble', title: 'Click to show the preamble' }, `▸ Preamble · ${it.lines} lines (packages and settings) — click to show`), 1) }).range(it.from, it.to)); break;
@@ -287,31 +291,47 @@ export default {
       },
       provide: f => EditorView.decorations.from(f, v => v.deco),
     });
-    const theme = EditorView.editorAttributes.of({ class: 'cm-visual' });
     const comp = new Compartment();
-    const ext = [comp.of([])];
-    ctx.editor.addExtension(ext);
+    ctx.editor.addExtension([comp.of([])]);
     const view = () => ctx.editor.view;
+    let btn;
     const apply = () => {
-      view().dispatch({ effects: comp.reconfigure(on ? [field, theme] : []) });
-      code.classList.toggle('on', !on); vis.classList.toggle('on', on);
-      if (on && !ready) loadMathJax().then(() => { ready = true; if (on) view().dispatch({ effects: refresh.of(null) }); }).catch((e) => ctx.ui.toast('Equations cannot be drawn: ' + e.message, 'err'));
+      const on = any();
+      view().dispatch({ effects: comp.reconfigure(on ? [field, EditorView.editorAttributes.of({ class: 'cm-typeset' + (layers.page ? ' cm-page' : '') })] : []) });
+      if (btn) btn.classList.toggle('on', on);
+      if (layers.math && !ready) loadMathJax().then(() => { ready = true; if (layers.math) view().dispatch({ effects: refresh.of(null) }); }).catch((e) => ctx.ui.toast('Equations cannot be drawn: ' + e.message, 'err'));
     };
-    const set = (v) => { on = v; ctx.settings.set('on', v); apply(); };
-    const code = h('button', { title: 'Show the LaTeX source (Ctrl+Shift+V)', onClick: () => set(false) }, 'Code');
-    const vis = h('button', { title: 'Show equations, headings and formatting as they will look (Ctrl+Shift+V)', onClick: () => set(true) }, 'Visual');
-    ctx.ui.addEditorButton(h('span', { class: 'seg', role: 'group', 'aria-label': 'Editor mode' }, code, vis));
-    ctx.ui.addCommand({ id: 'visual.toggle', name: 'Switch between Code and Visual mode', key: 'Mod+Shift+V', run: () => set(!on) });
-    ctx.editor.addKeymap([{ key: 'Mod-Shift-v', run: () => (set(!on), true) }]);
-    // a new file opened in the editor gets a fresh state: re-apply the mode
+    const set = (next) => { if (any()) ctx.settings.set('last', layers); layers = next; ctx.settings.set('layers', layers); apply(); };
+    const all = () => Object.fromEntries(LAYERS.map(([k]) => [k, true]));
+    const flip = () => set(any() ? {} : (Object.values(ctx.settings.get('last', {})).some(Boolean) ? ctx.settings.get('last') : all()));
+    const openMenu = () => ctx.ui.menu(btn, [
+      { heading: 'Show as it will look' },
+      ...LAYERS.map(([k, label, title]) => ({ label: (layers[k] ? '✓ ' : '\u2003') + label, title, onClick: () => { set({ ...layers, [k]: !layers[k] }); setTimeout(openMenu, 0); } })),
+      '-',
+      { label: 'Source only', hint: any() ? '' : 'now', onClick: () => set({}) },
+      { label: 'The whole page', hint: LAYERS.every(([k]) => layers[k]) ? 'now' : '', onClick: () => set(all()) },
+    ]);
+    btn = h('button', { class: 'ghost', title: 'Choose what is shown the way it will look (Ctrl+Shift+V switches between source and your last choice)', 'aria-haspopup': 'menu', onClick: openMenu }, ctx.ui.icon('eye'), h('span', { class: 'lbl' }, 'View'));
+    ctx.ui.addEditorButton(btn);
+    ctx.ui.addCommand({ id: 'visual.toggle', name: 'View: switch between source and typeset', key: 'Mod+Shift+V', run: flip });
+    ctx.ui.addCommand({ id: 'visual.page', name: 'View: the whole page', run: () => set(all()) });
+    ctx.ui.addCommand({ id: 'visual.source', name: 'View: source only', run: () => set({}) });
+    ctx.editor.addKeymap([{ key: 'Mod-Shift-v', run: () => (flip(), true) }]);
+    // a new file opened in the editor gets a fresh state: re-apply the view
     ctx.on('open', () => setTimeout(apply, 0));
     apply();
     ctx.onDispose(() => { try { view().dispatch({ effects: comp.reconfigure([]) }); } catch {} urls.forEach(u => URL.revokeObjectURL(u)); });
     // styles
     const css = h('style', {}, `
-.cm-visual .cm-content { font-family: var(--ui); font-size: 1.05em; }
-.cm-visual .cm-line { padding-right: 18px; }
-.vz-h { font-weight: 700; font-family: var(--ui); color: var(--ink); }
+.cm-page .cm-scroller { background: var(--bg); }
+.cm-page .cm-gutters { display: none; }
+.cm-page .cm-content { font-family: var(--serif); font-size: 1.14em; line-height: 1.62; max-width: 44rem; margin: 22px auto 60px; padding: 52px 64px 72px; background: var(--paper); box-shadow: 0 1px 2px rgba(23,32,43,.10), 0 10px 30px rgba(23,32,43,.08); border-radius: 2px; min-height: calc(100% - 82px); }
+.cm-page .cm-line { padding: 0; }
+.cm-page .cm-activeLine { background: transparent; }
+.cm-page .vz-h, .cm-page .vz-title-t, .cm-page .vz-abs { font-family: var(--serif); }
+.cm-page .vz-src-math, .cm-page .vz-envtag { font-family: var(--mono); }
+@container (max-width: 640px) { .cm-page .cm-content { padding: 28px 26px 48px; margin: 10px 8px 40px; } }
+.vz-h { font-weight: 700; color: var(--ink); }
 .vz-h0 { font-size: 1.6em; } .vz-h1 { font-size: 1.4em; } .vz-h2 { font-size: 1.2em; } .vz-h3 { font-size: 1.08em; } .vz-h4 { font-size: 1em; }
 .vz-b { font-weight: 700; } .vz-i { font-style: italic; } .vz-u { text-decoration: underline; } .vz-tt { font-family: var(--mono); } .vz-sc { font-variant: small-caps; }
 .vz-dmath { display: flex; justify-content: center; align-items: center; position: relative; padding: 6px 70px; min-height: 2.2em; cursor: text; overflow-x: auto; }
@@ -327,7 +347,7 @@ export default {
 .vz-ref { background: var(--accent-soft); color: var(--accent); }
 .vz-label { background: var(--panel-2); color: var(--muted); }
 .vz-bullet { background: none; color: var(--accent); font-weight: 700; padding: 0 6px 0 2px; font-size: 1em; }
-.vz-envtag { background: none; color: var(--faint); font: 11px var(--ui); text-transform: uppercase; letter-spacing: .08em; padding: 0; }
+.vz-envtag { background: none; color: var(--faint); font: 11px var(--mono); padding: 0; }
 .vz-abs { background: none; color: var(--ink); font: 700 1em var(--ui); padding: 0; }
 .vz-char { background: none; padding: 0; margin: 0; font: inherit; border-radius: 0; vertical-align: baseline; }
 .vz-preamble { margin: 4px 8px; padding: 6px 10px; border: 1px dashed var(--line); border-radius: 6px; color: var(--muted); font: 12px var(--ui); cursor: pointer; }
