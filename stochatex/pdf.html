@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF — StochaTeX</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="app.css">
+<style>
+  #pdfwrap { flex: 1; }
+  #gone { background: var(--warn); color: #fff; padding: 6px 12px; font-size: 13px; }
+  #stamp { font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="gone" hidden>The editor tab is closed, so this PDF no longer updates. Open the editor again and choose PDF ▾ → In a separate tab.</div>
+<section id="pdfwrap" aria-label="PDF">
+  <div class="bar"><button id="zoomOut" class="icon" title="Zoom out (Ctrl −)" aria-label="Zoom out">−</button><span id="zoomInfo" class="muted">100%</span><button id="zoomIn" class="icon" title="Zoom in (Ctrl +)" aria-label="Zoom in">＋</button>
+    <button id="zoomFit" class="small" title="Fit the page width (Ctrl 0)">Fit</button><span class="spacer"></span><span id="stamp" class="muted"></span><span id="pageInfo" class="muted"></span>
+    <button id="download" class="small">Download PDF</button><button id="dock" class="small" title="Close this tab and show the PDF beside the editor again">Put back beside the editor</button></div>
+  <div id="pdf"><div id="empty" class="muted pad" style="color:#f1f1ee;text-align:center;margin:40px auto;max-width:420px">Waiting for the editor… The PDF appears here and updates every time the document compiles. Double-click the PDF to jump to the source.</div></div>
+</section>
+<script type="module" src="pdfwin.js"></script>
+</body>
+</html>

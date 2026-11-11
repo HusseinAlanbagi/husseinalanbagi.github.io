@@ -1,12 +1,12 @@
-# TeXbench: licences and credits
+# StochaTeX: licences and credits
 
-TeXbench is an independent project. It is not affiliated with, endorsed by, or derived from Overleaf
+StochaTeX is an independent project. It is not affiliated with, endorsed by, or derived from Overleaf
 or any other LaTeX service, and it contains none of their code, templates, text or artwork.
 
-The code written for TeXbench itself (the `core.js` sources, `app.css`, everything in `modules/`,
+The code written for StochaTeX itself (the `core.js` sources, `app.css`, everything in `modules/`,
 and the changes made to the equation editor and IRF plotter) belongs to Hussein Alanbagi.
 
-## Third-party software shipped with TeXbench
+## Third-party software shipped with StochaTeX
 
 | Part | Used for | Licence |
 |---|---|---|

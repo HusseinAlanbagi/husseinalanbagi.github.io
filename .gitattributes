@@ -2,7 +2,7 @@
 * text=auto
 
 # TeX runtime files must be stored byte for byte
-texbench/runtime/** -text
-texbench/vendor/** -text
-texbench/harper/** -text
-texbench/fonts/** -text
+stochatex/runtime/** -text
+stochatex/vendor/** -text
+stochatex/harper/** -text
+stochatex/fonts/** -text

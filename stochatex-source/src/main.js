@@ -1,4 +1,4 @@
-// TeXbench — a free, modular LaTeX editor that runs entirely in the browser.
+// StochaTeX — a free, modular LaTeX editor that runs entirely in the browser.
 // Core: project storage, editor, compile, PDF preview, problems. Everything else lives in modules/.
 import { zipSync, unzipSync, strToU8 } from 'fflate';
 import { store, prefs, isTextPath, uid } from './store.js';
@@ -12,7 +12,7 @@ import { parseSyncTeX, forward, inverse, pageStarts } from './synctex.js';
 import { createModuleHost } from './modules.js';
 import { SAMPLE_MAIN, SAMPLE_BIB, BLANK_MAIN } from './template.js';
 
-const APP_NAME = 'TeXbench', VERSION = '0.1.0';
+const APP_NAME = 'StochaTeX', VERSION = '0.2.0';
 const $ = (id) => document.getElementById(id);
 const mac = /Mac|iPhone|iPad/.test(navigator.platform);
 const MOD = mac ? '⌘' : 'Ctrl';
@@ -145,7 +145,7 @@ const app = {
   goto, setProblems(source, list) { problems.set(source, list); if (!list.length) problems.delete(source); renderProblems(); },
 };
 const modules = createModuleHost(app);
-window.texbench = { app, modules, openFolder: (d) => openFolder(d), linkFolder: (d) => linkFolder(d), folder: () => folder, folderPull: (o) => folderPull(o), folderSync: () => folderSync() };       // handy for debugging and for module authors
+window.texbench = window.stochatex = { app, modules, openFolder: (d) => openFolder(d), linkFolder: (d) => linkFolder(d), folder: () => folder, folderPull: (o) => folderPull(o), folderSync: () => folderSync() };       // handy for debugging and for module authors
 
 function goto(file, line) {
   if (!project.files[file]) return;
@@ -594,7 +594,9 @@ function featuresDialog() {
           h('label', { class: 'field row' }, 'Editor text size', h('select', { onChange: (e) => { prefs.set('size', +e.target.value); applyPrefs(); } }, [12, 13, 14, 15, 16, 18, 20].map(v => h('option', { value: v, selected: prefs.get('size', 14) === v }, v + ' px')))),
           h('label', { class: 'feat' }, h('input', { type: 'checkbox', role: 'switch', checked: prefs.get('wrap', true), onChange: (e) => { prefs.set('wrap', e.target.checked); applyPrefs(); } }), h('span', { class: 'feat-text' }, h('strong', {}, 'Wrap long lines'))),
           h('button', { onClick: async () => { await clearEngineCache(); toast('Cleared downloaded TeX packages. They will be fetched again when needed.'); } }, 'Clear downloaded TeX packages')),
-        h('p', { class: 'muted small' }, `${APP_NAME} ${VERSION}. Independent project; not affiliated with or endorsed by Overleaf or any other LaTeX service. `, h('a', { href: 'LICENSES.txt', target: '_blank', rel: 'noopener' }, 'Open-source licences')));
+        h('div', { class: 'about' }, h('img', { src: 'logo.svg', alt: '', width: 40, height: 40 }),
+          h('div', {}, h('div', { class: 'wordmark' }, 'Stocha', 'T', h('span', { class: 'e' }, 'E'), 'X', h('span', { class: 'ver' }, VERSION)),
+            h('p', { class: 'muted small' }, 'Independent project; not affiliated with or endorsed by Overleaf, the Dynare team or any other LaTeX service. ', h('a', { href: 'LICENSES.txt', target: '_blank', rel: 'noopener' }, 'Open-source licences')))));
     };
     draw();
   }, buttons: [{ label: 'Done', primary: true }] });

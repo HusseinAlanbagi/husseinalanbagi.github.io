@@ -1,6 +1,6 @@
 # Adding and removing features
 
-Every optional feature of TeXbench is a module: one JavaScript file in the `modules/` folder.
+Every optional feature of StochaTeX is a module: one JavaScript file in the `modules/` folder.
 
 ## Switch a feature on or off
 

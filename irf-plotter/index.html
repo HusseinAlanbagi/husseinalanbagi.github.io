@@ -100,7 +100,7 @@
   <div class="topbar">
     <div><h1>📈 IRF Plotter for Dynare</h1>
       <p class="sub">Load your Dynare results, design the figures visually, and get LaTeX (pgfplots) code or images. Everything stays in your browser.</p></div>
-    <div class="row"><a href="../texbench/" style="font-size:13px;margin-right:10px">LaTeX editor ↗</a><a href="../texbench/equation/" style="font-size:13px;margin-right:6px">Equation editor ↗</a><button id="themeBtn">🌙 Dark</button></div>
+    <div class="row"><a href="../stochatex/" style="font-size:13px;margin-right:10px">LaTeX editor ↗</a><a href="../stochatex/equation/" style="font-size:13px;margin-right:6px">Equation editor ↗</a><button id="themeBtn">🌙 Dark</button></div>
   </div>
 
   <div class="card datacard">
@@ -540,7 +540,7 @@ function loadScript(srcs) {
   });
 }
 window.MathJax = { startup: { typeset: false }, svg: { fontCache: 'none' }, tex: { packages: { '[+]': ['ams', 'newcommand', 'boldsymbol'] } } };
-const mjReady = loadScript(['mathjax/tex-svg-full.js', '../texbench/equation/mathjax/tex-svg-full.js', 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js'])
+const mjReady = loadScript(['mathjax/tex-svg-full.js', '../stochatex/equation/mathjax/tex-svg-full.js', 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js'])
   .then(() => MathJax.startup.promise).then(() => { MJ = MathJax; render(); }).catch(() => { MJ = null; });
 const mjCache = new Map();
 function labelToTex(s) {
