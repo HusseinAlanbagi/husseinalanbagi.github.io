@@ -1,0 +1,2464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Equation Editor</title>
+<style>
+  :root { --green:#3b4cca; --ink:#1f2328; --muted:#667085; --line:#d0d5dd; --bg:#f7f8fa; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--ink); background:var(--bg); }
+  main { max-width:860px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 22px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:16px; }
+  .label { font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+  .label .num { background:var(--green); color:#fff; width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px; }
+  textarea { width:100%; min-height:90px; font:14px/1.45 ui-monospace,Menlo,Consolas,monospace; padding:10px; border:1px solid var(--line); border-radius:8px; resize:vertical; }
+  textarea:focus, math-field:focus-within { outline:2px solid var(--green); outline-offset:1px; }
+  math-field { display:block; width:100%; font-size:26px; padding:14px; border:1px solid var(--line); border-radius:8px; min-height:70px; background:#fff; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center; }
+  button { font:inherit; font-size:14px; padding:7px 14px; border:1px solid var(--line); background:#fff; border-radius:7px; cursor:pointer; }
+  button:hover { background:#f2f4f7; }
+  button.primary { background:var(--green); border-color:var(--green); color:#fff; font-weight:600; }
+  button.primary:hover { background:#0d6a05; }
+  .status { color:var(--green); font-size:13px; }
+  .tips { color:var(--muted); font-size:13px; margin-top:10px; }
+  .tips kbd { font:12px ui-monospace,monospace; background:#f2f4f7; border:1px solid var(--line); border-radius:4px; padding:0 5px; }
+  .mfwrap { position:relative; }
+  .hl { position:fixed; background:rgba(255,196,0,.38); border:1px solid rgba(214,150,0,.8); border-radius:3px; pointer-events:none; z-index:5; display:none; }
+  .clean { margin-top:12px; border:1px solid var(--line); border-radius:10px; background:#fbfcfd; padding:12px 14px; display:none; }
+  .clean.on { display:block; }
+  .clean h3 { margin:0 0 4px; font-size:15px; }
+  .clean .sum { color:var(--muted); font-size:13px; margin-bottom:10px; }
+  .grp { border-top:1px solid #eceef2; padding:8px 0; }
+  .grp:first-of-type { border-top:none; }
+  .grp > label { display:flex; gap:8px; align-items:flex-start; font-weight:600; cursor:pointer; }
+  .grp .why { font-weight:400; color:var(--muted); font-size:12.5px; display:block; }
+  .grp .tagd { font-size:11px; font-weight:600; padding:1px 7px; border-radius:9px; margin-left:6px; vertical-align:1px; }
+  .tagd.safe { background:#e6f4e6; color:#1d6b1d; } .tagd.check { background:#fff3d6; color:#8a5a00; }
+  .items { margin:6px 0 0 26px; display:flex; flex-direction:column; gap:3px; }
+  .item { display:flex; gap:8px; align-items:center; font:12.5px ui-monospace,Menlo,Consolas,monospace; padding:3px 6px; border-radius:6px; cursor:pointer; }
+  .item:hover { background:#fff6d6; }
+  .item del { background:#ffe0e0; color:#a12; text-decoration:line-through; padding:0 2px; border-radius:3px; }
+  .item ins { background:#dff5df; color:#185c18; text-decoration:none; padding:0 2px; border-radius:3px; }
+  .item .ctx { color:#888; }
+  .item .arrow { color:#999; margin:0 4px; }
+  .clean .done { color:var(--green); font-weight:600; }
+
+  .checks { margin-top:6px; display:flex; flex-direction:column; gap:3px; font-size:13px; }
+  .checks .ok { color:var(--green); }
+  .checks .err { text-align:left; border:none; background:#fff1f1; color:#a12; padding:4px 8px; border-radius:6px; font-size:13px; }
+  .checks .err.warn { background:#fff7e0; color:#8a5a00; }
+  .checks .err:hover { background:#ffe2e2; }
+  select { font:inherit; font-size:14px; padding:6px 8px; border:1px solid var(--line); border-radius:7px; background:#fff; }
+  button.sel { background:#e6e9fb; border-color:#aab4ee; }
+  button:disabled { opacity:.45; cursor:default; }
+  .note { font-size:13px; color:#3d5a80; }
+  .banner { display:none; background:#eef5ff; border:1px solid #bcd3f5; border-radius:8px; padding:8px 10px; margin-bottom:10px; font-size:14px; align-items:center; gap:8px; flex-wrap:wrap; }
+  .banner.on { display:flex; }
+  .symp { display:none; margin-top:10px; border:1px solid var(--line); border-radius:10px; padding:10px; background:#fbfcfd; }
+  .symp.on { display:block; }
+  .symp input { width:100%; font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px; }
+  .symgrid { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; max-height:260px; overflow:auto; }
+  .sym { min-width:52px; height:52px; padding:2px 8px; font-size:18px; display:flex; align-items:center; justify-content:center; }
+  .tabs { display:flex; gap:6px; margin-bottom:12px; border-bottom:1px solid var(--line); }
+  .tab { border:none; border-bottom:3px solid transparent; border-radius:0; background:none; padding:8px 12px; font-weight:600; color:var(--muted); }
+  .tab.sel { color:var(--ink); border-bottom-color:var(--green); background:none; }
+  .tabp { display:none; } .tabp.on { display:block; }
+  .muted { color:var(--muted); font-size:13px; }
+  .seq { display:flex; gap:10px; align-items:center; border-top:1px solid #eceef2; padding:8px 0; }
+  .seq.editing { background:#eef5ff; }
+  .snum { width:26px; height:26px; border-radius:50%; background:#eef0f3; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex:none; }
+  .sprev { flex:1; overflow-x:auto; font-size:17px; min-width:0; }
+  .smeta { font-size:12px; color:var(--muted); text-align:right; flex:none; }
+  .smeta span { margin-left:6px; font-weight:600; }
+  .bad { color:#b42318; } .tidy { color:#8a5a00; } .okc { color:var(--green); }
+  .hist { display:flex; gap:10px; align-items:center; border-top:1px solid #eceef2; padding:8px 0; }
+  .hprev { flex:1; cursor:pointer; overflow-x:auto; font-size:17px; padding:4px 6px; border-radius:6px; min-width:0; }
+  .hprev:hover { background:#f2f4f7; }
+  .hmeta { font-size:11px; color:var(--muted); text-align:right; flex:none; }
+  .hmeta button { padding:2px 8px; font-size:12px; margin-top:4px; }
+  .sum { color:var(--muted); font-size:13px; }
+
+  .refbox { display:flex; flex-direction:column; gap:3px; margin-bottom:10px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel); }
+  .refbox .err, .clean .err { text-align:left; border:none; padding:4px 8px; border-radius:6px; font-size:13px; }
+  .err.bad { background:#fff1f1; color:#a12; } .err.warn { background:#fff7e0; color:#8a5a00; } .err.info { background:#eef4fb; color:#2d5b8a; }
+  .matwrap { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; }
+  #matGrid { display:grid; grid-template-columns:repeat(8, 18px); gap:3px; }
+  .mcell { width:18px; height:18px; border:1px solid var(--line); border-radius:3px; background:var(--card); cursor:pointer; }
+  .mcell.on { background:#bfe5bc; border-color:#6dbb67; }
+  .matopts { display:grid; grid-template-columns:auto auto; gap:6px 10px; align-items:center; font-size:13px; }
+  .matopts input[type=number] { width:60px; font:inherit; padding:4px 6px; border:1px solid var(--line); border-radius:6px; background:var(--card); color:var(--ink); }
+  #matPrev, #expPrev { font-size:20px; padding:8px; min-height:40px; overflow-x:auto; }
+  #matCode { font:12px ui-monospace,Menlo,Consolas,monospace; color:var(--muted); word-break:break-all; }
+  .expopts { display:flex; gap:14px; flex-wrap:wrap; align-items:center; font-size:13px; margin-bottom:8px; }
+  #expPrev svg { max-width:100%; height:auto; }
+  .topbar { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .topbar .row { margin-top:0; }
+  #keysPanel table { border-collapse:collapse; font-size:14px; }
+  #keysPanel td { padding:4px 14px 4px 0; }
+  kbd { font:12px ui-monospace,Menlo,Consolas,monospace; background:var(--panel); border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:1px 6px; }
+  code { font:12.5px ui-monospace,Menlo,Consolas,monospace; background:var(--panel); padding:0 4px; border-radius:4px; }
+
+  /* ---------- dark mode ---------- */
+  :root { --card:#fff; --panel:#fbfcfd; --field:#fff; }
+  [data-theme=dark] { --ink:#e6e8ec; --muted:#9aa3b2; --line:#3a4150; --bg:#15181e; --card:#1d2129; --panel:#232833; --field:#1a1e25; color-scheme:dark; }
+  [data-theme=dark] body { background:var(--bg); color:var(--ink); }
+  [data-theme=dark] .card { background:var(--card); border-color:var(--line); }
+  [data-theme=dark] textarea, [data-theme=dark] select, [data-theme=dark] .symp input, [data-theme=dark] input[type=number] { background:var(--field); color:var(--ink); border-color:var(--line); }
+  [data-theme=dark] math-field { background:var(--field); color:var(--ink); border-color:var(--line); --caret-color:#7fd17a; --selection-background-color:#2e4a6b; --contains-highlight-background-color:#2a2f3a; }
+  [data-theme=dark] button { background:#262b36; color:var(--ink); border-color:var(--line); }
+  [data-theme=dark] button:hover { background:#2f3542; }
+  [data-theme=dark] button.primary { background:var(--green); border-color:var(--green); color:#fff; }
+  [data-theme=dark] button.sel { background:#232a4d; border-color:#4a5ad0; }
+  [data-theme=dark] .tab { background:none; }
+  [data-theme=dark] .clean, [data-theme=dark] .symp, [data-theme=dark] .refbox { background:var(--panel); border-color:var(--line); }
+  [data-theme=dark] .item:hover, [data-theme=dark] .hprev:hover { background:#2d2a1e; }
+  [data-theme=dark] .item del { background:#4a2020; color:#ffb4b4; } [data-theme=dark] .item ins { background:#232a4d; color:#c3caff; }
+  [data-theme=dark] .err.bad, [data-theme=dark] .checks .err { background:#3a1f22; color:#ffb4b4; }
+  [data-theme=dark] .err.warn, [data-theme=dark] .checks .err.warn { background:#3a321c; color:#f3d48a; }
+  [data-theme=dark] .err.info { background:#1e2c3d; color:#a9c9ef; }
+  [data-theme=dark] .banner { background:#1e2c3d; border-color:#34557a; }
+  [data-theme=dark] .seq.editing { background:#1e2c3d; }
+  [data-theme=dark] .snum { background:#2f3542; }
+  [data-theme=dark] .tagd.safe { background:#232a4d; color:#c3caff; } [data-theme=dark] .tagd.check { background:#3a321c; color:#f3d48a; }
+  [data-theme=dark] .hl { background:rgba(255,196,0,.28); }
+  [data-theme=dark] .mcell.on { background:#2f6b2b; border-color:#4fa049; }
+  [data-theme=dark] .note { color:#a9c9ef; }
+
+  main { max-width:1240px !important; }
+  .editor { padding:12px 14px 14px; }
+  .toolbar { display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; padding-bottom:10px; border-bottom:1px solid var(--line); margin-bottom:10px; }
+  .tgroup { display:flex; gap:4px; align-items:center; padding-right:10px; border-right:1px solid var(--line); }
+  .tgroup:last-of-type { border-right:none; }
+  .toolbar button, .toolbar select { padding:5px 9px; font-size:13px; }
+  .toolbar .status, .toolbar .note { font-size:13px; }
+  .panes { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; align-items:stretch; }
+  .pane { display:flex; flex-direction:column; min-width:0; }
+  .plabel { font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-bottom:5px; }
+  .pane textarea { flex:1; min-height:150px; margin:0; }
+  .pane .mfwrap { flex:1; display:flex; }
+  .pane math-field { flex:1; min-height:150px; display:block; width:100%; padding-top:30px; }
+  .pane .mfwrap { position:relative; }
+  .editor .checks { margin-top:8px; }
+  .editor .tips { margin-top:8px; font-size:12px; }
+  @media (max-width: 820px) {
+    .panes { grid-template-columns:1fr; }
+    .tgroup { border-right:none; padding-right:0; }
+  }
+  .accbar { display:inline-flex; gap:2px; margin-left:8px; vertical-align:middle; text-transform:none; letter-spacing:0; font-weight:400; flex-wrap:wrap; }
+  .acc { padding:0 5px; min-width:26px; height:24px; font-size:14px; display:inline-flex; align-items:center; justify-content:center; }
+  .pane .plabel { display:flex; align-items:center; flex-wrap:wrap; gap:2px; min-height:26px; }
+  .symhead { display:flex; gap:6px; }
+  .symhead input { flex:1; }
+  .symcats { display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; }
+  .symcat { padding:2px 9px; font-size:12px; border-radius:12px; }
+  .symcat.sel { background:#e6e9fb; border-color:#aab4ee; font-weight:600; }
+  [data-theme=dark] .symcat.sel { background:#232a4d; border-color:#4a5ad0; }
+  .symp { padding:8px; }
+  .symgrid { gap:4px; max-height:190px; margin-top:8px; }
+  .sym { min-width:40px; height:38px; padding:2px 6px; font-size:15px; }
+  math-field::part(virtual-keyboard-toggle) { display:none; }
+
+  .zoom { margin-left:auto; display:inline-flex; gap:2px; text-transform:none; letter-spacing:0; font-weight:400; }
+  .zoom button { padding:0 7px; height:24px; font-size:13px; }
+  #zoomVal { font-size:11px; color:var(--muted); min-width:34px; display:inline-block; }
+  .sym { height:auto; min-height:38px; min-width:40px; padding:3px 6px; overflow:hidden; }
+  .sym.tall { font-size:11px; min-height:44px; }
+  .sym .symtxt { font:11px ui-monospace,Menlo,Consolas,monospace; color:var(--muted); white-space:nowrap; }
+  .sym .gap { display:inline-block; border:1px dashed var(--muted); border-top:none; height:6px; vertical-align:-2px; margin-right:4px; }
+
+  .codewrap { position:relative; flex:1; display:flex; }
+  .codewrap textarea { flex:1; min-height:150px; margin:0; padding-right:84px; }
+  .copycorner { position:absolute; top:6px; right:6px; padding:3px 9px !important; font-size:12px !important; opacity:.92; }
+  .copycorner:hover { opacity:1; }
+  .shadowta { position:absolute !important; left:-9999px; top:0; width:10px; height:10px; opacity:0; pointer-events:none; }
+  .toolbar.bottom { border-bottom:none; padding-bottom:0; margin:8px 0 0; }
+  .tipsbtn { margin-left:auto; font-size:12px !important; }
+  .tips.hidden { display:none; }
+  .eqlist { flex:1; display:flex; flex-direction:column; gap:6px; }
+  .eqlist .mfwrap { flex:1; }
+  .eqlist.many { max-height:60vh; overflow:auto; padding-right:2px; }
+  .eqlist.many .mfwrap { flex:none; }
+  .eqlist.many math-field { min-height:70px !important; padding-top:14px !important; }
+  .eqlist.many .mfwrap::before { content:attr(data-n); position:absolute; left:-2px; top:-2px; z-index:2; font-size:10px; font-weight:700; background:var(--green); color:#fff; border-radius:8px; padding:0 6px; }
+  .eqstatic { display:flex; gap:8px; align-items:center; padding:6px 10px; border:1px dashed var(--line); border-radius:8px; cursor:pointer; font-size:16px; overflow-x:auto; }
+  .eqstatic:hover { border-style:solid; border-color:#aab4ee; background:var(--panel); }
+  .eqn { font-size:10px; font-weight:700; color:var(--muted); background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:0 6px; flex:none; }
+  .eqm { overflow-x:auto; }
+  .eqcount { font-weight:600; color:var(--muted); text-transform:none; letter-spacing:0; margin-left:2px; }
+  #clean.on { max-height:48vh; overflow:auto; margin-top:10px; }
+
+  .selbar { position:fixed; z-index:30; display:none; gap:2px; padding:3px; background:var(--card); border:1px solid var(--line); border-radius:9px; box-shadow:0 6px 18px rgba(0,0,0,.18); align-items:center; }
+  .selbar.on { display:flex; }
+  .selbar .sl { font-size:11px; color:var(--muted); padding:0 6px 0 4px; white-space:nowrap; }
+  .selbar button { min-width:30px; height:30px; padding:0 5px; font-size:13px; display:inline-flex; align-items:center; justify-content:center; }
+  .selbar .sep { width:1px; align-self:stretch; background:var(--line); margin:2px 3px; }
+  #spaceBtn.sel { background:#e6e9fb; border-color:#aab4ee; }
+  [data-theme=dark] #spaceBtn.sel { background:#232a4d; border-color:#4a5ad0; }
+
+  .codecards { flex:1; display:flex; flex-direction:column; gap:6px; max-height:60vh; overflow:auto; padding:1px; }
+  .codecard { position:relative; }
+  .codecard .eqcode { width:100%; min-height:46px; resize:none; overflow:hidden; display:block; font:13px/1.5 ui-monospace,Menlo,Consolas,monospace; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--field); color:var(--ink); }
+  .codecards .codecard:only-child .eqcode { min-height:150px; }
+  .codecard.active .eqcode { border-color:#aab4ee; }
+  .codecard .eqcode:focus { outline:2px solid var(--green); outline-offset:1px; }
+  .codecard .cnum { position:absolute; left:-2px; top:-6px; z-index:2; font-size:10px; font-weight:700; background:var(--panel); border:1px solid var(--line); color:var(--muted); border-radius:8px; padding:0 6px; }
+  .codecard.active .cnum { background:var(--green); border-color:var(--green); color:#fff; }
+  .codecards:has(.cnum) .eqcode { padding-top:10px; }
+  .pane .plabel #copy, .pane .plabel #addEq { padding:2px 9px; font-size:12px; }
+  .hov { position:fixed; pointer-events:none; z-index:4; display:none; border:1.5px dashed rgba(47,111,222,.75); border-radius:4px; background:rgba(47,111,222,.06); }
+  .wrapinfo { font-size:12px; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; }
+</style>
+<style id="ml-static">/* MathLive static rendering styles (MIT licence) */
+/* 0.111.4 */@font-face{font-display:"swap";font-family:KaTeX_AMS;font-style:normal;font-weight:400;src:url(fonts/KaTeX_AMS-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Caligraphic;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Caligraphic-Bold.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Caligraphic;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Caligraphic-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Fraktur;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Fraktur-Bold.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Fraktur;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Fraktur-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Main;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Main-BoldItalic.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Main;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Main-Bold.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Main;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Main-Italic.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Main;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Main-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Math;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Math-BoldItalic.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Math;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Math-Italic.woff2) format("woff2")}@font-face{font-display:"swap";font-family:"KaTeX_SansSerif";font-style:normal;font-weight:700;src:url(fonts/KaTeX_SansSerif-Bold.woff2) format("woff2")}@font-face{font-display:"swap";font-family:"KaTeX_SansSerif";font-style:italic;font-weight:400;src:url(fonts/KaTeX_SansSerif-Italic.woff2) format("woff2")}@font-face{font-display:"swap";font-family:"KaTeX_SansSerif";font-style:normal;font-weight:400;src:url(fonts/KaTeX_SansSerif-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Script;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Script-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Size1;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size1-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Size2;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size2-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Size3;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size3-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Size4;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size4-Regular.woff2) format("woff2")}@font-face{font-display:"swap";font-family:KaTeX_Typewriter;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Typewriter-Regular.woff2) format("woff2")}:root{--ML__static-fonts:true}.ML__container{min-height:auto!important;--_hue:var(--hue,212);--_placeholder-color:var(--placeholder-color,hsl(var(--_hue),40%,49%));--_placeholder-opacity:var(--placeholder-opacity,0.4);--_text-font-family:var(--text-font-family,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Roboto","Oxygen","Ubuntu","Cantarell","Fira Sans","Droid Sans","Helvetica Neue",sans-serif)}.ML__sr-only{height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;width:1px;clip:rect(0,0,0,0);border:0;clip-path:inset(50%);white-space:nowrap}.ML__base,.ML__is-inline{display:inline-block}.ML__base{border:0;box-sizing:content-box;cursor:text;font-family:inherit;font-style:inherit;font-weight:inherit;margin:0;outline:0;padding:0;position:relative;text-decoration:none;vertical-align:baseline;visibility:inherit;width:min-content}.ML__strut,.ML__strut--bottom{display:inline-block;min-height:0.5em}.ML__small-delim{font-family:KaTeX_Main}.ML__text{font-family:var(--_text-font-family);white-space:pre}.ML__cmr{font-family:KaTeX_Main;font-style:normal}.ML__mathit{font-family:KaTeX_Math;font-style:italic}.ML__mathbf{font-family:KaTeX_Main;font-weight:700}.ML__mathbfit,.lcGreek.ML__mathbf{font-family:KaTeX_Math}.ML__mathbfit{font-style:italic;font-weight:700}.ML__ams,.ML__bb{font-family:KaTeX_AMS}.ML__cal{font-family:KaTeX_Caligraphic}.ML__frak{font-family:KaTeX_Fraktur}.ML__tt{font-family:KaTeX_Typewriter}.ML__script{font-family:KaTeX_Script}.ML__sans{font-family:KaTeX_SansSerif}.ML__series_el,.ML__series_ul{font-weight:100}.ML__series_l{font-weight:200}.ML__series_sl{font-weight:300}.ML__series_sb{font-weight:500}.ML__bold{font-weight:700}.ML__series_eb{font-weight:800}.ML__series_ub{font-weight:900}.ML__series_uc{font-stretch:ultra-condensed}.ML__series_ec{font-stretch:extra-condensed}.ML__series_c{font-stretch:condensed}.ML__series_sc{font-stretch:semi-condensed}.ML__series_sx{font-stretch:semi-expanded}.ML__series_x{font-stretch:expanded}.ML__series_ex{font-stretch:extra-expanded}.ML__series_ux{font-stretch:ultra-expanded}.ML__it{font-style:italic}.ML__shape_ol{-webkit-text-stroke:1px #000;text-stroke:1px #000;color:transparent}.ML__shape_sc{font-variant:small-caps}.ML__shape_sl{font-style:oblique}.ML__emph{color:#bc2612}.ML__emph .ML__emph{color:#0c7f99}.ML__highlight{background:#edd1b0;color:#007cb2}.ML__center{text-align:center}.ML__left{text-align:left}.ML__right{text-align:right}.ML__label_padding{padding:0 0.5em}.ML__frac-line{min-height:1px;width:100%}.ML__frac-line:after{background:currentColor;box-sizing:content-box;content:"";display:block;forced-color-adjust:preserve-parent-color;margin-top:var(--frac-line-margin,max(-1px,-0.04em));min-height:var(--frac-line-thickness,max(1px,0.04em));print-color-adjust:exact;transform:translate(0)}@media (forced-colors:active){.ML__frac-line{min-height:0px}}.ML__sqrt,.ML__sqrt-sign{display:inline-block}.ML__sqrt-sign{position:relative}.ML__sqrt-line{display:inline-block;height:max(1px,0.04em);width:100%}.ML__sqrt-line:before{background:currentColor;content:"";display:block;forced-color-adjust:preserve-parent-color;margin-top:min(-1px,-0.04em);min-height:max(1px,0.04em);print-color-adjust:exact;transform:translate(0)}@media (forced-colors:active){.ML__sqrt-line:after{background:#fff!important}}.ML__sqrt-line:after{border-bottom-width:1px;content:" ";display:block;margin-top:-0.1em}.ML__sqrt-index{margin-left:0.27777778em;margin-right:-0.55555556em}.ML__delim-size1{font-family:KaTeX_Size1}.ML__delim-size2{font-family:KaTeX_Size2}.ML__delim-size3{font-family:KaTeX_Size3}.ML__delim-size4{font-family:KaTeX_Size4}.ML__delim-mult .delim-size1>span{font-family:KaTeX_Size1}.ML__delim-mult .delim-size4>span{font-family:KaTeX_Size4}.ML__accent-body{font-family:KaTeX_Main}.ML__accent-combining-char{left:0.24em;position:relative}.ML__latex{direction:ltr;display:inline-block;font-family:inherit;font-size-adjust:none;font-stretch:normal;font-style:normal;font-variant-caps:normal;letter-spacing:normal;line-height:1.2;text-align:left;text-indent:0;text-rendering:auto;word-wrap:normal;forced-color-adjust:preserve-parent-color;text-shadow:none;-webkit-user-select:none;user-select:none;white-space:nowrap;width:min-content;word-spacing:normal}.ML__latex .style-wrap{position:relative}.ML__latex .ML__left-right,.ML__latex .ML__mfrac{display:inline-block}.ML__latex .ML__vlist-t{border-collapse:collapse;display:inline-table;table-layout:fixed}.ML__latex .ML__vlist-r{display:table-row}.ML__latex .ML__vlist{display:table-cell;position:relative;vertical-align:bottom}.ML__latex .ML__vlist>span{display:block;height:0;position:relative}.ML__latex .ML__vlist>span>span{display:inline-block}.ML__latex .ML__vlist>span>.ML__pstrut{overflow:hidden;width:0}.ML__latex .ML__vlist-t2{margin-right:-2px}.ML__latex .ML__vlist-s{display:table-cell;font-size:1px;min-width:2px;vertical-align:bottom;width:2px}.ML__latex .ML__msubsup{text-align:left}.ML__latex .ML__negativethinspace{display:inline-block;height:0.71em;margin-left:-0.16667em}.ML__latex .ML__thinspace{display:inline-block;height:0.71em;width:0.16667em}.ML__latex .ML__mediumspace{display:inline-block;height:0.71em;width:0.22222em}.ML__latex .ML__thickspace{display:inline-block;height:0.71em;width:0.27778em}.ML__latex .ML__enspace{display:inline-block;height:0.71em;width:0.5em}.ML__latex .ML__quad{display:inline-block;height:0.71em;width:1em}.ML__latex .ML__qquad{display:inline-block;height:0.71em;width:2em}.ML__latex .ML__llap,.ML__latex .ML__rlap{display:inline-block;position:relative;width:0}.ML__latex .ML__llap>.ML__inner,.ML__latex .ML__rlap>.ML__inner{position:absolute}.ML__latex .ML__llap>.ML__fix,.ML__latex .ML__rlap>.ML__fix{display:inline-block}.ML__latex .ML__llap>.ML__inner{right:0}.ML__latex .ML__rlap>.ML__inner{left:0}.ML__latex .ML__rule{border:0 solid;box-sizing:border-box;display:inline-block;position:relative}.ML__latex .overline .overline-line,.ML__latex .underline .underline-line{width:100%}.ML__latex .overline .overline-line:before,.ML__latex .underline .underline-line:before{border-bottom-style:solid;border-bottom-width:max(1px,0.04em);content:"";display:block;print-color-adjust:exact}.ML__latex .overline .overline-line:after,.ML__latex .underline .underline-line:after{border-bottom-style:solid;border-bottom-width:max(1px,0.04em);content:"";display:block;margin-top:-1px;print-color-adjust:exact}.ML__latex .ML__stretchy{display:block;left:0;overflow:hidden;position:absolute;width:100%}.ML__latex .ML__stretchy:after,.ML__latex .ML__stretchy:before{content:""}.ML__latex .ML__stretchy svg{display:block;fill:currentColor;fill-opacity:1;fill-rule:nonzero;height:inherit;position:absolute;stroke:currentColor;stroke-dasharray:none;stroke-dashoffset:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-width:1;width:100%}.ML__latex .slice-1-of-2{left:0}.ML__latex .slice-1-of-2,.ML__latex .slice-2-of-2{display:inline-flex;overflow:hidden;position:absolute;width:50.2%}.ML__latex .slice-2-of-2{right:0}.ML__latex .slice-1-of-3{left:0;width:25.1%}.ML__latex .slice-1-of-3,.ML__latex .slice-2-of-3{display:inline-flex;overflow:hidden;position:absolute}.ML__latex .slice-2-of-3{left:25%;width:50%}.ML__latex .slice-3-of-3{right:0;width:25.1%}.ML__latex .slice-1-of-1,.ML__latex .slice-3-of-3{display:inline-flex;overflow:hidden;position:absolute}.ML__latex .slice-1-of-1{left:0;width:100%}.ML__latex .ML__nulldelimiter,.ML__latex .ML__op-group{display:inline-block}.ML__latex .ML__op-symbol{position:relative}.ML__latex .ML__op-symbol.ML__small-op{font-family:KaTeX_Size1}.ML__latex .ML__op-symbol.ML__large-op{font-family:KaTeX_Size2}.ML__latex:has(.ML__align_environment),.ML__latex:has(.ML__center_environment),.ML__latex:has(.ML__eqnarray_environment),.ML__latex:has(.ML__gather_environment),.ML__latex:has(.ML__multiline_environment){width:100%}.ML__latex .ML__multiline_environment{display:inline-flex;width:100%}.ML__latex .ML__center_environment{display:inline-flex;justify-content:center;width:100%}.ML__latex .ML__align_environment,.ML__latex .ML__eqnarray_environment,.ML__latex .ML__gather_environment{display:inline-block}.ML__latex .ML__mtable .ML__vertical-separator{box-sizing:border-box;display:inline-block;min-width:1px}.ML__latex .ML__mtable .ML__arraycolsep{display:inline-block}.ML__latex .ML__mtable .col-align-m>.ML__vlist-t{text-align:center}.ML__latex .ML__mtable .col-align-c>.ML__vlist-t{text-align:center}.ML__latex .ML__mtable .col-align-l>.ML__vlist-t{text-align:left}.ML__latex .ML__mtable .col-align-r>.ML__vlist-t{text-align:right}[data-href]{cursor:pointer}.ML__error{background-color:rgba(204,0,65,.1);background-image:radial-gradient(ellipse at center,#cc0041,transparent 70%);background-position:0 100%;background-repeat:repeat-x;background-size:3px 3px;display:inline-block;padding-bottom:3px}.ML__error>.ML__error{background:transparent;padding:0}.ML__placeholder{color:var(--_placeholder-color);font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;opacity:var(--_placeholder-opacity);padding-left:0.4ex;padding-right:0.4ex}.ML__notation{box-sizing:border-box;line-height:0;position:absolute}.ML__tooltip-container{position:relative;transform:scale(0)}.ML__tooltip-container .ML__tooltip-content{background:var(--_tooltip-background-color);border:var(--_tooltip-border);border-radius:var(--_tooltip-border-radius);display:inline-table;max-width:400px;padding:12px;position:fixed;visibility:hidden;width:max-content;z-index:2;--_selection-color:var(--_tooltip-color);box-shadow:var(--_tooltip-box-shadow);color:var(--_tooltip-color);opacity:0;transition:opacity 0.15s cubic-bezier(0.4,0,1,1)}.ML__tooltip-container .ML__tooltip-content .ML__text{white-space:normal}.ML__tooltip-container .ML__tooltip-content .ML__base{display:contents}.ML__tooltip-container:hover .ML__tooltip-content{font-size:0.75em;opacity:1;transform:scale(1) translateY(3em);visibility:visible}.ML__bg{background-color:transparent!important}.ML__bg:before{background-color:var(--bg-color);bottom:0;box-sizing:border-box;content:"";left:0;position:absolute;right:0;top:0;z-index:-1}
+  .embed .topbar h1, .embed .topbar .sub, .embed .topbar a { display: none; }
+  .embedbar { position: sticky; top: 0; z-index: 30; display: flex; gap: 8px; align-items: center; padding: 8px 14px; background: var(--card, #fff); border-bottom: 1px solid var(--line, #ccc); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="topbar">
+    <div><h1>Equation Editor</h1>
+    <p class="sub">Paste LaTeX (or an equation from Word), edit it visually, copy it back.</p></div>
+    <div class="row"><a href="../" style="font-size:13px;margin-right:10px">← LaTeX editor</a><a href="../../irf-plotter/" style="font-size:13px;margin-right:6px">📈 IRF plotter ↗</a><button id="keysBtn" title="Keyboard shortcuts (Alt+K)">⌨ Shortcuts</button><button id="themeBtn">🌙 Dark</button></div>
+  </div>
+  <div class="clean" id="keysPanel" style="margin-bottom:16px"></div>
+
+  <div class="card editor">
+    <div class="banner" id="secBanner">✎ Editing <b>equation</b> from your section.
+      <button class="primary" id="secPut">⤶ Put back into section</button><button id="secCancel">Cancel</button></div>
+    <div class="toolbar">
+      <div class="tgroup">
+        <button id="undoBtn" title="Undo the last tool change (Alt+Z)">↶ Undo</button>
+        <button id="clear" title="Clear both panes">Clear</button>
+        <button id="cleanBtn" title="Find unnecessary parts to remove (Alt+C)">🧹 Clean</button>
+      </div>
+      <div class="tgroup">
+        <select id="formSel" title="Convert to another kind of equation">
+        <option value="">—</option>
+        <option value="inline">$…$ inline</option>
+        <option value="paren">\(…\) inline</option>
+        <option value="display">\[…\] display</option>
+        <option value="equation">equation</option>
+        <option value="equation*">equation*</option>
+        <option value="align">align</option>
+        <option value="align*">align*</option>
+        <option value="gather">gather</option>
+        <option value="gather*">gather*</option>
+        <option value="multline">multline</option>
+      </select>
+        <button id="numBtn" title="Numbering on/off (Alt+N)">#</button>
+      </div>
+      <span class="status" id="status"></span><span class="note" id="note"></span>
+      <select id="unitStyle" style="display:none"><option value="qty">qty</option><option value="SI">SI</option></select>
+    </div>
+    <div class="panes">
+      <div class="pane">
+        <div class="plabel">LaTeX <span class="wrapinfo" id="wrapinfo"></span>
+          <span class="row nowrap" style="margin-left:auto">
+            <button id="addEq" title="Add another equation (Alt+Enter)">＋ Equation</button>
+            <button class="primary" id="copy" title="Copy all the LaTeX (Ctrl+Enter)">📋 Copy</button></span></div>
+        <div class="codecards" id="codecards"></div>
+        <textarea id="input" class="shadowta" tabindex="-1" aria-hidden="true"></textarea>
+      </div>
+      <div class="pane">
+        <div class="plabel">Visual <span class="eqcount" id="eqcount"></span><span class="accbar" id="accbar" title="Select a symbol (or part of the equation), then click an accent. With nothing selected, it applies to the symbol before the cursor."></span>
+          <span class="zoom" title="Size of the visual equation"><button class="icon" id="zoomOut" title="Smaller">−</button><button class="icon" id="zoomReset" title="Reset size"><span id="zoomVal">100%</span></button><button class="icon" id="zoomIn" title="Larger">+</button><button class="icon" id="spaceBtn" title="Space between symbols (easier to click and move between them)">↔</button></span></div>
+        <div class="selbar" id="selbar" role="toolbar" aria-label="Selection actions"></div>
+        <div class="eqlist" id="eqlist"><div class="mfwrap"><math-field id="mf"></math-field><div class="hl" id="hl"></div></div></div>
+      </div>
+    </div>
+    <div class="checks" id="checks"></div>
+    <div class="toolbar bottom">
+      <div class="tgroup">
+        <button id="symBtn" title="Browse or search symbols (Alt+F)">Ω Symbols</button>
+        <button id="matBtn" title="Build a matrix (Alt+M)">▦ Matrix</button>
+      </div>
+      <div class="tgroup">
+        <button id="alignBtn" title="Line up &amp; columns (Alt+A)">⇥ Align</button>
+        <button id="unitsBtn" title="Units ⇄ siunitx (Alt+U)">⚖ Units</button>
+        <button id="expBtn" title="Export as image (Alt+I)">🖼 Image</button>
+      </div>
+      <button id="tipsBtn" class="tipsbtn" title="Show or hide typing tips">💡 Tips</button>
+    </div>
+    <div class="tips" id="tips">
+      <kbd>/</kbd> fraction · <kbd>^</kbd> superscript · <kbd>_</kbd> subscript · <kbd>sqrt</kbd> root · <kbd>\alpha</kbd> Greek · <kbd>Tab</kbd> next part ·
+      double-click a symbol to select it (again to grow) · select code on the left to shade it on the right · <kbd>Alt</kbd>+<kbd>K</kbd> all shortcuts
+    </div>
+    <div class="clean" id="clean"></div>
+    <div class="symp" id="symPanel">
+      <div class="symhead"><input id="symQ" placeholder="Search: arrow, integral, approx, real numbers…" autocomplete="off"><button class="icon" id="symClose" title="Close (Esc)">✕</button></div>
+      <div class="symcats" id="symCats"></div>
+      <div class="symgrid" id="symGrid"></div>
+    </div>
+    <div class="symp" id="matPanel">
+      <div class="matwrap">
+        <div><div class="muted" style="margin-bottom:4px">Pick a size</div><div id="matGrid"></div></div>
+        <div class="matopts">
+          <span>Rows</span><input type="number" id="matR" min="1" max="20" value="2">
+          <span>Columns</span><input type="number" id="matC" min="1" max="20" value="2">
+          <span>Brackets</span><select id="matType">
+            <option value="pmatrix">( ) pmatrix</option><option value="bmatrix">[ ] bmatrix</option><option value="Bmatrix">{ } Bmatrix</option>
+            <option value="vmatrix">| | determinant</option><option value="Vmatrix">‖ ‖ norm</option><option value="matrix">none</option>
+            <option value="array">[ | ] augmented</option></select>
+          <span>Fill with</span><select id="matFill">
+            <option value="empty">empty boxes</option><option value="zeros">zeros</option><option value="identity">identity</option>
+            <option value="aij">a₁₁, a₁₂, …</option><option value="general">general m×n (with dots)</option></select>
+        </div>
+        <div style="flex:1;min-width:200px"><div id="matPrev"></div><div id="matCode"></div>
+          <div class="row"><button class="primary" id="matInsert">Insert at cursor</button></div></div>
+      </div>
+    </div>
+    <div class="clean" id="unitsPanel"></div>
+    <div class="symp" id="expPanel">
+      <div class="expopts">
+        <label>Colour <input type="color" id="expColor" value="#000000"></label>
+        <label>Size <select id="expScale"><option value="2">small</option><option value="4" selected>sharp</option><option value="8">extra sharp</option></select></label>
+        <label><input type="checkbox" id="expTransparent"> transparent background (PNG)</label>
+      </div>
+      <div class="row" style="margin-top:0">
+        <button class="primary" id="expCopy">Copy as image</button>
+        <button id="expPng">Download PNG</button>
+        <button id="expSvg">Download SVG</button>
+        <span class="status" id="expStatus"></span>
+      </div>
+      <div id="expPrev"></div>
+      <p class="muted">SVG stays sharp at any size and works in Word, PowerPoint and Keynote. The first export loads the drawing engine (MathJax).</p>
+    </div>
+    <textarea id="output" hidden readonly></textarea>
+  </div>
+
+  <div class="card" id="tools">
+    <div class="label">More tools</div>
+    <div class="tabs">
+      <button class="tab" data-tab="section">📄 Whole section</button>
+      <button class="tab" data-tab="macros">🧩 My macros</button>
+      <button class="tab" data-tab="history">🕘 History</button>
+    </div>
+    <div class="tabp" id="tab-section">
+      <p class="muted">Paste a whole section (or file) of LaTeX. Every equation is listed with its problems and things to tidy. Clean them all at once, or edit one and put it back.</p>
+      <textarea id="secTa" spellcheck="false" style="min-height:140px" placeholder="Paste a section of your .tex file here…"></textarea>
+      <div class="row"><button class="primary" id="secFind">Find equations</button></div>
+      <div id="secList" style="margin-top:10px"></div>
+    </div>
+    <div class="tabp" id="tab-macros">
+      <p class="muted">Paste the \newcommand / \DeclareMathOperator lines from your preamble. Your macros then display properly and stay as macros in the copied LaTeX. Saved in this browser only.</p>
+      <textarea id="macroTa" spellcheck="false" style="min-height:110px" placeholder="\newcommand{\R}{\mathbb{R}}&#10;\newcommand{\vect}[1]{\boldsymbol{#1}}&#10;\DeclareMathOperator{\tr}{tr}"></textarea>
+      <div class="row"><button class="primary" id="macroApply">Use these macros</button><button id="macroClear">Remove all</button></div>
+      <div class="note" id="macroStatus" style="margin-top:6px"></div>
+    </div>
+    <div class="tabp" id="tab-history"><div id="histList"></div></div>
+  </div>
+</main>
+
+<script>
+const SOURCES = [
+  'mathlive.min.js',
+  'https://cdn.jsdelivr.net/npm/mathlive@0.111.4/mathlive.min.js',
+  'https://unpkg.com/mathlive@0.111.4/mathlive.min.js'
+];
+function loadLib(i) {
+  if (i >= SOURCES.length) {
+    document.getElementById('mf').outerHTML =
+      '<div style="padding:14px;border:1px solid #f0b4b4;background:#fff5f5;border-radius:8px;color:#a12">' +
+      'The visual editor could not load. Your network or browser may be blocking cdn.jsdelivr.net and unpkg.com. ' +
+      'Try another network, or use the offline version.</div>';
+    return;
+  }
+  const sc = document.createElement('script');
+  sc.src = SOURCES[i];
+  sc.onload = start;
+  sc.onerror = () => loadLib(i + 1);
+  document.head.appendChild(sc);
+}
+loadLib(0);
+function start() {
+(function () {
+  const MF = window.MathfieldElement || customElements.get('math-field');
+  if (MF) { MF.fontsDirectory = 'fonts/'; MF.soundsDirectory = null; }
+
+  const input = document.getElementById('input');
+  const output = document.getElementById('output');
+  const mf = document.getElementById('mf');
+  const wrapinfo = document.getElementById('wrapinfo');
+  const status = document.getElementById('status');
+  mf.mathVirtualKeyboardPolicy = 'manual';
+  try { window.mathVirtualKeyboard && window.mathVirtualKeyboard.hide(); } catch (e) {}
+  mf.smartMode = false;
+  mf.smartFence = false;   // don't auto-pair brackets
+  mf.smartSuperscript = false;
+
+  const MULTI = /^(align|flalign|alignat|eqnarray|gather|multline)$/;
+  let wrap = { pre: '', post: '', multi: false, extras: [] };
+
+  // Strip delimiters/environments, keep them to restore on copy.
+  function parse(raw) {
+    let s = raw.trim(), pre = '', post = '', multi = false, m;
+    if ((m = s.match(/^\\begin\{((?:equation|align|alignat|flalign|gather|multline|eqnarray|displaymath|math)\*?)\}([\s\S]*)\\end\{\1\}$/))) {
+      pre = `\\begin{${m[1]}}\n  `; post = `\n\\end{${m[1]}}`; s = m[2];
+      multi = MULTI.test(m[1].replace('*', ''));
+    } else if ((m = s.match(/^\$\$([\s\S]*)\$\$$/))) { pre = '$$'; post = '$$'; s = m[1]; }
+    else if ((m = s.match(/^\\\[([\s\S]*)\\\]$/))) { pre = '\\['; post = '\\]'; s = m[1]; }
+    else if ((m = s.match(/^\\\(([\s\S]*)\\\)$/))) { pre = '\\('; post = '\\)'; s = m[1]; }
+    else if ((m = s.match(/^\$([\s\S]*)\$$/))) { pre = '$'; post = '$'; s = m[1]; }
+    const extras = [];
+    s = s.replace(/\\label\{[^}]*\}|\\nonumber\b|\\notag\b/g, (x) => { extras.push(x); return ''; }).trim();
+    return { body: s, pre, post, multi, extras };
+  }
+
+  function buildOutput() {
+    let body = mf.getValue('latex');
+    if (wrap.multi) {
+      // unwrap the aligned block; anything typed after it joins the last row
+      const m = body.match(/^\\begin\{aligned\}([\s\S]*?)\\end\{aligned\}([\s\S]*)$/);
+      if (m) body = m[1] + (m[2].trim() ? ' ' + m[2].trim() : '');
+    }
+    const extras = wrap.extras.length ? ' ' + wrap.extras.join(' ') : '';
+    output.value = wrap.pre + body + extras + wrap.post;
+  }
+
+  function load() {
+    const p = parse(input.value);
+    wrap = p;
+    mf.setValue(fieldLatex(input.value), { silenceNotifications: true });
+    wrapinfo.textContent = p.pre ? `— detected ${p.pre.trim().replace(/\n.*/, '')} … ${p.post.trim()}` : '';
+    buildOutput();  (typeof afterLoadHooks !== 'undefined' ? afterLoadHooks : []).forEach(h => { try { h(); } catch (e) {} });
+  }
+
+  input.addEventListener('input', load);
+  mf.addEventListener('input', () => { buildOutput(); input.value = output.value; clearHl(); });
+
+  // ---- Shade the part of the equation matching the selected LaTeX ----
+  // Approach: read the LaTeX's structure, widen the selection to whole pieces
+  // (a full \frac{..}{..}, a full x^{2}, a matched \left( .. \right) ...),
+  // drop two invisible marker characters around it, and let a hidden copy of
+  // MathLive tell us exactly which symbols sit between the markers.
+  const hl = document.getElementById('hl');
+  const MARK = '';
+  function clearHl() { hl.style.display = 'none'; }
+
+  // Mini LaTeX parser -> list of sibling nodes {s, e, kids:[[from,to],...]}
+  function matchBrace(src, i) { // src[i] === '{' or '['
+    const open = src[i], close = open === '{' ? '}' : ']';
+    let d = 0;
+    for (let j = i; j < src.length; j++) {
+      if (src[j] === '\\') { j++; continue; }
+      if (src[j] === open) d++;
+      else if (src[j] === close && --d === 0) return j;
+    }
+    return src.length - 1;
+  }
+  function readCmd(src, i) { // src[i] === '\\' -> end index (exclusive) of the command name
+    if (/[a-zA-Z]/.test(src[i + 1] || '')) { let j = i + 1; while (/[a-zA-Z]/.test(src[j] || '')) j++; return j; }
+    return Math.min(i + 2, src.length);
+  }
+  function skipWs(src, i, end) { while (i < end && /\s/.test(src[i])) i++; return i; }
+  function readDelim(src, i) { i = skipWs(src, i, src.length); return src[i] === '\\' ? readCmd(src, i) : i + 1; }
+  function findPair(src, i, openRe, closeRe) { // nested \left..\right or \begin{env}..\end{env}
+    const re = new RegExp(`${openRe.source}|${closeRe.source}`, 'g');
+    re.lastIndex = i; let d = 1, m;
+    while ((m = re.exec(src))) {
+      if (new RegExp('^' + openRe.source).test(m[0])) d++; else if (--d === 0) return m.index;
+    }
+    return -1;
+  }
+  function parseList(src, i, end) {
+    const nodes = [];
+    while (true) {
+      i = skipWs(src, i, end);
+      if (i >= end) break;
+      const c = src[i];
+      if (c === '}') { i++; continue; }
+      const node = { s: i, e: i + 1, kids: [] };
+      if (c === '{') {
+        const j = matchBrace(src, i); node.kids.push([i + 1, j]); node.e = j + 1;
+      } else if (c === '\\') {
+        const ce = readCmd(src, i), name = src.slice(i + 1, ce);
+        if (name === 'begin') {
+          const env = src.slice(ce).match(/^\s*\{([^}]*)\}/);
+          const envName = env ? env[1] : '';
+          let inner = ce + (env ? env[0].length : 0);
+          while (src[skipWs(src, inner, end)] === '{' || src[skipWs(src, inner, end)] === '[') inner = matchBrace(src, skipWs(src, inner, end)) + 1;
+          const esc = envName.replace(/[*]/g, '\\*');
+          const endAt = findPair(src, inner, new RegExp(`\\\\begin\\{${esc}\\}`), new RegExp(`\\\\end\\{${esc}\\}`));
+          if (endAt < 0) { node.e = end; node.kids.push([inner, end]); }
+          else { node.kids.push([inner, endAt]); node.e = endAt + `\\end{${envName}}`.length; }
+        } else if (name === 'left') {
+          const inner = readDelim(src, ce);
+          const r = findPair(src, inner, /\\left(?![a-zA-Z])/, /\\right(?![a-zA-Z])/);
+          if (r < 0) { node.e = inner; }
+          else { node.kids.push([inner, r]); node.e = readDelim(src, r + 6); }
+        } else {
+          node.e = ce;
+          // swallow the command's {..} / [..] arguments
+          while (true) {
+            const k = skipWs(src, node.e, end);
+            if (src[k] === '{' || (src[k] === '[' && /^(sqrt|frac|dfrac|tfrac|binom|xrightarrow|xleftarrow)$/.test(name))) {
+              const j = matchBrace(src, k); node.kids.push([k + 1, j]); node.e = j + 1;
+            } else break;
+          }
+        }
+      }
+      // attach ^ and _ scripts to the node
+      while (true) {
+        const k = skipWs(src, node.e, end);
+        if (src[k] !== '^' && src[k] !== '_') break;
+        const t = skipWs(src, k + 1, end);
+        if (src[t] === '{') { const j = matchBrace(src, t); node.kids.push([t + 1, j]); node.e = j + 1; }
+        else if (src[t] === '\\') { node.e = readCmd(src, t); }
+        else node.e = t + 1;
+      }
+      node.e = Math.min(node.e, end);
+      nodes.push(node);
+      i = node.e;
+    }
+    return nodes;
+  }
+  // smallest run of sibling nodes covering [s, e)
+  function locate(src, from, to, s, e) {
+    const nodes = parseList(src, from, to).filter(n => n.e > s && n.s < e);
+    if (!nodes.length) return null;
+    if (nodes.length === 1) {
+      const kid = nodes[0].kids.find(([a, b]) => s >= a && e <= b);
+      if (kid) { const r = locate(src, kid[0], kid[1], s, e); if (r) return r; }
+    }
+    return [nodes[0].s, nodes[nodes.length - 1].e];
+  }
+
+  // same transformation load() applies, so the hidden copy matches the real field
+  function fieldLatex(raw) {
+    const p = parse(raw);
+    let out = p.multi ? `\\begin{aligned}${p.body}\\end{aligned}` : p.body;
+    out = out.replace(/\\begin\s*\{[^}]*$/, ''); // a \begin{… still being typed
+    // never give the visual editor a top-level align/gather/… (MathLive then stays stuck in it):
+    // also covers an environment that is still being typed (no \end yet)
+    const m = out.match(/^\s*\\begin\{(align|gather|multline|flalign|alignat|eqnarray|equation|displaymath)\*?\}(?:\{[^}]*\})?/);
+    if (m) {
+      let inner = out.slice(m[0].length).replace(new RegExp(`\\\\end\\{${m[1]}\\*?\\}\\s*$`), '');
+      out = /^(align|flalign|alignat|eqnarray)$/.test(m[1]) ? `\\begin{aligned}${inner}\\end{aligned}` : /^(gather|multline)$/.test(m[1]) ? `\\begin{gathered}${inner}\\end{gathered}` : inner;
+    }
+    return out;
+  }
+  let ghost = null;
+  function getGhost() {
+    if (ghost) return ghost;
+    ghost = document.createElement('math-field');
+    ghost.setAttribute('aria-hidden', 'true');
+    ghost.tabIndex = -1;
+    Object.assign(ghost.style, { position: 'fixed', left: '-10000px', top: '0', width: '2000px', visibility: 'hidden' });
+    document.body.appendChild(ghost);
+    return ghost;
+  }
+  // where the equation itself sits inside the box text (excluding $ / \[ / \begin{equation} wrapper)
+  function bodyBounds(txt) {
+    let a = txt.length - txt.trimStart().length, b = txt.trimEnd().length;
+    const t = txt.slice(a, b), m = t.match(/^\\begin\{((?:equation|align|alignat|flalign|gather|multline|eqnarray|displaymath|math)\*?)\}/);
+    if (m && t.endsWith(`\\end{${m[1]}}`)) return [a + m[0].length, b - `\\end{${m[1]}}`.length];
+    for (const [o, c] of [['$$', '$$'], ['\\[', '\\]'], ['\\(', '\\)'], ['$', '$']])
+      if (t.startsWith(o) && t.endsWith(c) && t.length >= o.length + c.length) return [a + o.length, b - c.length];
+    return [a, b];
+  }
+  function rangeFor(el) { return rangeForText(el.value, el.selectionStart, el.selectionEnd); }
+  function rangeForText(txt, s, e) {
+    if (s === e) return null;
+    const [bs, be] = bodyBounds(txt);
+    if (s <= bs && e >= be) return 'all';
+    s = Math.max(s, bs); e = Math.min(e, be);
+    if (s >= e) return null;
+    const r = locate(txt, bs, be, s, e);
+    if (!r) return null;
+    const marked = txt.slice(0, r[0]) + MARK + txt.slice(r[0], r[1]) + MARK + txt.slice(r[1]);
+    const g = getGhost();
+    g.setValue(fieldLatex(marked), { silenceNotifications: true });
+    const pos = [];
+    for (let i = 0; i <= g.lastOffset; i++) {
+      const info = g.getElementInfo(i);
+      if (info && info.latex === MARK) pos.push(i);
+    }
+    if (pos.length !== 2 || g.lastOffset !== mf.lastOffset + 2) return 'all-ish';
+    return [pos[0] - 1, pos[1] - 2];
+  }
+  function drawRange([a, b]) {
+    let L = Infinity, T = Infinity, R = -Infinity, B = -Infinity;
+    for (let i = a + 1; i <= b; i++) {
+      const info = mf.getElementInfo(i);
+      const r = info && info.bounds;
+      if (!r || r.width <= 0) continue;
+      L = Math.min(L, r.left); T = Math.min(T, r.top);
+      R = Math.max(R, r.right); B = Math.max(B, r.bottom);
+    }
+    if (L === Infinity) return clearHl();
+    Object.assign(hl.style, { display: 'block', left: (L - 3) + 'px', top: (T - 3) + 'px',
+      width: (R - L + 6) + 'px', height: (B - T + 6) + 'px' });
+  }
+  let lastSel = null;
+  function updateHl(el) {
+    let r = null;
+    try { r = rangeFor(el); } catch (err) { r = null; }
+    if (r === 'all') r = [0, mf.lastOffset];
+    if (r === 'all-ish') r = null; // structure didn't line up: better to show nothing than the wrong thing
+    lastSel = r;
+    r ? drawRange(r) : clearHl();
+  }
+  [input, output].forEach((el) => {
+    ['select', 'mouseup', 'keyup'].forEach((ev) => el.addEventListener(ev, () => updateHl(el)));
+    el.addEventListener('blur', () => setTimeout(() => {
+      if (document.activeElement !== input && document.activeElement !== output) clearHl();
+    }, 0));
+  });
+  addEventListener('scroll', () => lastSel ? drawRange(lastSel) : null, true);
+  addEventListener('resize', () => lastSel ? drawRange(lastSel) : null);
+
+  document.getElementById('clear').onclick = () => { input.value = ''; load(); clearHl(); input.focus(); };
+  document.getElementById('copy').onclick = async () => {
+    try { await navigator.clipboard.writeText(input.value); status.textContent = 'Copied ✓'; }
+    catch (e) { input.select(); document.execCommand && document.execCommand('copy'); status.textContent = 'Selected — press Ctrl+C if it didn’t copy'; }
+    setTimeout(() => (status.textContent = ''), 2500);
+  };
+
+  // =================== Equation clean-up ===================
+  const SAFE = 'safe', CHECK = 'check';
+  const isEscaped = (src, i) => { let n = 0; while (i - 1 - n >= 0 && src[i - 1 - n] === '\\') n++; return n % 2 === 1; };
+  const prevNonWs = (src, i) => { i--; while (i >= 0 && /\s/.test(src[i])) i--; return i; };
+  const nextNonWs = (src, i) => { while (i < src.length && /\s/.test(src[i])) i++; return i; };
+  // the '{' at i is an argument (of a command, ^, _, or a previous {..}/[..] chain)?
+  function isArg(src, i) {
+    const j = prevNonWs(src, i);
+    if (j < 0) return false;
+    const c = src[j];
+    if (c === '^' || c === '_' || c === '}' || c === ']') return true;
+    if (/[a-zA-Z]/.test(c)) {
+      const m = src.slice(0, j + 1).match(/\\([a-zA-Z]+)$/);
+      if (!m) return false;
+      return !new RegExp(`^(${FUNCS})$`).test(m[1]); // \sin{x}: the braces are not an argument
+    }
+    return false;
+  }
+  // single "token": one letter/digit, or one command without its own arguments
+  function singleToken(inner, src, afterIdx) {
+    const t = inner.trim();
+    if (/^[A-Za-z0-9]$/.test(t)) return t;
+    if (/^\\[a-zA-Z]+$/.test(t) || /^\\[^a-zA-Z]$/.test(t)) return t;
+    return null;
+  }
+  // a command name glued to a following letter would change meaning: \alpha b -> \alphab
+  const glue = (rep, src, after) => (/\\[a-zA-Z]+$/.test(rep) && /[a-zA-Z]/.test(src[after] || '')) ? rep + ' ' : rep;
+  const TALL = /\\(frac|dfrac|tfrac|cfrac|sum|prod|int|iint|iiint|oint|bigcup|bigcap|lim|binom|dbinom|sqrt|begin|over|matrix|pmatrix|bmatrix|displaystyle|overbrace|underbrace|overset|underset|stackrel)\b|\^|_/;
+  const FUNCS = 'sin|cos|tan|cot|sec|csc|sinh|cosh|tanh|coth|arcsin|arccos|arctan|log|ln|lg|exp|lim|liminf|limsup|max|min|sup|inf|det|dim|deg|gcd|hom|ker|arg|Pr';
+
+  function scanIssues(txt) {
+    const [bs, be] = bodyBounds(txt);
+    const inBody = (a, b) => a >= bs && b <= be;
+    // text-like command contents are left alone
+    const prot = [];
+    for (const m of txt.matchAll(/\\(label|tag|text|textrm|textbf|textit|textsf|texttt|mbox|ref|eqref|mathrm|operatorname|mathbf|mathit|mathsf|mathtt|mathcal|mathbb|mathfrak|boldsymbol)\s*\{/g)) {
+      const open = m.index + m[0].length - 1; prot.push([open + 1, matchBrace(txt, open)]);
+    }
+    const isProt = (a, b) => prot.some(([x, y]) => a < y && b > x);
+    const isDisplay = /^\s*(\\\[|\$\$|\\begin\{(equation|align|gather|multline|eqnarray|displaymath|flalign|alignat)\*?\})/.test(txt);
+    const groups = {};
+    function add(kind, edits, extra = {}) {
+      if (!edits.every(([a, b]) => inBody(a, b))) return;
+      const g = groups[kind] || (groups[kind] = { kind, items: [] });
+      g.items.push({ edits, ...extra });
+    }
+
+    // brace scan
+    const braces = [];
+    for (let i = bs; i < be; i++) if (txt[i] === '{' && !isEscaped(txt, i)) braces.push([i, matchBrace(txt, i)]);
+    const braceAt = new Map(braces);
+
+    for (const [o, c] of braces) {
+      if (c >= be) continue;
+      const inner = txt.slice(o + 1, c);
+      const j = prevNonWs(txt, o), before = txt[j];
+      const k = nextNonWs(txt, c + 1), after = txt[k];
+      // empty ^{} / _{}
+      if (!inner.trim() && (before === '^' || before === '_')) { add('emptyScript', [[j, c + 1, '']]); continue; }
+      // empty \cmd{} for font/text commands
+      if (!inner.trim() && /[a-zA-Z]/.test(before || '')) {
+        const m = txt.slice(0, j + 1).match(/\\(mathrm|mathbf|mathit|mathsf|mathtt|mathcal|mathbb|mathfrak|boldsymbol|text|textrm|textbf|textit|mbox|operatorname|bm)$/);
+        if (m) { add('emptyCmd', [[j + 1 - m[0].length, c + 1, '']]); continue; }
+      }
+      if (isProt(o, c)) continue;
+      // {}^{..} left-side scripts: probably intentional
+      if (!inner.trim() && !isArg(txt, o) && (after === '^' || after === '_')) { add('emptyPrescript', [[o, c + 1, '']]); continue; }
+      // stray empty {}
+      if (!inner.trim() && !isArg(txt, o)) { add('emptyGroup', [[o, c + 1, '']]); continue; }
+      // ^{2} -> ^2
+      if ((before === '^' || before === '_')) {
+        const t = singleToken(inner);
+        if (t && !(/^[0-9]$/.test(t) === false && t.length > 1 && !t.startsWith('\\'))) {
+          add('scriptBraces', [[o, o + 1, ''], [c, c + 1, / $/.test(glue(t, txt, c + 1)) ? ' ' : '']]); continue;
+        }
+      }
+      // {{x}} -> {x}
+      const io = nextNonWs(txt, o + 1);
+      if (txt[io] === '{' && braceAt.has(io) && nextNonWs(txt, braceAt.get(io) + 1) === c) {
+        add('doubleBraces', [[o, io, ''], [braceAt.get(io) + 1, c + 1, '']]); continue;
+      }
+      // a+{b} -> a+b
+      if (!isArg(txt, o) && after !== '^' && after !== '_') {
+        const t = singleToken(inner);
+        if (t) {
+          const needSpace = /[a-zA-Z]/.test(txt[o - 1] || '') && /^[a-zA-Z]/.test(t); // \sin{x} -> \sin x
+          add('loneBraces', [[o, o + 1, needSpace ? ' ' : ''], [c, c + 1, / $/.test(glue(t, txt, c + 1)) ? ' ' : '']]);
+        }
+      }
+    }
+
+    // \operatorname{sin} -> \sin
+    for (const m of txt.matchAll(new RegExp(`\\\\operatorname\\s*\\{\\s*(${FUNCS})\\s*\\}`, 'g'))) {
+      const end = m.index + m[0].length;
+      add('operatorname', [[m.index, end, glue('\\' + m[1], txt, end)]]);
+    }
+    // \mathrm{\mathrm{x}} -> \mathrm{x}
+    for (const m of txt.matchAll(/\\(mathrm|mathbf|mathit|mathsf|mathtt|mathcal|mathbb|boldsymbol|text)\s*\{\s*\\\1\s*\{/g)) {
+      const o1 = txt.indexOf('{', m.index), o2 = m.index + m[0].length - 1;
+      const c2 = matchBrace(txt, o2), c1 = matchBrace(txt, o1);
+      if (nextNonWs(txt, c2 + 1) === c1) add('nestedFont', [[o1 + 1, o2 + 1, ''], [c2, c1, '']]);
+    }
+    // \left( a+b \right) with nothing tall inside
+    for (const m of txt.matchAll(/\\left\s*(\\[{|]|\\[a-zA-Z]+|[()[\]|.])/g)) {
+      const start = m.index, inner0 = start + m[0].length;
+      const r = findPair(txt, inner0, /\\left(?![a-zA-Z])/, /\\right(?![a-zA-Z])/);
+      if (r < 0) continue;
+      const rd = txt.slice(r).match(/^\\right\s*(\\[}|]|\\[a-zA-Z]+|[()[\]|.])/);
+      if (!rd || m[1] === '.' || rd[1] === '.') continue;
+      const inner = txt.slice(inner0, r);
+      if (TALL.test(inner) || /\\left/.test(inner)) continue;
+      add('leftRight', [[start, inner0, glue(m[1], txt, inner0)], [r, r + rd[0].length, glue(rd[1], txt, r + rd[0].length)]]);
+    }
+    // \displaystyle in display maths
+    if (isDisplay) for (const m of txt.matchAll(/\\displaystyle(?![a-zA-Z])\s*/g)) add('displaystyle', [[m.index, m.index + m[0].length, '']]);
+    // stacked spacing commands \,\,\, or \quad\quad
+    for (const m of txt.matchAll(/(?:(?:\\[,:;! ]|\\quad|\\qquad|~)\s*){2,}/g)) {
+      if (isProt(m.index, m.index + m[0].length)) continue;
+      add('stackedSpace', [[m.index, m.index + m[0].length, m[0]]], { note: 'review' });
+    }
+    // spacing at the very start / end of the equation
+    const body = txt.slice(bs, be);
+    const lead = body.match(/^\s*((?:\\[,:;! ]|\\quad|\\qquad|~)\s*)+/);
+    if (lead) add('edgeSpace', [[bs, bs + lead[0].length, body.match(/^\s*/)[0]]]);
+    const trail = body.match(/((?:\\[,:;!]|\\quad|\\qquad|~)\s*)+$/);
+    if (trail && (!lead || trail.index > lead[0].length)) add('edgeSpace', [[be - trail[0].length, be, '']]);
+    // trailing \\ at the end of a multi-line environment
+    const tb = body.match(/\\\\\s*((?:\\(?:label\{[^}]*\}|nonumber|notag)\s*)*)$/);
+    if (tb && /\\begin\{/.test(txt.slice(0, bs))) { const at = be - tb[0].length; add('trailingBreak', [[at, at + 2, '']]); }
+    // repeated spaces
+    for (const m of txt.matchAll(/[ \t]{2,}/g)) {
+      const a = m.index, b = a + m[0].length;
+      const lineStart = a === 0 || txt[a - 1] === '\n';
+      if (lineStart || isProt(a, b) || !inBody(a, b)) continue;
+      add('spaces', [[a, b, ' ']]);
+    }
+    // order groups for display
+    return ORDER.filter(k => groups[k]).map(k => groups[k]);
+  }
+
+  const INFO = {
+    emptyScript:   [SAFE,  'Empty superscripts / subscripts', 'x^{} or x_{} adds nothing.', true],
+    emptyCmd:      [SAFE,  'Empty formatting commands', 'e.g. \\mathrm{} or \\text{} with nothing inside.', true],
+    emptyGroup:    [SAFE,  'Empty { } braces', 'Leftover braces with nothing inside (common after copy-paste or editors).', true],
+    doubleBraces:  [SAFE,  'Double braces {{ }}', 'One pair is enough.', true],
+    scriptBraces:  [SAFE,  'Braces around a one-character script', 'x^{2} → x^2. Same output, easier to read.', true],
+    loneBraces:    [SAFE,  'Braces around a single symbol', 'a+{b} → a+b, \\sin{x} → \\sin x.', true],
+    nestedFont:    [SAFE,  'Repeated font command', '\\mathrm{\\mathrm{x}} → \\mathrm{x}.', true],
+    operatorname:  [SAFE,  'Built-in function names', '\\operatorname{sin} → \\sin (LaTeX already knows these).', true],
+    displaystyle:  [SAFE,  '\\displaystyle in display maths', 'Display equations are already in display style.', true],
+    trailingBreak: [SAFE,  'Trailing \\\\ on the last line', 'Creates an empty (and sometimes numbered) extra line.', true],
+    edgeSpace:     [SAFE,  'Spacing at the start/end', 'Spacing commands at the edges of an equation have no visible effect or add unwanted gaps.', true],
+    spaces:        [SAFE,  'Extra spaces in the code', 'Cosmetic only — LaTeX ignores them in maths.', true],
+    leftRight:     [CHECK, '\\left … \\right around simple content', 'Plain brackets look tighter when nothing inside is tall. Keep them if you want auto-sizing.', false],
+    emptyPrescript:[CHECK, 'Empty {} before a script', 'Often intentional, e.g. {}^{14}C for left-side scripts. Only remove if not.', false],
+    stackedSpace:  [CHECK, 'Stacked spacing commands', 'Several spacing commands in a row (\\,\\,\\, …). Could be simplified — review manually.', false],
+  };
+  const ORDER = ['emptyScript', 'emptyCmd', 'emptyGroup', 'doubleBraces', 'scriptBraces', 'loneBraces', 'nestedFont', 'operatorname', 'displaystyle', 'trailingBreak', 'edgeSpace', 'spaces', 'leftRight', 'emptyPrescript', 'stackedSpace'];
+
+  const cleanBox = document.getElementById('clean');
+  let issues = [];
+  const esc = (x) => x.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+  const vis = (x) => x === '' ? '∅' : x.replace(/\n/g, '↵').replace(/ /g, '·');
+
+  function preview(txt, item) {
+    const a = Math.min(...item.edits.map(e => e[0])), b = Math.max(...item.edits.map(e => e[1]));
+    const before = txt.slice(Math.max(0, a - 10), a), after = txt.slice(b, b + 10);
+    let oldS = '', newS = '', pos = a;
+    for (const [s0, e0, rep] of [...item.edits].sort((x, y) => x[0] - y[0])) {
+      oldS += esc(txt.slice(pos, s0)); newS += esc(txt.slice(pos, s0));
+      oldS += `<del>${esc(vis(txt.slice(s0, e0)))}</del>`;
+      newS += rep ? `<ins>${esc(vis(rep))}</ins>` : '';
+      pos = e0;
+    }
+    return `<span class="ctx">${esc(before.replace(/\n/g, ' '))}</span>${oldS}<span class="ctx">${esc(after.replace(/\n/g, ' '))}</span>` +
+      `<span class="arrow">→</span><span class="ctx">${esc(before.replace(/\n/g, ' '))}</span>${newS}<span class="ctx">${esc(after.replace(/\n/g, ' '))}</span>`;
+  }
+
+  function renderClean(msg = '') {
+    const txt = input.value;
+    issues = scanIssues(txt);
+    if (!issues.length) {
+      cleanBox.innerHTML = `${msg ? `<div class="done">${msg}</div>` : ''}<div class="done">✨ Looks clean — nothing to tidy.</div><div class="row"><button id="cleanClose">Close</button></div>`;
+      cleanBox.classList.add('on');
+      document.getElementById('cleanClose').onclick = () => cleanBox.classList.remove('on');
+      return;
+    }
+    const total = issues.reduce((n, g) => n + g.items.length, 0);
+    const which = (document.getElementById('eqcount') || {}).textContent ? ' in equation ' + (document.getElementById('eqcount').textContent.match(/\d+/) || [''])[0] : '';
+    let h = `<h3>🧹 Found ${total} thing${total > 1 ? 's' : ''} to tidy${which}</h3>
+      <div class="sum">${msg ? `<span class="done">${msg}</span> · ` : ''}Tick what to remove or simplify. Point at a line to see where it is in the equation.</div>`;
+    issues.forEach((g, gi) => {
+      const [tag, title, why, def] = INFO[g.kind];
+      h += `<div class="grp"><label><input type="checkbox" class="gchk" data-g="${gi}" ${def ? 'checked' : ''}>
+        <span>${esc(title)} <span class="tagd ${tag}">${tag === SAFE ? 'safe' : 'check first'}</span> <span style="color:#999;font-weight:400">×${g.items.length}</span>
+        <span class="why">${esc(why)}</span></span></label><div class="items">`;
+      g.items.forEach((it, ii) => {
+        h += `<label class="item" data-g="${gi}" data-i="${ii}"><input type="checkbox" class="ichk" data-g="${gi}" data-i="${ii}" ${def && g.kind !== 'stackedSpace' ? 'checked' : ''}><span>${preview(txt, it)}</span></label>`;
+      });
+      h += `</div></div>`;
+    });
+    h += `<div class="row"><button class="primary" id="cleanApply">Apply selected</button>
+      <button id="cleanAll">Select all</button><button id="cleanNone">Select none</button><button id="cleanClose">Close</button></div>`;
+    cleanBox.innerHTML = h;
+    cleanBox.classList.add('on');
+
+    const syncGroup = (gi) => {
+      const its = [...cleanBox.querySelectorAll(`.ichk[data-g="${gi}"]`)], on = its.filter(x => x.checked).length;
+      const gc = cleanBox.querySelector(`.gchk[data-g="${gi}"]`);
+      gc.checked = on === its.length; gc.indeterminate = on > 0 && on < its.length;
+    };
+    cleanBox.querySelectorAll('.gchk').forEach(gc => gc.addEventListener('change', () => {
+      cleanBox.querySelectorAll(`.ichk[data-g="${gc.dataset.g}"]`).forEach(x => x.checked = gc.checked);
+    }));
+    cleanBox.querySelectorAll('.ichk').forEach(x => x.addEventListener('change', () => syncGroup(x.dataset.g)));
+    issues.forEach((_, gi) => syncGroup(gi));
+    // point at an item -> shade it in the visual field
+    cleanBox.querySelectorAll('.item').forEach(row => {
+      const it = issues[row.dataset.g].items[row.dataset.i];
+      row.addEventListener('mouseenter', () => {
+        const a = Math.min(...it.edits.map(e => e[0])), b = Math.max(...it.edits.map(e => e[1]));
+        let r = null; try { r = rangeForText(input.value, a, b); } catch (e) {}
+        if (r === 'all') r = [0, mf.lastOffset];
+        if (Array.isArray(r)) { lastSel = r; drawRange(r); } else clearHl();
+      });
+      row.addEventListener('mouseleave', clearHl);
+    });
+    document.getElementById('cleanAll').onclick = () => { cleanBox.querySelectorAll('.ichk').forEach(x => x.checked = true); issues.forEach((_, gi) => syncGroup(gi)); };
+    document.getElementById('cleanNone').onclick = () => { cleanBox.querySelectorAll('.ichk').forEach(x => x.checked = false); issues.forEach((_, gi) => syncGroup(gi)); };
+    document.getElementById('cleanClose').onclick = () => { cleanBox.classList.remove('on'); clearHl(); };
+    document.getElementById('cleanApply').onclick = applyClean;
+  }
+
+  let undoStack = [];
+  function applyClean() {
+    const txt = input.value;
+    const chosen = [...cleanBox.querySelectorAll('.ichk:checked')].map(x => issues[x.dataset.g].items[x.dataset.i]);
+    if (!chosen.length) return;
+    // apply non-overlapping edits from the end backwards; overlapping ones get picked up on the re-scan
+    const edits = [], taken = [];
+    let applied = 0;
+    for (const it of chosen) {
+      if (it.edits.some(([a, b]) => taken.some(([x, y]) => a < y && b > x || (a === b && a > x && a < y)))) continue;
+      it.edits.forEach(e => { edits.push(e); taken.push([e[0], e[1]]); });
+      applied++;
+    }
+    edits.sort((x, y) => y[0] - x[0]);
+    let out = txt;
+    for (const [a, b, rep] of edits) out = out.slice(0, a) + rep + out.slice(b);
+    pushUndo(txt);
+    input.value = out;
+    load();
+    clearHl();
+    renderClean(`Applied ${applied} change${applied > 1 ? 's' : ''}.`);
+    const und = document.createElement('button'); und.textContent = '↶ Undo clean-up';
+    und.onclick = () => undoBtn.click();
+    cleanBox.querySelector('.row').appendChild(und);
+  }
+  document.getElementById('cleanBtn').onclick = () => {
+    if (cleanBox.classList.contains('on')) { cleanBox.classList.remove('on'); clearHl(); return; }
+    renderClean();
+  };
+  input.addEventListener('input', () => { if (cleanBox.classList.contains('on')) renderClean(); });
+  mf.addEventListener('input', () => { if (cleanBox.classList.contains('on')) setTimeout(() => renderClean(), 0); });
+
+  // =================== Shared helpers for the extra tools ===================
+  var afterLoadHooks = afterLoadHooks || [];
+  const undoBtn = document.getElementById('undoBtn');
+  function pushUndo(txt) { undoStack.push(txt); if (undoStack.length > 50) undoStack.shift(); undoBtn.disabled = false; }
+  function setInput(txt, note) {
+    pushUndo(input.value);
+    input.value = txt;
+    load();
+    clearHl();
+    if (cleanBox.classList.contains('on')) renderClean(note || '');
+  }
+  undoBtn.onclick = () => {
+    if (!undoStack.length) return;
+    input.value = undoStack.pop();
+    load(); clearHl();
+    if (cleanBox.classList.contains('on')) renderClean('Undone.');
+    undoBtn.disabled = !undoStack.length;
+  };
+  undoBtn.disabled = true;
+
+  function store(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
+  function recall(key, dflt) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : dflt; } catch (e) { return dflt; } }
+  function renderStatic(latex) {
+    try { return MathLive.convertLatexToMarkup(latex, { mathstyle: 'displaystyle' }); } catch (e) { return esc(latex); }
+  }
+  // apply a list of issue items (non-overlapping) to a text
+  function applyItems(txt, items) {
+    const edits = [], taken = [];
+    let applied = 0;
+    for (const it of items) {
+      if (it.edits.some(([a, b]) => taken.some(([x, y]) => (a < y && b > x) || (a === b && a > x && a < y)))) continue;
+      it.edits.forEach(e => { edits.push(e); taken.push([e[0], e[1]]); });
+      applied++;
+    }
+    edits.sort((x, y) => y[0] - x[0]);
+    let out = txt;
+    for (const [a, b, rep] of edits) out = out.slice(0, a) + rep + out.slice(b);
+    return { out, applied };
+  }
+  // apply every "safe" fix, repeating until nothing is left (fixes can reveal new ones)
+  function autoClean(txt) {
+    let total = 0;
+    for (let pass = 0; pass < 5; pass++) {
+      const items = scanIssues(txt).filter(g => INFO[g.kind][3]).flatMap(g => g.items);
+      if (!items.length) break;
+      const r = applyItems(txt, items);
+      if (!r.applied) break;
+      txt = r.out; total += r.applied;
+    }
+    return { text: txt, count: total };
+  }
+
+  // =================== 1. Error check ===================
+  const checksBox = document.getElementById('checks');
+  function lineOf(txt, pos) { return txt.slice(0, pos).split('\n').length; }
+  function checkLatex(txt, withMathLive) {
+    const errs = [];
+    const stack = [];
+    for (let i = 0; i < txt.length; i++) {
+      const c = txt[i];
+      if (c === '%' && !isEscaped(txt, i)) { while (i < txt.length && txt[i] !== '\n') i++; continue; }
+      if ((c === '{' || c === '}') && isEscaped(txt, i)) continue;
+      if (c === '{') stack.push(i);
+      else if (c === '}') { if (stack.length) stack.pop(); else errs.push({ pos: i, len: 1, msg: 'Extra } with no matching {' }); }
+    }
+    stack.forEach(p => errs.push({ pos: p, len: 1, msg: 'This { is never closed — a } is missing' }));
+    const lr = [];
+    for (const m of txt.matchAll(/\\(left|right)(?![a-zA-Z])/g)) {
+      if (m[1] === 'left') lr.push(m.index);
+      else if (lr.length) lr.pop();
+      else errs.push({ pos: m.index, len: 6, msg: '\\right without a matching \\left' });
+    }
+    lr.forEach(p => errs.push({ pos: p, len: 5, msg: '\\left without a matching \\right (use \\right. if you want it invisible)' }));
+    const env = [];
+    for (const m of txt.matchAll(/\\(begin|end)\s*\{([^}]*)\}/g)) {
+      if (m[1] === 'begin') env.push([m[2], m.index, m[0].length]);
+      else {
+        const top = env.pop();
+        if (!top) errs.push({ pos: m.index, len: m[0].length, msg: `\\end{${m[2]}} without a matching \\begin` });
+        else if (top[0] !== m[2]) errs.push({ pos: m.index, len: m[0].length, msg: `\\begin{${top[0]}} is closed by \\end{${m[2]}}` });
+      }
+    }
+    env.forEach(([n, p, l]) => errs.push({ pos: p, len: l, msg: `\\begin{${n}} is never closed with \\end{${n}}` }));
+    for (const m of txt.matchAll(/\\(frac|dfrac|tfrac|binom)\s*(?![a-zA-Z])/g)) {
+      let k = m.index + m[0].length, n = 0;
+      while (n < 2) { k = nextNonWs(txt, k); if (txt[k] === '{') { k = matchBrace(txt, k) + 1; n++; } else if (txt[k] && /[A-Za-z0-9]|\\/.test(txt[k])) { k += txt[k] === '\\' ? readCmd(txt, k) - k : 1; n++; } else break; }
+      if (n < 2) errs.push({ pos: m.index, len: m[0].length, msg: `\\${m[1]} needs two parts, e.g. \\${m[1]}{a}{b}` });
+    }
+    if (withMathLive) {
+      for (const e of (mf.errors || [])) {
+        if (e.code === 'unknown-command' || e.code === 'unknown-environment') {
+          const p = txt.indexOf(e.arg);
+          errs.push({ pos: Math.max(0, p), len: e.arg.length, msg: `Unknown command ${e.arg} — a typo, or a macro you can add under “My macros”`, warn: true });
+        }
+      }
+    }
+    return errs.sort((a, b) => a.pos - b.pos);
+  }
+  function runChecks() {
+    const txt = input.value;
+    if (!txt.trim()) { checksBox.innerHTML = ''; return; }
+    const errs = checkLatex(txt, true);
+    if (!errs.length) { checksBox.innerHTML = '<span class="ok">✔ No problems found</span>'; return; }
+    checksBox.innerHTML = errs.map((e, i) =>
+      `<button class="err ${e.warn ? 'warn' : ''}" data-i="${i}">${e.warn ? '⚠' : '✖'} Line ${lineOf(txt, e.pos)}: ${esc(e.msg)}</button>`).join('');
+    checksBox.querySelectorAll('.err').forEach(b => b.onclick = () => {
+      const e = errs[b.dataset.i]; input.focus(); input.setSelectionRange(e.pos, e.pos + e.len);
+    });
+  }
+  afterLoadHooks.push(runChecks);
+  input.addEventListener('input', clearHl);
+  output.addEventListener('scroll', () => {});
+  mf.addEventListener('input', () => setTimeout(runChecks, 0));
+
+  // =================== 2. Convert type / numbering ===================
+  const formSel = document.getElementById('formSel');
+  const FORMS = {
+    inline: ['$', '$'], paren: ['\\(', '\\)'], display: ['\\[ ', ' \\]'],
+    'equation': null, 'equation*': null, 'align': null, 'align*': null, 'gather': null, 'gather*': null, 'multline': null,
+  };
+  const MULTI_ENVS = /^(align|gather|multline|flalign|alignat|eqnarray)\*?$/;
+  function currentForm(txt) {
+    const t = txt.trim(), m = t.match(/^\\begin\{((?:equation|align|alignat|flalign|gather|multline|eqnarray|displaymath|math)\*?)\}/);
+    if (m) return m[1];
+    if (t.startsWith('$$') || t.startsWith('\\[')) return 'display';
+    if (t.startsWith('\\(')) return 'paren';
+    if (t.startsWith('$')) return 'inline';
+    return '';
+  }
+  function hasTopLevelBreak(body) { return splitRows(body).length > 1; }
+  function convertTo(form) {
+    const p = parse(input.value);
+    let body = p.body;
+    const extras = p.extras.filter(x => !(/^\\(nonumber|notag)/.test(x) && !/^(equation|align|gather|multline)$/.test(form)));
+    const toMulti = MULTI_ENVS.test(form);
+    // single-line forms can't hold \\ directly: wrap the lines in aligned
+    if (!toMulti && hasTopLevelBreak(body) && !/^\\begin\{(aligned|gathered|split)\}/.test(body.trim())) body = `\\begin{aligned}\n  ${body}\n\\end{aligned}`;
+    // going to align: unwrap an aligned block, it's no longer needed
+    const un = body.trim().match(/^\\begin\{(aligned|gathered)\}([\s\S]*)\\end\{\1\}$/);
+    if (toMulti && un) body = un[2].trim();
+    const ex = extras.length ? ' ' + extras.join(' ') : '';
+    let out;
+    if (FORMS[form]) out = FORMS[form][0] + body + ex + FORMS[form][1];
+    else out = `\\begin{${form}}\n  ${body}${ex}\n\\end{${form}}`;
+    setInput(out);
+    showNote(`Converted to ${formSel.selectedOptions[0].textContent}.` +
+      (extras.some(x => x.startsWith('\\label')) && !/^(equation|align|gather|multline)$/.test(form) ? ' Note: \\label has no number to point to in this form.' : ''));
+  }
+  formSel.addEventListener('change', () => { if (formSel.value) convertTo(formSel.value); });
+  const numBtn = document.getElementById('numBtn');
+  numBtn.onclick = () => {
+    let f = currentForm(input.value);
+    if (!f || f === 'inline' || f === 'paren' || f === 'display') f = 'equation*';
+    convertTo(f.endsWith('*') ? f.slice(0, -1) : (FORMS[f + '*'] !== undefined ? f + '*' : f));
+  };
+  function syncForm() {
+    const f = currentForm(input.value);
+    formSel.value = FORMS[f] !== undefined ? f : '';
+    const numbered = /^(equation|align|gather|multline|flalign|alignat|eqnarray)$/.test(f);
+    numBtn.textContent = numbered ? '# Numbered ✓' : '# Numbered ✗';
+    numBtn.classList.toggle('sel', numbered);
+    alignBtn.disabled = !(MULTI_ENVS.test(f) || /\\begin\{(aligned|split|cases|matrix|pmatrix|bmatrix|array)/.test(input.value));
+  }
+  afterLoadHooks.push(syncForm);
+  const noteEl = document.getElementById('note');
+  let noteT = 0;
+  function showNote(t) { noteEl.textContent = t; clearTimeout(noteT); noteT = setTimeout(() => noteEl.textContent = '', 6000); }
+
+  // =================== 3. Align columns ===================
+  // split on top-level \\ (not inside braces or nested environments)
+  function splitTop(src, sepRe) {
+    const out = []; let depth = 0, envDepth = 0, last = 0;
+    for (let i = 0; i < src.length; i++) {
+      const c = src[i];
+      if (c === '\\') {
+        const rest = src.slice(i);
+        if (/^\\begin\{/.test(rest)) envDepth++;
+        else if (/^\\end\{/.test(rest)) envDepth--;
+        else if (depth === 0 && envDepth === 0 && sepRe === '\\\\' && rest.startsWith('\\\\')) { out.push(src.slice(last, i)); last = i + 2; i++; continue; }
+        i++; continue;
+      }
+      if (c === '{') depth++;
+      else if (c === '}') depth--;
+      else if (depth === 0 && envDepth === 0 && sepRe === '&' && c === '&') { out.push(src.slice(last, i)); last = i + 1; }
+    }
+    out.push(src.slice(last));
+    return out;
+  }
+  const splitRows = (body) => splitTop(body, '\\\\').filter((r, i, a) => r.trim() || i < a.length - 1);
+  function alignBlock(body) {
+    const rows = splitRows(body).map(r => splitTop(r.trim(), '&').map(c => c.trim()));
+    const ncol = Math.max(...rows.map(r => r.length));
+    const w = Array.from({ length: ncol }, (_, k) => Math.max(...rows.map(r => (r[k] || '').length)));
+    return rows.map((r, ri) => {
+      let line = '';
+      r.forEach((c, k) => {
+        if (k === 0) { line = r.length > 1 ? c.padEnd(w[0]) : c; return; }
+        // keep the usual "&= x" style: no space between & and a relation sign
+        const tight = /^(=|<|>|\\(le|ge|leq|geq|approx|equiv|sim|neq|to|in|subset|propto)(?![a-zA-Z]))/.test(c);
+        line += ' &' + (tight ? '' : ' ') + (k === r.length - 1 ? c : c.padEnd(w[k]));
+      });
+      return '  ' + line + (ri < rows.length - 1 ? ' \\\\' : '');
+    }).join('\n');
+  }
+  const alignBtn = document.getElementById('alignBtn');
+  alignBtn.onclick = () => {
+    const txt = input.value;
+    let out = txt, n = 0;
+    // top-level multi-line environment
+    const f = currentForm(txt);
+    if (MULTI_ENVS.test(f)) {
+      const [bs, be] = bodyBounds(txt);
+      out = txt.slice(0, bs) + '\n' + alignBlock(txt.slice(bs, be)) + '\n' + txt.slice(be).trimStart();
+      n++;
+    } else {
+      // nested aligned / cases / matrices
+      out = txt.replace(/\\begin\{(aligned|split|cases|matrix|pmatrix|bmatrix|vmatrix|Bmatrix|array)\}(\{[^}]*\})?([\s\S]*?)\\end\{\1\}/g, (all, env, spec, inner) => {
+        n++; return `\\begin{${env}}${spec || ''}\n${alignBlock(inner)}\n\\end{${env}}`;
+      });
+    }
+    if (!n || out === txt) { showNote('Nothing to line up.'); return; }
+    setInput(out);
+    showNote('Lined up the & columns. Same output, easier to read.');
+  };
+
+  // =================== 4. Symbol search ===================
+  const SYMBOLS = [
+    // Greek
+    ...['alpha','beta','gamma','delta','epsilon','varepsilon','zeta','eta','theta','vartheta','iota','kappa','lambda','mu','nu','xi','pi','varpi','rho','varrho','sigma','tau','upsilon','phi','varphi','chi','psi','omega']
+      .map(g => [`\\${g}`, `${g} greek letter lowercase`]),
+    ...['Gamma','Delta','Theta','Lambda','Xi','Pi','Sigma','Upsilon','Phi','Psi','Omega'].map(g => [`\\${g}`, `${g} greek letter capital uppercase`]),
+    // operators & relations
+    ['\\times', 'times multiply cross product'], ['\\cdot', 'cdot dot multiply product'], ['\\div', 'divide division'], ['\\pm', 'plus minus'], ['\\mp', 'minus plus'],
+    ['\\ast', 'asterisk star convolution'], ['\\star', 'star'], ['\\circ', 'circ compose composition degree ring'], ['\\bullet', 'bullet dot'],
+    ['\\oplus', 'oplus direct sum xor circle plus'], ['\\otimes', 'otimes tensor product circle times'], ['\\odot', 'odot hadamard circle dot'],
+    ['=', 'equals'], ['\\neq', 'not equal neq'], ['\\asymp', 'asymptotically equivalent'], ['\\doteq', 'approaches limit dot equal'], ['\\approx', 'approx approximately almost equal'], ['\\equiv', 'equiv identical congruent defined'],
+    ['\\cong', 'cong congruent isomorphic'], ['\\sim', 'sim similar tilde distributed'], ['\\simeq', 'simeq similar equal'], ['\\propto', 'propto proportional'],
+    ['\\triangleq', 'defined as equal by definition'], ['\\coloneqq', 'colon equals defined as assignment :='],
+    ['<', 'less than'], ['>', 'greater than'], ['\\leq', 'leq less than or equal'], ['\\geq', 'geq greater than or equal'],
+    ['\\ll', 'much less than'], ['\\gg', 'much greater than'], ['\\prec', 'precedes'], ['\\succ', 'succeeds'],
+    // sets & logic
+    ['\\in', 'in element of member'], ['\\notin', 'not in not element'], ['\\ni', 'ni contains as member'], ['\\subset', 'subset'], ['\\subseteq', 'subseteq subset or equal'],
+    ['\\supset', 'superset'], ['\\supseteq', 'superset or equal'], ['\\cup', 'cup union'], ['\\cap', 'cap intersection'], ['\\setminus', 'set minus difference'],
+    ['\\emptyset', 'empty set'], ['\\varnothing', 'empty set varnothing'], ['\\forall', 'for all every'], ['\\exists', 'exists there exists'], ['\\nexists', 'does not exist'],
+    ['\\neg', 'not negation'], ['\\land', 'and wedge logical'], ['\\lor', 'or vee logical'], ['\\implies', 'implies then arrow'], ['\\iff', 'iff if and only if equivalent'],
+    ['\\therefore', 'therefore'], ['\\because', 'because'],
+    ['\\mathbb{R}', 'real numbers R reals'], ['\\mathbb{N}', 'natural numbers N'], ['\\mathbb{Z}', 'integers Z'], ['\\mathbb{Q}', 'rational numbers Q'], ['\\mathbb{C}', 'complex numbers C'],
+    // arrows
+    ['\\to', 'to right arrow maps tends'], ['\\rightarrow', 'right arrow'], ['\\leftarrow', 'left arrow gets'], ['\\leftrightarrow', 'left right arrow both'],
+    ['\\Rightarrow', 'double right arrow implies'], ['\\Leftarrow', 'double left arrow'], ['\\Leftrightarrow', 'double left right arrow iff'], ['\\mapsto', 'maps to'],
+    ['\\uparrow', 'up arrow'], ['\\downarrow', 'down arrow'], ['\\longrightarrow', 'long right arrow'], ['\\rightleftharpoons', 'equilibrium reversible reaction harpoons'],
+    ['\\xrightarrow{#?}', 'arrow with text above extensible'],
+    // calculus & big operators
+    ['\\frac{#@}{#?}', 'fraction divide over'], ['\\dfrac{#@}{#?}', 'display fraction big'], ['\\sqrt{#@}', 'square root sqrt radical'], ['\\sqrt[#?]{#?}', 'nth root cube root'],
+    ['\\sum_{#?}^{#?}', 'sum summation sigma'], ['\\prod_{#?}^{#?}', 'product pi'], ['\\int_{#?}^{#?}', 'integral int definite'], ['\\int', 'integral'],
+    ['\\iint', 'double integral'], ['\\iiint', 'triple integral'], ['\\oint', 'contour integral closed line'], ['\\lim_{#? \\to #?}', 'limit lim'],
+    ['\\partial', 'partial derivative'], ['\\nabla', 'nabla gradient del'], ['\\infty', 'infinity infinite'], ['\\mathrm{d}', 'd differential upright'],
+    ['\\frac{\\mathrm{d}#?}{\\mathrm{d}#?}', 'derivative dy dx'], ['\\frac{\\partial #?}{\\partial #?}', 'partial derivative fraction'],
+    ['\\Delta', 'delta change difference laplacian'], ['\\prime', 'prime derivative'], ["'", 'prime apostrophe derivative'],
+    // accents & decorations
+    ['\\hat{#@}', 'hat caret unit vector estimate'], ['\\bar{#@}', 'bar mean average overline'], ['\\overline{#@}', 'overline long bar conjugate'], ['\\tilde{#@}', 'tilde'],
+    ['\\vec{#@}', 'vector arrow'], ['\\dot{#@}', 'dot time derivative'], ['\\ddot{#@}', 'double dot second derivative'], ['\\underline{#@}', 'underline'],
+    ['\\overbrace{#@}^{#?}', 'overbrace brace above'], ['\\underbrace{#@}_{#?}', 'underbrace brace below'], ['\\widehat{#@}', 'wide hat caret accent'], ['\\widetilde{#@}', 'wide tilde accent'], ['\\check{#@}', 'check caron accent'], ['\\breve{#@}', 'breve accent'],
+    ['\\mathbf{#@}', 'bold vector matrix'], ['\\mathbb{#@}', 'blackboard bold double struck'], ['\\mathfrak{#@}', 'fraktur gothic'], ['\\operatorname{#?}', 'operator name function'],
+    ['\\boldsymbol{#@}', 'bold symbol greek bold'], ['\\mathrm{#@}', 'upright roman text units'], ['\\mathcal{#@}', 'calligraphic script'], ['\\text{#?}', 'text words'],
+    // brackets & structures
+    ['\\left( #@ \\right)', 'parentheses brackets auto size'], ['\\left[ #@ \\right]', 'square brackets auto size'], ['\\left\\{ #@ \\right\\}', 'curly braces set auto size'],
+    ['\\left| #@ \\right|', 'absolute value modulus'], ['\\left\\| #@ \\right\\|', 'norm double bars'], ['\\langle #@ \\rangle', 'angle brackets inner product expectation'],
+    ['\\lfloor #@ \\rfloor', 'floor'], ['\\lceil #@ \\rceil', 'ceiling ceil'],
+    ['\\begin{pmatrix} #? & #? \\\\ #? & #? \\end{pmatrix}', 'matrix 2x2 parentheses pmatrix'], ['\\begin{bmatrix} #? & #? \\\\ #? & #? \\end{bmatrix}', 'matrix 2x2 square bmatrix'],
+    ['\\begin{vmatrix} #? & #? \\\\ #? & #? \\end{vmatrix}', 'determinant matrix vmatrix'],
+    ['\\begin{cases} #? & #? \\\\ #? & #? \\end{cases}', 'cases piecewise function brace'], ['\\binom{#?}{#?}', 'binomial choose combination'],
+    // misc
+    ['\\ldots', 'dots ellipsis low'], ['\\cdots', 'center dots ellipsis'], ['\\vdots', 'vertical dots'], ['\\ddots', 'diagonal dots'],
+    ['\\angle', 'angle'], ['\\perp', 'perpendicular orthogonal'], ['\\parallel', 'parallel'], ['\\degree', 'degree'], ['^{\\circ}', 'degrees temperature angle'],
+    ['\\hbar', 'h bar planck reduced'], ['\\ell', 'ell script l length'], ['\\Re', 'real part'], ['\\Im', 'imaginary part'], ['\\aleph', 'aleph cardinal'],
+    ['\\dagger', 'dagger adjoint hermitian'], ['\\top', 'transpose top'], ['\\sin', 'sine sin trig'], ['\\cos', 'cosine cos trig'], ['\\tan', 'tangent tan trig'],
+    ['\\log', 'logarithm log'], ['\\ln', 'natural logarithm ln'], ['\\exp', 'exponential exp'], ['\\max', 'maximum max'], ['\\min', 'minimum min'],
+    ['\\arg\\max_{#?}', 'argmax arg max'], ['\\arg\\min_{#?}', 'argmin arg min'], ['\\det', 'determinant det'], ['\\quad', 'space quad gap wide'], ['\\qquad', 'space qquad very wide gap'], ['\\;', 'thick space gap'], ['\\!', 'negative thin space'], ['\\,', 'thin space small gap'],
+  ];
+  const symPanel = document.getElementById('symPanel'), symQ = document.getElementById('symQ'), symGrid = document.getElementById('symGrid'), symCats = document.getElementById('symCats');
+  const CATS = ['Greek', 'Operators', 'Relations', 'Arrows', 'Sets & logic', 'Calculus', 'Accents & fonts', 'Brackets & matrices', 'Other'];
+  function catOf(l, k) {
+    if (/^\\(hat|bar|overline|tilde|vec|dot|ddot|underline|overbrace|underbrace|widehat|widetilde|check|breve|mathbf|boldsymbol|mathrm|mathcal|mathbb|mathfrak|text|operatorname)\{#/.test(l)) return 'Accents & fonts';
+    if (/greek/.test(k)) return 'Greek';
+    if (/^\\(frac|dfrac|sqrt|sum|prod|int|iint|iiint|oint|lim|partial|nabla|infty|arg)|^\\mathrm\{d\}|\\prime|^'$|derivative/.test(l + ' ' + k)) return 'Calculus';
+    if (/arrow/.test(k + ' ' + l) || /^\\(to|mapsto|iff|implies|rightleftharpoons)$/.test(l)) return 'Arrows';
+    if (/^\\(left|langle|lfloor|lceil|begin|binom)/.test(l)) return 'Brackets & matrices';
+    if (/^\\(in|notin|ni|subset|subseteq|supset|supseteq|cup|cap|setminus|emptyset|varnothing|forall|exists|nexists|neg|land|lor|therefore|because)$|^\\mathbb\{[A-Z]\}$/.test(l)) return 'Sets & logic';
+    if (/^(=|<|>)$|^\\(neq|le|ge|leq|geq|approx|equiv|cong|sim|simeq|propto|triangleq|coloneqq|ll|gg|prec|succ|asymp|doteq|perp|parallel)$/.test(l)) return 'Relations';
+    if (/^\\(times|cdot|div|pm|mp|ast|star|circ|bullet|oplus|otimes|odot|dagger|top)$/.test(l)) return 'Operators';
+    return 'Other';
+  }
+  let symCat = recall('olve-symcat', 'Greek');
+  if (!CATS.includes(symCat)) symCat = 'Greek';
+  symCats.innerHTML = CATS.map(c => `<button class="symcat" data-c="${c}">${c}</button>`).join('');
+  symCats.querySelectorAll('.symcat').forEach(b => b.onclick = () => { symCat = b.dataset.c; store('olve-symcat', symCat); symQ.value = ''; showSyms(); });
+  const symPreview = (l) => l.replace(/\\(text|operatorname)\{#\?\}/, (m, c) => `\\${c}{${c === 'text' ? 'text' : 'op'}}`).replace(/#@/g, /wide|over|under/.test(l) ? 'xy' : 'x').replace(/#\?/g, '\\square');
+  const TALL_SYM = /\\(begin|frac|dfrac|sum|prod|int|iint|iiint|oint|lim|binom|overbrace|underbrace|xrightarrow|arg)|\\sqrt\[/;
+  const SPACES = { '\\,': ['thin space', 0.5], '\\:': ['medium space', 0.7], '\\;': ['thick space', 0.9], '\\quad': ['quad', 1.6], '\\qquad': ['qquad', 2.6], '\\!': ['negative space', 0.4], '\\ ': ['space', 0.6], '~': ['non-breaking space', 0.6] };
+  function symFace(l) {
+    if (SPACES[l]) return `<span class="symtxt"><span class="gap" style="width:${SPACES[l][1]}em"></span>${esc(l)}</span>`;
+    return renderStatic(symPreview(l));
+  }
+  function showSyms() {
+    const q = symQ.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const hits = q.length
+      ? SYMBOLS.filter(([l, k]) => q.every(w => k.toLowerCase().includes(w) || l.toLowerCase().includes(w))).slice(0, 80)
+      : SYMBOLS.filter(([l, k]) => catOf(l, k) === symCat);
+    symCats.querySelectorAll('.symcat').forEach(b => b.classList.toggle('sel', !q.length && b.dataset.c === symCat));
+    symGrid.innerHTML = hits.length ? hits.map(([l, k]) =>
+      `<button class="sym${TALL_SYM.test(l) ? ' tall' : ''}" data-l="${esc(l)}" title="${esc(k.split(' ').slice(0, 4).join(' '))} — ${esc(l.replace(/#[?@]/g, '□'))}">${symFace(l)}</button>`).join('')
+      : '<span style="color:#888">No match — try another word (e.g. "arrow", "integral", "matrix").</span>';
+    symGrid.querySelectorAll('.sym').forEach(b => {
+      b.addEventListener('mousedown', (e) => e.preventDefault()); // keep the selection where it is
+      b.onclick = () => applyTemplate(b.dataset.l);
+    });
+  }
+  // the pane the user last worked in decides where symbols and accents go
+  let lastFocus = 'mf';
+  mf.addEventListener('focusin', () => { lastFocus = 'mf'; });
+  input.addEventListener('focus', () => { lastFocus = 'input'; });
+  let lastWrap = null;
+  function applyTemplate(l) {
+    if (lastFocus === 'input') {
+      const s0 = input.selectionStart, e0 = input.selectionEnd, sel = input.value.slice(s0, e0);
+      const withSel = l.replace(/#@/g, sel);
+      const slot = withSel.indexOf('#?');            // first empty slot, if any
+      const t = withSel.replace(/#\?/g, '');
+      pushUndo(input.value);
+      input.value = input.value.slice(0, s0) + t + input.value.slice(e0);
+      let caret = s0 + t.length;
+      if (slot >= 0) caret = s0 + slot;
+      else if (!sel) { const k = t.indexOf('{}'); if (k >= 0) caret = s0 + k + 1; }
+      input.focus(); input.setSelectionRange(caret, caret);
+      load();
+      return;
+    }
+    mf.focus();
+    if (l.includes('#?')) { mf.insert(l, { format: 'latex', selectionMode: 'placeholder' }); lastWrap = null; }
+    else {
+      const sel = mf.selection && mf.selection.ranges && mf.selection.ranges[0];
+      const collapsed = !sel || sel[0] === sel[1];
+      // chaining (x → hat → prime): apply to what we just accented
+      let target = !collapsed;
+      if (collapsed && lastWrap && lastWrap.value === mf.getValue('latex') && mf.position === lastWrap.end) { mf.selection = { ranges: [[lastWrap.start, lastWrap.end]] }; target = true; }
+      else if (collapsed && mf.position > 0) {
+        // no selection: use the item just before the cursor
+        const p = mf.position, norm = (x) => (x || '').replace(/\s+/g, '');
+        const info = norm((mf.getElementInfo(p) || {}).latex);
+        const isOp = (x) => /^([+\-=<>,;:!|([{]|\\(cdot|times|pm|mp|div|le|ge|leq|geq|neq|approx|to|in|,|;|quad|qquad))$/.test(x);
+        let a = -1;
+        const nb = (x) => x.replace(/[{}]/g, '');
+        if (/^[\^_]/.test(info)) { for (let k = p - 1; k >= 0; k--) { const v = norm(mf.getValue(k, p, 'latex')); if (v && !/^[\^_]/.test(v) && nb(v).endsWith(nb(info))) { a = k; break; } } }
+        else if (info && !isOp(info)) { for (let k = p - 1; k >= 0; k--) { if (norm(mf.getValue(k, p, 'latex')) === info) { a = k; break; } } }
+        if (a >= 0) {
+          const picked = norm(mf.getValue(a, p, 'latex'));
+          const sm = /^[\^_]/.test(info) && picked.match(/^(.*?)((?:[\^_](?:\{(?:[^{}]|\{[^{}]*\})*\}|\\[a-zA-Z]+|[^\\{}]))+)$/);
+          if (sm && sm[1]) {
+            // x^2 / c_{t+1}: accent the base and keep the scripts (\hat{c}_{t+1}); a prime joins the superscript (x^{\prime 2})
+            const base = sm[1];
+            let sub = '', sup = '';
+            sm[2].replace(/([\^_])(\{(?:[^{}]|\{[^{}]*\})*\}|\\[a-zA-Z]+|[^\\{}])/g, (all, k, v) => { v = v.replace(/^\{([\s\S]*)\}$/, '$1'); if (k === '_') sub = v; else sup = v; return ''; });
+            const subS = sub ? `_{${sub}}` : '';
+            const rep = /\^\{\\prime\}$/.test(l) ? `${base}${subS}^{\\prime${sup ? ' ' + sup : ''}}` : `${l.replace('#@', base)}${subS}${sup ? `^{${sup}}` : ''}`;
+            mf.selection = { ranges: [[a, p]] };
+            mf.insert(rep, { format: 'latex', selectionMode: 'item' });
+            const r = mf.selection.ranges[0]; const s0 = Math.min(...r), e0 = Math.max(...r);
+            mf.position = e0; lastWrap = { start: s0, end: e0, value: mf.getValue('latex') };
+            buildOutput(); input.value = output.value; runChecks();
+            return;
+          }
+          mf.selection = { ranges: [[a, p]] }; target = true;
+        }
+      }
+      if (!target) { mf.insert(l.replace('#@', '#?'), { format: 'latex', selectionMode: 'placeholder' }); lastWrap = null; buildOutput(); input.value = output.value; runChecks(); return; }
+      mf.insert(l, { format: 'latex', selectionMode: 'item' });
+      const r = mf.selection && mf.selection.ranges && mf.selection.ranges[0];
+      if (r) { const a = Math.min(r[0], r[1]), b = Math.max(r[0], r[1]); mf.position = b; lastWrap = { start: a, end: b, value: mf.getValue('latex') }; }
+    }
+    buildOutput(); input.value = output.value; runChecks();
+  }
+  document.getElementById('symBtn').onclick = () => {
+    symPanel.classList.toggle('on');
+    if (symPanel.classList.contains('on')) showSyms();
+  };
+  document.getElementById('symClose').onclick = () => symPanel.classList.remove('on');
+  symQ.addEventListener('input', showSyms);
+  symQ.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const f = symGrid.querySelector('.sym'); if (f) f.click(); } if (e.key === 'Escape') symPanel.classList.remove('on'); });
+
+  // ---------- visual zoom ----------
+  const ZOOMS = [0.6, 0.7, 0.8, 0.9, 1, 1.15, 1.3, 1.5, 1.75, 2];
+  let zoom = recall('olve-zoom', 0.9);
+  function setZoom(z) {
+    zoom = Math.max(ZOOMS[0], Math.min(ZOOMS[ZOOMS.length - 1], z));
+    mf.style.fontSize = (24 * zoom).toFixed(1) + 'px';
+    document.getElementById('zoomVal').textContent = Math.round(zoom * 100) + '%';
+    store('olve-zoom', zoom);
+    if (lastSel) setTimeout(() => drawRange(lastSel), 0);
+  }
+  const zstep = (d) => { const i = ZOOMS.findIndex(z => z >= zoom - 1e-9); setZoom(ZOOMS[Math.max(0, Math.min(ZOOMS.length - 1, (i < 0 ? ZOOMS.length - 1 : i) + d))]); };
+  document.getElementById('zoomIn').onclick = () => zstep(1);
+  document.getElementById('zoomOut').onclick = () => zstep(-1);
+  document.getElementById('zoomReset').onclick = () => setZoom(0.9);
+  ['zoomIn', 'zoomOut', 'zoomReset'].forEach(id => document.getElementById(id).addEventListener('mousedown', e => e.preventDefault()));
+  setZoom(zoom);
+  // a click anywhere in the visual pane (not only on the equation) puts the cursor in it
+  mf.addEventListener('pointerdown', () => { setTimeout(() => { if (document.activeElement !== mf) { mf.focus(); mf.executeCommand('moveToMathfieldEnd'); } }, 0); });
+  // Ctrl/Cmd + mouse wheel over the visual pane zooms too
+  mf.addEventListener('wheel', (e) => { if (e.ctrlKey || e.metaKey) { e.preventDefault(); zstep(e.deltaY < 0 ? 1 : -1); } }, { passive: false });
+
+  // ---------- accents bar ----------
+  const ACCENTS = [
+    ['\\hat{#@}', 'Hat', 'H'], ['\\tilde{#@}', 'Tilde', 'T'], ['\\bar{#@}', 'Bar', 'B'], ['\\dot{#@}', 'Dot (time derivative)'], ['\\ddot{#@}', 'Double dot'],
+    ['\\vec{#@}', 'Vector arrow', 'V'], ['#@^{\\prime}', 'Prime', 'P'], ['\\overline{#@}', 'Overline (long bar)', 'O'], ['\\underline{#@}', 'Underline'],
+    ['\\widehat{#@}', 'Wide hat (for several symbols)'], ['\\widetilde{#@}', 'Wide tilde (for several symbols)'], ['\\boldsymbol{#@}', 'Bold (works for Greek too)'],
+  ];
+  const accbar = document.getElementById('accbar');
+  accbar.innerHTML = ACCENTS.map(([l, name, key], i) => `<button class="acc" data-i="${i}" title="${name}${key ? ' (Alt+' + key + ')' : ''}">${renderStatic(l.replace('#@', /wide/.test(l) ? 'xy' : 'x'))}</button>`).join('');
+  accbar.querySelectorAll('.acc').forEach(b => {
+    b.addEventListener('mousedown', (e) => e.preventDefault());
+    b.onclick = () => applyTemplate(ACCENTS[+b.dataset.i][0]);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (!e.altKey || e.ctrlKey || e.metaKey) return;
+    const a = ACCENTS.find(x => x[2] && e.code === 'Key' + x[2]);
+    if (a) { e.preventDefault(); e.stopPropagation(); setTimeout(() => applyTemplate(a[0]), 40); } // let the editor finish the last keystroke first
+  }, true);
+
+  // =================== 5. My macros ===================
+  const DEFAULT_MACROS = { ...mf.macros };
+  const macroTa = document.getElementById('macroTa'), macroStatus = document.getElementById('macroStatus');
+  function parseMacros(src) {
+    const out = {}, names = [];
+    src = src.replace(/(^|[^\\])%.*$/gm, '$1'); // drop comments
+    const grab = (i) => { // read {..} or \name at i -> [content, nextIndex]
+      i = nextNonWs(src, i);
+      if (src[i] === '{') { const j = matchBrace(src, i); return [src.slice(i + 1, j), j + 1]; }
+      if (src[i] === '\\') { const j = readCmd(src, i); return [src.slice(i, j), j]; }
+      return [null, i];
+    };
+    for (const m of src.matchAll(/\\(newcommand|renewcommand|providecommand|DeclareMathOperator|DeclareRobustCommand|def)(\*?)/g)) {
+      let i = m.index + m[0].length;
+      let [name, j] = m[1] === 'def' ? (() => { const k = nextNonWs(src, i); const e = readCmd(src, k); return [src.slice(k, e), e]; })() : grab(i);
+      if (!name) continue;
+      name = name.trim().replace(/^\\/, '');
+      let args = 0;
+      j = nextNonWs(src, j);
+      if (m[1] === 'def') { const pm = src.slice(j).match(/^(#\d)+/); if (pm) { args = pm[0].length / 2; j += pm[0].length; } }
+      else if (src[j] === '[') { const k = src.indexOf(']', j); args = parseInt(src.slice(j + 1, k)) || 0; j = nextNonWs(src, k + 1);
+        if (src[j] === '[') j = nextNonWs(src, src.indexOf(']', j) + 1); } // optional default arg: ignored
+      const [def] = grab(j);
+      if (def === null) continue;
+      out[name] = m[1] === 'DeclareMathOperator' ? { args: 0, def: `\\operatorname${m[2] ? '*' : ''}{${def}}` } : { args, def };
+      names.push('\\' + name);
+    }
+    return { macros: out, names };
+  }
+  function applyMacros(src, quiet) {
+    const { macros, names } = parseMacros(src);
+    mf.macros = { ...DEFAULT_MACROS, ...macros };
+    if (ghost) ghost.macros = mf.macros;
+    store('olve-macros', src);
+    macroStatus.textContent = names.length ? `✔ ${names.length} macro${names.length > 1 ? 's' : ''} active: ${names.slice(0, 12).join(' ')}${names.length > 12 ? ' …' : ''}` : (src.trim() ? 'No \\newcommand / \\DeclareMathOperator found.' : '');
+    if (!quiet) { load(); }
+  }
+  document.getElementById('macroApply').onclick = () => applyMacros(macroTa.value);
+  document.getElementById('macroClear').onclick = () => { macroTa.value = ''; applyMacros(''); };
+  macroTa.value = recall('olve-macros', '');
+  // the hidden copy used for shading must know the macros too
+  const _getGhost = getGhost;
+  getGhost = function () { const g = _getGhost(); if (g.macros !== mf.macros) g.macros = mf.macros; return g; };
+
+  // =================== 6. History ===================
+  const histList = document.getElementById('histList');
+  function saveHistory(txt) {
+    txt = (txt || '').trim();
+    if (!txt) return;
+    let h = recall('olve-history', []).filter(x => x.latex !== txt);
+    h.unshift({ latex: txt, t: Date.now() });
+    store('olve-history', h.slice(0, 40));
+    if (document.getElementById('tab-history').classList.contains('on')) showHistory();
+  }
+  function showHistory() {
+    const h = recall('olve-history', []);
+    if (!h.length) { histList.innerHTML = '<p class="muted">Equations you copy (or clear) appear here. They stay in this browser only.</p>'; return; }
+    histList.innerHTML = h.map((x, i) => `<div class="hist">
+        <div class="hprev" data-i="${i}" title="Open in editor">${renderStatic(fieldLatex(x.latex))}</div>
+        <div class="hmeta">${new Date(x.t).toLocaleString()}<br>
+          <button data-open="${i}">Open</button> <button data-del="${i}" title="Remove">✕</button></div></div>`).join('') +
+      '<div class="row"><button id="histClear">Clear history</button></div>';
+    histList.querySelectorAll('[data-open],.hprev').forEach(b => b.onclick = () => {
+      const x = h[b.dataset.open ?? b.dataset.i]; setInput(x.latex); window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    histList.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { h.splice(+b.dataset.del, 1); store('olve-history', h); showHistory(); });
+    document.getElementById('histClear').onclick = () => { store('olve-history', []); showHistory(); };
+  }
+  document.getElementById('copy').addEventListener('click', () => saveHistory(input.value));
+  const _clearBtn = document.getElementById('clear');
+  _clearBtn.onclick = () => { saveHistory(input.value); pushUndo(input.value); input.value = ''; load(); clearHl(); input.focus(); };
+
+  // =================== 7. Whole section ===================
+  const secTa = document.getElementById('secTa'), secList = document.getElementById('secList'), secBanner = document.getElementById('secBanner');
+  let secEqs = [], editingIdx = -1;
+  function findEquations(src) {
+    const comments = [];
+    for (let i = 0; i < src.length; i++) if (src[i] === '%' && !isEscaped(src, i)) { const j = src.indexOf('\n', i); comments.push([i, j < 0 ? src.length : j]); i = j < 0 ? src.length : j; }
+    const inComment = (a) => comments.some(([x, y]) => a >= x && a < y);
+    const found = [];
+    const free = (a, b) => !found.some(f => a < f.e && b > f.s);
+    const envRe = /\\begin\{((?:equation|align|gather|multline|eqnarray|displaymath|math|flalign|alignat)\*?)\}[\s\S]*?\\end\{\1\}/g;
+    for (const m of src.matchAll(envRe)) if (!inComment(m.index)) found.push({ s: m.index, e: m.index + m[0].length });
+    for (const re of [/\\\[[\s\S]*?\\\]/g, /\\\([\s\S]*?\\\)/g, /(?<!\\)\$\$[\s\S]*?(?<!\\)\$\$/g, /(?<![\\$])\$(?!\$)(?:\\.|[^$\\])+?(?<!\\)\$/g])
+      for (const m of src.matchAll(re)) { const s = m.index, e = s + m[0].length; if (!inComment(s) && free(s, e)) found.push({ s, e }); }
+    return found.sort((a, b) => a.s - b.s).map(f => ({ ...f, text: src.slice(f.s, f.e) }));
+  }
+  function showSection() {
+    const src = secTa.value;
+    secEqs = findEquations(src);
+    if (!secEqs.length) { secList.innerHTML = '<p class="muted">No equations found. Paste some LaTeX with $…$, \\[…\\] or equation/align environments.</p>'; return; }
+    let nIssues = 0, nErr = 0;
+    const rows = secEqs.map((q, i) => {
+      const safe = scanIssues(q.text).filter(g => INFO[g.kind][3]).reduce((n, g) => n + g.items.length, 0);
+      const errs = checkLatex(q.text, false).length;
+      nIssues += safe; nErr += errs ? 1 : 0;
+      return `<div class="seq ${i === editingIdx ? 'editing' : ''}">
+        <div class="snum">${i + 1}</div>
+        <div class="sprev">${renderStatic(fieldLatex(q.text))}</div>
+        <div class="smeta">line ${lineOf(src, q.s)} · ${esc(currentForm(q.text) || 'maths')}
+          ${errs ? `<span class="bad">✖ ${errs} problem${errs > 1 ? 's' : ''}</span>` : ''}
+          ${safe ? `<span class="tidy">🧹 ${safe} to tidy</span>` : '<span class="okc">✔ clean</span>'}
+          <br><button data-edit="${i}">✎ Edit</button></div></div>`;
+    }).join('');
+    secList.innerHTML = `<div class="sum">Found <b>${secEqs.length}</b> equation${secEqs.length > 1 ? 's' : ''} · ${nIssues} safe fix${nIssues === 1 ? '' : 'es'} available${nErr ? ` · <span class="bad">${nErr} with problems</span>` : ''}</div>
+      <div class="row" style="margin:6px 0 10px"><button class="primary" id="secCleanAll" ${nIssues ? '' : 'disabled'}>🧹 Clean all equations (safe fixes only)</button>
+      <button id="secCopy">Copy section</button><span class="status" id="secStatus"></span></div>${rows}`;
+    secList.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => editFromSection(+b.dataset.edit));
+    document.getElementById('secCleanAll').onclick = () => {
+      let src2 = secTa.value, total = 0;
+      for (const q of [...secEqs].reverse()) { const r = autoClean(q.text); total += r.count; src2 = src2.slice(0, q.s) + r.text + src2.slice(q.e); }
+      secUndo.push(secTa.value); secTa.value = src2; editingIdx = -1; secBanner.classList.remove('on');
+      showSection(); document.getElementById('secStatus').textContent = `Applied ${total} fixes. `;
+      addSecUndo();
+    };
+    document.getElementById('secCopy').onclick = async () => {
+      try { await navigator.clipboard.writeText(secTa.value); document.getElementById('secStatus').textContent = 'Copied ✓'; }
+      catch (e) { secTa.select(); document.getElementById('secStatus').textContent = 'Selected — press Ctrl+C'; }
+    };
+  }
+  const secUndo = [];
+  function addSecUndo() {
+    const b = document.createElement('button'); b.textContent = '↶ Undo';
+    b.onclick = () => { if (secUndo.length) { secTa.value = secUndo.pop(); showSection(); } };
+    document.getElementById('secCopy').after(b);
+  }
+  function editFromSection(i) {
+    editingIdx = i;
+    setInput(secEqs[i].text);
+    secBanner.classList.add('on');
+    secBanner.querySelector('b').textContent = `equation ${i + 1}`;
+    showSection();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  document.getElementById('secPut').onclick = () => {
+    if (editingIdx < 0) return;
+    const q = findEquations(secTa.value)[editingIdx];
+    if (!q) { showNote('Could not find that equation in the section any more.'); return; }
+    secUndo.push(secTa.value);
+    secTa.value = secTa.value.slice(0, q.s) + input.value + secTa.value.slice(q.e);
+    saveHistory(input.value);
+    showNote(`Equation ${editingIdx + 1} put back into the section.`);
+    editingIdx = -1; secBanner.classList.remove('on');
+    openTab('section'); showSection(); addSecUndo();
+    document.getElementById('tools').scrollIntoView({ behavior: 'smooth' });
+  };
+  document.getElementById('secCancel').onclick = () => { editingIdx = -1; secBanner.classList.remove('on'); showSection(); };
+  document.getElementById('secFind').onclick = () => { editingIdx = -1; secBanner.classList.remove('on'); showSection(); };
+
+  // =================== Tabs ===================
+  function openTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('sel', t.dataset.tab === name));
+    document.querySelectorAll('.tabp').forEach(p => p.classList.toggle('on', p.id === 'tab-' + name));
+    if (name === 'history') showHistory();
+    store('olve-tab', name);
+  }
+  document.querySelectorAll('.tab').forEach(t => t.onclick = () => openTab(t.dataset.tab));
+  openTab(recall('olve-tab', 'section'));
+
+  applyMacros(macroTa.value, true);
+
+  // =================================================================
+  //  Batch 2: refs check, units, matrix builder, image export,
+  //  paste from Word, dark mode + shortcuts
+  // =================================================================
+
+  // ---------- siunitx display support inside the editor ----------
+  const SI_MACROS = {
+    qty: { args: 2, def: '#1\\,\\mathrm{#2}' }, SI: { args: 2, def: '#1\\,\\mathrm{#2}' },
+    si: { args: 1, def: '\\mathrm{#1}' }, num: { args: 1, def: '#1' }, ang: { args: 1, def: '#1^{\\circ}' },
+    kilo: 'k', mega: 'M', giga: 'G', milli: 'm', micro: '\\mu ', nano: 'n', centi: 'c', pico: 'p',
+    gram: 'g', metre: 'm', meter: 'm', second: 's', kelvin: 'K', ampere: 'A', mole: 'mol', candela: 'cd',
+    newton: 'N', joule: 'J', watt: 'W', pascal: 'Pa', hertz: 'Hz', volt: 'V', ohm: '\\Omega', coulomb: 'C',
+    tesla: 'T', litre: 'L', liter: 'L', hour: 'h', minute: 'min', degreeCelsius: '{}^{\\circ}\\mathrm{C}',
+    percent: '\\%', per: '/', squared: '^{2}', cubed: '^{3}', degree: '^{\\circ}', electronvolt: 'eV',
+  };
+  Object.assign(DEFAULT_MACROS, SI_MACROS);
+  mf.macros = { ...mf.macros, ...SI_MACROS };
+
+  // ================= 1. Labels & references (whole section) =================
+  const REFCMD = /\\(ref|eqref|autoref|cref|Cref|pageref|vref|nameref|labelcref)\s*\{([^}]*)\}/g;
+  function refReport(src) {
+    const commentAt = [];
+    for (let i = 0; i < src.length; i++) if (src[i] === '%' && !isEscaped(src, i)) { const j = src.indexOf('\n', i); commentAt.push([i, j < 0 ? src.length : j]); i = j < 0 ? src.length : j; }
+    const inC = (p) => commentAt.some(([a, b]) => p >= a && p < b);
+    const labels = {}, refs = {};
+    for (const m of src.matchAll(/\\label\s*\{([^}]*)\}/g)) if (!inC(m.index)) (labels[m[1].trim()] ||= []).push({ pos: m.index, len: m[0].length });
+    for (const m of src.matchAll(REFCMD)) if (!inC(m.index))
+      for (const k of m[2].split(',')) (refs[k.trim()] ||= []).push({ pos: m.index, len: m[0].length });
+    const items = [];
+    for (const [k, v] of Object.entries(labels)) if (v.length > 1) v.forEach(x => items.push({ sev: 'bad', msg: `Label “${k}” is defined ${v.length} times`, ...x }));
+    for (const [k, v] of Object.entries(refs)) if (!labels[k]) v.forEach(x => items.push({ sev: 'warn', msg: `Reference to “${k}”, but no \\label{${k}} here (fine if it's in another section)`, ...x }));
+    for (const [k, v] of Object.entries(labels)) if (!refs[k]) items.push({ sev: 'info', msg: `Label “${k}” is never referenced`, ...v[0] });
+    // \label inside maths that gets no number
+    for (const q of findEquations(src)) {
+      const f = currentForm(q.text);
+      if (/^(inline|paren|display)$/.test(f) || /\*$/.test(f) || f === '') {
+        for (const m of q.text.matchAll(/\\label\s*\{([^}]*)\}/g))
+          items.push({ sev: 'warn', msg: `Label “${m[1]}” is in an unnumbered equation (${f || 'maths'}) — it has no number to show`, pos: q.s + m.index, len: m[0].length });
+      } else if (/^(align|gather|multline|flalign|alignat|eqnarray)$/.test(f)) {
+        // \nonumber on a line that also has a \label
+        splitRows(q.text).forEach(row => {
+          if (/\\(nonumber|notag)\b/.test(row) && /\\label\s*\{/.test(row)) {
+            const m = row.match(/\\label\s*\{([^}]*)\}/); const p = q.text.indexOf(m[0]);
+            items.push({ sev: 'warn', msg: `Label “${m[1]}” is on a line marked \\nonumber`, pos: q.s + p, len: m[0].length });
+          }
+        });
+      }
+    }
+    const order = { bad: 0, warn: 1, info: 2 };
+    return { items: items.sort((a, b) => order[a.sev] - order[b.sev] || a.pos - b.pos), nLabels: Object.keys(labels).length, nRefs: Object.values(refs).reduce((n, v) => n + v.length, 0) };
+  }
+  const _showSection = showSection;
+  showSection = function () {
+    _showSection();
+    const src = secTa.value;
+    if (!src.trim()) return;
+    const r = refReport(src);
+    if (!r.nLabels && !r.nRefs && !r.items.length) return;
+    const box = document.createElement('div');
+    box.className = 'refbox';
+    const icon = { bad: '✖', warn: '⚠', info: 'ℹ' };
+    box.innerHTML = `<div class="sum">🔗 <b>Labels & references:</b> ${r.nLabels} label${r.nLabels === 1 ? '' : 's'}, ${r.nRefs} reference${r.nRefs === 1 ? '' : 's'}${r.items.length ? '' : ' — <span class="okc">all good ✔</span>'}</div>` +
+      r.items.map((x, i) => `<button class="err ${x.sev}" data-i="${i}">${icon[x.sev]} Line ${lineOf(src, x.pos)}: ${esc(x.msg)}</button>`).join('');
+    box.querySelectorAll('.err').forEach(b => b.onclick = () => { const x = r.items[b.dataset.i]; secTa.focus(); secTa.setSelectionRange(x.pos, x.pos + x.len); });
+    secList.prepend(box);
+  };
+
+  // ================= 2. Units ⇄ siunitx =================
+  const unitsPanel = document.getElementById('unitsPanel');
+  const U_NUM = String.raw`(-?\d+(?:[.,]\d+)?(?:\s*(?:\\times|\\cdot)\s*10\^\{?-?\d+\}?)?)`;
+  const U_SEP = String.raw`(?:\s|\\[,;:! ]|~)*`;
+  const U_UNIT = String.raw`\\(?:mathrm|text|textrm|rm|mathsf|unit)\s*\{((?:[^{}]|\{[^{}]*\})+)\}`;
+  const plainRe = () => new RegExp(U_NUM + U_SEP + String.raw`(\\mu\s*|µ|μ)?` + U_UNIT, 'g');
+  const degRe = () => new RegExp(U_NUM + U_SEP + String.raw`\^\s*\{?\s*\\circ\s*\}?(?:` + U_SEP + String.raw`(?:\\mathrm\s*\{\s*C\s*\}|C(?![a-zA-Z])))?`, 'g');
+  const pctRe = () => new RegExp(U_NUM + U_SEP + String.raw`\\%`, 'g');
+  function numToSi(n) { return n.replace(/\s+/g, '').replace(/(?:\\times|\\cdot)10\^\{?(-?\d+)\}?/, 'e$1'); }
+  function unitToSi(u) {
+    return u.replace(/\\mu\s*|µ|μ/g, '\\micro ').replace(/\\Omega|Ω/g, '\\ohm').replace(/\^\{?\\circ\}?\s*C/g, '\\degreeCelsius')
+      .replace(/(^|[.\/\s])([kMGmnpc])\\ohm/g, (a, p, x) => p + ({ k: '\\kilo', M: '\\mega', G: '\\giga', m: '\\milli', n: '\\nano', p: '\\pico', c: '\\centi' })[x] + '\\ohm')
+      .replace(/\s*(\\[,;:! ]|\\cdot|~)\s*/g, '.').replace(/\s+/g, '.').replace(/\.{2,}/g, '.').replace(/^\.|\.$/g, '').replace(/\\micro\s*\./g, '\\micro ').trim();
+  }
+  const SI_BACK = { kilo: 'k', mega: 'M', giga: 'G', milli: 'm', micro: '\\mu ', nano: 'n', centi: 'c', pico: 'p', gram: 'g', metre: 'm', meter: 'm', second: 's',
+    kelvin: 'K', ampere: 'A', mole: 'mol', candela: 'cd', newton: 'N', joule: 'J', watt: 'W', pascal: 'Pa', hertz: 'Hz', volt: 'V', ohm: '\\Omega', coulomb: 'C',
+    tesla: 'T', litre: 'L', liter: 'L', hour: 'h', minute: 'min', electronvolt: 'eV' };
+  function numFromSi(n) { const m = n.trim().match(/^(-?[\d.,]+)\s*[eE]\s*([-+]?\d+)$/); return m ? `${m[1]}\\times10^{${+m[2]}}` : n.trim(); }
+  function unitFromSi(u) {
+    let s = u.trim();
+    s = s.replace(/\\per\s*/g, '/').replace(/\\squared/g, '^{2}').replace(/\\cubed/g, '^{3}')
+      .replace(/\\([a-zA-Z]+)\s*/g, (all, n) => SI_BACK[n] !== undefined ? SI_BACK[n] : all);
+    return s.replace(/\./g, '\\,').trim();
+  }
+  function scanUnits(txt) {
+    const [bs, be] = bodyBounds(txt);
+    const toSi = [], toPlain = [], taken = [];
+    const free = (a, b) => a >= bs && b <= be && !taken.some(([x, y]) => a < y && b > x);
+    const style = document.getElementById('unitStyle').value;
+    for (const m of txt.matchAll(degRe())) {
+      const a = m.index, b = a + m[0].length; if (!free(a, b)) continue; taken.push([a, b]);
+      const isC = /C\s*\}?\s*$/.test(m[0]);
+      toSi.push({ a, b, rep: isC ? `\\${style}{${numToSi(m[1])}}{\\degreeCelsius}` : `\\ang{${numToSi(m[1])}}` });
+    }
+    for (const m of txt.matchAll(pctRe())) { const a = m.index, b = a + m[0].length; if (!free(a, b)) continue; taken.push([a, b]); toSi.push({ a, b, rep: `\\${style}{${numToSi(m[1])}}{\\percent}` }); }
+    for (const m of txt.matchAll(plainRe())) {
+      const a = m.index, b = a + m[0].length; if (!free(a, b)) continue; taken.push([a, b]);
+      toSi.push({ a, b, rep: `\\${style}{${numToSi(m[1])}}{${(m[2] ? '\\micro ' : '') + unitToSi(m[3])}}` });
+    }
+    for (const m of txt.matchAll(/\\(qty|SI)\s*\{([^{}]*)\}\s*\{((?:[^{}]|\{[^{}]*\})*)\}/g)) {
+      const a = m.index, b = a + m[0].length; if (!free(a, b)) continue; taken.push([a, b]);
+      const u = m[3].trim();
+      const rep = u === '\\percent' ? `${numFromSi(m[2])}\\%` : u === '\\degreeCelsius' ? `${numFromSi(m[2])}^{\\circ}\\mathrm{C}` : `${numFromSi(m[2])}\\,\\mathrm{${unitFromSi(u)}}`;
+      toPlain.push({ a, b, rep });
+    }
+    for (const m of txt.matchAll(/\\(si|num|ang)\s*\{((?:[^{}]|\{[^{}]*\})*)\}/g)) {
+      const a = m.index, b = a + m[0].length; if (!free(a, b)) continue; taken.push([a, b]);
+      toPlain.push({ a, b, rep: m[1] === 'si' ? `\\mathrm{${unitFromSi(m[2])}}` : m[1] === 'num' ? numFromSi(m[2]) : `${numFromSi(m[2])}^{\\circ}` });
+    }
+    return { toSi: toSi.sort((x, y) => x.a - y.a), toPlain: toPlain.sort((x, y) => x.a - y.a) };
+  }
+  function renderUnits(msg = '') {
+    const txt = input.value, { toSi, toPlain } = scanUnits(txt);
+    const row = (it, k, i) => `<label class="item" data-a="${it.a}" data-b="${it.b}"><input type="checkbox" class="uchk" data-k="${k}" data-i="${i}" checked>
+      <span><del>${esc(txt.slice(it.a, it.b))}</del><span class="arrow">→</span><ins>${esc(it.rep)}</ins></span></label>`;
+    let h = `<h3>⚖ Units</h3><div class="sum">${msg ? `<span class="done">${msg}</span> · ` : ''}siunitx keeps numbers and units consistently formatted. It needs <code>\\usepackage{siunitx}</code> in your preamble.
+      Style: <select id="unitStyleSel"><option value="qty">\\qty{…}{…} (siunitx v3)</option><option value="SI">\\SI{…}{…} (older)</option></select></div>`;
+    if (toSi.length) h += `<div class="grp"><b>Plain → siunitx</b><div class="items">${toSi.map((it, i) => row(it, 'toSi', i)).join('')}</div></div>`;
+    if (toPlain.length) h += `<div class="grp"><b>siunitx → plain</b> <span class="why" style="display:inline">(unticked: tick to convert back)</span><div class="items">${toPlain.map((it, i) => row(it, 'toPlain', i).replace(' checked>', '>')).join('')}</div></div>`;
+    if (!toSi.length && !toPlain.length) h += `<p class="muted">No numbers with units found. I look for things like <code>5\\,\\mathrm{kg}</code>, <code>9.81~\\text{m/s^2}</code>, <code>25^{\\circ}C</code>, <code>40\\%</code>, or <code>\\qty{5}{kg}</code>.</p>`;
+    h += `<div class="row">${toSi.length || toPlain.length ? '<button class="primary" id="unitApply">Apply selected</button>' : ''}<button id="unitClose">Close</button></div>`;
+    unitsPanel.innerHTML = h;
+    const sel = document.getElementById('unitStyleSel');
+    sel.value = document.getElementById('unitStyle').value;
+    sel.onchange = () => { document.getElementById('unitStyle').value = sel.value; store('olve-unitstyle', sel.value); renderUnits(); };
+    unitsPanel.querySelectorAll('.item').forEach(r => {
+      r.addEventListener('mouseenter', () => { let x = null; try { x = rangeForText(input.value, +r.dataset.a, +r.dataset.b); } catch (e) {} if (Array.isArray(x)) drawRange(x); });
+      r.addEventListener('mouseleave', clearHl);
+    });
+    document.getElementById('unitClose').onclick = () => { unitsPanel.classList.remove('on'); clearHl(); };
+    const ap = document.getElementById('unitApply');
+    if (ap) ap.onclick = () => {
+      const all = { toSi, toPlain };
+      const chosen = [...unitsPanel.querySelectorAll('.uchk:checked')].map(c => all[c.dataset.k][c.dataset.i]).sort((x, y) => y.a - x.a);
+      if (!chosen.length) return;
+      let out = input.value;
+      for (const it of chosen) out = out.slice(0, it.a) + it.rep + out.slice(it.b);
+      setInput(out);
+      renderUnits(`Converted ${chosen.length}.`);
+    };
+  }
+  document.getElementById('unitStyle').value = recall('olve-unitstyle', 'qty');
+  document.getElementById('unitsBtn').onclick = () => {
+    if (unitsPanel.classList.toggle('on')) renderUnits(); else clearHl();
+  };
+
+  // ================= 3. Matrix builder =================
+  const matPanel = document.getElementById('matPanel'), matGrid = document.getElementById('matGrid');
+  const matR = document.getElementById('matR'), matC = document.getElementById('matC');
+  const matType = document.getElementById('matType'), matFill = document.getElementById('matFill'), matPrev = document.getElementById('matPrev');
+  for (let r = 1; r <= 8; r++) for (let c = 1; c <= 8; c++) {
+    const d = document.createElement('div'); d.className = 'mcell'; d.dataset.r = r; d.dataset.c = c; matGrid.appendChild(d);
+  }
+  function paintGrid(R, C) { matGrid.querySelectorAll('.mcell').forEach(d => d.classList.toggle('on', +d.dataset.r <= R && +d.dataset.c <= C)); }
+  matGrid.addEventListener('mouseover', (e) => { const d = e.target.closest('.mcell'); if (d) paintGrid(+d.dataset.r, +d.dataset.c); });
+  matGrid.addEventListener('mouseleave', () => paintGrid(+matR.value, +matC.value));
+  matGrid.addEventListener('click', (e) => { const d = e.target.closest('.mcell'); if (d) { matR.value = d.dataset.r; matC.value = d.dataset.c; updateMat(); } });
+  function buildMatrix(forPreview) {
+    const R = Math.max(1, Math.min(20, +matR.value || 2)), C = Math.max(1, Math.min(20, +matC.value || 2));
+    const fill = matFill.value, env = matType.value, ph = forPreview ? '\\square' : '#?';
+    const idx = (i, j) => (R > 9 || C > 9) ? `${i},${j}` : `${i}${j}`;
+    let rows = [];
+    if (fill === 'general') {
+      const n = (i) => i === R ? 'm' : i, m = (j) => j === C ? 'n' : j;
+      const ri = R >= 3 ? [1, 2, 'dots', R] : [...Array(R)].map((_, i) => i + 1);
+      const cj = C >= 3 ? [1, 2, 'dots', C] : [...Array(C)].map((_, j) => j + 1);
+      rows = ri.map(i => cj.map(j => i === 'dots' && j === 'dots' ? '\\ddots' : i === 'dots' ? '\\vdots' : j === 'dots' ? '\\cdots' : `a_{${n(i)}${m(j)}}`));
+    } else {
+      for (let i = 1; i <= R; i++) {
+        const row = [];
+        for (let j = 1; j <= C; j++) row.push(fill === 'zeros' ? '0' : fill === 'identity' ? (i === j ? '1' : '0') : fill === 'aij' ? `a_{${idx(i, j)}}` : ph);
+        rows.push(row);
+      }
+    }
+    const body = rows.map(r => r.join(' & ')).join(' \\\\ ');
+    if (env === 'array') return `\\left[\\begin{array}{${'c'.repeat(C - 1)}|c} ${body} \\end{array}\\right]`;
+    return `\\begin{${env}} ${body} \\end{${env}}`;
+  }
+  function updateMat() { paintGrid(+matR.value, +matC.value); matPrev.innerHTML = renderStatic(buildMatrix(true)); document.getElementById('matCode').textContent = buildMatrix(false).replace(/#\?/g, '□'); }
+  [matR, matC, matType, matFill].forEach(el => el.addEventListener('input', updateMat));
+  document.getElementById('matBtn').onclick = () => { if (matPanel.classList.toggle('on')) updateMat(); };
+  document.getElementById('matInsert').onclick = () => {
+    mf.focus();
+    mf.insert(buildMatrix(false), { format: 'latex', selectionMode: 'placeholder' });
+    buildOutput(); input.value = output.value; runChecks();
+    matPanel.classList.remove('on');
+  };
+
+  // ================= 4. Export as image =================
+  let mjReady = null;
+  function loadMathJax() {
+    if (mjReady) return mjReady;
+    mjReady = new Promise((resolve, reject) => {
+      window.MathJax = { startup: { typeset: false }, svg: { fontCache: 'none' }, tex: { packages: { '[+]': ['ams', 'newcommand', 'boldsymbol', 'cancel', 'color'] } } };
+      const srcs = ['mathjax/tex-svg-full.js', 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js'];
+      const tryLoad = (i) => {
+        if (i >= srcs.length) { mjReady = null; return reject(new Error('Could not load the image renderer (MathJax). Check your internet connection.')); }
+        const sc = document.createElement('script'); sc.src = srcs[i];
+        sc.onload = () => MathJax.startup.promise.then(resolve, reject);
+        sc.onerror = () => { sc.remove(); tryLoad(i + 1); };
+        document.head.appendChild(sc);
+      };
+      tryLoad(0);
+    });
+    return mjReady;
+  }
+  const expStatus = document.getElementById('expStatus');
+  function macroPreamble() {
+    // user macros + siunitx fallbacks, written as \newcommand so MathJax understands them
+    const user = macroTa.value.replace(/(^|[^\\])%.*$/gm, '$1');
+    return user + '\n\\newcommand{\\qty}[2]{#1\\,\\mathrm{#2}}\\newcommand{\\SI}[2]{#1\\,\\mathrm{#2}}\\newcommand{\\si}[1]{\\mathrm{#1}}\\newcommand{\\num}[1]{#1}\\newcommand{\\ang}[1]{#1^{\\circ}}' +
+      Object.entries(SI_MACROS).filter(([, v]) => typeof v === 'string').map(([k, v]) => `\\newcommand{\\${k}}{${v}}`).join('');
+  }
+  async function makeSvg() {
+    await loadMathJax();
+    const latex = fieldLatex(input.value);
+    try { MathJax.texReset(); } catch (e) {}
+    const node = MathJax.tex2svg(macroPreamble() + '\n' + latex, { display: true });
+    const svg = node.querySelector('svg');
+    const err = svg.querySelector('[data-mjx-error]');
+    if (err) throw new Error('Could not draw: ' + err.getAttribute('data-mjx-error'));
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svg.removeAttribute('role'); svg.removeAttribute('focusable');
+    const color = document.getElementById('expColor').value;
+    svg.setAttribute('color', color);
+    svg.style.color = color;
+    return svg;
+  }
+  async function svgToPng(svg) {
+    const scale = +document.getElementById('expScale').value || 4;
+    // MathJax sizes in ex units; convert using 1ex ≈ 0.45em at 16px
+    const exPx = 7.2;
+    const w = parseFloat(svg.getAttribute('width')) * exPx, h = parseFloat(svg.getAttribute('height')) * exPx;
+    const clone = svg.cloneNode(true);
+    clone.setAttribute('width', w + 'px'); clone.setAttribute('height', h + 'px');
+    clone.querySelectorAll('[fill="currentColor"]').forEach(n => n.setAttribute('fill', svg.getAttribute('color')));
+    clone.querySelectorAll('[stroke="currentColor"]').forEach(n => n.setAttribute('stroke', svg.getAttribute('color')));
+    const data = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(clone));
+    const img = new Image();
+    await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(new Error('Could not draw the image.')); img.src = data; });
+    const pad = 8;
+    const cv = document.createElement('canvas');
+    cv.width = Math.ceil((w + pad * 2) * scale); cv.height = Math.ceil((h + pad * 2) * scale);
+    const ctx = cv.getContext('2d');
+    if (!document.getElementById('expTransparent').checked) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height); }
+    ctx.scale(scale, scale);
+    ctx.drawImage(img, pad, pad, w, h);
+    return new Promise(res => cv.toBlob(res, 'image/png'));
+  }
+  function svgText(svg) {
+    const clone = svg.cloneNode(true);
+    const c = svg.getAttribute('color');
+    clone.querySelectorAll('[fill="currentColor"]').forEach(n => n.setAttribute('fill', c));
+    clone.querySelectorAll('[stroke="currentColor"]').forEach(n => n.setAttribute('stroke', c));
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(clone);
+  }
+  // inside the claude.ai viewer, files must go through its save prompt; elsewhere a normal download
+  let dlCap;
+  async function download(blob, name) {
+    if (dlCap === undefined) {
+      dlCap = null;
+      try { if (window.claude && typeof window.claude.use === 'function') dlCap = await window.claude.use('downloads'); } catch (e) { dlCap = null; }
+    }
+    if (dlCap) {
+      try { await dlCap.save({ filename: name, data: blob }); return true; }
+      catch (e) { if (e && e.code === 'declined') throw new Error('Save cancelled.'); throw new Error('Saving files is not available here — use “Copy as image” instead.'); }
+    }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    return true;
+  }
+  async function doExport(kind) {
+    expStatus.textContent = 'Drawing…';
+    try {
+      const svg = await makeSvg();
+      if (kind === 'copy') {
+        const png = await svgToPng(svg);
+        try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]); expStatus.textContent = 'Image copied ✓ — paste it into Word, PowerPoint, etc.'; }
+        catch (e) { await download(png, 'equation.png'); expStatus.textContent = 'Your browser blocked copying images here, so it was saved as a file instead.'; }
+      } else if (kind === 'png') { await download(await svgToPng(svg), 'equation.png'); expStatus.textContent = 'PNG saved ✓'; }
+      else { await download(new Blob([svgText(svg)], { type: 'image/svg+xml' }), 'equation.svg'); expStatus.textContent = 'SVG saved ✓ (sharp at any size — works in Word & PowerPoint)'; }
+      document.getElementById('expPrev').innerHTML = ''; document.getElementById('expPrev').appendChild(svg);
+    } catch (e) { expStatus.textContent = '⚠ ' + e.message; }
+  }
+  document.getElementById('expBtn').onclick = () => document.getElementById('expPanel').classList.toggle('on');
+  document.getElementById('expCopy').onclick = () => doExport('copy');
+  document.getElementById('expPng').onclick = () => doExport('png');
+  document.getElementById('expSvg').onclick = () => doExport('svg');
+
+  // ================= 5. Paste from Word / MathML / Unicode maths =================
+  const UNI = {
+    '≤': '\\leq', '≥': '\\geq', '≠': '\\neq', '≈': '\\approx', '×': '\\times', '·': '\\cdot', '⋅': '\\cdot', '±': '\\pm', '∓': '\\mp', '÷': '\\div',
+    '→': '\\to', '←': '\\leftarrow', '↔': '\\leftrightarrow', '⇒': '\\Rightarrow', '⇐': '\\Leftarrow', '⇔': '\\Leftrightarrow', '↦': '\\mapsto', '↑': '\\uparrow', '↓': '\\downarrow',
+    '∞': '\\infty', '∂': '\\partial', '∇': '\\nabla', '∑': '\\sum', '∏': '\\prod', '∫': '\\int', '∬': '\\iint', '∭': '\\iiint', '∮': '\\oint', '√': '\\sqrt',
+    '∈': '\\in', '∉': '\\notin', '∋': '\\ni', '⊂': '\\subset', '⊆': '\\subseteq', '⊃': '\\supset', '⊇': '\\supseteq', '∪': '\\cup', '∩': '\\cap', '∅': '\\emptyset', '∖': '\\setminus',
+    '∀': '\\forall', '∃': '\\exists', '∄': '\\nexists', '¬': '\\neg', '∧': '\\land', '∨': '\\lor', '≡': '\\equiv', '∼': '\\sim', '≃': '\\simeq', '≅': '\\cong', '∝': '\\propto',
+    '≪': '\\ll', '≫': '\\gg', '′': "'", '″': "''", '…': '\\ldots', '⋯': '\\cdots', '⋮': '\\vdots', '⋱': '\\ddots', '°': '^{\\circ}', 'ℏ': '\\hbar', 'ℓ': '\\ell',
+    '⟨': '\\langle', '⟩': '\\rangle', '‖': '\\|', '−': '-', '∗': '*', '⊗': '\\otimes', '⊕': '\\oplus', '⊙': '\\odot', '∘': '\\circ', '†': '\\dagger', '⊥': '\\perp', '∥': '\\parallel', '∠': '\\angle',
+    'ℝ': '\\mathbb{R}', 'ℕ': '\\mathbb{N}', 'ℤ': '\\mathbb{Z}', 'ℚ': '\\mathbb{Q}', 'ℂ': '\\mathbb{C}', '∴': '\\therefore', '∵': '\\because',
+    '⁡': '', '⁢': '', '⁣': ',', '​': '', '\u2009': '\\,', '\u2005': '\\;', '\u2003': '\\quad', '{': '\\{', '}': '\\}', '%': '\\%', '#': '\\#', '&': '\\&', '_': '\\_',
+    'ε': '\\varepsilon', 'ϵ': '\\epsilon', 'ϕ': '\\phi', 'φ': '\\varphi', 'ϑ': '\\vartheta', 'ς': '\\varsigma', 'ϖ': '\\varpi', 'ϱ': '\\varrho', 'ο': 'o', 'ο': 'o',
+  };
+  'alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron pi rho - sigma tau upsilon phi chi psi omega'.split(' ').forEach((n, i) => {
+    const ch = String.fromCodePoint(0x3B1 + i);
+    if (n !== '-' && !(ch in UNI)) UNI[ch] = n === 'omicron' ? 'o' : '\\' + n;
+    const C = String.fromCodePoint(0x391 + i);
+    if (n !== '-') UNI[C] = /^(gamma|delta|theta|lambda|xi|pi|sigma|upsilon|phi|psi|omega)$/.test(n) ? '\\' + n[0].toUpperCase() + n.slice(1) : ({ alpha: 'A', beta: 'B', epsilon: 'E', zeta: 'Z', eta: 'H', iota: 'I', kappa: 'K', mu: 'M', nu: 'N', omicron: 'O', rho: 'P', tau: 'T', chi: 'X' })[n];
+  });
+  const FUNC_NAMES = new RegExp(`^(${FUNCS})$`);
+  function texJoin(parts) {
+    let out = '';
+    for (const p of parts) {
+      if (!p) continue;
+      if (/\\[a-zA-Z]+$/.test(out) && /^[a-zA-Z0-9]/.test(p)) out += ' ';
+      out += p;
+    }
+    return out;
+  }
+  const SUPS = '⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ⁿⁱ', SUBS = '₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎ₐₑₒₓₙᵢⱼₖ';
+  const SUP_TO = '0123456789+-=()ni', SUB_TO = '0123456789+-=()aeoxnijk';
+  function scripts(s) {
+    return s.replace(new RegExp(`[${SUPS}]+`, 'g'), m => `^{${[...m].map(c => SUP_TO[[...SUPS].indexOf(c)]).join('')}}`)
+            .replace(new RegExp(`[${SUBS}]+`, 'g'), m => `_{${[...m].map(c => SUB_TO[[...SUBS].indexOf(c)]).join('')}}`);
+  }
+  function mapWithScripts(s) {
+    const re = new RegExp(`([${SUPS}]+|[${SUBS}]+)`, 'g');
+    return texJoin(s.split(re).map(part => !part ? '' : new RegExp(`^[${SUPS}]+$`).test(part) || new RegExp(`^[${SUBS}]+$`).test(part) ? scripts(part) : mapText(part)));
+  }
+  function mapText(s) {
+    const t = s.normalize('NFKC');
+    return texJoin([...t].map(c => UNI[c] !== undefined ? UNI[c] : (s.includes('ℎ') && c === 'h') ? 'h' : c));
+  }
+  const grp = (x) => (x.length === 1 || /^\\[a-zA-Z]+$/.test(x)) ? x : `{${x}}`;
+
+  // --- MathML ---
+  const kids = (n) => [...n.children];
+  function mml(n) {
+    const tag = n.localName, ch = kids(n), cv = () => texJoin(ch.map(mml));
+    switch (tag) {
+      case 'math': case 'mrow': case 'mstyle': case 'mpadded': case 'mphantom': case 'menclose': case 'merror': {
+        // ( mtable ) -> pmatrix etc.
+        if (ch.length === 3 && ch[1].localName === 'mtable' && ch[0].localName === 'mo' && ch[2].localName === 'mo') {
+          const env = { '(': 'pmatrix', '[': 'bmatrix', '|': 'vmatrix', '{': 'Bmatrix', '‖': 'Vmatrix' }[ch[0].textContent.trim()];
+          if (env) return mtable(ch[1], env);
+        }
+        if (tag === 'menclose' && /box/.test(n.getAttribute('notation') || '')) return `\\boxed{${cv()}}`;
+        return cv();
+      }
+      case 'semantics': {
+        const ann = ch.find(c => c.localName === 'annotation' && /tex/i.test(c.getAttribute('encoding') || ''));
+        return ann ? ann.textContent.trim() : (ch[0] ? mml(ch[0]) : '');
+      }
+      case 'annotation': case 'annotation-xml': return '';
+      case 'mi': {
+        const t = n.textContent.trim(), v = n.getAttribute('mathvariant');
+        if (FUNC_NAMES.test(t)) return '\\' + t;
+        const m = mapText(t);
+        if (v === 'bold' || v === 'bold-italic') return `\\mathbf{${m}}`;
+        if (v === 'double-struck') return `\\mathbb{${m}}`;
+        if (v === 'script') return `\\mathcal{${m}}`;
+        if ((v === 'normal' && t.length === 1 && /[a-zA-Z]/.test(t)) || (t.normalize('NFKC').length > 1 && /^[a-zA-Z]+$/.test(t.normalize('NFKC')))) return `\\mathrm{${m}}`;
+        return m;
+      }
+      case 'mn': return mapText(n.textContent.trim());
+      case 'mo': { const t = n.textContent.trim(); if (FUNC_NAMES.test(t)) return '\\' + t; return t === '{' ? '\\{' : t === '}' ? '\\}' : mapText(t); }
+      case 'mtext': { const t = n.textContent; return t.trim() ? `\\text{${t}}` : '\\ '; }
+      case 'ms': return `\\text{"${n.textContent}"}`;
+      case 'mspace': return '\\,';
+      case 'mfrac': {
+        const [a, b] = ch.map(mml);
+        return (n.getAttribute('linethickness') === '0' || n.getAttribute('linethickness') === '0px') ? `\\genfrac{}{}{0pt}{}{${a}}{${b}}` : `\\frac{${a}}{${b}}`;
+      }
+      case 'msup': return `${grp(mml(ch[0]))}^{${mml(ch[1])}}`;
+      case 'msub': return `${grp(mml(ch[0]))}_{${mml(ch[1])}}`;
+      case 'msubsup': return `${grp(mml(ch[0]))}_{${mml(ch[1])}}^{${mml(ch[2])}}`;
+      case 'msqrt': return `\\sqrt{${cv()}}`;
+      case 'mroot': return `\\sqrt[${mml(ch[1])}]{${mml(ch[0])}}`;
+      case 'mover': case 'munder': case 'munderover': {
+        const base = mml(ch[0]), a = ch[1] ? mml(ch[1]) : '', b = ch[2] ? mml(ch[2]) : '';
+        const raw = (ch[1] && ch[1].textContent.trim()) || '';
+        const big = /^\\(sum|prod|int|iint|oint|bigcup|bigcap|lim|max|min|sup|inf|coprod)$/.test(base) || /^(lim|max|min)$/.test(ch[0].textContent.trim());
+        if (tag === 'munderover') return `${base}_{${a}}^{${b}}`;
+        if (tag === 'mover') {
+          const acc = { '¯': 'overline', '‾': 'overline', '^': 'hat', 'ˆ': 'hat', '~': 'tilde', '˜': 'tilde', '→': 'vec', '⃗': 'vec', '˙': 'dot', '¨': 'ddot', '⏞': 'overbrace', '︷': 'overbrace' }[raw];
+          if (acc) return `\\${acc}{${base}}`;
+          return big ? `${base}^{${a}}` : `\\overset{${a}}{${base}}`;
+        }
+        const acc = { '_': 'underline', '̲': 'underline', '¯': 'underline', '⏟': 'underbrace', '︸': 'underbrace' }[raw];
+        if (acc) return `\\${acc}{${base}}`;
+        return big ? `${base}_{${a}}` : `\\underset{${a}}{${base}}`;
+      }
+      case 'mfenced': {
+        const o = n.getAttribute('open') ?? '(', c = n.getAttribute('close') ?? ')', sep = n.getAttribute('separators') ?? ',';
+        const d = (x) => x === '{' ? '\\{' : x === '}' ? '\\}' : x === '' ? '.' : mapText(x);
+        return `\\left${d(o)} ${ch.map(mml).join(sep.trim()[0] || ',')} \\right${d(c)}`;
+      }
+      case 'mtable': return mtable(n, 'matrix');
+      case 'mmultiscripts': return cv();
+      default: return cv();
+    }
+  }
+  function mtable(n, env) {
+    const rows = kids(n).filter(r => /mtr|mlabeledtr/.test(r.localName)).map(r => kids(r).filter(c => c.localName === 'mtd').map(mml).join(' & '));
+    return `\\begin{${env}} ${rows.join(' \\\\ ')} \\end{${env}}`;
+  }
+
+  // --- Office Math (OMML, what Word puts on the clipboard) ---
+  const mchild = (n, name) => kids(n).find(c => c.localName === name);
+  const mval = (n, prop, attr) => { const p = n && mchild(n, prop); const a = p && mchild(p, attr); return a ? (a.getAttribute('m:val') ?? a.getAttribute('val')) : null; };
+  function om(n) {
+    if (!n) return '';
+    const tag = n.localName, ch = kids(n), cv = () => texJoin(ch.map(om));
+    switch (tag) {
+      case 'oMathPara': { const parts = ch.filter(c => c.localName === 'oMath').map(om); return parts.length > 1 ? `\\begin{gathered} ${parts.join(' \\\\ ')} \\end{gathered}` : parts.join(''); }
+      case 'oMath': case 'e': case 'num': case 'den': case 'sub': case 'sup': case 'deg': case 'lim': case 'fName': case 'box': case 'borderBox': case 'phant': return cv();
+      case 'r': {
+        const t = ch.filter(c => c.localName === 't').map(c => c.textContent).join('');
+        const plain = mval(n, 'rPr', 'sty') === 'p' || !!(mchild(n, 'rPr') && mchild(mchild(n, 'rPr'), 'nor'));
+        const nt = t.normalize('NFKC');
+        if (FUNC_NAMES.test(nt.trim())) return '\\' + nt.trim();
+        if (plain && /^[A-Za-z]{1,}$/.test(nt.trim())) return `\\mathrm{${nt.trim()}}`;
+        if (plain && /[A-Za-z]{2,}/.test(nt) && /\s/.test(nt)) return `\\text{${nt}}`;
+        return mapText(t);
+      }
+      case 'f': {
+        const type = mval(n, 'fPr', 'type'), a = om(mchild(n, 'num')), b = om(mchild(n, 'den'));
+        if (type === 'lin') return `${grp(a)}/${grp(b)}`;
+        if (type === 'noBar') return `\\genfrac{}{}{0pt}{}{${a}}{${b}}`;
+        return `\\frac{${a}}{${b}}`;
+      }
+      case 'sSup': return `${grp(om(mchild(n, 'e')))}^{${om(mchild(n, 'sup'))}}`;
+      case 'sSub': return `${grp(om(mchild(n, 'e')))}_{${om(mchild(n, 'sub'))}}`;
+      case 'sSubSup': return `${grp(om(mchild(n, 'e')))}_{${om(mchild(n, 'sub'))}}^{${om(mchild(n, 'sup'))}}`;
+      case 'sPre': return `{}_{${om(mchild(n, 'sub'))}}^{${om(mchild(n, 'sup'))}}${om(mchild(n, 'e'))}`;
+      case 'rad': { const hide = mval(n, 'radPr', 'degHide'); const d = om(mchild(n, 'deg')); return (d && hide !== '1' && hide !== 'on') ? `\\sqrt[${d}]{${om(mchild(n, 'e'))}}` : `\\sqrt{${om(mchild(n, 'e'))}}`; }
+      case 'd': {
+        const beg = mval(n, 'dPr', 'begChr') ?? '(', end = mval(n, 'dPr', 'endChr') ?? ')', sep = mval(n, 'dPr', 'sepChr') ?? '|';
+        const es = ch.filter(c => c.localName === 'e').map(om);
+        const only = ch.filter(c => c.localName === 'e');
+        // a delimiter around a single matrix -> pmatrix / bmatrix
+        if (only.length === 1 && kids(only[0]).length === 1 && kids(only[0])[0].localName === 'm') {
+          const env = { '(': 'pmatrix', '[': 'bmatrix', '|': 'vmatrix', '{': 'Bmatrix', '‖': 'Vmatrix' }[beg];
+          if (env && ({ '(': ')', '[': ']', '|': '|', '{': '}', '‖': '‖' })[beg] === end) return omMatrix(kids(only[0])[0], env);
+        }
+        if (beg === '{' && end === '' && only.length === 1 && kids(only[0]).length === 1 && kids(only[0])[0].localName === 'eqArr')
+          return `\\begin{cases} ${kids(kids(only[0])[0]).filter(c => c.localName === 'e').map(om).join(' \\\\ ')} \\end{cases}`;
+        const dl = (x) => x === '' ? '.' : x === '{' ? '\\{' : x === '}' ? '\\}' : x === '⟨' ? '\\langle' : x === '⟩' ? '\\rangle' : x === '‖' ? '\\|' : mapText(x);
+        return `\\left${dl(beg)} ${es.join(sep === '|' ? ' \\mid ' : mapText(sep))} \\right${dl(end)}`;
+      }
+      case 'nary': {
+        const chr = mval(n, 'naryPr', 'chr') ?? '∫';
+        const op = UNI[chr] || '\\int';
+        const s = om(mchild(n, 'sub')), p = om(mchild(n, 'sup'));
+        return texJoin([op, s ? `_{${s}}` : '', p ? `^{${p}}` : '', ' ', om(mchild(n, 'e'))]);
+      }
+      case 'func': { const f = om(mchild(n, 'fName')); return texJoin([f, /^\\[a-zA-Z]+$/.test(f) ? ' ' : '', om(mchild(n, 'e'))]); }
+      case 'acc': {
+        const chr = mval(n, 'accPr', 'chr') ?? '̂';
+        const a = { '̂': 'hat', '^': 'hat', '̃': 'tilde', '~': 'tilde', '⃗': 'vec', '→': 'vec', '̇': 'dot', '̈': 'ddot', '̄': 'bar', '¯': 'bar', '̅': 'overline', '́': 'acute', '̀': 'grave', '̆': 'breve', '̌': 'check' }[chr] || 'hat';
+        return `\\${a}{${om(mchild(n, 'e'))}}`;
+      }
+      case 'bar': return mval(n, 'barPr', 'pos') === 'bot' ? `\\underline{${om(mchild(n, 'e'))}}` : `\\overline{${om(mchild(n, 'e'))}}`;
+      case 'groupChr': {
+        const chr = mval(n, 'groupChrPr', 'chr') ?? '⏟', pos = mval(n, 'groupChrPr', 'pos') ?? 'bot';
+        return (chr === '⏞' || pos === 'top') ? `\\overbrace{${om(mchild(n, 'e'))}}` : `\\underbrace{${om(mchild(n, 'e'))}}`;
+      }
+      case 'limLow': { const e = om(mchild(n, 'e')), l = om(mchild(n, 'lim')); return /^\\(lim|max|min|sup|inf|arg\\max|arg\\min)$/.test(e) ? `${e}_{${l}}` : `\\underset{${l}}{${e}}`; }
+      case 'limUpp': return `\\overset{${om(mchild(n, 'lim'))}}{${om(mchild(n, 'e'))}}`;
+      case 'm': return omMatrix(n, 'matrix');
+      case 'eqArr': return `\\begin{aligned} ${ch.filter(c => c.localName === 'e').map(om).join(' \\\\ ')} \\end{aligned}`;
+      case 't': return mapText(n.textContent);
+      default: return /Pr$/.test(tag) ? '' : cv();
+    }
+  }
+  function omMatrix(n, env) {
+    const rows = kids(n).filter(r => r.localName === 'mr').map(r => kids(r).filter(c => c.localName === 'e').map(om).join(' & '));
+    return `\\begin{${env}} ${rows.join(' \\\\ ')} \\end{${env}}`;
+  }
+  function tidyConverted(t) { return t.replace(/\s+/g, ' ').replace(/\s*([{}^_])\s*/g, '$1').replace(/\\left\s+/g, '\\left').replace(/\s+\\right/g, ' \\right').trim(); }
+
+  function convertClipboard(html, text) {
+    // 1) Word: Office MathML inside the HTML
+    if (html && /<m:oMath/.test(html)) {
+      const blocks = html.match(/<m:oMathPara[\s\S]*?<\/m:oMathPara>|<m:oMath(?![a-zA-Z])[\s\S]*?<\/m:oMath>/g) || [];
+      const out = [];
+      for (const b of blocks) {
+        const xml = `<root xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">${b.replace(/&nbsp;/g, '&#160;')}</root>`;
+        const doc = new DOMParser().parseFromString(xml, 'application/xml');
+        if (doc.querySelector('parsererror')) continue;
+        out.push(tidyConverted(om(doc.documentElement.firstElementChild)));
+      }
+      if (out.length) return { latex: out.join(' \\\\ '), from: 'Word' };
+    }
+    // 2) MathML (as text, or inside HTML from a web page)
+    const src = /<(mml:)?math[\s>]/.test(text || '') ? text : (/<(mml:)?math[\s>]/.test(html || '') ? html : null);
+    if (src) {
+      const m = src.match(/<(mml:)?math[\s\S]*?<\/(mml:)?math>/);
+      if (m) {
+        let x = m[0];
+        if (!/xmlns/.test(x.slice(0, 200))) x = x.replace(/^<(mml:)?math/, (s, p) => `<${p || ''}math xmlns${p ? ':mml' : ''}="http://www.w3.org/1998/Math/MathML"`);
+        let doc = new DOMParser().parseFromString(x, 'application/xml');
+        if (doc.querySelector('parsererror')) doc = new DOMParser().parseFromString(x, 'text/html');
+        const root = doc.documentElement.localName === 'math' ? doc.documentElement : doc.querySelector('math') || [...doc.getElementsByTagName('*')].find(e => e.localName === 'math');
+        if (root) return { latex: tidyConverted(mml(root)), from: 'MathML' };
+      }
+    }
+    // 3) Unicode maths (e.g. Word's plain-text copy, or 𝑥² from websites)
+    if (text && /[\u{1D400}-\u{1D7FF}\u2200-\u22FF\u0391-\u03C9²³¹⁰-⁹₀-₉ₐ-ₜ√∑∫]/u.test(text) && !/\\[a-zA-Z]/.test(text)) {
+      const t = mapWithScripts(text).replace(/\\sqrt\s*\(([^()]*)\)/g, '\\sqrt{$1}').replace(/\\sqrt\s*([a-zA-Z0-9])/g, '\\sqrt{$1}');
+      return { latex: tidyConverted(t), from: 'Unicode text' };
+    }
+    return null;
+  }
+  function insertAtCursor(ta, txt) {
+    const s = ta.selectionStart, e = ta.selectionEnd;
+    pushUndo(ta.value);
+    ta.value = ta.value.slice(0, s) + txt + ta.value.slice(e);
+    ta.setSelectionRange(s + txt.length, s + txt.length);
+  }
+  input.addEventListener('paste', (ev) => {
+    const cd = ev.clipboardData; if (!cd) return;
+    const r = convertClipboard(cd.getData('text/html'), cd.getData('text/plain'));
+    if (!r) return;
+    ev.preventDefault();
+    insertAtCursor(input, r.latex);
+    load();
+    showNote(`Converted from ${r.from} ✓ — check it looks right.`);
+  });
+  window.__olveConvert = convertClipboard; // used by the tests
+
+  // ================= 6. Dark mode + keyboard shortcuts =================
+  const themeBtn = document.getElementById('themeBtn');
+  function setTheme(t) {
+    document.documentElement.dataset.theme = t;
+    themeBtn.textContent = t === 'dark' ? '☀️ Light' : '🌙 Dark';
+    store('olve-theme', t);
+  }
+  setTheme(recall('olve-theme', null) || (matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  themeBtn.onclick = () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+
+  const SHORTCUTS = [
+    ['Ctrl + Enter', 'Copy LaTeX', () => document.getElementById('copy').click()],
+    ['Alt + C', 'Clean up', () => document.getElementById('cleanBtn').click()],
+    ['Alt + F', 'Symbols panel', () => document.getElementById('symBtn').click()],
+    ['Alt + M', 'Matrix builder', () => document.getElementById('matBtn').click()],
+    ['Alt + U', 'Units', () => document.getElementById('unitsBtn').click()],
+    ['Alt + A', 'Align columns', () => document.getElementById('alignBtn').click()],
+    ['Alt + N', 'Numbering on/off', () => document.getElementById('numBtn').click()],
+    ['Alt + I', 'Export as image', () => document.getElementById('expBtn').click()],
+    ['Alt + Z', 'Undo last tool change', () => undoBtn.click()],
+    ['Alt + E', 'Jump to the visual editor', () => mf.focus()],
+    ['Alt + L', 'Jump to the LaTeX box', () => input.focus()],
+    ['Alt + D', 'Dark / light mode', () => themeBtn.click()],
+    ['Alt + K', 'Show these shortcuts', () => document.getElementById('keysBtn').click()],
+    ['Alt + H / T / B', 'Hat / tilde / bar on the selection', null],
+    ['Alt + V / P / O', 'Vector arrow / prime / overline', null],
+    ['Ctrl + wheel', 'Zoom the visual equation (over the visual pane)', null],
+    ['Alt + Enter', 'New equation box (in the LaTeX pane)', null],
+    ['Double-click', 'Select a symbol; again to grow the selection', null],
+    ['Esc', 'Close open panels', null],
+  ];
+  const KEYMAP = { Enter: 0, KeyC: 1, KeyF: 2, KeyM: 3, KeyU: 4, KeyA: 5, KeyN: 6, KeyI: 7, KeyZ: 8, KeyE: 9, KeyL: 10, KeyD: 11, KeyK: 12 };
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); SHORTCUTS[0][2](); return; }
+    if (e.altKey && !e.ctrlKey && !e.metaKey && KEYMAP[e.code] > 0) { e.preventDefault(); e.stopPropagation(); SHORTCUTS[KEYMAP[e.code]][2](); return; }
+    if (e.key === 'Escape') {
+      const open = [...document.querySelectorAll('.clean.on, .symp.on, #keysPanel.on')];
+      if (open.length) { open.forEach(p => p.classList.remove('on')); clearHl(); }
+    }
+  }, true);
+  const keysPanel = document.getElementById('keysPanel');
+  keysPanel.innerHTML = '<h3>⌨ Keyboard shortcuts</h3><table>' + SHORTCUTS.map(([k, d]) => `<tr><td><kbd>${k.split(' + ').join('</kbd> + <kbd>')}</kbd></td><td>${d}</td></tr>`).join('') +
+    '</table><p class="muted">On a Mac, use <kbd>⌥ Option</kbd> for Alt and <kbd>⌘</kbd> for Ctrl.</p><div class="row"><button id="keysClose">Close</button></div>';
+  document.getElementById('keysBtn').onclick = () => keysPanel.classList.toggle('on');
+  document.getElementById('keysClose').onclick = () => keysPanel.classList.remove('on');
+
+
+  // =================== One LaTeX box per equation ===================
+  // Each equation has its own box (#codecards). The hidden #input always mirrors the
+  // *active* box, so every existing tool keeps working on "the equation".
+  const cardsEl = document.getElementById('codecards');
+  const eqlist = document.getElementById('eqlist');
+  const mfwrapEl = document.querySelector('.mfwrap');
+  const eqcount = document.getElementById('eqcount');
+  const NV = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value');
+  let cards = [], active = 0, syncing = false;
+
+  // split text into equations: one per line; environments and \[ … \] / $$ … $$ blocks stay together
+  function splitBlocks(t) {
+    const lines = [];
+    for (let i = 0; ;) { const j = t.indexOf('\n', i), e = j < 0 ? t.length : j; lines.push({ s: i, e, txt: t.slice(i, e) }); if (j < 0) break; i = j + 1; }
+    const out = [];
+    for (let k = 0; k < lines.length; k++) {
+      const L = lines[k], tr = L.txt.trim();
+      if (!tr) continue;
+      let endK = k;
+      const env = tr.match(/^\\begin\s*\{([^}]+)\}/);
+      if (env) {
+        const name = env[1].replace(/[*]/g, '\\*'), bre = new RegExp(`\\\\begin\\s*\\{${name}\\}`, 'g'), ere = new RegExp(`\\\\end\\s*\\{${name}\\}`, 'g');
+        let depth = 0;
+        for (let m = k; m < lines.length; m++) { depth += (lines[m].txt.match(bre) || []).length - (lines[m].txt.match(ere) || []).length; endK = m; if (depth <= 0) break; }
+      } else if (tr.startsWith('\\[') && !tr.includes('\\]')) {
+        for (let m = k + 1; m < lines.length; m++) { endK = m; if (lines[m].txt.includes('\\]')) break; }
+      } else if (tr.startsWith('$$') && tr.indexOf('$$', 2) < 0) {
+        for (let m = k + 1; m < lines.length; m++) { endK = m; if (lines[m].txt.includes('$$')) break; }
+      }
+      const s = L.s + (L.txt.length - L.txt.trimStart().length), last = lines[endK];
+      out.push(t.slice(s, last.e - (last.txt.length - last.txt.trimEnd().length)));
+      k = endK;
+    }
+    return out;
+  }
+  const autosize = (ta) => { ta.style.height = 'auto'; ta.style.height = Math.max(46, ta.scrollHeight + 2) + 'px'; };
+  const cur = () => cards[active];
+
+  function makeCard(text) {
+    const ta = document.createElement('textarea');
+    ta.className = 'eqcode';
+    ta.spellcheck = false;
+    NV.set.call(ta, text || '');
+    ta.addEventListener('focus', () => { setActive(cards.indexOf(ta)); input.dispatchEvent(new Event('focus')); });
+    ta.addEventListener('blur', () => {
+      input.dispatchEvent(new Event('blur'));
+      // an emptied box disappears (unless it's the only one)
+      setTimeout(() => { if (!ta.value.trim() && cards.length > 1 && document.activeElement !== ta) removeCard(cards.indexOf(ta), false); }, 150);
+    });
+    ta.addEventListener('input', () => {
+      autosize(ta);
+      if (!maybeSplit(ta)) { syncing = true; NV.set.call(input, ta.value); syncing = false; renderList(); }
+      input.dispatchEvent(new Event('input'));
+    });
+    // wait until the visual pane has drawn this equation before shading
+    ['keyup', 'mouseup', 'select'].forEach(ev => ta.addEventListener(ev, () => requestAnimationFrame(() => requestAnimationFrame(() => input.dispatchEvent(new Event(ev))))));
+    ta.addEventListener('paste', (e) => {
+      const ev = new ClipboardEvent('paste', { clipboardData: e.clipboardData, cancelable: true });
+      input.dispatchEvent(ev);                       // Word / MathML conversion
+      if (ev.defaultPrevented) { e.preventDefault(); setTimeout(() => maybeSplit(ta), 0); }
+    });
+    ta.addEventListener('keydown', (e) => {
+      const i = cards.indexOf(ta);
+      if (e.key === 'Enter' && e.altKey) { e.preventDefault(); addCard(i + 1, '', true); return; }
+      if (e.key === 'Backspace' && !ta.value && cards.length > 1) { e.preventDefault(); removeCard(i, true); return; }
+      const atStart = ta.selectionStart === 0 && ta.selectionEnd === 0, atEnd = ta.selectionStart === ta.value.length;
+      if (e.key === 'ArrowUp' && !e.shiftKey && i > 0 && !ta.value.slice(0, ta.selectionStart).includes('\n')) { e.preventDefault(); focusCard(i - 1, 'end'); }
+      else if (e.key === 'ArrowDown' && !e.shiftKey && i < cards.length - 1 && !ta.value.slice(ta.selectionEnd).includes('\n')) { e.preventDefault(); focusCard(i + 1, 'start'); }
+      else if (e.key === 'ArrowLeft' && atStart && i > 0) { e.preventDefault(); focusCard(i - 1, 'end'); }
+      else if (e.key === 'ArrowRight' && atEnd && !e.shiftKey && i < cards.length - 1) { e.preventDefault(); focusCard(i + 1, 'start'); }
+    });
+    return ta;
+  }
+  // a box that now holds several equations (paste, or a new line) is split into several boxes
+  function maybeSplit(ta) {
+    const parts = splitBlocks(ta.value);
+    if (parts.length <= 1) return false;
+    const i = cards.indexOf(ta);
+    NV.set.call(ta, parts[0]); autosize(ta);
+    parts.slice(1).forEach((t, k) => addCard(i + 1 + k, t, false));
+    renderCards();
+    focusCard(i + parts.length - 1, 'end');
+    showNote(`Split into ${parts.length} equations.`);
+    return true;
+  }
+  function renderCards() {
+    cardsEl.innerHTML = '';
+    cards.forEach((ta, i) => {
+      const w = document.createElement('div');
+      w.className = 'codecard' + (i === active ? ' active' : '');
+      if (cards.length > 1) { const n = document.createElement('span'); n.className = 'cnum'; n.textContent = i + 1; w.appendChild(n); }
+      w.appendChild(ta);
+      cardsEl.appendChild(w);
+    });
+    cards.forEach(autosize); // size them once they are all in place
+    cards[0].placeholder = cards.length === 1 ? 'Paste LaTeX (or a Word equation)…  e.g. \\frac{a+b}{c^2}   $E=mc^2$   \\begin{equation} … \\end{equation}\n\nSeveral equations? Paste them all — each gets its own box.' : '';
+    renderList();
+  }
+  function addCard(at, text, focus) {
+    const ta = makeCard(text);
+    cards.splice(at, 0, ta);
+    renderCards();
+    if (focus) focusCard(at, 'end');
+    return ta;
+  }
+  function removeCard(i, focusPrev) {
+    if (i < 0 || cards.length <= 1) return;
+    cards.splice(i, 1);
+    if (active >= cards.length) active = cards.length - 1;
+    renderCards();
+    if (focusPrev) focusCard(Math.max(0, i - 1), 'end');
+    else setActive(active, true);
+  }
+  function focusCard(i, where) {
+    const ta = cards[i]; if (!ta) return;
+    ta.focus();
+    const p = where === 'start' ? 0 : ta.value.length;
+    ta.setSelectionRange(p, p);
+  }
+  function setActive(i, force) {
+    if (i < 0 || i >= cards.length) return;
+    if (i === active && !force && NV.get.call(input) === cards[i].value) return;
+    active = i;
+    syncing = true; NV.set.call(input, cards[i].value); syncing = false;
+    cardsEl.querySelectorAll('.codecard').forEach((w, k) => w.classList.toggle('active', k === i));
+    renderList();
+    load(); clearHl();
+  }
+
+  // the hidden #input is a window onto the active box
+  Object.defineProperty(input, 'value', {
+    configurable: true,
+    get() { return NV.get.call(input); },
+    set(v) {
+      NV.set.call(input, v);
+      if (syncing) return;
+      if (!cards.length) { cards.push(makeCard('')); active = 0; renderCards(); }
+      NV.set.call(cur(), v); autosize(cur());
+      renderList();
+    },
+  });
+  Object.defineProperty(input, 'selectionStart', { configurable: true, get() { return cur() ? cur().selectionStart : 0; } });
+  Object.defineProperty(input, 'selectionEnd', { configurable: true, get() { return cur() ? cur().selectionEnd : 0; } });
+  input.setSelectionRange = (a, b) => { if (cur()) cur().setSelectionRange(a, b); };
+  input.focus = () => { if (cur()) cur().focus(); };
+  input.select = () => { if (cur()) cur().select(); };
+
+  // the visual pane mirrors the boxes: the active one is editable, the others are clickable
+  function renderList() {
+    eqlist.querySelectorAll('.eqstatic').forEach(n => n.remove());
+    const many = cards.length > 1;
+    eqlist.classList.toggle('many', many);
+    eqcount.textContent = many ? `· equation ${active + 1} of ${cards.length}` : '';
+    if (!many) return;
+    cards.forEach((ta, i) => {
+      if (i === active) return;
+      const d = document.createElement('div');
+      d.className = 'eqstatic';
+      d.title = 'Click to edit this equation';
+      d.innerHTML = `<span class="eqn">${i + 1}</span><span class="eqm">${ta.value.trim() ? renderStatic(fieldLatex(ta.value)) : '<span class="muted">(empty)</span>'}</span>`;
+      d.onclick = () => { setActive(i); mf.focus(); setTimeout(() => mf.executeCommand('moveToMathfieldEnd'), 0); };
+      eqlist.insertBefore(d, i < active ? mfwrapEl : null);
+    });
+    mfwrapEl.dataset.n = active + 1;
+  }
+  const allText = () => cards.map(t => t.value.trim()).filter(Boolean).join('\n');
+
+  document.getElementById('addEq').addEventListener('mousedown', e => e.preventDefault());
+  document.getElementById('addEq').onclick = () => addCard(active + 1, '', true);
+  document.getElementById('copy').onclick = async () => {
+    try { await navigator.clipboard.writeText(allText()); status.textContent = cards.length > 1 ? `Copied ${cards.length} equations ✓` : 'Copied ✓'; }
+    catch (e) { cur().select(); status.textContent = 'Selected — press Ctrl+C'; }
+    setTimeout(() => (status.textContent = ''), 2500);
+  };
+  document.getElementById('clear').onclick = () => {
+    saveHistory(input.value);
+    pushUndo(input.value);
+    cards = [makeCard('')]; active = 0; renderCards();
+    syncing = true; NV.set.call(input, ''); syncing = false;
+    load(); clearHl(); cur().focus();
+  };
+  window.__olveCards = { all: allText, count: () => cards.length, active: () => active, box: (i) => cards[i] };
+
+  // =================== Embedded in the LaTeX editor ===================
+  // Opened as  index.html?embed  inside the editor: it receives an equation and sends the result back.
+  if (new URLSearchParams(location.search).has('embed') && window.parent !== window) {
+    document.documentElement.classList.add('embed');
+    const setAll = (latex) => {
+      cards = [makeCard('')]; active = 0; renderCards();
+      syncing = true; NV.set.call(input, ''); syncing = false;
+      input.value = latex || ''; autosize(cur()); maybeSplit(cur());
+      load(); clearHl();
+    };
+    const bar = document.createElement('div');
+    bar.className = 'embedbar';
+    bar.innerHTML = '<span>Editing an equation from your document.</span><span style="flex:1"></span><button id="embedCancel">Cancel</button><button class="primary" id="embedApply" title="Ctrl+Enter">⤶ Put into document</button>';
+    document.body.prepend(bar);
+    const send = (type, extra) => window.parent.postMessage({ source: 'equation-editor', type, ...extra }, location.origin);
+    document.getElementById('embedApply').onclick = () => send('apply', { latex: allText() });
+    document.getElementById('embedCancel').onclick = () => send('cancel');
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); e.stopImmediatePropagation(); send('apply', { latex: allText() }); }
+    }, true);
+    window.addEventListener('message', (e) => {
+      if (e.origin !== location.origin || !e.data || e.data.target !== 'equation-editor') return;
+      if (e.data.type === 'set') { if (e.data.theme) setTheme(e.data.theme); setAll(e.data.latex); setTimeout(() => { try { mf.focus(); } catch (err) {} }, 50); }
+    });
+    send('ready');
+  }
+
+  // =================== Easier selection in the visual box ===================
+  const hov = document.createElement('div');
+  hov.className = 'hov';
+  document.body.appendChild(hov);
+  const normL = (s) => (s || '').replace(/\s+/g, '');
+  function atomsList() {
+    const out = [];
+    for (let i = 1; i <= mf.lastOffset; i++) {
+      const x = mf.getElementInfo(i);
+      if (x && x.bounds && x.bounds.width > 0 && x.latex) out.push({ i, latex: x.latex, r: x.bounds });
+    }
+    return out;
+  }
+  function atomAt(x, y) {
+    // prefer a symbol the pointer is really inside; only then allow a small margin
+    const list = atomsList();
+    for (const tol of [0, 3]) {
+      let best = null;
+      for (const a of list) {
+        const r = a.r;
+        if (x >= r.left - tol && x <= r.right + tol && y >= r.top - tol && y <= r.bottom + tol) {
+          const area = r.width * r.height;
+          if (!best || area < best.area) best = { ...a, area };
+        }
+      }
+      if (best) return best;
+    }
+    return null;
+  }
+  function atomRange(at) {
+    for (let k = at.i - 1; k >= 0; k--) if (normL(mf.getValue(k, at.i, 'latex')) === normL(at.latex)) return [k, at.i];
+    return [at.i - 1, at.i];
+  }
+  function selRect() {
+    const r = mf.selection && mf.selection.ranges && mf.selection.ranges[0];
+    if (!r || r[0] === r[1]) return null;
+    return rangeRect([Math.min(...r), Math.max(...r)]);
+  }
+  // hover: outline what a double-click would select
+  mf.addEventListener('pointermove', (e) => {
+    if (e.buttons) { hov.style.display = 'none'; return; }
+    const a = atomAt(e.clientX, e.clientY);
+    if (!a) { hov.style.display = 'none'; return; }
+    Object.assign(hov.style, { display: 'block', left: (a.r.left - 2) + 'px', top: (a.r.top - 2) + 'px', width: (a.r.width + 4) + 'px', height: (a.r.height + 4) + 'px' });
+  });
+  mf.addEventListener('pointerleave', () => { hov.style.display = 'none'; });
+  addEventListener('scroll', () => { hov.style.display = 'none'; }, true);
+  // double-click: select the symbol; double-click again: grow to the enclosing part, then everything
+  let lastDbl = null;
+  mf.addEventListener('dblclick', (e) => {
+    const x = e.clientX, y = e.clientY;
+    setTimeout(() => {
+      let range = null;
+      const lr = lastDbl && rangeRect(lastDbl.range);
+      const again = lastDbl && lr && Date.now() - lastDbl.t < 2500 && lastDbl.value === mf.getValue('latex') &&
+        x >= lr.left - 2 && x <= lr.right + 2 && y >= lr.top - 2 && y <= lr.bottom + 2;   // double-clicked inside the last selection
+      if (again) {
+        // grow: smallest atom that contains what we selected last time
+        const sr = rangeRect(lastDbl.range);
+        let best = null;
+        if (sr) for (const a of atomsList()) {
+          const r = a.r, area = r.width * r.height;
+          if (r.left <= sr.left + 1 && r.right >= sr.right - 1 && r.top <= sr.top + 1 && r.bottom >= sr.bottom - 1 && area > sr.width * sr.height + 1)
+            if (!best || area < best.area) best = { ...a, area };
+        }
+        range = best ? atomRange(best) : [0, mf.lastOffset];
+      } else {
+        const a = atomAt(x, y);
+        if (a) range = atomRange(a);
+      }
+      if (!range) return;
+      mf.selection = { ranges: [range] };
+      lastDbl = { range, x, y, t: Date.now(), value: mf.getValue('latex') };
+      hov.style.display = 'none';
+      const rr = rangeRect(range);
+      if (rr) showSelbarAt(rr);
+    }, 0);
+  });
+  // shift+click: extend the selection from the cursor to the clicked symbol
+  let shiftAnchor = null;
+  mf.addEventListener('pointerdown', (e) => {
+    shiftAnchor = e.shiftKey ? (mf.selection && mf.selection.ranges ? mf.selection.ranges[0][0] : mf.position) : null;
+  }, true);
+  mf.addEventListener('click', (e) => {
+    if (shiftAnchor === null || !e.shiftKey) return;
+    const a = atomAt(e.clientX, e.clientY);
+    if (!a) return;
+    const [s0, e0] = atomRange(a), anchor = shiftAnchor;
+    setTimeout(() => { mf.selection = { ranges: [[Math.min(anchor, s0), Math.max(anchor, e0)]] }; }, 0);
+  });
+
+  // ---------- tips line can be hidden ----------
+  const tipsEl = document.getElementById('tips');
+  const setTips = (on) => { tipsEl.classList.toggle('hidden', !on); document.getElementById('tipsBtn').classList.toggle('sel', on); store('olve-tips', on); };
+  setTips(recall('olve-tips', true));
+  document.getElementById('tipsBtn').onclick = () => setTips(tipsEl.classList.contains('hidden'));
+  // clean-up suggestions: keep them in view right under the editor
+  document.getElementById('cleanBtn').addEventListener('click', () => setTimeout(() => { const c = document.getElementById('clean'); if (c.classList.contains('on')) c.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 0));
+
+  // ---------- room between symbols in the visual box ----------
+  const SPACES_LV = [0, 0.1, 0.2], SPACE_NAMES = ['normal', 'roomy', 'extra roomy'];
+  let spaceLv = recall('olve-space', 1);
+  function applySpacing() {
+    const root = mf.shadowRoot; if (!root) return;
+    let st = root.getElementById('olve-space');
+    if (!st) { st = document.createElement('style'); st.id = 'olve-space'; root.appendChild(st); }
+    const em = SPACES_LV[spaceLv] || 0;
+    st.textContent = em ? `.ML__base > [data-atom-id], .ML__mrow > [data-atom-id] { margin-right:${em}em !important; }` : '';
+    const b = document.getElementById('spaceBtn');
+    b.classList.toggle('sel', spaceLv > 0);
+    b.title = `Space between symbols: ${SPACE_NAMES[spaceLv]} (click to change)`;
+    if (lastSel) setTimeout(() => drawRange(lastSel), 0);
+  }
+  document.getElementById('spaceBtn').addEventListener('mousedown', e => e.preventDefault());
+  document.getElementById('spaceBtn').onclick = () => { spaceLv = (spaceLv + 1) % SPACES_LV.length; store('olve-space', spaceLv); applySpacing(); };
+  applySpacing();
+
+  // ---------- floating toolbar for a selection ----------
+  const SEL_ACTIONS = [
+    ['\\frac{#@}{#?}', 'Make it a numerator', '\\frac{a}{\\square}'],
+    ['\\frac{#?}{#@}', 'Make it a denominator', '\\frac{\\square}{a}'],
+    null,
+    ['\\left(#@\\right)', 'Wrap in ( )', '(a)'],
+    ['\\left[#@\\right]', 'Wrap in [ ]', '[a]'],
+    ['\\left\\{#@\\right\\}', 'Wrap in { }', '\\{a\\}'],
+    ['\\left|#@\\right|', 'Absolute value | |', '|a|'],
+    null,
+    ['\\sqrt{#@}', 'Square root', '\\sqrt{a}'],
+    ['\\left(#@\\right)^{#?}', 'Raise to a power', '(a)^{\\square}'],
+    ['#?^{#@}', 'Make it an exponent', '\\square^{a}'],
+    ['#?_{#@}', 'Make it a subscript', '\\square_{a}'],
+    null,
+    ['\\overbrace{#@}^{#?}', 'Brace above, with a label', '\\overbrace{a}^{\\square}'],
+    ['\\underbrace{#@}_{#?}', 'Brace below, with a label', '\\underbrace{a}_{\\square}'],
+    ['\\boxed{#@}', 'Box it', '\\boxed{a}'],
+    ['\\text{#@}', 'Plain text (words)', '\\text{ab}'],
+  ];
+  const selbar = document.getElementById('selbar');
+  selbar.innerHTML = '<span class="sl">Selection:</span>' + SEL_ACTIONS.map((a, i) => a ? `<button data-i="${i}" title="${a[1]}">${renderStatic(a[2])}</button>` : '<span class="sep"></span>').join('');
+  selbar.addEventListener('mousedown', e => e.preventDefault());
+  selbar.querySelectorAll('button').forEach(b => b.onclick = () => { hideSelbar(); applyTemplate(SEL_ACTIONS[+b.dataset.i][0]); });
+  let selbarHideT = 0;
+  function showSelbarAt(rect) {
+    clearTimeout(selbarHideT);
+    selbar.classList.add('on');
+    const w = selbar.offsetWidth, h = selbar.offsetHeight;
+    // stay inside the visual pane (never over the code pane or its Copy button), just below the selection
+    const pane = mf.getBoundingClientRect();
+    // go below the whole equation (not just the selection), so it never covers a denominator or subscript
+    let bottom = rect.bottom;
+    try { for (const a of atomsList()) bottom = Math.max(bottom, a.r.bottom); } catch (e) {}
+    let x = rect.left + rect.width / 2 - w / 2, y = bottom + 6;
+    if (y + h > Math.min(innerHeight - 6, pane.bottom + h + 12)) y = rect.top - h - 8;
+    const minX = Math.max(6, pane.left), maxX = Math.min(innerWidth - 6, Math.max(pane.right, pane.left + w)) - w;
+    x = Math.max(minX, Math.min(x, maxX));
+    selbar.style.left = x + 'px'; selbar.style.top = y + 'px';
+  }
+  function hideSelbar() { clearTimeout(selbarHideT); selbar.classList.remove('on'); }
+  function scheduleHide(ms) { clearTimeout(selbarHideT); selbarHideT = setTimeout(hideSelbar, ms); }
+  function rangeRect([a, b]) {
+    let L = Infinity, T = Infinity, R = -Infinity, B = -Infinity;
+    for (let i = a + 1; i <= b; i++) { const r = mf.getElementInfo(i)?.bounds; if (!r || r.width <= 0) continue; L = Math.min(L, r.left); T = Math.min(T, r.top); R = Math.max(R, r.right); B = Math.max(B, r.bottom); }
+    return L === Infinity ? null : { left: L, top: T, right: R, bottom: B, width: R - L, height: B - T };
+  }
+  // selection made in the visual box
+  mf.addEventListener('selection-change', () => {
+    const r = mf.selection && mf.selection.ranges && mf.selection.ranges[0];
+    if (!r || r[0] === r[1] || document.activeElement !== mf) { scheduleHide(120); return; }
+    const rect = rangeRect([Math.min(...r), Math.max(...r)]);
+    if (rect) showSelbarAt(rect);
+  });
+  mf.addEventListener('blur', () => { scheduleHide(150); });
+  // selection made in the code box: show the bar above the shaded part
+  const codeBoxes = document.getElementById('codecards');
+  const codeSel = () => {
+    setTimeout(() => {
+      const ta = document.activeElement;
+      if (!ta || !codeBoxes.contains(ta) || ta.selectionStart === ta.selectionEnd || hl.style.display !== 'block') { hideSelbar(); return; }
+      showSelbarAt(hl.getBoundingClientRect());
+    }, 120);
+  };
+  ['mouseup', 'keyup', 'select'].forEach(ev => codeBoxes.addEventListener(ev, codeSel, true));
+  codeBoxes.addEventListener('focusout', () => { scheduleHide(150); });
+  addEventListener('scroll', (e) => { if (e.composedPath && e.composedPath().includes(mf)) return; hideSelbar(); }, true);
+  // clicking anywhere else (or Esc) closes it; a new selection shows it again
+  document.addEventListener('pointerdown', (e) => { if (!selbar.contains(e.target)) hideSelbar(); }, true);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideSelbar(); });
+
+  input.value = '\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}';
+  load();
+})();
+}
+</script>
+</body>
+</html>

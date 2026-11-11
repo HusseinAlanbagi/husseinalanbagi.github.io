@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# TeX runtime files must be stored byte for byte
+texbench/runtime/** -text
+texbench/vendor/** -text

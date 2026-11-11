@@ -1,0 +1,12 @@
+[
+ "autocomplete.js",
+ "dark-mode.js",
+ "dynare.js",
+ "equation-editor.js",
+ "irf-figures.js",
+ "model-checks.js",
+ "outline.js",
+ "snippets.js",
+ "spell-check.js",
+ "word-count.js"
+]

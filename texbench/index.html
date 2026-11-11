@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TeXbench</title>
+<meta name="description" content="A free LaTeX editor that runs in your browser: compiles on your own machine, works offline, and every feature is a module you can switch on or off.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%233b4cca'/%3E%3Cpath d='M8 9h16v3.2h-6.3V24h-3.4V12.2H8z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header id="top">
+  <button id="projBtn" class="proj" title="Projects: new, open, import, export" aria-haspopup="menu"><span class="logo" aria-hidden="true">T</span><span id="projName">…</span><span class="caret" aria-hidden="true">▾</span></button>
+  <div class="grp">
+    <button id="compileBtn" class="primary">▶ Compile</button>
+    <label class="check" title="Recompile shortly after you stop typing"><input type="checkbox" id="auto"> Auto</label>
+    <span id="status" class="status" role="status" aria-live="polite"></span>
+  </div>
+  <div id="toolbar" class="grp" role="toolbar" aria-label="Tools"></div>
+  <span class="spacer"></span>
+  <button id="paletteBtn">Commands</button>
+  <button id="featBtn" title="Switch features on or off, and other settings">⚙ Features</button>
+</header>
+<main id="work">
+  <aside id="side" aria-label="Project">
+    <details class="panel" open><summary>Files
+        <span class="sum-actions"><button id="newFileBtn" class="icon" title="New file" aria-label="New file">＋</button><button id="uploadBtn" class="icon" title="Upload files (or drop them here)" aria-label="Upload files">⇪</button></span></summary>
+      <div id="tree" class="panel-body tree"></div>
+    </details>
+    <div id="panels"></div>
+  </aside>
+  <div class="split" id="split1" role="separator" aria-orientation="vertical"></div>
+  <section id="edwrap" aria-label="Source">
+    <div class="bar"><span id="fileName" class="fname"></span><span class="spacer"></span><span id="cursorInfo" class="muted"></span>
+      <button id="syncBtn" class="small">Show in PDF →</button></div>
+    <div id="ed"></div>
+    <div id="binview" hidden></div>
+    <div id="bottom">
+      <div class="bar tabs"><button id="tabProblems" class="tab">Problems</button><button id="tabLog" class="tab">Log</button><span class="spacer"></span><span id="statusItems"></span></div>
+      <div id="bottomBody" hidden><div id="problemList" hidden></div><pre id="logText" hidden></pre></div>
+    </div>
+  </section>
+  <div class="split" id="split2" role="separator" aria-orientation="vertical"></div>
+  <section id="pdfwrap" aria-label="PDF preview">
+    <div class="bar"><button id="zoomOut" class="icon" title="Zoom out" aria-label="Zoom out">−</button><span id="zoomInfo" class="muted">100%</span><button id="zoomIn" class="icon" title="Zoom in" aria-label="Zoom in">＋</button>
+      <button id="zoomFit" class="small" title="Fit the page width">Fit</button><span class="spacer"></span><span id="pageInfo" class="muted"></span><button id="pdfDownload" class="small" title="Download the PDF">Download PDF</button></div>
+    <div id="pdf"><div id="pdfEmpty" class="muted pad">The PDF appears here after the first compile. The first run downloads the TeX engine (about 35 MB) and keeps it for next time.</div></div>
+  </section>
+</main>
+<noscript>This editor needs JavaScript.</noscript>
+<script type="module" src="core.js"></script>
+</body>
+</html>

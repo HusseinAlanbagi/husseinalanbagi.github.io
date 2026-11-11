@@ -1,0 +1,30 @@
+# TeXbench: licences and credits
+
+TeXbench is an independent project. It is not affiliated with, endorsed by, or derived from Overleaf
+or any other LaTeX service, and it contains none of their code, templates, text or artwork.
+
+The code written for TeXbench itself (the `core.js` sources, `app.css`, everything in `modules/`,
+and the changes made to the equation editor and IRF plotter) belongs to Hussein Alanbagi.
+
+## Third-party software shipped with TeXbench
+
+| Part | Used for | Licence |
+|---|---|---|
+| [Siglum engine](https://github.com/SiglumProject/siglum) 0.2.2 | Runs TeX in the browser (`engine-worker.js`, `runtime/worker.js`) | MIT |
+| [BusyTeX](https://github.com/busytex/busytex) (Siglum's build) | pdfTeX, XeTeX and BibTeX compiled to WebAssembly (`runtime/wasm/`) | MIT for the build scripts; the TeX programs keep their own free licences (pdfTeX: GPL; XeTeX: MIT/X11; BibTeX: Knuth licence; kpathsea: LGPL) |
+| [TeX Live](https://tug.org/texlive/) packages | The LaTeX packages and fonts in `runtime/bundles/` and `runtime/api/texlive/` | Each package has its own free licence, mostly the LaTeX Project Public License (LPPL), also GPL, MIT, BSD and the SIL Open Font License. TeX Live only accepts free software. The licence of a package is listed on its page at ctan.org. |
+| [xzwasm](https://github.com/SteveSanderson/xzwasm) | Unpacks package archives (`runtime/xzwasm.js`) | MIT (contains xz-embedded, public domain, and walloc, MIT) |
+| [CodeMirror 6](https://codemirror.net/) | The source editor (inside `core.js`) | MIT |
+| [PDF.js](https://mozilla.github.io/pdf.js/) | The PDF preview (`vendor/`) | Apache 2.0 |
+| [fflate](https://github.com/101arrowz/fflate) | Zip import and export (inside `core.js`) | MIT |
+| [MathLive](https://mathlive.io/) 0.111.4 | Visual equation editing (`equation/mathlive.min.js`, `equation/fonts/`) | MIT (see `equation/MATHLIVE-LICENSE.txt`) |
+| [MathJax](https://www.mathjax.org/) 3.2.2 | Equation images and figure labels (`equation/mathjax/`) | Apache 2.0 |
+| [jsPDF](https://github.com/parallax/jsPDF) | PDF export in the IRF plotter (`irf/lib/`) | MIT (see `irf/lib/jspdf-LICENSE.txt`) |
+| [svg2pdf.js](https://github.com/yWorks/svg2pdf.js) | PDF export in the IRF plotter (`irf/lib/`) | MIT (see `irf/lib/svg2pdf-LICENSE.txt`) |
+
+Dynare is not included. The Dynare module only reads and writes `.mod` text files.
+
+## Names
+
+LaTeX, TeX Live, Dynare, Overleaf, Word and other names mentioned in the app belong to their owners
+and are used only to say what the app works with (for example "import a project .zip").
