@@ -1,0 +1,798 @@
+{
+  "name": "extra-xetex-lang",
+  "files": [
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabicdigits.map",
+      "start": 0,
+      "end": 256
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabicdigits.tec",
+      "start": 256,
+      "end": 437
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-farsi-fullvoc.map",
+      "start": 437,
+      "end": 17069
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-farsi-fullvoc.tec",
+      "start": 17069,
+      "end": 22184
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-farsi-novoc.map",
+      "start": 22184,
+      "end": 37791
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-farsi-novoc.tec",
+      "start": 37791,
+      "end": 41977
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-farsi-trans-loc.map",
+      "start": 41977,
+      "end": 47751
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-farsi-trans-loc.tec",
+      "start": 47751,
+      "end": 49041
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-farsi-voc.map",
+      "start": 49041,
+      "end": 65314
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-farsi-voc.tec",
+      "start": 65314,
+      "end": 69548
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-fullvoc.map",
+      "start": 69548,
+      "end": 85838
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-fullvoc.tec",
+      "start": 85838,
+      "end": 90675
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-kashmiri-fullvoc.map",
+      "start": 90675,
+      "end": 107890
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-kashmiri-fullvoc.tec",
+      "start": 107890,
+      "end": 113189
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-kashmiri-novoc.map",
+      "start": 113189,
+      "end": 129420
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-kashmiri-novoc.tec",
+      "start": 129420,
+      "end": 133763
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-kashmiri-voc.map",
+      "start": 133763,
+      "end": 150619
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-kashmiri-voc.tec",
+      "start": 150619,
+      "end": 154991
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-kurdish.map",
+      "start": 154991,
+      "end": 164090
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-kurdish.tec",
+      "start": 164090,
+      "end": 166483
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-maghribi-fullvoc.map",
+      "start": 166483,
+      "end": 182806
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-maghribi-fullvoc.tec",
+      "start": 182806,
+      "end": 187651
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-maghribi-novoc.map",
+      "start": 187651,
+      "end": 202430
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-maghribi-novoc.tec",
+      "start": 202430,
+      "end": 206287
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-maghribi-voc.map",
+      "start": 206287,
+      "end": 221784
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-maghribi-voc.tec",
+      "start": 221784,
+      "end": 225738
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-malay-fullvoc.map",
+      "start": 225738,
+      "end": 242006
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-malay-fullvoc.tec",
+      "start": 242006,
+      "end": 246981
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-malay-novoc.map",
+      "start": 246981,
+      "end": 262251
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-malay-novoc.tec",
+      "start": 262251,
+      "end": 266351
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-malay-voc.map",
+      "start": 266351,
+      "end": 282260
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-malay-voc.tec",
+      "start": 282260,
+      "end": 286344
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-novoc.map",
+      "start": 286344,
+      "end": 301090
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-novoc.tec",
+      "start": 301090,
+      "end": 304942
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-pashto-fullvoc.map",
+      "start": 304942,
+      "end": 321338
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-pashto-fullvoc.tec",
+      "start": 321338,
+      "end": 326381
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-pashto-novoc.map",
+      "start": 326381,
+      "end": 341793
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-pashto-novoc.tec",
+      "start": 341793,
+      "end": 345925
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-pashto-trans-loc.map",
+      "start": 345925,
+      "end": 351448
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-pashto-trans-loc.tec",
+      "start": 351448,
+      "end": 352743
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-pashto-voc.map",
+      "start": 352743,
+      "end": 368780
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-pashto-voc.tec",
+      "start": 368780,
+      "end": 372930
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-sindhi-fullvoc.map",
+      "start": 372930,
+      "end": 388770
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-sindhi-fullvoc.tec",
+      "start": 388770,
+      "end": 393657
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-sindhi-novoc.map",
+      "start": 393657,
+      "end": 408499
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-sindhi-novoc.tec",
+      "start": 408499,
+      "end": 412419
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-sindhi-trans-loc.map",
+      "start": 412419,
+      "end": 418205
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-sindhi-trans-loc.tec",
+      "start": 418205,
+      "end": 419484
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-sindhi-voc.map",
+      "start": 419484,
+      "end": 434965
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-sindhi-voc.tec",
+      "start": 434965,
+      "end": 438905
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-trans-dmg.map",
+      "start": 438905,
+      "end": 445297
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-trans-dmg.tec",
+      "start": 445297,
+      "end": 448687
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-trans-loc.map",
+      "start": 448687,
+      "end": 454552
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-trans-loc.tec",
+      "start": 454552,
+      "end": 456305
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-turk-fullvoc.map",
+      "start": 456305,
+      "end": 472522
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-turk-fullvoc.tec",
+      "start": 472522,
+      "end": 477501
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-turk-novoc.map",
+      "start": 477501,
+      "end": 492734
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-turk-novoc.tec",
+      "start": 492734,
+      "end": 496786
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-turk-voc.map",
+      "start": 496786,
+      "end": 512644
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-turk-voc.tec",
+      "start": 512644,
+      "end": 516746
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-uighur.map",
+      "start": 516746,
+      "end": 525252
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-uighur.tec",
+      "start": 525252,
+      "end": 527508
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-urdu-fullvoc.map",
+      "start": 527508,
+      "end": 544196
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-urdu-fullvoc.tec",
+      "start": 544196,
+      "end": 549342
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-urdu-novoc.map",
+      "start": 549342,
+      "end": 565046
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-urdu-novoc.tec",
+      "start": 565046,
+      "end": 569233
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-urdu-trans-loc.map",
+      "start": 569233,
+      "end": 575070
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-urdu-trans-loc.tec",
+      "start": 575070,
+      "end": 576413
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-urdu-voc.map",
+      "start": 576413,
+      "end": 592742
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-urdu-voc.tec",
+      "start": 592742,
+      "end": 596993
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-voc.map",
+      "start": 596993,
+      "end": 612457
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "arabtex-voc.tec",
+      "start": 612457,
+      "end": 616400
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "farsidigits.map",
+      "start": 616400,
+      "end": 616655
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "farsidigits.tec",
+      "start": 616655,
+      "end": 616838
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "fixlamalif.map",
+      "start": 616838,
+      "end": 617593
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "fixlamalif.tec",
+      "start": 617593,
+      "end": 617851
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "mirrorpunct.map",
+      "start": 617851,
+      "end": 618101
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/arabxetex",
+      "name": "mirrorpunct.tec",
+      "start": 618101,
+      "end": 618284
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/base",
+      "name": "qx-unicode.map",
+      "start": 618284,
+      "end": 624253
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/base",
+      "name": "qx-unicode.tec",
+      "start": 624253,
+      "end": 625912
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/base",
+      "name": "tex-text.map",
+      "start": 625912,
+      "end": 626714
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/base",
+      "name": "tex-text.tec",
+      "start": 626714,
+      "end": 627112
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-bb.map",
+      "start": 627112,
+      "end": 628162
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-bb.tec",
+      "start": 628162,
+      "end": 628662
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-bbit.map",
+      "start": 628662,
+      "end": 628812
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-bbit.tec",
+      "start": 628812,
+      "end": 628978
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-bf.map",
+      "start": 628978,
+      "end": 631198
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-bf.tec",
+      "start": 631198,
+      "end": 632053
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-bfit.map",
+      "start": 632053,
+      "end": 634093
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-bfit.tec",
+      "start": 634093,
+      "end": 634864
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-frak.map",
+      "start": 634864,
+      "end": 635824
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-frak.tec",
+      "start": 635824,
+      "end": 636244
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-frakbf.map",
+      "start": 636244,
+      "end": 637240
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-frakbf.tec",
+      "start": 637240,
+      "end": 637659
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-it.map",
+      "start": 637659,
+      "end": 639699
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-it.tec",
+      "start": 639699,
+      "end": 640507
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-scr.map",
+      "start": 640507,
+      "end": 641503
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-scr.tec",
+      "start": 641503,
+      "end": 641993
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-scrbf.map",
+      "start": 641993,
+      "end": 642989
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-scrbf.tec",
+      "start": 642989,
+      "end": 643419
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-sf.map",
+      "start": 643419,
+      "end": 644595
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-sf.tec",
+      "start": 644595,
+      "end": 645080
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-sfbf.map",
+      "start": 645080,
+      "end": 647300
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-sfbf.tec",
+      "start": 647300,
+      "end": 648155
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-sfbfit.map",
+      "start": 648155,
+      "end": 650195
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-sfbfit.tec",
+      "start": 650195,
+      "end": 650960
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-sfit.map",
+      "start": 650960,
+      "end": 651956
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-sfit.tec",
+      "start": 651956,
+      "end": 652360
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-tt.map",
+      "start": 652360,
+      "end": 653536
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/unimath-plain-xetex",
+      "name": "unimath-tt.tec",
+      "start": 653536,
+      "end": 654016
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "brh-kan.map",
+      "start": 654016,
+      "end": 659512
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "brh-kan.tec",
+      "start": 659512,
+      "end": 661103
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "itrans-dvn.map",
+      "start": 661103,
+      "end": 666459
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "itrans-dvn.tec",
+      "start": 666459,
+      "end": 668172
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "itrans-iast.map",
+      "start": 668172,
+      "end": 675346
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "itrans-iast.tec",
+      "start": 675346,
+      "end": 676931
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "itrans-kan.map",
+      "start": 676931,
+      "end": 684895
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "itrans-kan.tec",
+      "start": 684895,
+      "end": 687452
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "itrans-sankan.map",
+      "start": 687452,
+      "end": 695953
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "itrans-sankan.tec",
+      "start": 695953,
+      "end": 698516
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "itrans-santel.map",
+      "start": 698516,
+      "end": 707317
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "itrans-santel.tec",
+      "start": 707317,
+      "end": 710072
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "itrans-sdvn.map",
+      "start": 710072,
+      "end": 715940
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "itrans-sdvn.tec",
+      "start": 715940,
+      "end": 717908
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "itrans-tamil.map",
+      "start": 717908,
+      "end": 723855
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "itrans-tamil.tec",
+      "start": 723855,
+      "end": 725371
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "itrans-tel.map",
+      "start": 725371,
+      "end": 731204
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-itrans",
+      "name": "itrans-tel.tec",
+      "start": 731204,
+      "end": 732928
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-tibetan",
+      "name": "loctib.map",
+      "start": 732928,
+      "end": 739079
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-tibetan",
+      "name": "loctib.tec",
+      "start": 739079,
+      "end": 741554
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-tibetan",
+      "name": "wylie.map",
+      "start": 741554,
+      "end": 747699
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/misc/xetex/fontmapping/xetex-tibetan",
+      "name": "wylie.tec",
+      "start": 747699,
+      "end": 750107
+    }
+  ],
+  "totalSize": 750107
+}

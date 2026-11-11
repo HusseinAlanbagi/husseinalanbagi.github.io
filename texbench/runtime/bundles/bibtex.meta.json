@@ -1,0 +1,216 @@
+{
+  "name": "bibtex",
+  "files": [
+    {
+      "path": "/texlive/texmf-dist/bibtex/bib/base",
+      "name": "xampl.bib",
+      "start": 0,
+      "end": 10133
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bib/oberdiek",
+      "name": "oberdiek-bundle.bib",
+      "start": 10133,
+      "end": 16165
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bib/oberdiek",
+      "name": "oberdiek-source.bib",
+      "start": 16165,
+      "end": 17103
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/amscls",
+      "name": "amsalpha.bst",
+      "start": 17103,
+      "end": 45778
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/amscls",
+      "name": "amsplain.bst",
+      "start": 45778,
+      "end": 71576
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "bababbr3-fl.bst",
+      "start": 71576,
+      "end": 99450
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "bababbr3-lf.bst",
+      "start": 99450,
+      "end": 127254
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "bababbr3.bst",
+      "start": 127254,
+      "end": 155089
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "bababbrv-fl.bst",
+      "start": 155089,
+      "end": 182799
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "bababbrv-lf.bst",
+      "start": 182799,
+      "end": 210439
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "bababbrv.bst",
+      "start": 210439,
+      "end": 238110
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "babalpha-fl.bst",
+      "start": 238110,
+      "end": 268947
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "babalpha-lf.bst",
+      "start": 268947,
+      "end": 299722
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "babalpha.bst",
+      "start": 299722,
+      "end": 330520
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "babamspl.bst",
+      "start": 330520,
+      "end": 355737
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "babplai3-fl.bst",
+      "start": 355737,
+      "end": 383750
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "babplai3-lf.bst",
+      "start": 383750,
+      "end": 411701
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "babplai3.bst",
+      "start": 411701,
+      "end": 439675
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "babplain-fl.bst",
+      "start": 439675,
+      "end": 467524
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "babplain-lf.bst",
+      "start": 467524,
+      "end": 495311
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "babplain.bst",
+      "start": 495311,
+      "end": 523121
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "babunsrt-fl.bst",
+      "start": 523121,
+      "end": 548418
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "babunsrt-lf.bst",
+      "start": 548418,
+      "end": 573653
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/babelbib",
+      "name": "babunsrt.bst",
+      "start": 573653,
+      "end": 598911
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/base",
+      "name": "abbrv.bst",
+      "start": 598911,
+      "end": 619240
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/base",
+      "name": "acm.bst",
+      "start": 619240,
+      "end": 640304
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/base",
+      "name": "alpha.bst",
+      "start": 640304,
+      "end": 664211
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/base",
+      "name": "apalike.bst",
+      "start": 664211,
+      "end": 688846
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/base",
+      "name": "ieeetr.bst",
+      "start": 688846,
+      "end": 707207
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/base",
+      "name": "plain.bst",
+      "start": 707207,
+      "end": 727820
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/base",
+      "name": "siam.bst",
+      "start": 727820,
+      "end": 747223
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/base",
+      "name": "unsrt.bst",
+      "start": 747223,
+      "end": 765253
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/natbib",
+      "name": "abbrvnat.bst",
+      "start": 765253,
+      "end": 791785
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/natbib",
+      "name": "plainnat.bst",
+      "start": 791785,
+      "end": 818601
+    },
+    {
+      "path": "/texlive/texmf-dist/bibtex/bst/natbib",
+      "name": "unsrtnat.bst",
+      "start": 818601,
+      "end": 843151
+    }
+  ],
+  "totalSize": 843151
+}

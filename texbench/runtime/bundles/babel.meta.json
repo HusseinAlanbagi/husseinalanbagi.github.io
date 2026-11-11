@@ -1,0 +1,6312 @@
+{
+  "name": "babel",
+  "files": [
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel-english",
+      "name": "UKenglish.ldf",
+      "start": 0,
+      "end": 2772
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel-english",
+      "name": "USenglish.ldf",
+      "start": 2772,
+      "end": 5544
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel-english",
+      "name": "american.ldf",
+      "start": 5544,
+      "end": 8312
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel-english",
+      "name": "australian.ldf",
+      "start": 8312,
+      "end": 11088
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel-english",
+      "name": "british.ldf",
+      "start": 11088,
+      "end": 13852
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel-english",
+      "name": "canadian.ldf",
+      "start": 13852,
+      "end": 16620
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel-english",
+      "name": "english.ldf",
+      "start": 16620,
+      "end": 23628
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel-english",
+      "name": "newzealand.ldf",
+      "start": 23628,
+      "end": 26404
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "UKenglish.sty",
+      "start": 26404,
+      "end": 28660
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "USenglish.sty",
+      "start": 28660,
+      "end": 30916
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "afrikaans.sty",
+      "start": 30916,
+      "end": 33170
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "albanian.sty",
+      "start": 33170,
+      "end": 35423
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "american.sty",
+      "start": 35423,
+      "end": 37675
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "austrian.sty",
+      "start": 37675,
+      "end": 39927
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "babel-bidi-basic-r.lua",
+      "start": 39927,
+      "end": 46179
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "babel-bidi-basic.lua",
+      "start": 46179,
+      "end": 59740
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "babel-ca-buddhist.tex",
+      "start": 59740,
+      "end": 61060
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "babel-ca-chinese.tex",
+      "start": 61060,
+      "end": 65500
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "babel-ca-coptic.tex",
+      "start": 65500,
+      "end": 67565
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "babel-ca-ethiopic.tex",
+      "start": 67565,
+      "end": 69638
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "babel-ca-hebrew.tex",
+      "start": 69638,
+      "end": 77089
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "babel-ca-islamic.tex",
+      "start": 77089,
+      "end": 82599
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "babel-ca-julian.tex",
+      "start": 82599,
+      "end": 84775
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "babel-ca-persian.tex",
+      "start": 84775,
+      "end": 87608
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "babel-data-bidi.lua",
+      "start": 87608,
+      "end": 210728
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "babel-data-cjk.lua",
+      "start": 210728,
+      "end": 219550
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "babel-transforms.lua",
+      "start": 219550,
+      "end": 239507
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "babel.def",
+      "start": 239507,
+      "end": 315053
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "babel.sty",
+      "start": 315053,
+      "end": 462072
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "bahasa.sty",
+      "start": 462072,
+      "end": 464317
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "bahasam.sty",
+      "start": 464317,
+      "end": 466565
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "basque.sty",
+      "start": 466565,
+      "end": 468757
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "blplain.tex",
+      "start": 468757,
+      "end": 470275
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "bplain.tex",
+      "start": 470275,
+      "end": 471788
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "breton.sty",
+      "start": 471788,
+      "end": 474031
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "british.sty",
+      "start": 474031,
+      "end": 476279
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "bulgarian.sty",
+      "start": 476279,
+      "end": 478537
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "catalan.sty",
+      "start": 478537,
+      "end": 480785
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "croatian.sty",
+      "start": 480785,
+      "end": 483038
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "czech.sty",
+      "start": 483038,
+      "end": 485276
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "danish.sty",
+      "start": 485276,
+      "end": 487519
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "dutch.sty",
+      "start": 487519,
+      "end": 489757
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "english.sty",
+      "start": 489757,
+      "end": 492005
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "errbabel.def",
+      "start": 492005,
+      "end": 502654
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "esperanto.sty",
+      "start": 502654,
+      "end": 504912
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "estonian.sty",
+      "start": 504912,
+      "end": 507165
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "finnish.sty",
+      "start": 507165,
+      "end": 509413
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "francais.sty",
+      "start": 509413,
+      "end": 511662
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "galician.sty",
+      "start": 511662,
+      "end": 513915
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "germanb.sty",
+      "start": 513915,
+      "end": 516162
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "greek.sty",
+      "start": 516162,
+      "end": 518400
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "hebrew.sty",
+      "start": 518400,
+      "end": 520661
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "hyphen.cfg",
+      "start": 520661,
+      "end": 527104
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "icelandic.sty",
+      "start": 527104,
+      "end": 529362
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "interlingua.sty",
+      "start": 529362,
+      "end": 531630
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "irish.sty",
+      "start": 531630,
+      "end": 533868
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "italian.sty",
+      "start": 533868,
+      "end": 536116
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "latin.sty",
+      "start": 536116,
+      "end": 538354
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/aa",
+      "name": "babel-aa.ini",
+      "start": 538354,
+      "end": 540920
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/aa",
+      "name": "babel-afar.tex",
+      "start": 540920,
+      "end": 541256
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ab",
+      "name": "babel-ab.ini",
+      "start": 541256,
+      "end": 544586
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ab",
+      "name": "babel-abkhazian.tex",
+      "start": 544586,
+      "end": 544922
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ae",
+      "name": "babel-ae.ini",
+      "start": 544922,
+      "end": 547223
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ae",
+      "name": "babel-avestan.tex",
+      "start": 547223,
+      "end": 547559
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/af",
+      "name": "babel-af.ini",
+      "start": 547559,
+      "end": 551584
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/af",
+      "name": "babel-afrikaans.tex",
+      "start": 551584,
+      "end": 551960
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/agq",
+      "name": "babel-aghem.tex",
+      "start": 551960,
+      "end": 552297
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/agq",
+      "name": "babel-agq.ini",
+      "start": 552297,
+      "end": 555965
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ak",
+      "name": "babel-ak.ini",
+      "start": 555965,
+      "end": 559865
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ak",
+      "name": "babel-akan.tex",
+      "start": 559865,
+      "end": 560201
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/akk",
+      "name": "babel-akk.ini",
+      "start": 560201,
+      "end": 562486
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/akk",
+      "name": "babel-akkadian.tex",
+      "start": 562486,
+      "end": 562823
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/alt",
+      "name": "babel-alt.ini",
+      "start": 562823,
+      "end": 565234
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/alt",
+      "name": "babel-southernaltai.tex",
+      "start": 565234,
+      "end": 565571
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/am",
+      "name": "babel-am.ini",
+      "start": 565571,
+      "end": 575791
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/am",
+      "name": "babel-amharic.tex",
+      "start": 575791,
+      "end": 576465
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-ar-DZ.ini",
+      "start": 576465,
+      "end": 581172
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-ar-EG.ini",
+      "start": 581172,
+      "end": 586375
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-ar-IQ.ini",
+      "start": 586375,
+      "end": 591111
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-ar-JO.ini",
+      "start": 591111,
+      "end": 595851
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-ar-LB.ini",
+      "start": 595851,
+      "end": 600591
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-ar-MA.ini",
+      "start": 600591,
+      "end": 605292
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-ar-PS.ini",
+      "start": 605292,
+      "end": 610088
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-ar-SA.ini",
+      "start": 610088,
+      "end": 614915
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-ar-SY.ini",
+      "start": 614915,
+      "end": 619622
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-ar-TN.ini",
+      "start": 619622,
+      "end": 624322
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-ar.ini",
+      "start": 624322,
+      "end": 628971
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-algeria.tex",
+      "start": 628971,
+      "end": 629310
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-dz.tex",
+      "start": 629310,
+      "end": 629649
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-eg.tex",
+      "start": 629649,
+      "end": 629988
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-egypt.tex",
+      "start": 629988,
+      "end": 630327
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-iq.tex",
+      "start": 630327,
+      "end": 630666
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-iraq.tex",
+      "start": 630666,
+      "end": 631005
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-jo.tex",
+      "start": 631005,
+      "end": 631344
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-jordan.tex",
+      "start": 631344,
+      "end": 631683
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-lb.tex",
+      "start": 631683,
+      "end": 632022
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-lebanon.tex",
+      "start": 632022,
+      "end": 632361
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-ma.tex",
+      "start": 632361,
+      "end": 632700
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-morocco.tex",
+      "start": 632700,
+      "end": 633039
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-palestinianterritories.tex",
+      "start": 633039,
+      "end": 633378
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-ps.tex",
+      "start": 633378,
+      "end": 633717
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-sa.tex",
+      "start": 633717,
+      "end": 634056
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-saudiarabia.tex",
+      "start": 634056,
+      "end": 634395
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-sy.tex",
+      "start": 634395,
+      "end": 634734
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-syria.tex",
+      "start": 634734,
+      "end": 635073
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-tn.tex",
+      "start": 635073,
+      "end": 635412
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic-tunisia.tex",
+      "start": 635412,
+      "end": 635751
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ar",
+      "name": "babel-arabic.tex",
+      "start": 635751,
+      "end": 636126
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/arc",
+      "name": "babel-aramaic-nabataean.tex",
+      "start": 636126,
+      "end": 636468
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/arc",
+      "name": "babel-aramaic-nbat.tex",
+      "start": 636468,
+      "end": 636810
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/arc",
+      "name": "babel-aramaic-palm.tex",
+      "start": 636810,
+      "end": 637152
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/arc",
+      "name": "babel-aramaic-palmyrene.tex",
+      "start": 637152,
+      "end": 637494
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/arc",
+      "name": "babel-aramaic.tex",
+      "start": 637494,
+      "end": 637831
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/arc",
+      "name": "babel-arc-Nbat.ini",
+      "start": 637831,
+      "end": 640115
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/arc",
+      "name": "babel-arc-Palm.ini",
+      "start": 640115,
+      "end": 642402
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/arc",
+      "name": "babel-arc.ini",
+      "start": 642402,
+      "end": 644679
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/arq",
+      "name": "babel-algerianarabic.tex",
+      "start": 644679,
+      "end": 645016
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/arq",
+      "name": "babel-arq.ini",
+      "start": 645016,
+      "end": 648127
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/arz",
+      "name": "babel-arz.ini",
+      "start": 648127,
+      "end": 650367
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/arz",
+      "name": "babel-egyptianarabic.tex",
+      "start": 650367,
+      "end": 650704
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/as",
+      "name": "babel-as.ini",
+      "start": 650704,
+      "end": 655225
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/as",
+      "name": "babel-assamese.tex",
+      "start": 655225,
+      "end": 655561
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/asa",
+      "name": "babel-asa.ini",
+      "start": 655561,
+      "end": 659072
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/asa",
+      "name": "babel-asu.tex",
+      "start": 659072,
+      "end": 659409
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ast",
+      "name": "babel-ast.ini",
+      "start": 659409,
+      "end": 663699
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ast",
+      "name": "babel-asturian.tex",
+      "start": 663699,
+      "end": 664036
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/awa",
+      "name": "babel-awa.ini",
+      "start": 664036,
+      "end": 666182
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/awa",
+      "name": "babel-awadhi.tex",
+      "start": 666182,
+      "end": 666519
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ay",
+      "name": "babel-ay.ini",
+      "start": 666519,
+      "end": 668668
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ay",
+      "name": "babel-aymara.tex",
+      "start": 668668,
+      "end": 669004
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/az",
+      "name": "babel-az-Cyrl.ini",
+      "start": 669004,
+      "end": 672947
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/az",
+      "name": "babel-az-Latn.ini",
+      "start": 672947,
+      "end": 676532
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/az",
+      "name": "babel-az.ini",
+      "start": 676532,
+      "end": 680774
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/az",
+      "name": "babel-azerbaijani-cyrillic.tex",
+      "start": 680774,
+      "end": 681115
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/az",
+      "name": "babel-azerbaijani-cyrl.tex",
+      "start": 681115,
+      "end": 681456
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/az",
+      "name": "babel-azerbaijani-latin.tex",
+      "start": 681456,
+      "end": 681797
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/az",
+      "name": "babel-azerbaijani-latn.tex",
+      "start": 681797,
+      "end": 682138
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/az",
+      "name": "babel-azerbaijani.tex",
+      "start": 682138,
+      "end": 682516
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ba",
+      "name": "babel-ba.ini",
+      "start": 682516,
+      "end": 685215
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ba",
+      "name": "babel-bashkir.tex",
+      "start": 685215,
+      "end": 685551
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bal",
+      "name": "babel-bal.ini",
+      "start": 685551,
+      "end": 688389
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bal",
+      "name": "babel-baluchi.tex",
+      "start": 688389,
+      "end": 688726
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ban",
+      "name": "babel-balinese.tex",
+      "start": 688726,
+      "end": 689063
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ban",
+      "name": "babel-ban.ini",
+      "start": 689063,
+      "end": 691210
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bar",
+      "name": "babel-bar.ini",
+      "start": 691210,
+      "end": 693367
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bar",
+      "name": "babel-bavarian.tex",
+      "start": 693367,
+      "end": 693704
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bas",
+      "name": "babel-bas.ini",
+      "start": 693704,
+      "end": 697348
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bas",
+      "name": "babel-basaa.tex",
+      "start": 697348,
+      "end": 697685
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bbc",
+      "name": "babel-bataktoba.tex",
+      "start": 697685,
+      "end": 698022
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bbc",
+      "name": "babel-bbc.ini",
+      "start": 698022,
+      "end": 700224
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/be",
+      "name": "babel-be-tarask.ini",
+      "start": 700224,
+      "end": 706176
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/be",
+      "name": "babel-be.ini",
+      "start": 706176,
+      "end": 712045
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/be",
+      "name": "babel-belarusian-taraskievica.tex",
+      "start": 712045,
+      "end": 712388
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/be",
+      "name": "babel-belarusian.tex",
+      "start": 712388,
+      "end": 712765
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bem",
+      "name": "babel-bem.ini",
+      "start": 712765,
+      "end": 716322
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bem",
+      "name": "babel-bemba.tex",
+      "start": 716322,
+      "end": 716659
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bew",
+      "name": "babel-betawi.tex",
+      "start": 716659,
+      "end": 716996
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bew",
+      "name": "babel-bew.ini",
+      "start": 716996,
+      "end": 719940
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bez",
+      "name": "babel-bena.tex",
+      "start": 719940,
+      "end": 720277
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bez",
+      "name": "babel-bez.ini",
+      "start": 720277,
+      "end": 724135
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bg",
+      "name": "babel-bg.ini",
+      "start": 724135,
+      "end": 729855
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bg",
+      "name": "babel-bulgarian.tex",
+      "start": 729855,
+      "end": 730231
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bgc",
+      "name": "babel-bgc.ini",
+      "start": 730231,
+      "end": 733374
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bgc",
+      "name": "babel-haryanvi.tex",
+      "start": 733374,
+      "end": 733711
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bho",
+      "name": "babel-bho.ini",
+      "start": 733711,
+      "end": 736860
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bho",
+      "name": "babel-bhojpuri.tex",
+      "start": 736860,
+      "end": 737197
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bm",
+      "name": "babel-bambara.tex",
+      "start": 737197,
+      "end": 737533
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bm",
+      "name": "babel-bm.ini",
+      "start": 737533,
+      "end": 741050
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bn",
+      "name": "babel-bangla.tex",
+      "start": 741050,
+      "end": 741386
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bn",
+      "name": "babel-bengali.tex",
+      "start": 741386,
+      "end": 741722
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bn",
+      "name": "babel-bn.ini",
+      "start": 741722,
+      "end": 746737
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bo",
+      "name": "babel-bo.ini",
+      "start": 746737,
+      "end": 752211
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bo",
+      "name": "babel-tibetan.tex",
+      "start": 752211,
+      "end": 757008
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/br",
+      "name": "babel-br.ini",
+      "start": 757008,
+      "end": 763286
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/br",
+      "name": "babel-breton.tex",
+      "start": 763286,
+      "end": 763659
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/brx",
+      "name": "babel-bodo.tex",
+      "start": 763659,
+      "end": 763996
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/brx",
+      "name": "babel-brx.ini",
+      "start": 763996,
+      "end": 768373
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bs",
+      "name": "babel-bosnian-cyrillic.tex",
+      "start": 768373,
+      "end": 768714
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bs",
+      "name": "babel-bosnian-cyrl.tex",
+      "start": 768714,
+      "end": 769055
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bs",
+      "name": "babel-bosnian-latin.tex",
+      "start": 769055,
+      "end": 769396
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bs",
+      "name": "babel-bosnian-latn.tex",
+      "start": 769396,
+      "end": 769737
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bs",
+      "name": "babel-bosnian.tex",
+      "start": 769737,
+      "end": 770111
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bs",
+      "name": "babel-bs-Cyrl.ini",
+      "start": 770111,
+      "end": 774195
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bs",
+      "name": "babel-bs-Latn.ini",
+      "start": 774195,
+      "end": 778026
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bs",
+      "name": "babel-bs.ini",
+      "start": 778026,
+      "end": 781890
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bua",
+      "name": "babel-bua.ini",
+      "start": 781890,
+      "end": 787976
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/bua",
+      "name": "babel-buriat.tex",
+      "start": 787976,
+      "end": 788313
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/byn",
+      "name": "babel-blin.tex",
+      "start": 788313,
+      "end": 788650
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/byn",
+      "name": "babel-byn.ini",
+      "start": 788650,
+      "end": 794208
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ca",
+      "name": "babel-ca.ini",
+      "start": 794208,
+      "end": 798440
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ca",
+      "name": "babel-catalan.tex",
+      "start": 798440,
+      "end": 798814
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cch",
+      "name": "babel-atsam.tex",
+      "start": 798814,
+      "end": 799151
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cch",
+      "name": "babel-cch.ini",
+      "start": 799151,
+      "end": 801840
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ccp",
+      "name": "babel-ccp.ini",
+      "start": 801840,
+      "end": 806445
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ccp",
+      "name": "babel-chakma.tex",
+      "start": 806445,
+      "end": 806782
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ce",
+      "name": "babel-ce.ini",
+      "start": 806782,
+      "end": 811047
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ce",
+      "name": "babel-chechen.tex",
+      "start": 811047,
+      "end": 811383
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ceb",
+      "name": "babel-ceb.ini",
+      "start": 811383,
+      "end": 814118
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ceb",
+      "name": "babel-cebuano.tex",
+      "start": 814118,
+      "end": 814455
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cgg",
+      "name": "babel-cgg.ini",
+      "start": 814455,
+      "end": 818076
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cgg",
+      "name": "babel-chiga.tex",
+      "start": 818076,
+      "end": 818413
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/chr",
+      "name": "babel-cherokee.tex",
+      "start": 818413,
+      "end": 818750
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/chr",
+      "name": "babel-chr.ini",
+      "start": 818750,
+      "end": 822522
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ckb",
+      "name": "babel-centralkurdish-latin.tex",
+      "start": 822522,
+      "end": 822864
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ckb",
+      "name": "babel-centralkurdish-latn.tex",
+      "start": 822864,
+      "end": 823206
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ckb",
+      "name": "babel-centralkurdish.tex",
+      "start": 823206,
+      "end": 823543
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ckb",
+      "name": "babel-ckb-Arab.ini",
+      "start": 823543,
+      "end": 828394
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ckb",
+      "name": "babel-ckb-Latn.ini",
+      "start": 828394,
+      "end": 831458
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ckb",
+      "name": "babel-ckb.ini",
+      "start": 831458,
+      "end": 836866
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ckb",
+      "name": "babel-sorani.tex",
+      "start": 836866,
+      "end": 837203
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/co",
+      "name": "babel-co.ini",
+      "start": 837203,
+      "end": 840020
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/co",
+      "name": "babel-corsican.tex",
+      "start": 840020,
+      "end": 840356
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cop",
+      "name": "babel-cop.ini",
+      "start": 840356,
+      "end": 842924
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cop",
+      "name": "babel-coptic.tex",
+      "start": 842924,
+      "end": 843261
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cs",
+      "name": "babel-cs.ini",
+      "start": 843261,
+      "end": 847708
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cs",
+      "name": "babel-czech.tex",
+      "start": 847708,
+      "end": 848080
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cu",
+      "name": "babel-churchslavic-cyrs.tex",
+      "start": 848080,
+      "end": 848421
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cu",
+      "name": "babel-churchslavic-glag.tex",
+      "start": 848421,
+      "end": 848762
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cu",
+      "name": "babel-churchslavic-glagolitic.tex",
+      "start": 848762,
+      "end": 849103
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cu",
+      "name": "babel-churchslavic-oldcyrillic.tex",
+      "start": 849103,
+      "end": 849444
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cu",
+      "name": "babel-churchslavic.tex",
+      "start": 849444,
+      "end": 849780
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cu",
+      "name": "babel-churchslavonic.tex",
+      "start": 849780,
+      "end": 850116
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cu",
+      "name": "babel-cu-Cyrs.ini",
+      "start": 850116,
+      "end": 853861
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cu",
+      "name": "babel-cu-Glag.ini",
+      "start": 853861,
+      "end": 855457
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cu",
+      "name": "babel-cu.ini",
+      "start": 855457,
+      "end": 859053
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cv",
+      "name": "babel-chuvash.tex",
+      "start": 859053,
+      "end": 859389
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cv",
+      "name": "babel-cv.ini",
+      "start": 859389,
+      "end": 863729
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cy",
+      "name": "babel-cy.ini",
+      "start": 863729,
+      "end": 867865
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/cy",
+      "name": "babel-welsh.tex",
+      "start": 867865,
+      "end": 868237
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/da",
+      "name": "babel-da.ini",
+      "start": 868237,
+      "end": 872133
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/da",
+      "name": "babel-danish.tex",
+      "start": 872133,
+      "end": 872506
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/dav",
+      "name": "babel-dav.ini",
+      "start": 872506,
+      "end": 876316
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/dav",
+      "name": "babel-taita.tex",
+      "start": 876316,
+      "end": 876653
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-austrian.tex",
+      "start": 876653,
+      "end": 877323
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-austriangerman.tex",
+      "start": 877323,
+      "end": 877702
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-de-1901.ini",
+      "start": 877702,
+      "end": 882441
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-de-1996.ini",
+      "start": 882441,
+      "end": 887144
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-de-AT-1901.ini",
+      "start": 887144,
+      "end": 892140
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-de-AT-1996.ini",
+      "start": 892140,
+      "end": 897090
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-de-AT.ini",
+      "start": 897090,
+      "end": 902010
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-de-CH-1901.ini",
+      "start": 902010,
+      "end": 906958
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-de-CH-1996.ini",
+      "start": 906958,
+      "end": 911951
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-de-CH.ini",
+      "start": 911951,
+      "end": 916852
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-de-DE-1901.ini",
+      "start": 916852,
+      "end": 921747
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-de-DE-1996.ini",
+      "start": 921747,
+      "end": 926573
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-de-DE.ini",
+      "start": 926573,
+      "end": 931369
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-de.ini",
+      "start": 931369,
+      "end": 936099
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-german-at-1901.tex",
+      "start": 936099,
+      "end": 936488
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-german-at.tex",
+      "start": 936488,
+      "end": 936867
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-german-austria-1901.tex",
+      "start": 936867,
+      "end": 937261
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-german-austria-traditional.tex",
+      "start": 937261,
+      "end": 937650
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-german-austria.tex",
+      "start": 937650,
+      "end": 938034
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-german-ch-1901.tex",
+      "start": 938034,
+      "end": 938423
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-german-ch.tex",
+      "start": 938423,
+      "end": 938802
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-german-de-1901.tex",
+      "start": 938802,
+      "end": 939190
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-german-de.tex",
+      "start": 939190,
+      "end": 939568
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-german-germany-1901.tex",
+      "start": 939568,
+      "end": 939961
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-german-germany.tex",
+      "start": 939961,
+      "end": 940344
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-german-switzerland-1901.tex",
+      "start": 940344,
+      "end": 940742
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-german-switzerland-traditional.tex",
+      "start": 940742,
+      "end": 941140
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-german-switzerland.tex",
+      "start": 941140,
+      "end": 941528
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-german-traditional.tex",
+      "start": 941528,
+      "end": 941918
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-german.tex",
+      "start": 941918,
+      "end": 942578
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/de",
+      "name": "babel-swisshighgerman.tex",
+      "start": 942578,
+      "end": 942960
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/dje",
+      "name": "babel-dje.ini",
+      "start": 942960,
+      "end": 946491
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/dje",
+      "name": "babel-zarma.tex",
+      "start": 946491,
+      "end": 946828
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/doi",
+      "name": "babel-dogri.tex",
+      "start": 946828,
+      "end": 947165
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/doi",
+      "name": "babel-doi.ini",
+      "start": 947165,
+      "end": 951778
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/dsb",
+      "name": "babel-dsb.ini",
+      "start": 951778,
+      "end": 956008
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/dsb",
+      "name": "babel-lowersorbian.tex",
+      "start": 956008,
+      "end": 956384
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/dua",
+      "name": "babel-dua.ini",
+      "start": 956384,
+      "end": 959692
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/dua",
+      "name": "babel-duala.tex",
+      "start": 959692,
+      "end": 960029
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/dv",
+      "name": "babel-divehi.tex",
+      "start": 960029,
+      "end": 960365
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/dv",
+      "name": "babel-dv.ini",
+      "start": 960365,
+      "end": 962550
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/dyo",
+      "name": "babel-dyo.ini",
+      "start": 962550,
+      "end": 966014
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/dyo",
+      "name": "babel-jolafonyi.tex",
+      "start": 966014,
+      "end": 966351
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/dz",
+      "name": "babel-dz.ini",
+      "start": 966351,
+      "end": 970932
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/dz",
+      "name": "babel-dzongkha.tex",
+      "start": 970932,
+      "end": 971268
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ebu",
+      "name": "babel-ebu.ini",
+      "start": 971268,
+      "end": 975027
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ebu",
+      "name": "babel-embu.tex",
+      "start": 975027,
+      "end": 975364
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ee",
+      "name": "babel-ee.ini",
+      "start": 975364,
+      "end": 979188
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ee",
+      "name": "babel-ewe.tex",
+      "start": 979188,
+      "end": 979524
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/egy",
+      "name": "babel-ancientegyptian.tex",
+      "start": 979524,
+      "end": 979861
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/egy",
+      "name": "babel-egy.ini",
+      "start": 979861,
+      "end": 982147
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/el",
+      "name": "babel-el-monoton.ini",
+      "start": 982147,
+      "end": 998807
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/el",
+      "name": "babel-el-polyton.ini",
+      "start": 998807,
+      "end": 1016075
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/el",
+      "name": "babel-el.ini",
+      "start": 1016075,
+      "end": 1032498
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/el",
+      "name": "babel-greek.tex",
+      "start": 1032498,
+      "end": 1035080
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/el",
+      "name": "babel-monotonicgreek.tex",
+      "start": 1035080,
+      "end": 1038040
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/el",
+      "name": "babel-polytonicgreek.tex",
+      "start": 1038040,
+      "end": 1041134
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-american.tex",
+      "start": 1041134,
+      "end": 1041512
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-americanenglish.tex",
+      "start": 1041512,
+      "end": 1041851
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-australian.tex",
+      "start": 1041851,
+      "end": 1042231
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-australianenglish.tex",
+      "start": 1042231,
+      "end": 1042570
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-british.tex",
+      "start": 1042570,
+      "end": 1042947
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-britishenglish.tex",
+      "start": 1042947,
+      "end": 1043286
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-canadian.tex",
+      "start": 1043286,
+      "end": 1043664
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-canadianenglish.tex",
+      "start": 1043664,
+      "end": 1044003
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-en-AU.ini",
+      "start": 1044003,
+      "end": 1048072
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-en-CA.ini",
+      "start": 1048072,
+      "end": 1052121
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-en-GB.ini",
+      "start": 1052121,
+      "end": 1056217
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-en-NZ.ini",
+      "start": 1056217,
+      "end": 1060240
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-en-US.ini",
+      "start": 1060240,
+      "end": 1064313
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-en.ini",
+      "start": 1064313,
+      "end": 1068249
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-english-au.tex",
+      "start": 1068249,
+      "end": 1068588
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-english-australia.tex",
+      "start": 1068588,
+      "end": 1068927
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-english-ca.tex",
+      "start": 1068927,
+      "end": 1069266
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-english-canada.tex",
+      "start": 1069266,
+      "end": 1069605
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-english-gb.tex",
+      "start": 1069605,
+      "end": 1069944
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-english-newzealand.tex",
+      "start": 1069944,
+      "end": 1070283
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-english-nz.tex",
+      "start": 1070283,
+      "end": 1070622
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-english-unitedkingdom.tex",
+      "start": 1070622,
+      "end": 1070961
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-english-unitedstates.tex",
+      "start": 1070961,
+      "end": 1071300
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-english-us.tex",
+      "start": 1071300,
+      "end": 1071639
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-english.tex",
+      "start": 1071639,
+      "end": 1072013
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-newzealand.tex",
+      "start": 1072013,
+      "end": 1072393
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-ukenglish.tex",
+      "start": 1072393,
+      "end": 1072772
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/en",
+      "name": "babel-usenglish.tex",
+      "start": 1072772,
+      "end": 1073151
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/eo",
+      "name": "babel-eo.ini",
+      "start": 1073151,
+      "end": 1077088
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/eo",
+      "name": "babel-esperanto.tex",
+      "start": 1077088,
+      "end": 1077464
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/es",
+      "name": "babel-es-MX.ini",
+      "start": 1077464,
+      "end": 1081977
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/es",
+      "name": "babel-es.ini",
+      "start": 1081977,
+      "end": 1086280
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/es",
+      "name": "babel-mexican.tex",
+      "start": 1086280,
+      "end": 1086619
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/es",
+      "name": "babel-mexicanspanish.tex",
+      "start": 1086619,
+      "end": 1086958
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/es",
+      "name": "babel-spanish-mexico.tex",
+      "start": 1086958,
+      "end": 1087297
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/es",
+      "name": "babel-spanish-mx.tex",
+      "start": 1087297,
+      "end": 1087636
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/es",
+      "name": "babel-spanish.tex",
+      "start": 1087636,
+      "end": 1088010
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/et",
+      "name": "babel-estonian.tex",
+      "start": 1088010,
+      "end": 1088385
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/et",
+      "name": "babel-et.ini",
+      "start": 1088385,
+      "end": 1092334
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ett",
+      "name": "babel-etruscan.tex",
+      "start": 1092334,
+      "end": 1092671
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ett",
+      "name": "babel-ett.ini",
+      "start": 1092671,
+      "end": 1094974
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/eu",
+      "name": "babel-basque.tex",
+      "start": 1094974,
+      "end": 1095347
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/eu",
+      "name": "babel-eu.ini",
+      "start": 1095347,
+      "end": 1099614
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ewo",
+      "name": "babel-ewo.ini",
+      "start": 1099614,
+      "end": 1103195
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ewo",
+      "name": "babel-ewondo.tex",
+      "start": 1103195,
+      "end": 1103532
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fa",
+      "name": "babel-fa.ini",
+      "start": 1103532,
+      "end": 1109909
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fa",
+      "name": "babel-farsi.tex",
+      "start": 1109909,
+      "end": 1110281
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fa",
+      "name": "babel-persian.tex",
+      "start": 1110281,
+      "end": 1110617
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ff",
+      "name": "babel-ff.ini",
+      "start": 1110617,
+      "end": 1114104
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ff",
+      "name": "babel-fulah.tex",
+      "start": 1114104,
+      "end": 1114440
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fi",
+      "name": "babel-fi.ini",
+      "start": 1114440,
+      "end": 1118941
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fi",
+      "name": "babel-finnish.tex",
+      "start": 1118941,
+      "end": 1119315
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fil",
+      "name": "babel-fil.ini",
+      "start": 1119315,
+      "end": 1123340
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fil",
+      "name": "babel-filipino.tex",
+      "start": 1123340,
+      "end": 1123677
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fo",
+      "name": "babel-faroese.tex",
+      "start": 1123677,
+      "end": 1124013
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fo",
+      "name": "babel-fo.ini",
+      "start": 1124013,
+      "end": 1127606
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-acadian.tex",
+      "start": 1127606,
+      "end": 1127952
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-canadianfrench.tex",
+      "start": 1127952,
+      "end": 1128291
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-fr-BE.ini",
+      "start": 1128291,
+      "end": 1134638
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-fr-CA.ini",
+      "start": 1134638,
+      "end": 1140525
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-fr-CH.ini",
+      "start": 1140525,
+      "end": 1144845
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-fr-LU.ini",
+      "start": 1144845,
+      "end": 1149158
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-fr-x-acadian.ini",
+      "start": 1149158,
+      "end": 1153451
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-fr.ini",
+      "start": 1153451,
+      "end": 1159766
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-french-be.tex",
+      "start": 1159766,
+      "end": 1160105
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-french-belgium.tex",
+      "start": 1160105,
+      "end": 1160444
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-french-ca.tex",
+      "start": 1160444,
+      "end": 1160783
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-french-canada.tex",
+      "start": 1160783,
+      "end": 1162506
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-french-ch.tex",
+      "start": 1162506,
+      "end": 1162845
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-french-lu.tex",
+      "start": 1162845,
+      "end": 1163184
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-french-luxembourg.tex",
+      "start": 1163184,
+      "end": 1163523
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-french-switzerland.tex",
+      "start": 1163523,
+      "end": 1163862
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-french.tex",
+      "start": 1163862,
+      "end": 1166041
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fr",
+      "name": "babel-swissfrench.tex",
+      "start": 1166041,
+      "end": 1166380
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/frr",
+      "name": "babel-frr.ini",
+      "start": 1166380,
+      "end": 1170343
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/frr",
+      "name": "babel-northernfrisian.tex",
+      "start": 1170343,
+      "end": 1170680
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fur",
+      "name": "babel-friulian.tex",
+      "start": 1170680,
+      "end": 1171055
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fur",
+      "name": "babel-fur.ini",
+      "start": 1171055,
+      "end": 1175093
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fy",
+      "name": "babel-fy.ini",
+      "start": 1175093,
+      "end": 1178696
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/fy",
+      "name": "babel-westernfrisian.tex",
+      "start": 1178696,
+      "end": 1179032
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ga",
+      "name": "babel-ga.ini",
+      "start": 1179032,
+      "end": 1183080
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ga",
+      "name": "babel-irish.tex",
+      "start": 1183080,
+      "end": 1183452
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gaa",
+      "name": "babel-ga.tex",
+      "start": 1183452,
+      "end": 1183789
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gaa",
+      "name": "babel-gaa.ini",
+      "start": 1183789,
+      "end": 1186589
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gd",
+      "name": "babel-gd.ini",
+      "start": 1186589,
+      "end": 1191363
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gd",
+      "name": "babel-scottish.tex",
+      "start": 1191363,
+      "end": 1191738
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gd",
+      "name": "babel-scottishgaelic.tex",
+      "start": 1191738,
+      "end": 1192119
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gez",
+      "name": "babel-geez.tex",
+      "start": 1192119,
+      "end": 1192456
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gez",
+      "name": "babel-gez.ini",
+      "start": 1192456,
+      "end": 1197422
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gl",
+      "name": "babel-galician.tex",
+      "start": 1197422,
+      "end": 1197797
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gl",
+      "name": "babel-gl.ini",
+      "start": 1197797,
+      "end": 1201952
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gn",
+      "name": "babel-gn.ini",
+      "start": 1201952,
+      "end": 1204758
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gn",
+      "name": "babel-guarani.tex",
+      "start": 1204758,
+      "end": 1205094
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/got",
+      "name": "babel-got.ini",
+      "start": 1205094,
+      "end": 1207396
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/got",
+      "name": "babel-gothic.tex",
+      "start": 1207396,
+      "end": 1207733
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/grc",
+      "name": "babel-ancientgreek.tex",
+      "start": 1207733,
+      "end": 1210811
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/grc",
+      "name": "babel-grc.ini",
+      "start": 1210811,
+      "end": 1223914
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gsw",
+      "name": "babel-alemannic.tex",
+      "start": 1223914,
+      "end": 1224251
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gsw",
+      "name": "babel-alsatian.tex",
+      "start": 1224251,
+      "end": 1224592
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gsw",
+      "name": "babel-gsw-FR.ini",
+      "start": 1224592,
+      "end": 1228378
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gsw",
+      "name": "babel-gsw.ini",
+      "start": 1228378,
+      "end": 1231965
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gsw",
+      "name": "babel-swissgerman.tex",
+      "start": 1231965,
+      "end": 1232722
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gu",
+      "name": "babel-gu.ini",
+      "start": 1232722,
+      "end": 1237080
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gu",
+      "name": "babel-gujarati.tex",
+      "start": 1237080,
+      "end": 1237416
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/guz",
+      "name": "babel-gusii.tex",
+      "start": 1237416,
+      "end": 1237753
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/guz",
+      "name": "babel-guz.ini",
+      "start": 1237753,
+      "end": 1241215
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gv",
+      "name": "babel-gv.ini",
+      "start": 1241215,
+      "end": 1244726
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/gv",
+      "name": "babel-manx.tex",
+      "start": 1244726,
+      "end": 1245062
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ha",
+      "name": "babel-ha-GH.ini",
+      "start": 1245062,
+      "end": 1248607
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ha",
+      "name": "babel-ha-NE.ini",
+      "start": 1248607,
+      "end": 1251941
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ha",
+      "name": "babel-ha.ini",
+      "start": 1251941,
+      "end": 1255873
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ha",
+      "name": "babel-hausa-gh.tex",
+      "start": 1255873,
+      "end": 1256212
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ha",
+      "name": "babel-hausa-ghana.tex",
+      "start": 1256212,
+      "end": 1256551
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ha",
+      "name": "babel-hausa-ne.tex",
+      "start": 1256551,
+      "end": 1256890
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ha",
+      "name": "babel-hausa-niger.tex",
+      "start": 1256890,
+      "end": 1257229
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ha",
+      "name": "babel-hausa.tex",
+      "start": 1257229,
+      "end": 1257565
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/haw",
+      "name": "babel-haw.ini",
+      "start": 1257565,
+      "end": 1260675
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/haw",
+      "name": "babel-hawaiian.tex",
+      "start": 1260675,
+      "end": 1261012
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/hbo",
+      "name": "babel-ancienthebrew.tex",
+      "start": 1261012,
+      "end": 1261350
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/hbo",
+      "name": "babel-hbo.ini",
+      "start": 1261350,
+      "end": 1263670
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/he",
+      "name": "babel-he.ini",
+      "start": 1263670,
+      "end": 1270053
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/he",
+      "name": "babel-hebrew.tex",
+      "start": 1270053,
+      "end": 1276189
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/hi",
+      "name": "babel-hi.ini",
+      "start": 1276189,
+      "end": 1282149
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/hi",
+      "name": "babel-hindi.tex",
+      "start": 1282149,
+      "end": 1282521
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/hnj",
+      "name": "babel-hmongnjua.tex",
+      "start": 1282521,
+      "end": 1282858
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/hnj",
+      "name": "babel-hnj.ini",
+      "start": 1282858,
+      "end": 1287230
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/hr",
+      "name": "babel-croatian.tex",
+      "start": 1287230,
+      "end": 1287605
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/hr",
+      "name": "babel-hr.ini",
+      "start": 1287605,
+      "end": 1292282
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/hsb",
+      "name": "babel-hsb.ini",
+      "start": 1292282,
+      "end": 1296511
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/hsb",
+      "name": "babel-uppersorbian.tex",
+      "start": 1296511,
+      "end": 1296887
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/hu",
+      "name": "babel-hu.ini",
+      "start": 1296887,
+      "end": 1303193
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/hu",
+      "name": "babel-hungarian.tex",
+      "start": 1303193,
+      "end": 1303566
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/hu",
+      "name": "babel-magyar.tex",
+      "start": 1303566,
+      "end": 1303939
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/hy",
+      "name": "babel-armenian.tex",
+      "start": 1303939,
+      "end": 1304275
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/hy",
+      "name": "babel-hy.ini",
+      "start": 1304275,
+      "end": 1309872
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ia",
+      "name": "babel-ia.ini",
+      "start": 1309872,
+      "end": 1312265
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ia",
+      "name": "babel-interlingua.tex",
+      "start": 1312265,
+      "end": 1312643
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/id",
+      "name": "babel-id.ini",
+      "start": 1312643,
+      "end": 1316669
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/id",
+      "name": "babel-indonesian.tex",
+      "start": 1316669,
+      "end": 1317046
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ig",
+      "name": "babel-ig.ini",
+      "start": 1317046,
+      "end": 1320805
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ig",
+      "name": "babel-igbo.tex",
+      "start": 1320805,
+      "end": 1321141
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ii",
+      "name": "babel-ii.ini",
+      "start": 1321141,
+      "end": 1324292
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ii",
+      "name": "babel-sichuanyi.tex",
+      "start": 1324292,
+      "end": 1324628
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/inh",
+      "name": "babel-ingush.tex",
+      "start": 1324628,
+      "end": 1324965
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/inh",
+      "name": "babel-inh.ini",
+      "start": 1324965,
+      "end": 1327132
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-bahasa.tex",
+      "start": 1327132,
+      "end": 1327784
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-bahasai.tex",
+      "start": 1327784,
+      "end": 1328439
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-bahasam.tex",
+      "start": 1328439,
+      "end": 1329073
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-brazil.tex",
+      "start": 1329073,
+      "end": 1329725
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-classiclatin.tex",
+      "start": 1329725,
+      "end": 1330418
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-ecclesiasticlatin.tex",
+      "start": 1330418,
+      "end": 1331151
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-friulan.tex",
+      "start": 1331151,
+      "end": 1331801
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-germanb.tex",
+      "start": 1331801,
+      "end": 1332450
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-indon.tex",
+      "start": 1332450,
+      "end": 1333099
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-lsorbian.tex",
+      "start": 1333099,
+      "end": 1333760
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-melayu.tex",
+      "start": 1333760,
+      "end": 1334400
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-naustrian.tex",
+      "start": 1334400,
+      "end": 1334919
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-ngerman.tex",
+      "start": 1334919,
+      "end": 1335427
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-ngermanb.tex",
+      "start": 1335427,
+      "end": 1336077
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-nswissgerman.tex",
+      "start": 1336077,
+      "end": 1336612
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-polutonikogreek.tex",
+      "start": 1336612,
+      "end": 1339163
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-portuges.tex",
+      "start": 1339163,
+      "end": 1339821
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-russianb.tex",
+      "start": 1339821,
+      "end": 1340470
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-samin.tex",
+      "start": 1340470,
+      "end": 1341118
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-serbianc.tex",
+      "start": 1341118,
+      "end": 1341630
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-ukraineb.tex",
+      "start": 1341630,
+      "end": 1342288
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/invalid",
+      "name": "babel-usorbian.tex",
+      "start": 1342288,
+      "end": 1342949
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/is",
+      "name": "babel-icelandic.tex",
+      "start": 1342949,
+      "end": 1343325
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/is",
+      "name": "babel-is.ini",
+      "start": 1343325,
+      "end": 1347404
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/isv",
+      "name": "babel-interslavic.tex",
+      "start": 1347404,
+      "end": 1347741
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/isv",
+      "name": "babel-isv.ini",
+      "start": 1347741,
+      "end": 1350340
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/it",
+      "name": "babel-it.ini",
+      "start": 1350340,
+      "end": 1354595
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/it",
+      "name": "babel-italian.tex",
+      "start": 1354595,
+      "end": 1354969
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/iu",
+      "name": "babel-inuktitut.tex",
+      "start": 1354969,
+      "end": 1355305
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/iu",
+      "name": "babel-iu.ini",
+      "start": 1355305,
+      "end": 1358719
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ja",
+      "name": "babel-ja.ini",
+      "start": 1358719,
+      "end": 1374417
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ja",
+      "name": "babel-japanese.tex",
+      "start": 1374417,
+      "end": 1376967
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/jgo",
+      "name": "babel-jgo.ini",
+      "start": 1376967,
+      "end": 1380732
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/jgo",
+      "name": "babel-ngomba.tex",
+      "start": 1380732,
+      "end": 1381069
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/jmc",
+      "name": "babel-jmc.ini",
+      "start": 1381069,
+      "end": 1384556
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/jmc",
+      "name": "babel-machame.tex",
+      "start": 1384556,
+      "end": 1384893
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/jv",
+      "name": "babel-javanese.tex",
+      "start": 1384893,
+      "end": 1385229
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/jv",
+      "name": "babel-jv.ini",
+      "start": 1385229,
+      "end": 1389185
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ka",
+      "name": "babel-georgian.tex",
+      "start": 1389185,
+      "end": 1389667
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ka",
+      "name": "babel-ka.ini",
+      "start": 1389667,
+      "end": 1394100
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kab",
+      "name": "babel-kab.ini",
+      "start": 1394100,
+      "end": 1397774
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kab",
+      "name": "babel-kabyle.tex",
+      "start": 1397774,
+      "end": 1398111
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kaj",
+      "name": "babel-jju.tex",
+      "start": 1398111,
+      "end": 1398448
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kaj",
+      "name": "babel-kaj.ini",
+      "start": 1398448,
+      "end": 1401284
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kam",
+      "name": "babel-kam.ini",
+      "start": 1401284,
+      "end": 1405043
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kam",
+      "name": "babel-kamba.tex",
+      "start": 1405043,
+      "end": 1405380
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kcg",
+      "name": "babel-kcg.ini",
+      "start": 1405380,
+      "end": 1408208
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kcg",
+      "name": "babel-tyap.tex",
+      "start": 1408208,
+      "end": 1408545
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kde",
+      "name": "babel-kde.ini",
+      "start": 1408545,
+      "end": 1412448
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kde",
+      "name": "babel-makonde.tex",
+      "start": 1412448,
+      "end": 1412785
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kea",
+      "name": "babel-kabuverdianu.tex",
+      "start": 1412785,
+      "end": 1413122
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kea",
+      "name": "babel-kea.ini",
+      "start": 1413122,
+      "end": 1416827
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kgp",
+      "name": "babel-kaingang.tex",
+      "start": 1416827,
+      "end": 1417164
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kgp",
+      "name": "babel-kgp.ini",
+      "start": 1417164,
+      "end": 1421423
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/khb",
+      "name": "babel-khb.ini",
+      "start": 1421423,
+      "end": 1423608
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/khb",
+      "name": "babel-lu.tex",
+      "start": 1423608,
+      "end": 1423945
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/khq",
+      "name": "babel-khq.ini",
+      "start": 1423945,
+      "end": 1427486
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/khq",
+      "name": "babel-koyrachiini.tex",
+      "start": 1427486,
+      "end": 1427823
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ki",
+      "name": "babel-ki.ini",
+      "start": 1427823,
+      "end": 1431521
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ki",
+      "name": "babel-kikuyu.tex",
+      "start": 1431521,
+      "end": 1431857
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kk",
+      "name": "babel-kazakh.tex",
+      "start": 1431857,
+      "end": 1432193
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kk",
+      "name": "babel-kk.ini",
+      "start": 1432193,
+      "end": 1436346
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kkj",
+      "name": "babel-kako.tex",
+      "start": 1436346,
+      "end": 1436683
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kkj",
+      "name": "babel-kkj.ini",
+      "start": 1436683,
+      "end": 1440762
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kl",
+      "name": "babel-kalaallisut.tex",
+      "start": 1440762,
+      "end": 1441098
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kl",
+      "name": "babel-kl.ini",
+      "start": 1441098,
+      "end": 1444672
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kln",
+      "name": "babel-kalenjin.tex",
+      "start": 1444672,
+      "end": 1445009
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kln",
+      "name": "babel-kln.ini",
+      "start": 1445009,
+      "end": 1448597
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/km",
+      "name": "babel-khmer.tex",
+      "start": 1448597,
+      "end": 1449171
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/km",
+      "name": "babel-km.ini",
+      "start": 1449171,
+      "end": 1453782
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kn",
+      "name": "babel-kannada.tex",
+      "start": 1453782,
+      "end": 1454118
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kn",
+      "name": "babel-kn.ini",
+      "start": 1454118,
+      "end": 1458876
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ko",
+      "name": "babel-ko-Hani.ini",
+      "start": 1458876,
+      "end": 1467570
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ko",
+      "name": "babel-ko.ini",
+      "start": 1467570,
+      "end": 1476272
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ko",
+      "name": "babel-korean-han.tex",
+      "start": 1476272,
+      "end": 1476613
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ko",
+      "name": "babel-korean-hani.tex",
+      "start": 1476613,
+      "end": 1476954
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ko",
+      "name": "babel-korean.tex",
+      "start": 1476954,
+      "end": 1479465
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kok",
+      "name": "babel-kok.ini",
+      "start": 1479465,
+      "end": 1483455
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kok",
+      "name": "babel-konkani.tex",
+      "start": 1483455,
+      "end": 1483792
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ks",
+      "name": "babel-kashmiri.tex",
+      "start": 1483792,
+      "end": 1484128
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ks",
+      "name": "babel-ks.ini",
+      "start": 1484128,
+      "end": 1487659
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ksb",
+      "name": "babel-ksb.ini",
+      "start": 1487659,
+      "end": 1491138
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ksb",
+      "name": "babel-shambala.tex",
+      "start": 1491138,
+      "end": 1491475
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ksf",
+      "name": "babel-bafia.tex",
+      "start": 1491475,
+      "end": 1491812
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ksf",
+      "name": "babel-ksf.ini",
+      "start": 1491812,
+      "end": 1495247
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ksh",
+      "name": "babel-colognian.tex",
+      "start": 1495247,
+      "end": 1495584
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ksh",
+      "name": "babel-ksh.ini",
+      "start": 1495584,
+      "end": 1499333
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ku",
+      "name": "babel-ku-Arab.ini",
+      "start": 1499333,
+      "end": 1503183
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ku",
+      "name": "babel-ku.ini",
+      "start": 1503183,
+      "end": 1509156
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ku",
+      "name": "babel-kurdish-arab.tex",
+      "start": 1509156,
+      "end": 1509497
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ku",
+      "name": "babel-kurdish-arabic.tex",
+      "start": 1509497,
+      "end": 1509838
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ku",
+      "name": "babel-kurdish.tex",
+      "start": 1509838,
+      "end": 1510174
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ku",
+      "name": "babel-kurmanji.tex",
+      "start": 1510174,
+      "end": 1510461
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ku",
+      "name": "babel-northernkurdish-arab.tex",
+      "start": 1510461,
+      "end": 1510714
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ku",
+      "name": "babel-northernkurdish-arabic.tex",
+      "start": 1510714,
+      "end": 1510967
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ku",
+      "name": "babel-northernkurdish.tex",
+      "start": 1510967,
+      "end": 1511215
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kv",
+      "name": "babel-komi.tex",
+      "start": 1511215,
+      "end": 1511551
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kv",
+      "name": "babel-kv.ini",
+      "start": 1511551,
+      "end": 1513704
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kw",
+      "name": "babel-cornish.tex",
+      "start": 1513704,
+      "end": 1514040
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/kw",
+      "name": "babel-kw.ini",
+      "start": 1514040,
+      "end": 1517536
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ky",
+      "name": "babel-ky.ini",
+      "start": 1517536,
+      "end": 1525542
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ky",
+      "name": "babel-kyrgyz.tex",
+      "start": 1525542,
+      "end": 1525878
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/la",
+      "name": "babel-classicallatin.tex",
+      "start": 1525878,
+      "end": 1526450
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/la",
+      "name": "babel-ecclesiasticallatin.tex",
+      "start": 1526450,
+      "end": 1526935
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/la",
+      "name": "babel-la-x-classic.ini",
+      "start": 1526935,
+      "end": 1531091
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/la",
+      "name": "babel-la-x-ecclesia.ini",
+      "start": 1531091,
+      "end": 1535245
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/la",
+      "name": "babel-la-x-medieval.ini",
+      "start": 1535245,
+      "end": 1539395
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/la",
+      "name": "babel-la.ini",
+      "start": 1539395,
+      "end": 1543441
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/la",
+      "name": "babel-latin.tex",
+      "start": 1543441,
+      "end": 1543901
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/la",
+      "name": "babel-medievallatin.tex",
+      "start": 1543901,
+      "end": 1544473
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lab",
+      "name": "babel-lab.ini",
+      "start": 1544473,
+      "end": 1546724
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lab",
+      "name": "babel-lineara.tex",
+      "start": 1546724,
+      "end": 1547061
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lad",
+      "name": "babel-lad.ini",
+      "start": 1547061,
+      "end": 1549257
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lad",
+      "name": "babel-ladino.tex",
+      "start": 1549257,
+      "end": 1549594
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lag",
+      "name": "babel-lag.ini",
+      "start": 1549594,
+      "end": 1552841
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lag",
+      "name": "babel-langi.tex",
+      "start": 1552841,
+      "end": 1553178
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lb",
+      "name": "babel-lb.ini",
+      "start": 1553178,
+      "end": 1557285
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lb",
+      "name": "babel-luxembourgish.tex",
+      "start": 1557285,
+      "end": 1557621
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lep",
+      "name": "babel-lep.ini",
+      "start": 1557621,
+      "end": 1559885
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lep",
+      "name": "babel-lepcha.tex",
+      "start": 1559885,
+      "end": 1560222
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lg",
+      "name": "babel-ganda.tex",
+      "start": 1560222,
+      "end": 1560558
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lg",
+      "name": "babel-lg.ini",
+      "start": 1560558,
+      "end": 1564035
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lif",
+      "name": "babel-lif-Limb.ini",
+      "start": 1564035,
+      "end": 1566253
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lif",
+      "name": "babel-lif.ini",
+      "start": 1566253,
+      "end": 1568419
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lif",
+      "name": "babel-limbu-limb.tex",
+      "start": 1568419,
+      "end": 1568761
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lif",
+      "name": "babel-limbu-limbu.tex",
+      "start": 1568761,
+      "end": 1569103
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lif",
+      "name": "babel-limbu.tex",
+      "start": 1569103,
+      "end": 1569440
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lij",
+      "name": "babel-ligurian.tex",
+      "start": 1569440,
+      "end": 1569777
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lij",
+      "name": "babel-lij.ini",
+      "start": 1569777,
+      "end": 1572664
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lkt",
+      "name": "babel-lakota.tex",
+      "start": 1572664,
+      "end": 1573001
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lkt",
+      "name": "babel-lkt.ini",
+      "start": 1573001,
+      "end": 1577171
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lmo",
+      "name": "babel-lmo.ini",
+      "start": 1577171,
+      "end": 1579313
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lmo",
+      "name": "babel-lombard.tex",
+      "start": 1579313,
+      "end": 1579650
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ln",
+      "name": "babel-lingala.tex",
+      "start": 1579650,
+      "end": 1579986
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ln",
+      "name": "babel-ln.ini",
+      "start": 1579986,
+      "end": 1583605
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lo",
+      "name": "babel-lao.tex",
+      "start": 1583605,
+      "end": 1583942
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lo",
+      "name": "babel-lo.ini",
+      "start": 1583942,
+      "end": 1588477
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lrc",
+      "name": "babel-lrc.ini",
+      "start": 1588477,
+      "end": 1592902
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lrc",
+      "name": "babel-northernluri.tex",
+      "start": 1592902,
+      "end": 1593239
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lt",
+      "name": "babel-lithuanian.tex",
+      "start": 1593239,
+      "end": 1593616
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lt",
+      "name": "babel-lt.ini",
+      "start": 1593616,
+      "end": 1598510
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lu",
+      "name": "babel-lu.ini",
+      "start": 1598510,
+      "end": 1602163
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lu",
+      "name": "babel-lubakatanga.tex",
+      "start": 1602163,
+      "end": 1602499
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/luo",
+      "name": "babel-luo.ini",
+      "start": 1602499,
+      "end": 1606170
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/luo",
+      "name": "babel-luo.tex",
+      "start": 1606170,
+      "end": 1606507
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/luy",
+      "name": "babel-luy.ini",
+      "start": 1606507,
+      "end": 1609979
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/luy",
+      "name": "babel-luyia.tex",
+      "start": 1609979,
+      "end": 1610316
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lv",
+      "name": "babel-latvian.tex",
+      "start": 1610316,
+      "end": 1610690
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/lv",
+      "name": "babel-lv.ini",
+      "start": 1610690,
+      "end": 1614902
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mai",
+      "name": "babel-mai.ini",
+      "start": 1614902,
+      "end": 1619929
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mai",
+      "name": "babel-maithili.tex",
+      "start": 1619929,
+      "end": 1620266
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mak",
+      "name": "babel-mak-Bugi.ini",
+      "start": 1620266,
+      "end": 1622464
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mak",
+      "name": "babel-mak.ini",
+      "start": 1622464,
+      "end": 1624627
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mak",
+      "name": "babel-makasar-bugi.tex",
+      "start": 1624627,
+      "end": 1624969
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mak",
+      "name": "babel-makasar-buginese.tex",
+      "start": 1624969,
+      "end": 1625311
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mak",
+      "name": "babel-makasar.tex",
+      "start": 1625311,
+      "end": 1625648
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mas",
+      "name": "babel-mas.ini",
+      "start": 1625648,
+      "end": 1629056
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mas",
+      "name": "babel-masai.tex",
+      "start": 1629056,
+      "end": 1629393
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mer",
+      "name": "babel-mer.ini",
+      "start": 1629393,
+      "end": 1632870
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mer",
+      "name": "babel-meru.tex",
+      "start": 1632870,
+      "end": 1633207
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mfe",
+      "name": "babel-mfe.ini",
+      "start": 1633207,
+      "end": 1636618
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mfe",
+      "name": "babel-morisyen.tex",
+      "start": 1636618,
+      "end": 1636955
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mg",
+      "name": "babel-malagasy.tex",
+      "start": 1636955,
+      "end": 1637291
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mg",
+      "name": "babel-mg.ini",
+      "start": 1637291,
+      "end": 1640788
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mgh",
+      "name": "babel-makhuwameetto.tex",
+      "start": 1640788,
+      "end": 1641125
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mgh",
+      "name": "babel-mgh.ini",
+      "start": 1641125,
+      "end": 1644905
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mgo",
+      "name": "babel-meta.tex",
+      "start": 1644905,
+      "end": 1645242
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mgo",
+      "name": "babel-mgo.ini",
+      "start": 1645242,
+      "end": 1648557
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mi",
+      "name": "babel-maori.tex",
+      "start": 1648557,
+      "end": 1648893
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mi",
+      "name": "babel-mi.ini",
+      "start": 1648893,
+      "end": 1652624
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mk",
+      "name": "babel-macedonian.tex",
+      "start": 1652624,
+      "end": 1653179
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mk",
+      "name": "babel-mk.ini",
+      "start": 1653179,
+      "end": 1658858
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ml",
+      "name": "babel-malayalam.tex",
+      "start": 1658858,
+      "end": 1659194
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ml",
+      "name": "babel-ml.ini",
+      "start": 1659194,
+      "end": 1663888
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mn",
+      "name": "babel-mn.ini",
+      "start": 1663888,
+      "end": 1668730
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mn",
+      "name": "babel-mongolian.tex",
+      "start": 1668730,
+      "end": 1669106
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mni",
+      "name": "babel-manipuri.tex",
+      "start": 1669106,
+      "end": 1669443
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mni",
+      "name": "babel-mni.ini",
+      "start": 1669443,
+      "end": 1673976
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mr",
+      "name": "babel-marathi.tex",
+      "start": 1673976,
+      "end": 1674312
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mr",
+      "name": "babel-mr.ini",
+      "start": 1674312,
+      "end": 1679263
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ms",
+      "name": "babel-malay-bn.tex",
+      "start": 1679263,
+      "end": 1679602
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ms",
+      "name": "babel-malay-brunei.tex",
+      "start": 1679602,
+      "end": 1679941
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ms",
+      "name": "babel-malay-sg.tex",
+      "start": 1679941,
+      "end": 1680280
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ms",
+      "name": "babel-malay-singapore.tex",
+      "start": 1680280,
+      "end": 1680619
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ms",
+      "name": "babel-malay.tex",
+      "start": 1680619,
+      "end": 1680991
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ms",
+      "name": "babel-ms-BN.ini",
+      "start": 1680991,
+      "end": 1684261
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ms",
+      "name": "babel-ms-SG.ini",
+      "start": 1684261,
+      "end": 1687540
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ms",
+      "name": "babel-ms.ini",
+      "start": 1687540,
+      "end": 1691366
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mt",
+      "name": "babel-maltese.tex",
+      "start": 1691366,
+      "end": 1691702
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mt",
+      "name": "babel-mt.ini",
+      "start": 1691702,
+      "end": 1695266
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mua",
+      "name": "babel-mua.ini",
+      "start": 1695266,
+      "end": 1699046
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mua",
+      "name": "babel-mundang.tex",
+      "start": 1699046,
+      "end": 1699383
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mus",
+      "name": "babel-mus.ini",
+      "start": 1699383,
+      "end": 1702198
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mus",
+      "name": "babel-muscogee.tex",
+      "start": 1702198,
+      "end": 1702535
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/my",
+      "name": "babel-burmese.tex",
+      "start": 1702535,
+      "end": 1702871
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/my",
+      "name": "babel-my.ini",
+      "start": 1702871,
+      "end": 1707044
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/myv",
+      "name": "babel-erzya.tex",
+      "start": 1707044,
+      "end": 1707381
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/myv",
+      "name": "babel-myv.ini",
+      "start": 1707381,
+      "end": 1710764
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/myz",
+      "name": "babel-classicalmandaic.tex",
+      "start": 1710764,
+      "end": 1711101
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/myz",
+      "name": "babel-myz.ini",
+      "start": 1711101,
+      "end": 1713388
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mzn",
+      "name": "babel-mazanderani.tex",
+      "start": 1713388,
+      "end": 1713725
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/mzn",
+      "name": "babel-mzn.ini",
+      "start": 1713725,
+      "end": 1718111
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/naq",
+      "name": "babel-nama.tex",
+      "start": 1718111,
+      "end": 1718448
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/naq",
+      "name": "babel-naq.ini",
+      "start": 1718448,
+      "end": 1721757
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nb",
+      "name": "babel-nb.ini",
+      "start": 1721757,
+      "end": 1725714
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nb",
+      "name": "babel-norwegianbokmal.tex",
+      "start": 1725714,
+      "end": 1726050
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nd",
+      "name": "babel-nd.ini",
+      "start": 1726050,
+      "end": 1729560
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nd",
+      "name": "babel-northndebele.tex",
+      "start": 1729560,
+      "end": 1729896
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nds",
+      "name": "babel-lowgerman.tex",
+      "start": 1729896,
+      "end": 1730233
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nds",
+      "name": "babel-nds.ini",
+      "start": 1730233,
+      "end": 1734143
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ne",
+      "name": "babel-ne.ini",
+      "start": 1734143,
+      "end": 1738131
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ne",
+      "name": "babel-nepali.tex",
+      "start": 1738131,
+      "end": 1738467
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/new",
+      "name": "babel-new.ini",
+      "start": 1738467,
+      "end": 1740605
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/new",
+      "name": "babel-newari.tex",
+      "start": 1740605,
+      "end": 1740942
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nl",
+      "name": "babel-dutch.tex",
+      "start": 1740942,
+      "end": 1741314
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nl",
+      "name": "babel-nl.ini",
+      "start": 1741314,
+      "end": 1745569
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nmg",
+      "name": "babel-kwasio.tex",
+      "start": 1745569,
+      "end": 1745906
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nmg",
+      "name": "babel-nmg.ini",
+      "start": 1745906,
+      "end": 1749975
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nn",
+      "name": "babel-nn.ini",
+      "start": 1749975,
+      "end": 1753982
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nn",
+      "name": "babel-norwegiannynorsk.tex",
+      "start": 1753982,
+      "end": 1754318
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nn",
+      "name": "babel-nynorsk.tex",
+      "start": 1754318,
+      "end": 1754692
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nnh",
+      "name": "babel-ngiemboon.tex",
+      "start": 1754692,
+      "end": 1755029
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nnh",
+      "name": "babel-nnh.ini",
+      "start": 1755029,
+      "end": 1758874
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/no",
+      "name": "babel-no.ini",
+      "start": 1758874,
+      "end": 1762732
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/no",
+      "name": "babel-norsk.tex",
+      "start": 1762732,
+      "end": 1763104
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/no",
+      "name": "babel-norwegian.tex",
+      "start": 1763104,
+      "end": 1763480
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/non",
+      "name": "babel-non.ini",
+      "start": 1763480,
+      "end": 1765741
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/non",
+      "name": "babel-oldnorse.tex",
+      "start": 1765741,
+      "end": 1766078
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nqo",
+      "name": "babel-nko.tex",
+      "start": 1766078,
+      "end": 1766415
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nqo",
+      "name": "babel-nqo.ini",
+      "start": 1766415,
+      "end": 1768917
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nr",
+      "name": "babel-nr.ini",
+      "start": 1768917,
+      "end": 1771574
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nr",
+      "name": "babel-southndebele.tex",
+      "start": 1771574,
+      "end": 1771910
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nso",
+      "name": "babel-northernsotho.tex",
+      "start": 1771910,
+      "end": 1772247
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nso",
+      "name": "babel-nso.ini",
+      "start": 1772247,
+      "end": 1774952
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nus",
+      "name": "babel-nuer.tex",
+      "start": 1774952,
+      "end": 1775289
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nus",
+      "name": "babel-nus.ini",
+      "start": 1775289,
+      "end": 1778653
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nv",
+      "name": "babel-navajo.tex",
+      "start": 1778653,
+      "end": 1778989
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nv",
+      "name": "babel-nv.ini",
+      "start": 1778989,
+      "end": 1781133
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ny",
+      "name": "babel-ny.ini",
+      "start": 1781133,
+      "end": 1783767
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ny",
+      "name": "babel-nyanja.tex",
+      "start": 1783767,
+      "end": 1784103
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nyn",
+      "name": "babel-nyankole.tex",
+      "start": 1784103,
+      "end": 1784440
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/nyn",
+      "name": "babel-nyn.ini",
+      "start": 1784440,
+      "end": 1788050
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/oc",
+      "name": "babel-oc.ini",
+      "start": 1788050,
+      "end": 1790834
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/oc",
+      "name": "babel-occitan.tex",
+      "start": 1790834,
+      "end": 1791208
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/om",
+      "name": "babel-om.ini",
+      "start": 1791208,
+      "end": 1794713
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/om",
+      "name": "babel-oromo.tex",
+      "start": 1794713,
+      "end": 1795049
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/or",
+      "name": "babel-odia.tex",
+      "start": 1795049,
+      "end": 1795385
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/or",
+      "name": "babel-or.ini",
+      "start": 1795385,
+      "end": 1800509
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/or",
+      "name": "babel-oriya.tex",
+      "start": 1800509,
+      "end": 1800845
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/os",
+      "name": "babel-os.ini",
+      "start": 1800845,
+      "end": 1805148
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/os",
+      "name": "babel-ossetic.tex",
+      "start": 1805148,
+      "end": 1805484
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/osa",
+      "name": "babel-osa.ini",
+      "start": 1805484,
+      "end": 1809403
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/osa",
+      "name": "babel-osage.tex",
+      "start": 1809403,
+      "end": 1809740
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/oui",
+      "name": "babel-olduighur.tex",
+      "start": 1809740,
+      "end": 1810077
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/oui",
+      "name": "babel-oui.ini",
+      "start": 1810077,
+      "end": 1812301
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pa",
+      "name": "babel-pa-Arab.ini",
+      "start": 1812301,
+      "end": 1815640
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pa",
+      "name": "babel-pa-Guru.ini",
+      "start": 1815640,
+      "end": 1820193
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pa",
+      "name": "babel-pa.ini",
+      "start": 1820193,
+      "end": 1824748
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pa",
+      "name": "babel-punjabi-arab.tex",
+      "start": 1824748,
+      "end": 1825089
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pa",
+      "name": "babel-punjabi-arabic.tex",
+      "start": 1825089,
+      "end": 1825430
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pa",
+      "name": "babel-punjabi-gurmukhi.tex",
+      "start": 1825430,
+      "end": 1825771
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pa",
+      "name": "babel-punjabi-guru.tex",
+      "start": 1825771,
+      "end": 1826112
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pa",
+      "name": "babel-punjabi.tex",
+      "start": 1826112,
+      "end": 1826448
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pap",
+      "name": "babel-pap.ini",
+      "start": 1826448,
+      "end": 1829171
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pap",
+      "name": "babel-papiamento.tex",
+      "start": 1829171,
+      "end": 1829508
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pcm",
+      "name": "babel-nigerianpidgin.tex",
+      "start": 1829508,
+      "end": 1829845
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pcm",
+      "name": "babel-pcm.ini",
+      "start": 1829845,
+      "end": 1834143
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/peo",
+      "name": "babel-oldpersian.tex",
+      "start": 1834143,
+      "end": 1834480
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/peo",
+      "name": "babel-peo.ini",
+      "start": 1834480,
+      "end": 1836738
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/phn",
+      "name": "babel-phn.ini",
+      "start": 1836738,
+      "end": 1839014
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/phn",
+      "name": "babel-phoenician.tex",
+      "start": 1839014,
+      "end": 1839351
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pl",
+      "name": "babel-pl.ini",
+      "start": 1839351,
+      "end": 1843752
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pl",
+      "name": "babel-polish.tex",
+      "start": 1843752,
+      "end": 1844125
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pms",
+      "name": "babel-piedmontese.tex",
+      "start": 1844125,
+      "end": 1844504
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pms",
+      "name": "babel-pms.ini",
+      "start": 1844504,
+      "end": 1847162
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/prg",
+      "name": "babel-prg.ini",
+      "start": 1847162,
+      "end": 1849976
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/prg",
+      "name": "babel-prussian.tex",
+      "start": 1849976,
+      "end": 1850313
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ps",
+      "name": "babel-pashto.tex",
+      "start": 1850313,
+      "end": 1850649
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ps",
+      "name": "babel-ps.ini",
+      "start": 1850649,
+      "end": 1854972
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pt",
+      "name": "babel-brazilian.tex",
+      "start": 1854972,
+      "end": 1855351
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pt",
+      "name": "babel-brazilianportuguese.tex",
+      "start": 1855351,
+      "end": 1855690
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pt",
+      "name": "babel-europeanportuguese.tex",
+      "start": 1855690,
+      "end": 1856029
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pt",
+      "name": "babel-portuguese-br.tex",
+      "start": 1856029,
+      "end": 1856368
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pt",
+      "name": "babel-portuguese-brazil.tex",
+      "start": 1856368,
+      "end": 1856707
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pt",
+      "name": "babel-portuguese-portugal.tex",
+      "start": 1856707,
+      "end": 1857046
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pt",
+      "name": "babel-portuguese-pt.tex",
+      "start": 1857046,
+      "end": 1857385
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pt",
+      "name": "babel-portuguese.tex",
+      "start": 1857385,
+      "end": 1857762
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pt",
+      "name": "babel-pt-BR.ini",
+      "start": 1857762,
+      "end": 1862312
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pt",
+      "name": "babel-pt-PT.ini",
+      "start": 1862312,
+      "end": 1866857
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/pt",
+      "name": "babel-pt.ini",
+      "start": 1866857,
+      "end": 1871234
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/qu",
+      "name": "babel-qu.ini",
+      "start": 1871234,
+      "end": 1874927
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/qu",
+      "name": "babel-quechua.tex",
+      "start": 1874927,
+      "end": 1875263
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/raj",
+      "name": "babel-raj.ini",
+      "start": 1875263,
+      "end": 1878403
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/raj",
+      "name": "babel-rajasthani.tex",
+      "start": 1878403,
+      "end": 1878740
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/rm",
+      "name": "babel-rm.ini",
+      "start": 1878740,
+      "end": 1882933
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/rm",
+      "name": "babel-romansh.tex",
+      "start": 1882933,
+      "end": 1883307
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/rmo",
+      "name": "babel-rmo.ini",
+      "start": 1883307,
+      "end": 1885550
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/rmo",
+      "name": "babel-sinteromani.tex",
+      "start": 1885550,
+      "end": 1885887
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/rn",
+      "name": "babel-rn.ini",
+      "start": 1885887,
+      "end": 1889434
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/rn",
+      "name": "babel-rundi.tex",
+      "start": 1889434,
+      "end": 1889770
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ro",
+      "name": "babel-moldavian.tex",
+      "start": 1889770,
+      "end": 1890109
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ro",
+      "name": "babel-ro-MD.ini",
+      "start": 1890109,
+      "end": 1894175
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ro",
+      "name": "babel-ro.ini",
+      "start": 1894175,
+      "end": 1898248
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ro",
+      "name": "babel-romanian-md.tex",
+      "start": 1898248,
+      "end": 1898587
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ro",
+      "name": "babel-romanian-moldova.tex",
+      "start": 1898587,
+      "end": 1898926
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ro",
+      "name": "babel-romanian.tex",
+      "start": 1898926,
+      "end": 1899301
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/rof",
+      "name": "babel-rof.ini",
+      "start": 1899301,
+      "end": 1903011
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/rof",
+      "name": "babel-rombo.tex",
+      "start": 1903011,
+      "end": 1903348
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ru",
+      "name": "babel-ru.ini",
+      "start": 1903348,
+      "end": 1910584
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ru",
+      "name": "babel-russian.tex",
+      "start": 1910584,
+      "end": 1910959
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/rw",
+      "name": "babel-kinyarwanda.tex",
+      "start": 1910959,
+      "end": 1911295
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/rw",
+      "name": "babel-rw.ini",
+      "start": 1911295,
+      "end": 1914824
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/rwk",
+      "name": "babel-rwa.tex",
+      "start": 1914824,
+      "end": 1915161
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/rwk",
+      "name": "babel-rwk.ini",
+      "start": 1915161,
+      "end": 1918638
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sa-Beng.ini",
+      "start": 1918638,
+      "end": 1920114
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sa-Deva.ini",
+      "start": 1920114,
+      "end": 1922340
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sa-Gujr.ini",
+      "start": 1922340,
+      "end": 1923818
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sa-Knda.ini",
+      "start": 1923818,
+      "end": 1925169
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sa-Mlym.ini",
+      "start": 1925169,
+      "end": 1926522
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sa-Telu.ini",
+      "start": 1926522,
+      "end": 1927872
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sa.ini",
+      "start": 1927872,
+      "end": 1930431
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sanskrit-bangla.tex",
+      "start": 1930431,
+      "end": 1930684
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sanskrit-beng.tex",
+      "start": 1930684,
+      "end": 1930937
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sanskrit-bengali.tex",
+      "start": 1930937,
+      "end": 1931190
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sanskrit-deva.tex",
+      "start": 1931190,
+      "end": 1931443
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sanskrit-devanagari.tex",
+      "start": 1931443,
+      "end": 1931696
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sanskrit-gujarati.tex",
+      "start": 1931696,
+      "end": 1931949
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sanskrit-gujr.tex",
+      "start": 1931949,
+      "end": 1932202
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sanskrit-kannada.tex",
+      "start": 1932202,
+      "end": 1932455
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sanskrit-knda.tex",
+      "start": 1932455,
+      "end": 1932708
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sanskrit-malayalam.tex",
+      "start": 1932708,
+      "end": 1932961
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sanskrit-mlym.tex",
+      "start": 1932961,
+      "end": 1933214
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sanskrit-telu.tex",
+      "start": 1933214,
+      "end": 1933467
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sanskrit-telugu.tex",
+      "start": 1933467,
+      "end": 1933720
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sa",
+      "name": "babel-sanskrit.tex",
+      "start": 1933720,
+      "end": 1933968
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sah",
+      "name": "babel-sah.ini",
+      "start": 1933968,
+      "end": 1938352
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sah",
+      "name": "babel-sakha.tex",
+      "start": 1938352,
+      "end": 1938689
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/saq",
+      "name": "babel-samburu.tex",
+      "start": 1938689,
+      "end": 1939026
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/saq",
+      "name": "babel-saq.ini",
+      "start": 1939026,
+      "end": 1942736
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sat",
+      "name": "babel-santali.tex",
+      "start": 1942736,
+      "end": 1943073
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sat",
+      "name": "babel-sat.ini",
+      "start": 1943073,
+      "end": 1947097
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sbp",
+      "name": "babel-sangu.tex",
+      "start": 1947097,
+      "end": 1947434
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sbp",
+      "name": "babel-sbp.ini",
+      "start": 1947434,
+      "end": 1950993
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sc",
+      "name": "babel-sardinian.tex",
+      "start": 1950993,
+      "end": 1951329
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sc",
+      "name": "babel-sc.ini",
+      "start": 1951329,
+      "end": 1955455
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/scn",
+      "name": "babel-scn.ini",
+      "start": 1955455,
+      "end": 1958271
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/scn",
+      "name": "babel-sicilian.tex",
+      "start": 1958271,
+      "end": 1958608
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sd",
+      "name": "babel-sd-Deva.ini",
+      "start": 1958608,
+      "end": 1963111
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sd",
+      "name": "babel-sd-Khoj.ini",
+      "start": 1963111,
+      "end": 1965309
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sd",
+      "name": "babel-sd-Sind.ini",
+      "start": 1965309,
+      "end": 1967517
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sd",
+      "name": "babel-sd.ini",
+      "start": 1967517,
+      "end": 1972084
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sd",
+      "name": "babel-sindhi-deva.tex",
+      "start": 1972084,
+      "end": 1972425
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sd",
+      "name": "babel-sindhi-devanagari.tex",
+      "start": 1972425,
+      "end": 1972766
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sd",
+      "name": "babel-sindhi-khoj.tex",
+      "start": 1972766,
+      "end": 1973107
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sd",
+      "name": "babel-sindhi-khojki.tex",
+      "start": 1973107,
+      "end": 1973448
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sd",
+      "name": "babel-sindhi-khudawadi.tex",
+      "start": 1973448,
+      "end": 1973789
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sd",
+      "name": "babel-sindhi-sind.tex",
+      "start": 1973789,
+      "end": 1974130
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sd",
+      "name": "babel-sindhi.tex",
+      "start": 1974130,
+      "end": 1974466
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/se",
+      "name": "babel-northernsami.tex",
+      "start": 1974466,
+      "end": 1974845
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/se",
+      "name": "babel-se.ini",
+      "start": 1974845,
+      "end": 1979171
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/seh",
+      "name": "babel-seh.ini",
+      "start": 1979171,
+      "end": 1982663
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/seh",
+      "name": "babel-sena.tex",
+      "start": 1982663,
+      "end": 1983000
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ses",
+      "name": "babel-koyraborosenni.tex",
+      "start": 1983000,
+      "end": 1983337
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ses",
+      "name": "babel-ses.ini",
+      "start": 1983337,
+      "end": 1986888
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sg",
+      "name": "babel-sango.tex",
+      "start": 1986888,
+      "end": 1987224
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sg",
+      "name": "babel-sg.ini",
+      "start": 1987224,
+      "end": 1990771
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sga",
+      "name": "babel-oldirish.tex",
+      "start": 1990771,
+      "end": 1991108
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sga",
+      "name": "babel-sga.ini",
+      "start": 1991108,
+      "end": 1993299
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/shared",
+      "name": "babel-Arab.ini",
+      "start": 1993299,
+      "end": 1996029
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/shared",
+      "name": "babel-Deva.ini",
+      "start": 1996029,
+      "end": 2002918
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/shared",
+      "name": "babel-Hani.ini",
+      "start": 2002918,
+      "end": 2006404
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/shared",
+      "name": "babel-Hebr.ini",
+      "start": 2006404,
+      "end": 2008144
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/shi",
+      "name": "babel-shi-Latn.ini",
+      "start": 2008144,
+      "end": 2011725
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/shi",
+      "name": "babel-shi-Tfng.ini",
+      "start": 2011725,
+      "end": 2015431
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/shi",
+      "name": "babel-shi.ini",
+      "start": 2015431,
+      "end": 2019139
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/shi",
+      "name": "babel-tachelhit-latin.tex",
+      "start": 2019139,
+      "end": 2019481
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/shi",
+      "name": "babel-tachelhit-latn.tex",
+      "start": 2019481,
+      "end": 2019823
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/shi",
+      "name": "babel-tachelhit-tfng.tex",
+      "start": 2019823,
+      "end": 2020165
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/shi",
+      "name": "babel-tachelhit-tifinagh.tex",
+      "start": 2020165,
+      "end": 2020507
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/shi",
+      "name": "babel-tachelhit.tex",
+      "start": 2020507,
+      "end": 2020844
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/si",
+      "name": "babel-si.ini",
+      "start": 2020844,
+      "end": 2025523
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/si",
+      "name": "babel-sinhala.tex",
+      "start": 2025523,
+      "end": 2025859
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sk",
+      "name": "babel-sk.ini",
+      "start": 2025859,
+      "end": 2030264
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sk",
+      "name": "babel-slovak.tex",
+      "start": 2030264,
+      "end": 2030637
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/skr",
+      "name": "babel-saraiki.tex",
+      "start": 2030637,
+      "end": 2030974
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/skr",
+      "name": "babel-skr.ini",
+      "start": 2030974,
+      "end": 2033125
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sl",
+      "name": "babel-sl.ini",
+      "start": 2033125,
+      "end": 2037176
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sl",
+      "name": "babel-slovene.tex",
+      "start": 2037176,
+      "end": 2037684
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sl",
+      "name": "babel-slovenian.tex",
+      "start": 2037684,
+      "end": 2038060
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/smn",
+      "name": "babel-inarisami.tex",
+      "start": 2038060,
+      "end": 2038397
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/smn",
+      "name": "babel-smn.ini",
+      "start": 2038397,
+      "end": 2042209
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/smp",
+      "name": "babel-samaritan.tex",
+      "start": 2042209,
+      "end": 2042546
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/smp",
+      "name": "babel-smp.ini",
+      "start": 2042546,
+      "end": 2044815
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sn",
+      "name": "babel-shona.tex",
+      "start": 2044815,
+      "end": 2045151
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sn",
+      "name": "babel-sn.ini",
+      "start": 2045151,
+      "end": 2048617
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/so",
+      "name": "babel-so.ini",
+      "start": 2048617,
+      "end": 2052277
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/so",
+      "name": "babel-somali.tex",
+      "start": 2052277,
+      "end": 2052613
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sq",
+      "name": "babel-albanian.tex",
+      "start": 2052613,
+      "end": 2052988
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sq",
+      "name": "babel-sq.ini",
+      "start": 2052988,
+      "end": 2057015
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-cyrillic-bosniaherzegovina.tex",
+      "start": 2057015,
+      "end": 2057359
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-cyrillic-kosovo.tex",
+      "start": 2057359,
+      "end": 2057703
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-cyrillic-montenegro.tex",
+      "start": 2057703,
+      "end": 2058047
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-cyrillic.tex",
+      "start": 2058047,
+      "end": 2058388
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-cyrl-ba.tex",
+      "start": 2058388,
+      "end": 2058732
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-cyrl-me.tex",
+      "start": 2058732,
+      "end": 2059076
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-cyrl-xk.tex",
+      "start": 2059076,
+      "end": 2059420
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-cyrl.tex",
+      "start": 2059420,
+      "end": 2059761
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-ijekavsk.tex",
+      "start": 2059761,
+      "end": 2060106
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-latin-bosniaherzegovina.tex",
+      "start": 2060106,
+      "end": 2060450
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-latin-kosovo.tex",
+      "start": 2060450,
+      "end": 2060794
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-latin-montenegro.tex",
+      "start": 2060794,
+      "end": 2061138
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-latin.tex",
+      "start": 2061138,
+      "end": 2061479
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-latn-ba.tex",
+      "start": 2061479,
+      "end": 2061823
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-latn-ijekavsk.tex",
+      "start": 2061823,
+      "end": 2062173
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-latn-me.tex",
+      "start": 2062173,
+      "end": 2062517
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-latn-xk.tex",
+      "start": 2062517,
+      "end": 2062861
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian-latn.tex",
+      "start": 2062861,
+      "end": 2063202
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-serbian.tex",
+      "start": 2063202,
+      "end": 2063847
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-sr-Cyrl-BA.ini",
+      "start": 2063847,
+      "end": 2071249
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-sr-Cyrl-ME.ini",
+      "start": 2071249,
+      "end": 2078534
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-sr-Cyrl-XK.ini",
+      "start": 2078534,
+      "end": 2085765
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-sr-Cyrl.ini",
+      "start": 2085765,
+      "end": 2092983
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-sr-Latn-BA.ini",
+      "start": 2092983,
+      "end": 2096991
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-sr-Latn-ME.ini",
+      "start": 2096991,
+      "end": 2101035
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-sr-Latn-XK.ini",
+      "start": 2101035,
+      "end": 2104994
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-sr-Latn-ijekavsk.ini",
+      "start": 2104994,
+      "end": 2109118
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-sr-Latn.ini",
+      "start": 2109118,
+      "end": 2113080
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-sr-ijekavsk.ini",
+      "start": 2113080,
+      "end": 2119339
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sr",
+      "name": "babel-sr.ini",
+      "start": 2119339,
+      "end": 2126596
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ss",
+      "name": "babel-ss.ini",
+      "start": 2126596,
+      "end": 2129162
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ss",
+      "name": "babel-swati.tex",
+      "start": 2129162,
+      "end": 2129498
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ssy",
+      "name": "babel-saho.tex",
+      "start": 2129498,
+      "end": 2129835
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ssy",
+      "name": "babel-ssy.ini",
+      "start": 2129835,
+      "end": 2132505
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/st",
+      "name": "babel-southernsotho.tex",
+      "start": 2132505,
+      "end": 2132841
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/st",
+      "name": "babel-st.ini",
+      "start": 2132841,
+      "end": 2135495
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/su",
+      "name": "babel-su.ini",
+      "start": 2135495,
+      "end": 2138377
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/su",
+      "name": "babel-sundanese.tex",
+      "start": 2138377,
+      "end": 2138713
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sv",
+      "name": "babel-sv.ini",
+      "start": 2138713,
+      "end": 2142699
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sv",
+      "name": "babel-swedish.tex",
+      "start": 2142699,
+      "end": 2143073
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sw",
+      "name": "babel-sw.ini",
+      "start": 2143073,
+      "end": 2146510
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/sw",
+      "name": "babel-swahili.tex",
+      "start": 2146510,
+      "end": 2146846
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/syr",
+      "name": "babel-syr.ini",
+      "start": 2146846,
+      "end": 2148719
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/syr",
+      "name": "babel-syriac.tex",
+      "start": 2148719,
+      "end": 2149056
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/szl",
+      "name": "babel-silesian.tex",
+      "start": 2149056,
+      "end": 2149393
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/szl",
+      "name": "babel-szl.ini",
+      "start": 2149393,
+      "end": 2152366
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ta",
+      "name": "babel-ta.ini",
+      "start": 2152366,
+      "end": 2157247
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ta",
+      "name": "babel-tamil.tex",
+      "start": 2157247,
+      "end": 2157583
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tdd",
+      "name": "babel-tainua.tex",
+      "start": 2157583,
+      "end": 2157920
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tdd",
+      "name": "babel-tdd.ini",
+      "start": 2157920,
+      "end": 2160109
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/te",
+      "name": "babel-te.ini",
+      "start": 2160109,
+      "end": 2164805
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/te",
+      "name": "babel-telugu.tex",
+      "start": 2164805,
+      "end": 2165141
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/teo",
+      "name": "babel-teo.ini",
+      "start": 2165141,
+      "end": 2168710
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/teo",
+      "name": "babel-teso.tex",
+      "start": 2168710,
+      "end": 2169047
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tg",
+      "name": "babel-tajik.tex",
+      "start": 2169047,
+      "end": 2169383
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tg",
+      "name": "babel-tg.ini",
+      "start": 2169383,
+      "end": 2173672
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/th",
+      "name": "babel-th.ini",
+      "start": 2173672,
+      "end": 2182080
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/th",
+      "name": "babel-thai.tex",
+      "start": 2182080,
+      "end": 2182452
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ti",
+      "name": "babel-ti.ini",
+      "start": 2182452,
+      "end": 2187637
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ti",
+      "name": "babel-tigrinya.tex",
+      "start": 2187637,
+      "end": 2187973
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tig",
+      "name": "babel-tig.ini",
+      "start": 2187973,
+      "end": 2192386
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tig",
+      "name": "babel-tigre.tex",
+      "start": 2192386,
+      "end": 2192723
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tk",
+      "name": "babel-tk.ini",
+      "start": 2192723,
+      "end": 2195889
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tk",
+      "name": "babel-turkmen.tex",
+      "start": 2195889,
+      "end": 2196263
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tn",
+      "name": "babel-tn.ini",
+      "start": 2196263,
+      "end": 2198936
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tn",
+      "name": "babel-tswana.tex",
+      "start": 2198936,
+      "end": 2199272
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/to",
+      "name": "babel-to.ini",
+      "start": 2199272,
+      "end": 2202641
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/to",
+      "name": "babel-tongan.tex",
+      "start": 2202641,
+      "end": 2202977
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tpi",
+      "name": "babel-tokpisin.tex",
+      "start": 2202977,
+      "end": 2203314
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tpi",
+      "name": "babel-tpi.ini",
+      "start": 2203314,
+      "end": 2205926
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tr",
+      "name": "babel-tr.ini",
+      "start": 2205926,
+      "end": 2210078
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tr",
+      "name": "babel-turkish.tex",
+      "start": 2210078,
+      "end": 2210579
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/trv",
+      "name": "babel-taroko.tex",
+      "start": 2210579,
+      "end": 2210916
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/trv",
+      "name": "babel-trv.ini",
+      "start": 2210916,
+      "end": 2213688
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ts",
+      "name": "babel-ts.ini",
+      "start": 2213688,
+      "end": 2216391
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ts",
+      "name": "babel-tsonga.tex",
+      "start": 2216391,
+      "end": 2216727
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tt",
+      "name": "babel-tatar.tex",
+      "start": 2216727,
+      "end": 2217063
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tt",
+      "name": "babel-tt.ini",
+      "start": 2217063,
+      "end": 2221473
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/twq",
+      "name": "babel-tasawaq.tex",
+      "start": 2221473,
+      "end": 2221810
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/twq",
+      "name": "babel-twq.ini",
+      "start": 2221810,
+      "end": 2225290
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/txg",
+      "name": "babel-tangut.tex",
+      "start": 2225290,
+      "end": 2225707
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/txg",
+      "name": "babel-txg.ini",
+      "start": 2225707,
+      "end": 2228059
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tzm",
+      "name": "babel-centralatlastamazight.tex",
+      "start": 2228059,
+      "end": 2228396
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/tzm",
+      "name": "babel-tzm.ini",
+      "start": 2228396,
+      "end": 2232018
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ug",
+      "name": "babel-ug.ini",
+      "start": 2232018,
+      "end": 2235906
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ug",
+      "name": "babel-uyghur.tex",
+      "start": 2235906,
+      "end": 2238168
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/uga",
+      "name": "babel-uga.ini",
+      "start": 2238168,
+      "end": 2240487
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/uga",
+      "name": "babel-ugaritic.tex",
+      "start": 2240487,
+      "end": 2240824
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/uk",
+      "name": "babel-uk.ini",
+      "start": 2240824,
+      "end": 2246743
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/uk",
+      "name": "babel-ukrainian.tex",
+      "start": 2246743,
+      "end": 2247118
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/und",
+      "name": "babel-und-x-nil.ini",
+      "start": 2247118,
+      "end": 2247773
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/und",
+      "name": "babel-und.ini",
+      "start": 2247773,
+      "end": 2248528
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ur",
+      "name": "babel-ur.ini",
+      "start": 2248528,
+      "end": 2252232
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ur",
+      "name": "babel-urdu.tex",
+      "start": 2252232,
+      "end": 2252568
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/uz",
+      "name": "babel-uz-Arab.ini",
+      "start": 2252568,
+      "end": 2255969
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/uz",
+      "name": "babel-uz-Cyrl.ini",
+      "start": 2255969,
+      "end": 2259813
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/uz",
+      "name": "babel-uz-Latn.ini",
+      "start": 2259813,
+      "end": 2263371
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/uz",
+      "name": "babel-uz.ini",
+      "start": 2263371,
+      "end": 2266937
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/uz",
+      "name": "babel-uzbek-arab.tex",
+      "start": 2266937,
+      "end": 2267278
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/uz",
+      "name": "babel-uzbek-arabic.tex",
+      "start": 2267278,
+      "end": 2267619
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/uz",
+      "name": "babel-uzbek-cyrillic.tex",
+      "start": 2267619,
+      "end": 2267960
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/uz",
+      "name": "babel-uzbek-cyrl.tex",
+      "start": 2267960,
+      "end": 2268301
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/uz",
+      "name": "babel-uzbek-latin.tex",
+      "start": 2268301,
+      "end": 2268642
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/uz",
+      "name": "babel-uzbek-latn.tex",
+      "start": 2268642,
+      "end": 2268983
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/uz",
+      "name": "babel-uzbek.tex",
+      "start": 2268983,
+      "end": 2269319
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vai",
+      "name": "babel-vai-Latn.ini",
+      "start": 2269319,
+      "end": 2272954
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vai",
+      "name": "babel-vai-Vaii.ini",
+      "start": 2272954,
+      "end": 2277254
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vai",
+      "name": "babel-vai-latin.tex",
+      "start": 2277254,
+      "end": 2277596
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vai",
+      "name": "babel-vai-latn.tex",
+      "start": 2277596,
+      "end": 2277938
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vai",
+      "name": "babel-vai-vai.tex",
+      "start": 2277938,
+      "end": 2278280
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vai",
+      "name": "babel-vai-vaii.tex",
+      "start": 2278280,
+      "end": 2278622
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vai",
+      "name": "babel-vai.ini",
+      "start": 2278622,
+      "end": 2282935
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vai",
+      "name": "babel-vai.tex",
+      "start": 2282935,
+      "end": 2283272
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ve",
+      "name": "babel-ve.ini",
+      "start": 2283272,
+      "end": 2285856
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/ve",
+      "name": "babel-venda.tex",
+      "start": 2285856,
+      "end": 2286192
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vec",
+      "name": "babel-vec.ini",
+      "start": 2286192,
+      "end": 2288978
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vec",
+      "name": "babel-venetian.tex",
+      "start": 2288978,
+      "end": 2289315
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vi",
+      "name": "babel-vi.ini",
+      "start": 2289315,
+      "end": 2293922
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vi",
+      "name": "babel-vietnamese.tex",
+      "start": 2293922,
+      "end": 2294299
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vmw",
+      "name": "babel-makhuwa.tex",
+      "start": 2294299,
+      "end": 2294636
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vmw",
+      "name": "babel-vmw.ini",
+      "start": 2294636,
+      "end": 2297348
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vo",
+      "name": "babel-vo.ini",
+      "start": 2297348,
+      "end": 2300057
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vo",
+      "name": "babel-volapuk.tex",
+      "start": 2300057,
+      "end": 2300393
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vun",
+      "name": "babel-vun.ini",
+      "start": 2300393,
+      "end": 2303876
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/vun",
+      "name": "babel-vunjo.tex",
+      "start": 2303876,
+      "end": 2304213
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/wae",
+      "name": "babel-wae.ini",
+      "start": 2304213,
+      "end": 2307865
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/wae",
+      "name": "babel-walser.tex",
+      "start": 2307865,
+      "end": 2308202
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/wal",
+      "name": "babel-wal.ini",
+      "start": 2308202,
+      "end": 2312598
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/wal",
+      "name": "babel-wolaytta.tex",
+      "start": 2312598,
+      "end": 2312935
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/war",
+      "name": "babel-war.ini",
+      "start": 2312935,
+      "end": 2315080
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/war",
+      "name": "babel-waray.tex",
+      "start": 2315080,
+      "end": 2315417
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/wo",
+      "name": "babel-wo.ini",
+      "start": 2315417,
+      "end": 2318138
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/wo",
+      "name": "babel-wolof.tex",
+      "start": 2318138,
+      "end": 2318474
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/xcr",
+      "name": "babel-carian.tex",
+      "start": 2318474,
+      "end": 2318811
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/xcr",
+      "name": "babel-xcr.ini",
+      "start": 2318811,
+      "end": 2321051
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/xh",
+      "name": "babel-xh.ini",
+      "start": 2321051,
+      "end": 2324986
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/xh",
+      "name": "babel-xhosa.tex",
+      "start": 2324986,
+      "end": 2325322
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/xlc",
+      "name": "babel-lycian.tex",
+      "start": 2325322,
+      "end": 2325659
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/xlc",
+      "name": "babel-xlc.ini",
+      "start": 2325659,
+      "end": 2327902
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/xld",
+      "name": "babel-lydian.tex",
+      "start": 2327902,
+      "end": 2328239
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/xld",
+      "name": "babel-xld.ini",
+      "start": 2328239,
+      "end": 2330479
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/xnr",
+      "name": "babel-kangri.tex",
+      "start": 2330479,
+      "end": 2330816
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/xnr",
+      "name": "babel-xnr.ini",
+      "start": 2330816,
+      "end": 2333813
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/xog",
+      "name": "babel-soga.tex",
+      "start": 2333813,
+      "end": 2334150
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/xog",
+      "name": "babel-xog.ini",
+      "start": 2334150,
+      "end": 2337659
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/xsa",
+      "name": "babel-sabaean.tex",
+      "start": 2337659,
+      "end": 2337996
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/xsa",
+      "name": "babel-xsa.ini",
+      "start": 2337996,
+      "end": 2340250
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/yav",
+      "name": "babel-yangben.tex",
+      "start": 2340250,
+      "end": 2340587
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/yav",
+      "name": "babel-yav.ini",
+      "start": 2340587,
+      "end": 2344092
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/yi",
+      "name": "babel-yi.ini",
+      "start": 2344092,
+      "end": 2348387
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/yi",
+      "name": "babel-yiddish.tex",
+      "start": 2348387,
+      "end": 2348751
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/yo",
+      "name": "babel-yo.ini",
+      "start": 2348751,
+      "end": 2352350
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/yo",
+      "name": "babel-yoruba.tex",
+      "start": 2352350,
+      "end": 2352686
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/yrl",
+      "name": "babel-nheengatu.tex",
+      "start": 2352686,
+      "end": 2353023
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/yrl",
+      "name": "babel-yrl.ini",
+      "start": 2353023,
+      "end": 2357243
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/yue",
+      "name": "babel-cantonese.tex",
+      "start": 2357243,
+      "end": 2359755
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/yue",
+      "name": "babel-yue.ini",
+      "start": 2359755,
+      "end": 2373260
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/za",
+      "name": "babel-za.ini",
+      "start": 2373260,
+      "end": 2375963
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/za",
+      "name": "babel-zhuang.tex",
+      "start": 2375963,
+      "end": 2376299
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zgh",
+      "name": "babel-standardmoroccantamazight.tex",
+      "start": 2376299,
+      "end": 2376636
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zgh",
+      "name": "babel-zgh.ini",
+      "start": 2376636,
+      "end": 2380384
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-chinese-hans-hk.tex",
+      "start": 2380384,
+      "end": 2380728
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-chinese-hans-mo.tex",
+      "start": 2380728,
+      "end": 2381072
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-chinese-hans-sg.tex",
+      "start": 2381072,
+      "end": 2381416
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-chinese-hans.tex",
+      "start": 2381416,
+      "end": 2381757
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-chinese-hant-hk.tex",
+      "start": 2381757,
+      "end": 2382101
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-chinese-hant-mo.tex",
+      "start": 2382101,
+      "end": 2382445
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-chinese-hant.tex",
+      "start": 2382445,
+      "end": 2382786
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-chinese-simplified-hongkongsarchina.tex",
+      "start": 2382786,
+      "end": 2383130
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-chinese-simplified-macausarchina.tex",
+      "start": 2383130,
+      "end": 2383474
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-chinese-simplified-singapore.tex",
+      "start": 2383474,
+      "end": 2383818
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-chinese-simplified.tex",
+      "start": 2383818,
+      "end": 2384159
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-chinese-traditional-hongkongsarchina.tex",
+      "start": 2384159,
+      "end": 2384503
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-chinese-traditional-macausarchina.tex",
+      "start": 2384503,
+      "end": 2384847
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-chinese-traditional.tex",
+      "start": 2384847,
+      "end": 2385188
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-chinese.tex",
+      "start": 2385188,
+      "end": 2388500
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-zh-Hans-HK.ini",
+      "start": 2388500,
+      "end": 2405140
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-zh-Hans-MO.ini",
+      "start": 2405140,
+      "end": 2421773
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-zh-Hans-SG.ini",
+      "start": 2421773,
+      "end": 2438381
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-zh-Hans.ini",
+      "start": 2438381,
+      "end": 2455199
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-zh-Hant-HK.ini",
+      "start": 2455199,
+      "end": 2472838
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-zh-Hant-MO.ini",
+      "start": 2472838,
+      "end": 2490446
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-zh-Hant.ini",
+      "start": 2490446,
+      "end": 2508324
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zh",
+      "name": "babel-zh.ini",
+      "start": 2508324,
+      "end": 2525126
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zu",
+      "name": "babel-zu.ini",
+      "start": 2525126,
+      "end": 2528833
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel/locale/zu",
+      "name": "babel-zulu.tex",
+      "start": 2528833,
+      "end": 2529169
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "lsorbian.sty",
+      "start": 2529169,
+      "end": 2531422
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "luababel.def",
+      "start": 2531422,
+      "end": 2606394
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "magyar.sty",
+      "start": 2606394,
+      "end": 2608637
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "naustrian.sty",
+      "start": 2608637,
+      "end": 2610894
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "ngermanb.sty",
+      "start": 2610894,
+      "end": 2613146
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "nil.ldf",
+      "start": 2613146,
+      "end": 2615842
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "norsk.sty",
+      "start": 2615842,
+      "end": 2618080
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "plain.def",
+      "start": 2618080,
+      "end": 2619277
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "polish.sty",
+      "start": 2619277,
+      "end": 2621520
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "portuges.sty",
+      "start": 2621520,
+      "end": 2623773
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "romanian.sty",
+      "start": 2623773,
+      "end": 2626026
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "russianb.sty",
+      "start": 2626026,
+      "end": 2628279
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "samin.sty",
+      "start": 2628279,
+      "end": 2630517
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "scottish.sty",
+      "start": 2630517,
+      "end": 2632770
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "serbian.sty",
+      "start": 2632770,
+      "end": 2634965
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "slovak.sty",
+      "start": 2634965,
+      "end": 2637208
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "slovene.sty",
+      "start": 2637208,
+      "end": 2639456
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "spanish.sty",
+      "start": 2639456,
+      "end": 2641704
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "swedish.sty",
+      "start": 2641704,
+      "end": 2643952
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "switch.def",
+      "start": 2643952,
+      "end": 2645210
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "tests-babel-bidi-basic.lua",
+      "start": 2645210,
+      "end": 2659667
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "turkish.sty",
+      "start": 2659667,
+      "end": 2661915
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "txtbabel.def",
+      "start": 2661915,
+      "end": 2667146
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "ukraineb.sty",
+      "start": 2667146,
+      "end": 2669399
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "usorbian.sty",
+      "start": 2669399,
+      "end": 2671652
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "welsh.sty",
+      "start": 2671652,
+      "end": 2673890
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/babel",
+      "name": "xebabel.def",
+      "start": 2673890,
+      "end": 2691436
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyphen",
+      "name": "dumyhyph.tex",
+      "start": 2691436,
+      "end": 2691855
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyphen",
+      "name": "hyphen.tex",
+      "start": 2691855,
+      "end": 2719715
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyphen",
+      "name": "hypht1.tex",
+      "start": 2719715,
+      "end": 2728796
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/generic/hyphen",
+      "name": "zerohyph.tex",
+      "start": 2728796,
+      "end": 2729198
+    }
+  ],
+  "totalSize": 2729198
+}

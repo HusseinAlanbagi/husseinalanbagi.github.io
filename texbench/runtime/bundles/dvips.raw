@@ -1,0 +1,1930 @@
+%% $Id: dvipdfmx-unsafe.cfg 61101 2021-11-20 23:01:11Z karl $
+%% dvipdfmx-unsafe.cfg for trustworthy sources only.
+%% 
+%% This file is read after reading a default configuration file
+%% dvipdfmx.cfg via an option -i dvipdfmx-unsafe.cfg. Or, from XeTeX:
+%%   -output-driver="xdvipdfmx -i dvipdfmx-unsafe.cfg -q -E"
+%% It is needed for PSTricks in XeTeX.
+%% 
+%% Wrapper scripts xetex-unsafe and xelatex-unsafe do the above;
+%% see their man page for more details.
+%% 
+%% With the TL22 release and its dvipdfmx, we will remove -dNOSAFER here.
+%% https://tug.org/pipermail/tex-live-commits/2021-November/019700.html
+%%
+D  "rungs -q -dALLOWPSTRANSPARENCY -dNOSAFER -dNOPAUSE -dBATCH -dEPSCrop -sPAPERSIZE=a0 -sDEVICE=pdfwrite -dCompatibilityLevel=%v -dAutoFilterGrayImages=false -dGrayImageFilter=/FlateEncode -dAutoFilterColorImages=false -dColorImageFilter=/FlateEncode -dAutoRotatePages=/None -sOutputFile='%o' '%i' -c quit"
+%% If you change the above rungs invocation, also change dvipdfmx.cfg!
+%% $Id: dvipdfmx.cfg 73863 2025-02-10 22:31:41Z karl $
+%% dvipdfmx.cfg for dvipdfmx and xdvipdfmx.  (Public domain.)
+%% (maintained in TeX Live /source/ tree, copied to Master.)
+%% 
+%% PDF Version Setting
+%%
+%% PDF (minor) version stamp to use in output file.
+%% This also implies maximal version of PDF file allowed to be included.
+%% Dvipdfmx does not support 1.0, 1.1, 1.2 since TrueType font embedded
+%% as CIDFontType2 requires at least version 1.3. Transparent imaging
+%% model requires version 1.4. So if you want soft-masking support for
+%% PNG image with alpha channels, you should set version to 4 or higher.
+%% PDF 1.5 enables object compression.
+%% In 2025, we switched to PDF 1.7 by default, since that's now
+%% recommended by the PDF Association.
+%% https://tug.org/pipermail/tex-live/2025-February/051090.html
+
+V  7
+
+%% Dvipdfmx Compatibility Flags
+%%
+%%   0x0002  Use semi-transparent filling for tpic shading command,
+%%           instead of opaque gray color. (requires PDF 1.4)
+%%   0x0004  Treat all CIDFont as fixed-pitch font.
+%%           This is only for backward compatibility. Don't use that.
+%%   0x0008  Do not replace duplicate fontmap entries.
+%%           Dvipdfm's (not 'x') behaviour.
+%%   0x0010  Do not optimize PDF destinations. Use this if you want to
+%%           refer from other files to destinations in the current file.
+
+%C  0x0000
+
+%% PDF Document Settings
+%%
+%% Papersize Option:
+%%
+%%   p papersize-spec
+%%
+%% papersize-spec is 'paper-format' or length-pair, e.g., 'a4', 'letter',
+%% '20cm,30cm'. Recognized unit is 'cm', 'mm', 'bp', 'pt', 'in'.
+
+p  a4
+
+%% Annotation Box Margin:
+%%
+%%   g length
+%%
+%% Add margin to annotation rectangle created via various \specials. Many
+%% TeX macro packages set the annotation bounding box equal to the TeX box
+%% that encloses the material. That's not always what you want.
+%% Annotations created by pdf:bannot/pdf:eannot is also affected.
+
+%g  0
+
+%% Bookmark Open Level:
+%%
+%%   O integer
+%%
+%% Mark bookmark (outline) item as initial state 'open' if the depth
+%% of that item (from root node) is less than or equal to the integer
+%% specified with this option.
+
+O  0
+
+%% PDF Security (Encryption) Setting
+%%
+%% Those options won't take effects unless you use flag 'S'.
+%%
+%% Key bits for PDF encryption (40 - 128)
+
+K  40
+
+%% Permission flag for PDF encryption: Revision will be 3 if the key size
+%% is greater than 40 bits.
+%%
+%% 0x0004 (Revision 2) Print the document.
+%%        (Revision 3) Print the document (possibly not at the highest quality
+%%        level, depending on whether bit 12[0x0800] is also set).
+%% 0x0008 Modify the contents of the document by operations other than those
+%%        controlled by bits 6[0x0020], 9[0x0100], and 11[0x0400].
+%% 0x0010 (Revision 2) Copy or otherwise extract text and graphics from the
+%%        document, including extracting text and graphics (in support of
+%%        accessibility to disabled users or for other purposes).
+%%        (Revision 3) Copy or otherwise extract text and grphics from the
+%%        document by operations other than that controlled by bit 10[0x0200].
+%% 0x0020 Add or modify text annotations, fill in interactive form fields,
+%%        and, if bit 4[0x0008] is also set, create or modify interactive
+%%        form fields (including signature fields).
+%%
+%% (Revision 3 only)
+%% 0x0100 Fill in existing interactive form fields (including signature
+%%        fields), even if bit 6 is clear.
+%% 0x0200 Extract text and graphics (in support of accessibility to disabled
+%%        users or for other purposes).
+%% 0x0400 Assemble the document (insert, rotate, or delete pages and create
+%%        bookmarks or thumbnail images), even if bit 4 is clear.
+%% 0x0800 Print the document to a representation from which a faithful digital
+%%        copy of the PDF content could be generated. When this bit is clear
+%%        (and bit 3 is set), printing is limited to a low-level representation
+%%        of the appearance, possibly of degraded quality.
+
+P  0x003C
+
+%% Image Handler
+%%
+%% With 'D' option dvipdfmx may invoke shell command via system()
+%% function call.
+%%
+%% Command-line template for a-to-b conversion:
+%%
+%% Supported target format ('b') is currently PDF.
+%% Percent sign '%' is special character:
+%%
+%%   %i  Input file name (FQPN). Name of file to be converted to PDF.
+%%   %o  Output file name (FQPN). Temporary file to store conversion
+%%       result. Removed after inclusion is finished. (regardless of
+%%       success or failure)
+%%   %b  The "base" name of the input file, e.g., "foo" instead of
+%%       "foo.eps".
+%%   %v  The PDF version to be converted to, e.g. "1.4" for PDF 1.4.
+%%   %%  Replaced with single '%'.
+
+%% Ghostscript (PS-to-PDF and PDF-to-PDF):
+%%
+%% In TeX Live, we use the rungs wrapper instead of ps2pdf, in order to
+%% use our own supplied gs on Windows.
+%% 
+%% Without the -dEPSCROP below, an eps file with negative llx/lly (as
+%% created by MetaPost, for example) fails.  In 2013, changes were made
+%% to the drivers xetex.def, dvipdfmx.def, etc., to handle non-zero
+%% llx/lly so we could use it.  The file epsf-dvipdfmx.tex is available
+%% from CTAN/TL/etc. to support plain's epsf.tex.
+%% 
+%% In 2014, we discovered that -sPAPERSIZE=a0 was needed to support
+%% pstricks under xetex; otherwise, images were cropped (see thread at
+%% https://tug.org/pipermail/xetex/2014-November/025664.html).
+%% Happily, it seems that using both -dEPSCROP and -sPAPERSIZE=a0
+%% simultaneously works ok.  So that's we do below.
+%% 
+%% By default, gs encodes all images contained in a PS file using
+%% the lossy DCT (i.e., JPEG) filter. This can lead to inferior
+%% result (see the discussion at http://electron.mit.edu/~gsteele/pdf/).
+%% The "-dAutoFilterXXXImages" and "-dXXXImageFilter" options used
+%% below force all images to be encoded with the lossless Flate (zlib,
+%% same as PNG) filter. Note that if the PS file already contains DCT
+%% encoded images (which is possible in PS level 2), then these images
+%% will also be re-encoded using Flate. To turn the conversion off,
+%% remove the options mentioned above.
+%% 
+%% Incidentally, more than one dvipdfmx.cfg may exist.
+%% You can find the one that is active by running:
+%%   kpsewhich -progname=dvipdfmx -format=othertext dvipdfmx.cfg
+%% and control which one is found by setting DVIPDFMXINPUTS.
+%%
+D  "rungs -q -dSAFER -dNOPAUSE -dBATCH -dEPSCrop -sPAPERSIZE=a0 -sDEVICE=pdfwrite -dCompatibilityLevel=%v -dAutoFilterGrayImages=false -dGrayImageFilter=/FlateEncode -dAutoFilterColorImages=false -dColorImageFilter=/FlateEncode -dAutoRotatePages=/None -sOutputFile='%o' '%i' -c quit"
+%% If you change the above rungs invocation, also change dvipdfmx-unsafe.cfg!
+
+% other random ps converters people have experimented with.
+%D "/usr/local/bin/ps2pdf -dEPSCrop '%i' '%o'"
+%D "/usr/texbin/epstopdf '%i' -o '%o'"
+%D "/usr/bin/pstopdf '%i' -o '%o'"
+%
+%% Frank Siegert's PStill:
+%D  "/usr/local/bin/pstill -c -o '%o' '%i'"
+%
+%% Batik + Fop (SVG-to-PDF):
+%% If you want both PS and SVG, you need to write a script or program
+%% that selectively invokes converters.
+%D  "java -classpath classpaths -jar /path/to/batik-rasterizer.jar -m application/pdf -d '%o' '%i'"
+%
+%% There are no way to directly know suggested size of (raster) images.
+%% You may want to use %b here, since you can try reading the ebb file
+%% to see what is natural (physical) size of images. 
+%D  "ras2pdf -r 300x300 -b '%b.bb' -o '%o' '%i'"
+%
+%% ImageMagick:
+%% Easiest way to support various file formats.
+%D  "convert '%i' 'epdf:%o'"
+
+%% Other Options
+%%
+%% DPI for PK font creation
+
+%r  600
+
+%% Set number of fractional digit kept for various numbers in PDF page
+%% content output. By setting this to 2 (default), dvipdfmx rounds
+%% real numbers at 2nd fractional (decimal) digit; e.g., "3.14159" is
+%% written as "3.14". Increasing this to more than 2 isn't meaningful
+%% for old Acrobat due to implementation limit of Acrobat.
+%% Length 0.01 in unscaled coordinate system amount to width of 1 pixel
+%% in 7200ppi display. 
+
+%d  5
+
+%% Image cache life in hours
+%%  0 means erase all old images and leave new images
+%% -1 means erase all old images and also erase new images
+%% -2 means ignore image cache
+%I -2
+
+%% Font Map Files
+%%
+%% teTeX 2.x and TeX Live using updmap (pdfTeX format)
+f  pdftex.map
+
+%% teTeX 2.x and TeX Live using updmap (DVIPDFM format)
+%f dvipdfm.map
+
+%% teTeX 2.x and TeX Live using updmap (DVIPS format)
+%% MiKTeX 2.2 and 2.3
+%f psfonts.map
+
+%% Put additional fontmap files here (usually for Type0 fonts)
+%f  cid-x.map
+
+% the following file is generated by updmap(-sys) from the 
+% KanjiMap entries in the updmap.cfg file.
+f kanjix.map
+% minimal example for Chinese and Korean users
+% improvements please to tex-live@tug.org
+f ckx.map
+
+%% Include other config files
+%i <filename>
+%!
+TeXDict begin/setcmykcolor where{pop}{/setcmykcolor{dup 10 eq{pop
+setrgbcolor}{1 sub 4 1 roll 3{3 index add neg dup 0 lt{pop 0}if 3 1 roll
+}repeat setrgbcolor pop}ifelse}B}ifelse/TeXcolorcmyk{setcmykcolor}def
+/TeXcolorrgb{setrgbcolor}def/TeXcolorgrey{setgray}def/TeXcolorgray{
+setgray}def/TeXcolorhsb{sethsbcolor}def/currentcmykcolor where{pop}{
+/currentcmykcolor{currentrgbcolor 10}B}ifelse/DC{exch dup userdict exch
+known{pop pop}{X}ifelse}B/GreenYellow{0.15 0 0.69 0 setcmykcolor}DC
+/Yellow{0 0 1 0 setcmykcolor}DC/Goldenrod{0 0.10 0.84 0 setcmykcolor}DC
+/Dandelion{0 0.29 0.84 0 setcmykcolor}DC/Apricot{0 0.32 0.52 0
+setcmykcolor}DC/Peach{0 0.50 0.70 0 setcmykcolor}DC/Melon{0 0.46 0.50 0
+setcmykcolor}DC/YellowOrange{0 0.42 1 0 setcmykcolor}DC/Orange{0 0.61
+0.87 0 setcmykcolor}DC/BurntOrange{0 0.51 1 0 setcmykcolor}DC
+/Bittersweet{0 0.75 1 0.24 setcmykcolor}DC/RedOrange{0 0.77 0.87 0
+setcmykcolor}DC/Mahogany{0 0.85 0.87 0.35 setcmykcolor}DC/Maroon{0 0.87
+0.68 0.32 setcmykcolor}DC/BrickRed{0 0.89 0.94 0.28 setcmykcolor}DC/Red{
+0 1 1 0 setcmykcolor}DC/OrangeRed{0 1 0.50 0 setcmykcolor}DC/RubineRed{
+0 1 0.13 0 setcmykcolor}DC/WildStrawberry{0 0.96 0.39 0 setcmykcolor}DC
+/Salmon{0 0.53 0.38 0 setcmykcolor}DC/CarnationPink{0 0.63 0 0
+setcmykcolor}DC/Magenta{0 1 0 0 setcmykcolor}DC/VioletRed{0 0.81 0 0
+setcmykcolor}DC/Rhodamine{0 0.82 0 0 setcmykcolor}DC/Mulberry{0.34 0.90
+0 0.02 setcmykcolor}DC/RedViolet{0.07 0.90 0 0.34 setcmykcolor}DC
+/Fuchsia{0.47 0.91 0 0.08 setcmykcolor}DC/Lavender{0 0.48 0 0
+setcmykcolor}DC/Thistle{0.12 0.59 0 0 setcmykcolor}DC/Orchid{0.32 0.64 0
+0 setcmykcolor}DC/DarkOrchid{0.40 0.80 0.20 0 setcmykcolor}DC/Purple{
+0.45 0.86 0 0 setcmykcolor}DC/Plum{0.50 1 0 0 setcmykcolor}DC/Violet{
+0.79 0.88 0 0 setcmykcolor}DC/RoyalPurple{0.75 0.90 0 0 setcmykcolor}DC
+/BlueViolet{0.86 0.91 0 0.04 setcmykcolor}DC/Periwinkle{0.57 0.55 0 0
+setcmykcolor}DC/CadetBlue{0.62 0.57 0.23 0 setcmykcolor}DC
+/CornflowerBlue{0.65 0.13 0 0 setcmykcolor}DC/MidnightBlue{0.98 0.13 0
+0.43 setcmykcolor}DC/NavyBlue{0.94 0.54 0 0 setcmykcolor}DC/RoyalBlue{1
+0.50 0 0 setcmykcolor}DC/Blue{1 1 0 0 setcmykcolor}DC/Cerulean{0.94 0.11
+0 0 setcmykcolor}DC/Cyan{1 0 0 0 setcmykcolor}DC/ProcessBlue{0.96 0 0 0
+setcmykcolor}DC/SkyBlue{0.62 0 0.12 0 setcmykcolor}DC/Turquoise{0.85 0
+0.20 0 setcmykcolor}DC/TealBlue{0.86 0 0.34 0.02 setcmykcolor}DC
+/Aquamarine{0.82 0 0.30 0 setcmykcolor}DC/BlueGreen{0.85 0 0.33 0
+setcmykcolor}DC/Emerald{1 0 0.50 0 setcmykcolor}DC/JungleGreen{0.99 0
+0.52 0 setcmykcolor}DC/SeaGreen{0.69 0 0.50 0 setcmykcolor}DC/Green{1 0
+1 0 setcmykcolor}DC/ForestGreen{0.91 0 0.88 0.12 setcmykcolor}DC
+/PineGreen{0.92 0 0.59 0.25 setcmykcolor}DC/LimeGreen{0.50 0 1 0
+setcmykcolor}DC/YellowGreen{0.44 0 0.74 0 setcmykcolor}DC/SpringGreen{
+0.26 0 0.76 0 setcmykcolor}DC/OliveGreen{0.64 0 0.95 0.40 setcmykcolor}
+DC/RawSienna{0 0.72 1 0.45 setcmykcolor}DC/Sepia{0 0.83 1 0.70
+setcmykcolor}DC/Brown{0 0.81 1 0.60 setcmykcolor}DC/Tan{0.14 0.42 0.56 0
+setcmykcolor}DC/Gray{0 0 0 0.50 setcmykcolor}DC/Black{0 0 0 1
+setcmykcolor}DC/White{0 0 0 0 setcmykcolor}DC end
+%!
+TeXDict begin/cX 18 def/CM{gsave TR 0 cX neg moveto 0 cX lineto stroke
+cX neg 0 moveto cX 0 lineto stroke grestore}def end/bop-hook{cX dup TR
+gsave .3 setlinewidth 0 0 CM vsize cX 2 mul sub dup hsize cX 2 mul sub
+dup isls{4 2 roll}if 0 CM exch CM 0 exch CM grestore 0 cX -2 mul TR isls
+{cX -2 mul 0 TR}if}def
+%!
+/fstore{dup dict exch{dup 4 2 roll put}repeat def}bind def/fshow{gsave
+72 TeXDict/Resolution get div -72 TeXDict/VResolution get div scale 1
+DVImag div dup scale get cvx exec show grestore}bind def
+%!
+/HPSdict 20 dict dup begin/braindeaddistill 50 def/rfch{dup length 1 sub
+1 exch getinterval}bind def/splituri{dup(#)search{exch pop}{()exch}
+ifelse dup(file:)anchorsearch{pop exch pop 3 -1 roll pop false}{pop 3 -1
+roll exch pop true}ifelse}bind def/lookuptarget{exch rfch dup
+/TargetAnchors where{pop TargetAnchors dup 3 -1 roll known{exch get true
+}{pop(target unknown:)print == false}ifelse}{pop pop
+(target dictionary unknown\012)print false}ifelse}bind def/savecount 0
+def/stackstopped{count counttomark sub/savecount exch store stopped
+count savecount sub 1 sub dup 0 gt{{exch pop}repeat}{pop}ifelse}bind def
+/tempstring 128 string def/targetvalidate{1 index dup length 127 gt exch
+tempstring cvs dup(/)search{pop pop pop exch pop true exch}{pop}ifelse
+token{pop length 0 ne}{true}ifelse or not}bind def/targetdump-hook where
+{pop}{/targetdump-hook{dup mark exch gsave initmat setmatrix{{mark/Dest
+4 2 roll targetvalidate{aload pop exch pop/Page 3 1 roll/View exch[exch
+/FitH exch]/DEST pdfmark}{cleartomark}ifelse}forall}stackstopped pop
+grestore}bind def}ifelse/baseurl{mark exch 1 dict dup 3 -1 roll/Base
+exch put/URI exch/DOCVIEW{pdfmark}stackstopped pop}bind def
+/externalhack systemdict/PDF known def/oldstyle true def/initmat matrix
+currentmatrix def/actiondict 2 dict dup/Subtype/URI put def
+/weblinkhandler{dup 3 1 roll mark 4 1 roll/Title 4 1 roll splituri 3 -1
+roll dup length 0 gt{cvn/Dest exch 4 2 roll}{pop}ifelse{externalhack{
+/HTTPFile exch}{actiondict dup 3 -1 roll/URI exch put/Action exch}
+ifelse}{externalhack{/HTTPFile exch}{/File exch/Action/GoToR}ifelse}
+ifelse counttomark 2 sub -1 roll aload pop/Rect 4 1 roll/Border 3 1 roll
+/Color exch oldstyle{/LNK}{/Subtype/Link/ANN}ifelse gsave initmat
+setmatrix{pdfmark}stackstopped grestore}bind def/externalhandler where{
+pop}{/externalhandler{2 copy{weblinkhandler}exec{/externalhack
+externalhack not store 2 copy{weblinkhandler}exec{/externalhack
+externalhack not store/oldstyle false store 2 copy{weblinkhandler}exec{
+(WARNING: external refs disabled\012)print/externalhandler{pop pop}bind
+store externalhandler}{pop pop}ifelse}{pop pop/externalhack externalhack
+not store}ifelse}{pop pop/externalhandler{weblinkhandler pop}bind store}
+ifelse}bind def}ifelse/pdfmnew{dup type/stringtype eq{externalhandler}{
+exch dup rfch exch 3 -1 roll lookuptarget{mark 4 1 roll/Title 4 1 roll
+aload pop exch pop/Page 3 1 roll/View exch[exch/FitH exch]5 -1 roll
+aload pop/Rect 4 1 roll/Border 3 1 roll/Color exch/LNK gsave initmat
+setmatrix pdfmark grestore}{pop pop}ifelse}ifelse}bind def/pdfmold{dup
+type/stringtype eq{externalhandler}{exch dup rfch exch 3 -1 roll
+lookuptarget{mark 4 1 roll/Title 4 1 roll aload pop exch pop/Page 3 1
+roll/View exch[exch/FitH exch]5 -1 roll aload pop pop 0 3 getinterval
+/Rect 3 1 roll/Border exch/LNK gsave initmat setmatrix pdfmark grestore}
+{pop pop}ifelse}ifelse}bind def/pdfm where{pop}{/pdfm
+/currentdistillerparams where{pop currentdistillerparams dup
+/CoreDistVersion known{/CoreDistVersion get}{0}ifelse dup
+braindeaddistill le{(WARNING: switching to old pdfm because version =)
+print ==/pdfmold}{pop/pdfmnew}ifelse load}{/pdfmark where{pop{dup type
+/stringtype eq{externalhandler}{2 copy mark 3 1 roll{pdfmnew}
+stackstopped{2 copy mark 3 1 roll{pdfmold}stackstopped{
+(WARNING: pdfm disabled\012)print/pdfm{pop pop}store}{
+(WARNING: new pdfm failed, switching to old pdfm\012)print/pdfm/pdfmold
+load store}ifelse}{/pdfm/pdfmnew load store}ifelse pop pop}ifelse}}{{
+pop pop}}ifelse}ifelse bind def}ifelse end def
+% (This is the file {\tt resolution400.ps} supplied with NeWSprint.)
+% {\tt simpson@math.psu.edu} only got this work by downloading the code
+% via an extra header file, i.e., having this in the Dvips config file:
+%
+% M sparcptr
+% D 400
+% h resolution400.ps
+%
+/SetResolution {
+    /setres where {
+        /setres get exec
+    }{
+        pop
+    } ifelse
+} def
+%%BeginFeature *SetResolution 400
+400 SetResolution
+%%EndFeature
+%%EndSetup
+%!
+TeXDict begin/SDict 200 dict N SDict begin/@SpecialDefaults{/hs 612 N
+/vs 792 N/ho 0 N/vo 0 N/hsc 1 N/vsc 1 N/ang 0 N/CLIP 0 N/rwiSeen false N
+/rhiSeen false N/letter{}N/note{}N/a4{}N/legal{}N}B/@scaleunit 100 N
+/@hscale{@scaleunit div/hsc X}B/@vscale{@scaleunit div/vsc X}B/@hsize{
+/hs X/CLIP 1 N}B/@vsize{/vs X/CLIP 1 N}B/@clip{/CLIP 2 N}B/@hoffset{/ho
+X}B/@voffset{/vo X}B/@angle{/ang X}B/@rwi{10 div/rwi X/rwiSeen true N}B
+/@rhi{10 div/rhi X/rhiSeen true N}B/@llx{/llx X}B/@lly{/lly X}B/@urx{
+/urx X}B/@ury{/ury X}B/magscale true def end/@MacSetUp{userdict/md known
+{userdict/md get type/dicttype eq{userdict begin md length 10 add md
+maxlength ge{/md md dup length 20 add dict copy def}if end md begin
+/letter{}N/note{}N/legal{}N/od{txpose 1 0 mtx defaultmatrix dtransform S
+atan/pa X newpath clippath mark{transform{itransform moveto}}{transform{
+itransform lineto}}{6 -2 roll transform 6 -2 roll transform 6 -2 roll
+transform{itransform 6 2 roll itransform 6 2 roll itransform 6 2 roll
+curveto}}{{closepath}}pathforall newpath counttomark array astore/gc xdf
+pop ct 39 0 put 10 fz 0 fs 2 F/|______Courier fnt invertflag{PaintBlack}
+if}N/txpose{pxs pys scale ppr aload pop por{noflips{pop S neg S TR pop 1
+-1 scale}if xflip yflip and{pop S neg S TR 180 rotate 1 -1 scale ppr 3
+get ppr 1 get neg sub neg ppr 2 get ppr 0 get neg sub neg TR}if xflip
+yflip not and{pop S neg S TR pop 180 rotate ppr 3 get ppr 1 get neg sub
+neg 0 TR}if yflip xflip not and{ppr 1 get neg ppr 0 get neg TR}if}{
+noflips{TR pop pop 270 rotate 1 -1 scale}if xflip yflip and{TR pop pop
+90 rotate 1 -1 scale ppr 3 get ppr 1 get neg sub neg ppr 2 get ppr 0 get
+neg sub neg TR}if xflip yflip not and{TR pop pop 90 rotate ppr 3 get ppr
+1 get neg sub neg 0 TR}if yflip xflip not and{TR pop pop 270 rotate ppr
+2 get ppr 0 get neg sub neg 0 S TR}if}ifelse scaleby96{ppr aload pop 4
+-1 roll add 2 div 3 1 roll add 2 div 2 copy TR .96 dup scale neg S neg S
+TR}if}N/cp{pop pop showpage pm restore}N end}if}if}N/normalscale{
+Resolution 72 div VResolution 72 div neg scale magscale{DVImag dup scale
+}if 0 setgray}N/@beginspecial{SDict begin/SpecialSave save N gsave
+normalscale currentpoint TR @SpecialDefaults count/ocount X/dcount
+countdictstack N}N/@setspecial{CLIP 1 eq{newpath 0 0 moveto hs 0 rlineto
+0 vs rlineto hs neg 0 rlineto closepath clip}if ho vo TR hsc vsc scale
+ang rotate rwiSeen{rwi urx llx sub div rhiSeen{rhi ury lly sub div}{dup}
+ifelse scale llx neg lly neg TR}{rhiSeen{rhi ury lly sub div dup scale
+llx neg lly neg TR}if}ifelse CLIP 2 eq{newpath llx lly moveto urx lly
+lineto urx ury lineto llx ury lineto closepath clip}if/showpage{}N
+/erasepage{}N/setpagedevice{pop}N/copypage{}N newpath}N/@endspecial{
+count ocount sub{pop}repeat countdictstack dcount sub{end}repeat
+grestore SpecialSave restore end}N/@defspecial{SDict begin}N
+/@fedspecial{end}B/li{lineto}B/rl{rlineto}B/rc{rcurveto}B/np{/SaveX
+currentpoint/SaveY X N 1 setlinecap newpath}N/st{stroke SaveX SaveY
+moveto}N/fil{fill SaveX SaveY moveto}N/ellipse{/endangle X/startangle X
+/yrad X/xrad X/savematrix matrix currentmatrix N TR xrad yrad scale 0 0
+1 startangle endangle arc savematrix setmatrix}N end
+%!
+/TeXDict 300 dict def TeXDict begin/N{def}def/B{bind def}N/S{exch}N/X{S
+N}B/A{dup}B/TR{translate}N/isls false N/vsize 11 72 mul N/hsize 8.5 72
+mul N/landplus90{false}def/@rigin{isls{[0 landplus90{1 -1}{-1 1}ifelse 0
+0 0]concat}if 72 Resolution div 72 VResolution div neg scale isls{
+landplus90{VResolution 72 div vsize mul 0 exch}{Resolution -72 div hsize
+mul 0}ifelse TR}if Resolution VResolution vsize -72 div 1 add mul TR[
+matrix currentmatrix{A A round sub abs 0.00001 lt{round}if}forall round
+exch round exch]setmatrix}N/@landscape{/isls true N}B/@manualfeed{
+statusdict/manualfeed true put}B/@copies{/#copies X}B/FMat[1 0 0 -1 0 0]
+N/FBB[0 0 0 0]N/nn 0 N/IEn 0 N/ctr 0 N/df-tail{/nn 8 dict N nn begin
+/FontType 3 N/FontMatrix fntrx N/FontBBox FBB N string/base X array
+/BitMaps X/BuildChar{CharBuilder}N/Encoding IEn N end A{/foo setfont}2
+array copy cvx N load 0 nn put/ctr 0 N[}B/sf 0 N/df{/sf 1 N/fntrx FMat N
+df-tail}B/dfs{div/sf X/fntrx[sf 0 0 sf neg 0 0]N df-tail}B/E{pop nn A
+definefont setfont}B/Cw{Cd A length 5 sub get}B/Ch{Cd A length 4 sub get
+}B/Cx{128 Cd A length 3 sub get sub}B/Cy{Cd A length 2 sub get 127 sub}
+B/Cdx{Cd A length 1 sub get}B/Ci{Cd A type/stringtype ne{ctr get/ctr ctr
+1 add N}if}B/CharBuilder{save 3 1 roll S A/base get 2 index get S
+/BitMaps get S get/Cd X pop/ctr 0 N Cdx 0 Cx Cy Ch sub Cx Cw add Cy
+setcachedevice Cw Ch true[1 0 0 -1 -.1 Cx sub Cy .1 sub]{Ci}imagemask
+restore}B/D{/cc X A type/stringtype ne{]}if nn/base get cc ctr put nn
+/BitMaps get S ctr S sf 1 ne{A A length 1 sub A 2 index S get sf div put
+}if put/ctr ctr 1 add N}B/I{cc 1 add D}B/bop{userdict/bop-hook known{
+bop-hook}if/SI save N @rigin 0 0 moveto/V matrix currentmatrix A 1 get A
+mul exch 0 get A mul add .99 lt{/QV}{/RV}ifelse load def pop pop}N/eop{
+SI restore userdict/eop-hook known{eop-hook}if showpage}N/@start{
+userdict/start-hook known{start-hook}if pop/VResolution X/Resolution X
+1000 div/DVImag X/IEn 256 array N 2 string 0 1 255{IEn S A 360 add 36 4
+index cvrs cvn put}for pop 65781.76 div/vsize X 65781.76 div/hsize X}N
+/dir 0 def/dyy{/dir 0 def}B/dyt{/dir 1 def}B/dty{/dir 2 def}B/dtt{/dir 3
+def}B/p{dir 2 eq{-90 rotate show 90 rotate}{dir 3 eq{-90 rotate show 90
+rotate}{show}ifelse}ifelse}N/RMat[1 0 0 -1 0 0]N/BDot 260 string N/Rx 0
+N/Ry 0 N/V{}B/RV/v{/Ry X/Rx X V}B statusdict begin/product where{pop
+false[(Display)(NeXT)(LaserWriter 16/600)]{A length product length le{A
+length product exch 0 exch getinterval eq{pop true exit}if}{pop}ifelse}
+forall}{false}ifelse end{{gsave TR -.1 .1 TR 1 1 scale Rx Ry false RMat{
+BDot}imagemask grestore}}{{gsave TR -.1 .1 TR Rx Ry scale 1 1 false RMat
+{BDot}imagemask grestore}}ifelse B/QV{gsave newpath transform round exch
+round exch itransform moveto Rx 0 rlineto 0 Ry neg rlineto Rx neg 0
+rlineto fill grestore}B/a{moveto}B/delta 0 N/tail{A/delta X 0 rmoveto}B
+/M{S p delta add tail}B/b{S p tail}B/c{-4 M}B/d{-3 M}B/e{-2 M}B/f{-1 M}
+B/g{0 M}B/h{1 M}B/i{2 M}B/j{3 M}B/k{4 M}B/w{0 rmoveto}B/l{p -4 w}B/m{p
+-3 w}B/n{p -2 w}B/o{p -1 w}B/q{p 1 w}B/r{p 2 w}B/s{p 3 w}B/t{p 4 w}B/x{
+0 S rmoveto}B/y{3 2 roll p a}B/bos{/SS save N}B/eos{SS restore}B end
+%!
+/TeXDict 300 dict def TeXDict begin/N{def}def/B{bind def}N/S{exch}N/X{S
+N}B/A{dup}B/TR{translate}N/isls false N/vsize 11 72 mul N/hsize 8.5 72
+mul N/landplus90{false}def/@rigin{isls{[0 landplus90{1 -1}{-1 1}ifelse 0
+0 0]concat}if 72 Resolution div 72 VResolution div neg scale isls{
+landplus90{VResolution 72 div vsize mul 0 exch}{Resolution -72 div hsize
+mul 0}ifelse TR}if Resolution VResolution vsize -72 div 1 add mul TR[
+matrix currentmatrix{A A round sub abs 0.00001 lt{round}if}forall round
+exch round exch]setmatrix}N/@landscape{/isls true N}B/@manualfeed{
+statusdict/manualfeed true put}B/@copies{/#copies X}B/FMat[1 0 0 -1 0 0]
+N/FBB[0 0 0 0]N/nn 0 N/IEn 0 N/ctr 0 N/df-tail{/nn 8 dict N nn begin
+/FontType 3 N/FontMatrix fntrx N/FontBBox FBB N string/base X array
+/BitMaps X/BuildChar{CharBuilder}N/Encoding IEn N end A{/foo setfont}2
+array copy cvx N load 0 nn put/ctr 0 N[}B/sf 0 N/df{/sf 1 N/fntrx FMat N
+df-tail}B/dfs{div/sf X/fntrx[sf 0 0 sf neg 0 0]N df-tail}B/E{pop nn A
+definefont setfont}B/Cw{Cd A length 5 sub get}B/Ch{Cd A length 4 sub get
+}B/Cx{128 Cd A length 3 sub get sub}B/Cy{Cd A length 2 sub get 127 sub}
+B/Cdx{Cd A length 1 sub get}B/Ci{Cd A type/stringtype ne{ctr get/ctr ctr
+1 add N}if}B/id 0 N/rw 0 N/rc 0 N/gp 0 N/cp 0 N/G 0 N/CharBuilder{save 3
+1 roll S A/base get 2 index get S/BitMaps get S get/Cd X pop/ctr 0 N Cdx
+0 Cx Cy Ch sub Cx Cw add Cy setcachedevice Cw Ch true[1 0 0 -1 -.1 Cx
+sub Cy .1 sub]/id Ci N/rw Cw 7 add 8 idiv string N/rc 0 N/gp 0 N/cp 0 N{
+rc 0 ne{rc 1 sub/rc X rw}{G}ifelse}imagemask restore}B/G{{id gp get/gp
+gp 1 add N A 18 mod S 18 idiv pl S get exec}loop}B/adv{cp add/cp X}B
+/chg{rw cp id gp 4 index getinterval putinterval A gp add/gp X adv}B/nd{
+/cp 0 N rw exit}B/lsh{rw cp 2 copy get A 0 eq{pop 1}{A 255 eq{pop 254}{
+A A add 255 and S 1 and or}ifelse}ifelse put 1 adv}B/rsh{rw cp 2 copy
+get A 0 eq{pop 128}{A 255 eq{pop 127}{A 2 idiv S 128 and or}ifelse}
+ifelse put 1 adv}B/clr{rw cp 2 index string putinterval adv}B/set{rw cp
+fillstr 0 4 index getinterval putinterval adv}B/fillstr 18 string 0 1 17
+{2 copy 255 put pop}for N/pl[{adv 1 chg}{adv 1 chg nd}{1 add chg}{1 add
+chg nd}{adv lsh}{adv lsh nd}{adv rsh}{adv rsh nd}{1 add adv}{/rc X nd}{
+1 add set}{1 add clr}{adv 2 chg}{adv 2 chg nd}{pop nd}]A{bind pop}
+forall N/D{/cc X A type/stringtype ne{]}if nn/base get cc ctr put nn
+/BitMaps get S ctr S sf 1 ne{A A length 1 sub A 2 index S get sf div put
+}if put/ctr ctr 1 add N}B/I{cc 1 add D}B/bop{userdict/bop-hook known{
+bop-hook}if/SI save N @rigin 0 0 moveto/V matrix currentmatrix A 1 get A
+mul exch 0 get A mul add .99 lt{/QV}{/RV}ifelse load def pop pop}N/eop{
+SI restore userdict/eop-hook known{eop-hook}if showpage}N/@start{
+userdict/start-hook known{start-hook}if pop/VResolution X/Resolution X
+1000 div/DVImag X/IEn 256 array N 2 string 0 1 255{IEn S A 360 add 36 4
+index cvrs cvn put}for pop 65781.76 div/vsize X 65781.76 div/hsize X}N
+/dir 0 def/dyy{/dir 0 def}B/dyt{/dir 1 def}B/dty{/dir 2 def}B/dtt{/dir 3
+def}B/p{dir 2 eq{-90 rotate show 90 rotate}{dir 3 eq{-90 rotate show 90
+rotate}{show}ifelse}ifelse}N/RMat[1 0 0 -1 0 0]N/BDot 260 string N/Rx 0
+N/Ry 0 N/V{}B/RV/v{/Ry X/Rx X V}B statusdict begin/product where{pop
+false[(Display)(NeXT)(LaserWriter 16/600)]{A length product length le{A
+length product exch 0 exch getinterval eq{pop true exit}if}{pop}ifelse}
+forall}{false}ifelse end{{gsave TR -.1 .1 TR 1 1 scale Rx Ry false RMat{
+BDot}imagemask grestore}}{{gsave TR -.1 .1 TR Rx Ry scale 1 1 false RMat
+{BDot}imagemask grestore}}ifelse B/QV{gsave newpath transform round exch
+round exch itransform moveto Rx 0 rlineto 0 Ry neg rlineto Rx neg 0
+rlineto fill grestore}B/a{moveto}B/delta 0 N/tail{A/delta X 0 rmoveto}B
+/M{S p delta add tail}B/b{S p tail}B/c{-4 M}B/d{-3 M}B/e{-2 M}B/f{-1 M}
+B/g{0 M}B/h{1 M}B/i{2 M}B/j{3 M}B/k{4 M}B/w{0 rmoveto}B/l{p -4 w}B/m{p
+-3 w}B/n{p -2 w}B/o{p -1 w}B/q{p 1 w}B/r{p 2 w}B/s{p 3 w}B/t{p 4 w}B/x{
+0 S rmoveto}B/y{3 2 roll p a}B/bos{/SS save N}B/eos{SS restore}B end
+%!
+TeXDict begin/rf{findfont dup length 1 add dict begin{1 index/FID ne 2
+index/UniqueID ne and{def}{pop pop}ifelse}forall[1 index 0 6 -1 roll
+exec 0 exch 5 -1 roll VResolution Resolution div mul neg 0 0]FontType 0
+ne{/Metrics exch def dict begin Encoding{exch dup type/integertype ne{
+pop pop 1 sub dup 0 le{pop}{[}ifelse}{FontMatrix 0 get div Metrics 0 get
+div def}ifelse}forall Metrics/Metrics currentdict end def}{{1 index type
+/nametype eq{exit}if exch pop}loop}ifelse[2 index currentdict end
+definefont 3 -1 roll makefont/setfont cvx]cvx def}def/ObliqueSlant{dup
+sin S cos div neg}B/SlantFont{4 index mul add}def/ExtendFont{3 -1 roll
+mul exch}def/ReEncodeFont{CharStrings rcheck{/Encoding false def dup[
+exch{dup CharStrings exch known not{pop/.notdef/Encoding true def}if}
+forall Encoding{]exch pop}{cleartomark}ifelse}if/Encoding exch def}def
+end
+%!
+% Patch by TVZ
+% Makes dvips files draw rules with stroke rather than fill.
+% Makes narrow rules more predictable at low resolutions
+% after distilling to PDF.
+% May have unknown consequences for very thick rules.
+% Tested only with dvips 5.85(k).
+TeXDict begin
+/QV {
+  gsave newpath /ruleY X /ruleX X
+  Rx Ry gt
+  { ruleX ruleY Ry 2 div sub moveto Rx 0 rlineto Ry }
+  { ruleX Rx 2 div add ruleY moveto 0 Ry neg rlineto Rx }
+  ifelse
+  setlinewidth 0 setlinecap stroke grestore
+} bind def
+end
+M canonex
+D 600
+p +bakomaextra.map
+p +psfonts.cmz
+p +psfonts.amz
+M canonex
+D 600
+M cx
+D 300
+M deskjet
+D 300
+% The printer offsets the output by this much.
+O 0pt,0pt
+M epson
+D 240
+M ibmvga
+D 110
+M ljfour
+D 600
+p +hlce.map
+p +hlcf.map
+p +hlcn.map
+p +hlct.map
+p +hlcw.map
+p +hlh.map
+p +hls.map
+p +hlst.map
+p +hlx.map
+p +hlcm.map
+p +mbn.map
+p +mga.map
+% config.mirrorprint: Thomas Esser, 1998, public domain.
+
+% Usage: dvips -Pmirrorprint ...
+% Purpose: print in a mirrored way 
+
+h mirr.hd
+p +mntz.map
+p +lscy.map
+% $Id: config.ps 41704 2016-07-14 22:33:33Z karl $
+% config.ps - configuration file for dvips.
+% Tomas Rokicki, Thomas Esser, Karl Berry, et al., 1986ff, public domain.
+
+% Memory available. Download the three-line PostScript file:
+%   %! Hey, we're PostScript
+%   /Times-Roman findfont 30 scalefont setfont 144 432 moveto
+%   vmstatus exch sub 40 string cvs show pop showpage
+% to determine this number. (It will be the only thing printed.)
+m 3500000
+
+% Run securely.  z2 disables both shell command execution in
+% `\special' and config files (via the `E' option) and opening of any
+% absolute filenames.  z1, the default, forbids shell escapes but
+% allows absolute filenames.  z0 allows both.  The corresponding
+% command line options are -R0|-R1|-R2
+z1
+
+% How to print, maybe with lp instead lpr, etc. If commented-out, output
+% will go into a file by default.
+%o |lpr
+
+% Default resolution of this device, in dots per inch.
+D 600
+X 600
+Y 600
+
+% Metafont mode.  (This is completely different from the -M
+% command-line option, which controls whether mktexpk is invoked.)
+% See ../../metafont/misc/modes.mf for a list of mode names.  This mode
+% and the D number above must agree, or mktexpk will get confused.
+M ljfour
+
+% Last resort bitmap sizes.
+R 300 600
+
+% Correct printer offset. You can use testpage.tex from the LaTeX
+% distribution to find these numbers.
+O 0pt,0pt
+
+% Bitmap font compression. Results in more compact output files, but
+% sometimes causes trouble. So the default is disabled. Set Z1 to enable
+% this feature.
+Z0
+
+% Partially download Type 1 fonts by default.  Only reason not to do
+% this is if you encounter bugs.  (Please report them to
+% @email{tex-k@tug.org} if you do.)
+j
+
+% This shows how to add your own map file.
+% Remove the comment and adjust the name:
+% p +myfonts.map
+
+% In the past, the a4size and letterSize definitions did not set the
+% paper size, but we want to set it if we can so that ps2pdf can work
+% properly.  So, a4 and a4size, and letter and letterSize, are made
+% identical here, and we prefer the a4/letter names -- texconfig uses them.
+%
+% In the definitions below, if we have setpagedevice, use that.
+% Else if we have the a4 resp. letter operator, use that.
+% Else do nothing to set the page size.
+% 
+% If you need to have no paper size stuff in the output at all, e.g., if
+% you are producing a multi-page document for further processing, use
+% -tnopaper (defined at end).  (With a single-page document, you can use -E.)
+%
+% emacs-page
+
+@ a4 210mm 297mm
+@+ ! %%DocumentPaperSizes: a4
+@+ %%BeginPaperSize: a4
+@+ /setpagedevice where
+@+  { pop << /PageSize [595 842] >> setpagedevice }
+@+  { /a4 where { pop a4 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ letter 8.5in 11in
+@+ ! %%DocumentPaperSizes: Letter
+@+ %%BeginPaperSize: Letter
+@+ /setpagedevice where
+@+  { pop << /PageSize [612 792] >> setpagedevice }
+@+  { /letter where { pop letter } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ a4size 210mm 297mm
+@+ ! %%DocumentPaperSizes: a4
+@+ %%BeginPaperSize: a4
+@+ /setpagedevice where
+@+  { pop << /PageSize [595 842] >> setpagedevice }
+@+  { /a4 where { pop a4 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ letterSize 8.5in 11in
+@+ ! %%DocumentPaperSizes: Letter
+@+ %%BeginPaperSize: Letter
+@+ /setpagedevice where
+@+  { pop << /PageSize [612 792] >> setpagedevice }
+@+  { /letter where { pop letter } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+% The jacow paper size is the smaller of letter and a4 in both
+% dimensions, and can therefore hopefully be printed on either paper
+% size.  As far as we know, Volker Schaa first used it for the JACOW
+% conference proceedings that he produced.
+@ jacow 210mm 11in
+@+ ! %%DocumentPaperSizes: jacow
+@+ %%BeginPaperSize: jacow
+@+ /setpagedevice where
+@+  { pop << /PageSize [595 792] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+% The smallbook paper size has been used by the Free Software Foundation
+% to print manuals for many years, and is part of Texinfo.
+@ smallbook 7in 9.25in
+@+ ! %%DocumentPaperSizes: smallbook
+@+ %%BeginPaperSize: smallbook
+@+ /setpagedevice where
+@+  { pop << /PageSize [504 666] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+% Special paper size for IEEE Computer Society Journals
+@ ieeecs 7.875in 10.75in
+@+ ! %%DocumentPaperSizes: ieeecs
+@+ %%BeginPaperSize: ieeecs
+@+ /setpagedevice where
+@+  { pop << /PageSize [567 774] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ halfexecutive 133mm 184mm
+@+ ! %%DocumentPaperSizes: halfexecutive
+@+ %%BeginPaperSize: halfexecutive
+@+ /setpagedevice where
+@+  { pop << /PageSize [378 522] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ halfletter 140mm 216mm
+@+ ! %%DocumentPaperSizes: halfletter
+@+ %%BeginPaperSize: halfletter
+@+ /setpagedevice where
+@+  { pop << /PageSize [396 612] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ statement 140mm 216mm
+@+ ! %%DocumentPaperSizes: statement
+@+ %%BeginPaperSize: statement
+@+ /setpagedevice where
+@+  { pop << /PageSize [396 612] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ executive 184mm 267mm
+@+ ! %%DocumentPaperSizes: executive
+@+ %%BeginPaperSize: executive
+@+ /setpagedevice where
+@+  { pop << /PageSize [522 756] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+% for powerdot
+@ screen 8.25in 11in
+@+ ! %%DocumentPaperSizes: Screen
+@+ %%BeginPaperSize: Screen
+@+ /setpagedevice where
+@+  { pop << /PageSize [594 792] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+% a common size for printers (in north america).
+@ sixbynine 6in 9in
+@+ ! %%DocumentPaperSizes: SixByNine
+@+ %%BeginPaperSize: SixByNine
+@+ /setpagedevice where
+@+  { pop << /PageSize [432 648] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ quarto 215mm 275mm
+@+ ! %%DocumentPaperSizes: quarto
+@+ %%BeginPaperSize: quarto
+@+ /setpagedevice where
+@+  { pop << /PageSize [610 780] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ note 216mm 279mm
+@+ ! %%DocumentPaperSizes: note
+@+ %%BeginPaperSize: note
+@+ /setpagedevice where
+@+  { pop << /PageSize [612 792] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ folio 216mm 330mm
+@+ ! %%DocumentPaperSizes: folio
+@+ %%BeginPaperSize: folio
+@+ /setpagedevice where
+@+  { pop << /PageSize [612 936] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ legal 8.5in 14in
+@+ ! %%DocumentPaperSizes: Legal
+@+ %%BeginPaperSize: Legal
+@+ /setpagedevice where
+@+  { pop << /PageSize [612 1008] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ 10x14 10in 14in
+@+ ! %%DocumentPaperSizes: 10x14
+@+ %%BeginPaperSize: 10x14
+@+ /setpagedevice where
+@+  { pop << /PageSize [720 1008] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ ledger 17in 11in
+@+ ! %%DocumentPaperSizes: Ledger
+@+ %%BeginPaperSize: Ledger
+@+ /setpagedevice where
+@+  { pop << /PageSize [1224 792] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ tabloid 11in 17in
+@+ ! %%DocumentPaperSizes: Tabloid
+@+ %%BeginPaperSize: Tabloid
+@+ /setpagedevice where
+@+  { pop << /PageSize [792 1224] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ 11x17 11in 17in
+@+ ! %%DocumentPaperSizes: 11x17
+@+ %%BeginPaperSize: 11x17
+@+ /setpagedevice where
+@+  { pop << /PageSize [792 1224] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ a0 841mm 1189mm
+@+ ! %%DocumentPaperSizes: a0
+@+ %%BeginPaperSize: a0
+@+ /setpagedevice where
+@+  { pop << /PageSize [2384 3370] >> setpagedevice }
+@+  { /a0 where { pop a0 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ a1 594mm 841mm
+@+ ! %%DocumentPaperSizes: a1
+@+ %%BeginPaperSize: a1
+@+ /setpagedevice where
+@+  { pop << /PageSize [1684 2384] >> setpagedevice }
+@+  { /a1 where { pop a1 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ a2 420mm 594mm
+@+ ! %%DocumentPaperSizes: a2
+@+ %%BeginPaperSize: a2
+@+ /setpagedevice where
+@+  { pop << /PageSize [1191 1684] >> setpagedevice }
+@+  { /a2 where { pop a2 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ a3 297mm 420mm
+@+ ! %%DocumentPaperSizes: a3
+@+ %%BeginPaperSize: a3
+@+ /setpagedevice where
+@+  { pop << /PageSize [842 1191] >> setpagedevice }
+@+  { /a3 where { pop a3 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ a5 148mm 210mm
+@+ ! %%DocumentPaperSizes: a5
+@+ %%BeginPaperSize: a5
+@+ /setpagedevice where
+@+  { pop << /PageSize [420 595] >> setpagedevice }
+@+  { /a5 where { pop a5 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ a6 105mm 148mm
+@+ ! %%DocumentPaperSizes: a6
+@+ %%BeginPaperSize: a6
+@+ /setpagedevice where
+@+  { pop << /PageSize [298 420] >> setpagedevice }
+@+  { /a6 where { pop a6 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ a7 74mm 105mm
+@+ ! %%DocumentPaperSizes: a7
+@+ %%BeginPaperSize: a7
+@+ /setpagedevice where
+@+  { pop << /PageSize [210 298] >> setpagedevice }
+@+  { /a7 where { pop a7 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ a8 52mm 74mm
+@+ ! %%DocumentPaperSizes: a8
+@+ %%BeginPaperSize: a8
+@+ /setpagedevice where
+@+  { pop << /PageSize [147 210] >> setpagedevice }
+@+  { /a8 where { pop a8 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ a9 37mm 52mm
+@+ ! %%DocumentPaperSizes: a9
+@+ %%BeginPaperSize: a9
+@+ /setpagedevice where
+@+  { pop << /PageSize [105 147] >> setpagedevice }
+@+  { /a9 where { pop a9 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ a10 26mm 37mm
+@+ ! %%DocumentPaperSizes: a10
+@+ %%BeginPaperSize: a10
+@+ /setpagedevice where
+@+  { pop << /PageSize [74 105] >> setpagedevice }
+@+  { /a10 where { pop a10 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ jisb0 1030mm 1456mm
+@+ ! %%DocumentPaperSizes: jisb0
+@+ %%BeginPaperSize: jisb0
+@+ /setpagedevice where
+@+  { pop << /PageSize [2920 4127] >> setpagedevice }
+@+  { /jisb0 where { pop jisb0 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ jisb1 728mm 1030mm
+@+ ! %%DocumentPaperSizes: jisb1
+@+ %%BeginPaperSize: jisb1
+@+ /setpagedevice where
+@+  { pop << /PageSize [2064 2920] >> setpagedevice }
+@+  { /jisb1 where { pop jisb1 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ jisb2 515mm 728mm
+@+ ! %%DocumentPaperSizes: jisb2
+@+ %%BeginPaperSize: jisb2
+@+ /setpagedevice where
+@+  { pop << /PageSize [1460 2064] >> setpagedevice }
+@+  { /jisb2 where { pop jisb2 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ jisb3 364mm 515mm
+@+ ! %%DocumentPaperSizes: jisb3
+@+ %%BeginPaperSize: jisb3
+@+ /setpagedevice where
+@+  { pop << /PageSize [1032 1460] >> setpagedevice }
+@+  { /jisb3 where { pop jisb3 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ jisb4 257mm 364mm
+@+ ! %%DocumentPaperSizes: jisb4
+@+ %%BeginPaperSize: jisb4
+@+ /setpagedevice where
+@+  { pop << /PageSize [729 1032] >> setpagedevice }
+@+  { /jisb4 where { pop jisb4 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ jisb5 182mm 257mm
+@+ ! %%DocumentPaperSizes: jisb5
+@+ %%BeginPaperSize: jisb5
+@+ /setpagedevice where
+@+  { pop << /PageSize [516 729] >> setpagedevice }
+@+  { /jisb5 where { pop jisb5 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ jisb6 128mm 182mm
+@+ ! %%DocumentPaperSizes: jisb6
+@+ %%BeginPaperSize: jisb6
+@+ /setpagedevice where
+@+  { pop << /PageSize [363 516] >> setpagedevice }
+@+  { /jisb6 where { pop jisb6 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ jisb7 91mm 128mm
+@+ ! %%DocumentPaperSizes: jisb7
+@+ %%BeginPaperSize: jisb7
+@+ /setpagedevice where
+@+  { pop << /PageSize [258 363] >> setpagedevice }
+@+  { /jisb7 where { pop jisb7 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ jisb8 64mm 91mm
+@+ ! %%DocumentPaperSizes: jisb8
+@+ %%BeginPaperSize: jisb8
+@+ /setpagedevice where
+@+  { pop << /PageSize [181 258] >> setpagedevice }
+@+  { /jisb8 where { pop jisb8 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ b0 1000mm 1414mm
+@+ ! %%DocumentPaperSizes: b0
+@+ %%BeginPaperSize: b0
+@+ /setpagedevice where
+@+  { pop << /PageSize [2835 4008] >> setpagedevice }
+@+  { /b0 where { pop b0 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ b1 707mm 1000mm
+@+ ! %%DocumentPaperSizes: b1
+@+ %%BeginPaperSize: b1
+@+ /setpagedevice where
+@+  { pop << /PageSize [2004 2835] >> setpagedevice }
+@+  { /b1 where { pop b1 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ b2 500mm 707mm
+@+ ! %%DocumentPaperSizes: b2
+@+ %%BeginPaperSize: b2
+@+ /setpagedevice where
+@+  { pop << /PageSize [1417 2004] >> setpagedevice }
+@+  { /b2 where { pop b2 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ b3 353mm 500mm
+@+ ! %%DocumentPaperSizes: b3
+@+ %%BeginPaperSize: b3
+@+ /setpagedevice where
+@+  { pop << /PageSize [1001 1417] >> setpagedevice }
+@+  { /b3 where { pop b3 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ b4 250mm 353mm
+@+ ! %%DocumentPaperSizes: b4
+@+ %%BeginPaperSize: b4
+@+ /setpagedevice where
+@+  { pop << /PageSize [709 1001] >> setpagedevice }
+@+  { /b4 where { pop b4 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ b5 176mm 250mm
+@+ ! %%DocumentPaperSizes: b5
+@+ %%BeginPaperSize: b5
+@+ /setpagedevice where
+@+  { pop << /PageSize [499 709] >> setpagedevice }
+@+  { /b5 where { pop b5 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ b6 125mm 176mm
+@+ ! %%DocumentPaperSizes: b6
+@+ %%BeginPaperSize: b6
+@+ /setpagedevice where
+@+  { pop << /PageSize [354 499] >> setpagedevice }
+@+  { /b6 where { pop b6 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ c5 162mm 229mm
+@+ ! %%DocumentPaperSizes: c5
+@+ %%BeginPaperSize: c5
+@+ /setpagedevice where
+@+  { pop << /PageSize [459 649] >> setpagedevice }
+@+  { /c5 where { pop c5 } if }
+@+ ifelse
+@+ %%EndPaperSize
+
+@ DL 110mm 220mm
+@+ ! %%DocumentPaperSizes: DL
+@+ %%BeginPaperSize: DL
+@+ /setpagedevice where
+@+  { pop << /PageSize [312 624] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ Comm10 105mm 241mm
+@+ ! %%DocumentPaperSizes: Comm10
+@+ %%BeginPaperSize: Comm10
+@+ /setpagedevice where
+@+  { pop << /PageSize [297 684] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ Monarch 98.4mm 190.5mm
+@+ ! %%DocumentPaperSizes: Monarch
+@+ %%BeginPaperSize: Monarch
+@+ /setpagedevice where
+@+  { pop << /PageSize [279 540] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ archE 36in 48in
+@+ ! %%DocumentPaperSizes: archE
+@+ %%BeginPaperSize: archE
+@+ /setpagedevice where
+@+  { pop << /PageSize [2592 3456] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ archD 24in 36in
+@+ ! %%DocumentPaperSizes: archD
+@+ %%BeginPaperSize: archD
+@+ /setpagedevice where
+@+  { pop << /PageSize [1728 2592] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ archC 18in 24in
+@+ ! %%DocumentPaperSizes: archC
+@+ %%BeginPaperSize: archC
+@+ /setpagedevice where
+@+  { pop << /PageSize [1296 1728] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ archB 12in 18in
+@+ ! %%DocumentPaperSizes: archB
+@+ %%BeginPaperSize: archB
+@+ /setpagedevice where
+@+  { pop << /PageSize [864 1296] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ archA 9in 12in
+@+ ! %%DocumentPaperSizes: archA
+@+ %%BeginPaperSize: archA
+@+ /setpagedevice where
+@+  { pop << /PageSize [648 864] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ flsa 216mm 330.2mm
+@+ ! %%DocumentPaperSizes: flsa
+@+ %%BeginPaperSize: flsa
+@+ /setpagedevice where
+@+  { pop << /PageSize [612 936] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ flse 216mm 330.2mm
+@+ ! %%DocumentPaperSizes: flse
+@+ %%BeginPaperSize: flse
+@+ /setpagedevice where
+@+  { pop << /PageSize [612 936] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ csheet 431.8mm 558.8mm
+@+ ! %%DocumentPaperSizes: csheet
+@+ %%BeginPaperSize: csheet
+@+ /setpagedevice where
+@+  { pop << /PageSize [1224 1584] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ dsheet 558.8mm 863.6mm
+@+ ! %%DocumentPaperSizes: dsheet
+@+ %%BeginPaperSize: dsheet
+@+ /setpagedevice where
+@+  { pop << /PageSize [1584 2448] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+@ esheet 863.6mm 1117.6mm
+@+ ! %%DocumentPaperSizes: esheet
+@+ %%BeginPaperSize: esheet
+@+ /setpagedevice where
+@+  { pop << /PageSize [2448 3168] >> setpagedevice }
+@+ if
+@+ %%EndPaperSize
+
+% use -t unknown with a \special{papersize=...} for a nonstandard page size.
+@ unknown 0in 0in
+@+ % dvips-unknown
+@+ statusdict /setpageparams known { hsize vsize 0 1 statusdict begin {
+@+ setpageparams } stopped end } { true } ifelse { statusdict /setpage known
+@+ { hsize vsize 1 statusdict begin { setpage } stopped pop end } if } if
+
+% use -t nopaper to get no paper size stuff in the output at all.
+% This should remain as the last thing in the file, because the first
+% 0in 0in entry is chosen when there is nothing better; ordinarily, we
+% want to that to be "unknown", so that the correct nonstandard paper
+% size is output, instead of just being omitted.
+% http://groups.google.com/group/fr.comp.text.tex/browse_thread/thread/1b08961cf9b8a5ab/6b1d0b32443905e3
+% and mactex mailing list thread from 24 Sep 2009 11:36:26.
+@ nopaper 0in 0in
+@+ % dvips-nopaper
+M qms
+D 300
+M toshiba
+D 180
+p +unms.map
+p +xypic.map
+M cx
+D 300
+M deskjet
+D 300
+M gtfax
+X 204
+Y 196
+% The printer offsets the output by this much.
+O 0pt,0pt
+M epson
+D 240
+M ibmvga
+D 110
+M ljfour
+D 600
+M qms
+D 300
+M toshiba
+D 180
+%%
+%% This is file `l3backend-dvips.pro',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% l3backend-header.dtx  (with options: `header,dvips')
+%% 
+%% Copyright (C) 2019-2025 The LaTeX Project
+%% 
+%% It may be distributed and/or modified under the conditions of
+%% the LaTeX Project Public License (LPPL), either version 1.3c of
+%% this license or (at your option) any later version.  The latest
+%% version of this license is in the file:
+%% 
+%%    https://www.latex-project.org/lppl.txt
+%% 
+%% This file is part of the "l3backend bundle" (The Work in LPPL)
+%% and all files in that bundle must be distributed together.
+%% 
+%% File: l3backend-header.dtx
+/color.sc { } def
+TeXDict begin
+/TeXcolorseparation { setcolor } def
+end
+true setglobal
+/pdf.globaldict 4 dict def
+false setglobal
+/pdf.cvs { 65534 string cvs } def
+/pdf.dvi.pt { 72.27 mul Resolution div } def
+/pdf.pt.dvi { 72.27 div Resolution mul } def
+/pdf.rect.ht { dup 1 get neg exch 3 get add } def
+/pdf.linkmargin { 1 pdf.pt.dvi } def
+/pdf.linkdp.pad { 0 } def
+/pdf.linkht.pad { 0 } def
+/pdf.rect
+  { /Rect [ pdf.llx pdf.lly pdf.urx pdf.ury ] } def
+/pdf.save.ll
+  {
+    currentpoint
+    /pdf.lly exch def
+    /pdf.llx exch def
+  }
+    def
+/pdf.save.ur
+  {
+    currentpoint
+    /pdf.ury exch def
+    /pdf.urx exch def
+  }
+    def
+/pdf.save.linkll
+  {
+    currentpoint
+    pdf.linkmargin add
+    pdf.linkdp.pad add
+    /pdf.lly exch def
+    pdf.linkmargin sub
+    /pdf.llx exch def
+  }
+    def
+/pdf.save.linkur
+  {
+    currentpoint
+    pdf.linkmargin sub
+    pdf.linkht.pad sub
+    /pdf.ury exch def
+    pdf.linkmargin add
+    /pdf.urx exch def
+  }
+    def
+/pdf.dest.anchor
+  {
+    currentpoint exch
+    pdf.dvi.pt 72 add
+    /pdf.dest.x exch def
+    pdf.dvi.pt
+    vsize 72 sub exch sub
+    /pdf.dest.y exch def
+  }
+    def
+/pdf.dest.point
+  { pdf.dest.x pdf.dest.y } def
+/pdf.dest2device
+  {
+    /pdf.dest.y exch def
+    /pdf.dest.x exch def
+    matrix currentmatrix
+    matrix defaultmatrix
+    matrix invertmatrix
+    matrix concatmatrix
+    cvx exec
+    /pdf.dev.y exch def
+    /pdf.dev.x exch def
+    /pdf.tmpd exch def
+    /pdf.tmpc exch def
+    /pdf.tmpb exch def
+    /pdf.tmpa exch def
+    pdf.dest.x pdf.tmpa mul
+      pdf.dest.y pdf.tmpc mul add
+      pdf.dev.x add
+    pdf.dest.x pdf.tmpb mul
+      pdf.dest.y pdf.tmpd mul add
+      pdf.dev.y add
+  }
+    def
+/pdf.bordertracking false def
+/pdf.bordertracking.begin
+  {
+    SDict /pdf.bordertracking true put
+    SDict /pdf.leftboundary undef
+    SDict /pdf.rightboundary undef
+    /a where
+      {
+        /a
+          {
+            currentpoint pop
+            SDict /pdf.rightboundary known dup
+              {
+                SDict /pdf.rightboundary get 2 index lt
+                  { not }
+                if
+              }
+            if
+              { pop }
+              { SDict exch /pdf.rightboundary exch put }
+            ifelse
+            moveto
+            currentpoint pop
+            SDict /pdf.leftboundary known dup
+              {
+                SDict /pdf.leftboundary get 2 index gt
+                  { not }
+                if
+              }
+            if
+              { pop }
+              { SDict exch /pdf.leftboundary exch put }
+            ifelse
+          }
+        put
+      }
+    if
+  }
+    def
+/pdf.bordertracking.end
+  {
+    /a where { /a { moveto } put } if
+    /x where { /x { 0 exch rmoveto } put } if
+    SDict /pdf.leftboundary known
+      { pdf.outerbox 0 pdf.leftboundary put }
+    if
+    SDict /pdf.rightboundary known
+      { pdf.outerbox 2 pdf.rightboundary put }
+    if
+    SDict /pdf.bordertracking false put
+  }
+    def
+  /pdf.bordertracking.endpage
+{
+  pdf.bordertracking
+    {
+      pdf.bordertracking.end
+      true setglobal
+      pdf.globaldict
+        /pdf.brokenlink.rect [ pdf.outerbox aload pop ] put
+      pdf.globaldict
+        /pdf.brokenlink.skip pdf.baselineskip put
+      pdf.globaldict
+        /pdf.brokenlink.dict
+          pdf.link.dict pdf.cvs put
+      false setglobal
+      mark pdf.link.dict cvx exec /Rect
+        [
+          pdf.llx
+          pdf.lly
+          pdf.outerbox 2 get pdf.linkmargin add
+          currentpoint exch pop
+          pdf.outerbox pdf.rect.ht sub pdf.linkmargin sub
+        ]
+      /ANN pdf.pdfmark
+    }
+  if
+}
+  def
+/pdf.bordertracking.continue
+  {
+    /pdf.link.dict pdf.globaldict
+      /pdf.brokenlink.dict get def
+    /pdf.outerbox pdf.globaldict
+      /pdf.brokenlink.rect get def
+    /pdf.baselineskip pdf.globaldict
+      /pdf.brokenlink.skip get def
+    pdf.globaldict dup dup
+    /pdf.brokenlink.dict undef
+    /pdf.brokenlink.skip undef
+    /pdf.brokenlink.rect undef
+    currentpoint
+    /pdf.originy exch def
+    /pdf.originx exch def
+    /a where
+      {
+        /a
+          {
+            moveto
+            SDict
+            begin
+            currentpoint pdf.originy ne exch
+              pdf.originx ne or
+              {
+                pdf.save.linkll
+                /pdf.lly
+                  pdf.lly pdf.outerbox 1 get sub def
+                pdf.bordertracking.begin
+              }
+            if
+            end
+          }
+        put
+      }
+    if
+    /x where
+      {
+        /x
+          {
+            0 exch rmoveto
+            SDict
+            begin
+            currentpoint
+            pdf.originy ne exch pdf.originx ne or
+              {
+                pdf.save.linkll
+                /pdf.lly
+                  pdf.lly pdf.outerbox 1 get sub def
+                pdf.bordertracking.begin
+              }
+            if
+            end
+          }
+        put
+      }
+    if
+  }
+    def
+/pdf.breaklink
+  {
+    pop
+    counttomark 2 mod 0 eq
+      {
+        counttomark /pdf.count exch def
+          {
+            pdf.count 0 eq { exit } if
+            counttomark 2 roll
+            1 index /Rect eq
+              {
+                dup 4 array copy
+                dup dup
+                  1 get
+                  pdf.outerbox pdf.rect.ht
+                  pdf.linkmargin 2 mul add sub
+                  3 exch put
+                dup
+                  pdf.outerbox 2 get
+                  pdf.linkmargin add
+                  2 exch put
+                dup dup
+                  3 get
+                  pdf.outerbox pdf.rect.ht
+                  pdf.linkmargin 2 mul add add
+                  1 exch put
+                /pdf.currentrect exch def
+                pdf.breaklink.write
+                  {
+                    pdf.currentrect
+                    dup
+                      pdf.outerbox 0 get
+                      pdf.linkmargin sub
+                      0 exch put
+                    dup
+                      pdf.outerbox 2 get
+                      pdf.linkmargin add
+                      2 exch put
+                    dup dup
+                      1 get
+                      pdf.baselineskip add
+                      1 exch put
+                    dup dup
+                      3 get
+                      pdf.baselineskip add
+                      3 exch put
+                    /pdf.currentrect exch def
+                    pdf.breaklink.write
+                  }
+                1 index 3 get
+                pdf.linkmargin 2 mul add
+                pdf.outerbox pdf.rect.ht add
+                2 index 1 get sub
+                pdf.baselineskip div round cvi 1 sub
+                  exch
+                repeat
+                pdf.currentrect
+                dup
+                  pdf.outerbox 0 get
+                  pdf.linkmargin sub
+                  0 exch put
+                dup dup
+                  1 get
+                  pdf.baselineskip add
+                  1 exch put
+                dup dup
+                  3 get
+                  pdf.baselineskip add
+                  3 exch put
+                dup 2 index 2 get  2 exch put
+                /pdf.currentrect exch def
+                pdf.breaklink.write
+                SDict /pdf.pdfmark.good false put
+                exit
+              }
+              { pdf.count 2 sub /pdf.count exch def }
+            ifelse
+          }
+        loop
+      }
+    if
+    /ANN
+  }
+    def
+/pdf.breaklink.write
+  {
+    counttomark 1 sub
+    index /_objdef eq
+      {
+        counttomark -2 roll
+        dup wcheck
+          {
+            readonly
+            counttomark 2 roll
+          }
+          { pop pop }
+        ifelse
+      }
+    if
+    counttomark 1 add copy
+    pop pdf.currentrect
+    /ANN pdfmark
+  }
+    def
+/pdf.pdfmark
+  {
+    SDict /pdf.pdfmark.good true put
+    dup /ANN eq
+      {
+        pdf.pdfmark.store
+        pdf.pdfmark.dict
+          begin
+            Subtype /Link eq
+            currentdict /Rect known and
+            SDict /pdf.outerbox known and
+            SDict /pdf.baselineskip known and
+              {
+                Rect 3 get
+                pdf.linkmargin 2 mul add
+                pdf.outerbox pdf.rect.ht add
+                Rect 1 get sub
+                pdf.baselineskip div round cvi 0 gt
+                  { pdf.breaklink }
+                if
+              }
+            if
+          end
+        SDict /pdf.outerbox undef
+        SDict /pdf.baselineskip undef
+        currentdict /pdf.pdfmark.dict undef
+      }
+    if
+    pdf.pdfmark.good
+      { pdfmark }
+      { cleartomark }
+    ifelse
+  }
+    def
+/pdf.pdfmark.store
+  {
+    /pdf.pdfmark.dict 65534 dict def
+    counttomark 1 add copy
+    pop
+      {
+        dup mark eq
+          {
+            pop
+            exit
+          }
+          {
+            pdf.pdfmark.dict
+            begin def end
+          }
+        ifelse
+      }
+    loop
+}
+  def
+%% 
+%%
+%% End of file `l3backend-dvips.pro'.
+%!
+%%
+%% Source File `pspicture.dtx'.
+%% Copyright (C) 1992 1999 David Carlisle
+%% This file may be distributed under the terms of the LPPL.
+%% See 00readme.txt for details.
+%%
+
+
+
+
+/!BP{
+  72 72.27 div dup scale
+  }def
+/!A{
+  newpath
+  0 0 moveto
+  dup neg dup .4 mul rlineto
+  .8 mul 0 exch  rlineto
+  closepath
+  fill
+  } def
+/!V{
+  !BP
+  /!X exch def
+  /!y exch def
+  /!x exch def
+  newpath
+  0 0 moveto
+  !x 0 eq {0  !y 0 lt {!X neg}{!X} ifelse}
+         {!x 0 lt {!X neg}{!X}ifelse  !X !y mul !x abs div} ifelse
+  lineto
+  setlinewidth  % @wholewidth
+  currentpoint
+  stroke
+  translate
+  !y !x atan
+  rotate
+  !A            % @arrowlength
+  }def
+/!L{
+  !BP
+  /!X exch def
+  /!y exch def
+  /!x exch def
+  newpath
+  0 0 moveto
+  !x 0 eq {0  !y 0 lt {!X neg}{!X} ifelse}
+         {!x 0 lt {!X neg}{!X}ifelse  !X !y mul !x abs div} ifelse
+  lineto
+  setlinewidth  % @wholewidth
+  stroke
+  }def
+/!C{
+  !BP
+  0 0 3 2 roll
+  2 div 0 360 arc
+  setlinewidth  % @wholewidth
+  stroke
+  }def
+/!D{
+  !BP
+  0 0 3 2 roll
+  2 div 0 360 arc fill
+  }def
+/!O{
+  !BP
+  /!y exch 2 div def
+  /!x exch 2 div def
+  /!r exch !x !y
+    2 copy gt {exch} if pop
+    2 copy gt {exch} if pop
+      def
+  setlinewidth  % @wholewidth
+  1 eq
+  {newpath
+   !x neg 0 moveto
+   !x neg !y 0 !y !r arcto 4 {pop} repeat
+   0 !y lineto
+   stroke}if
+  1 eq
+  {newpath
+   !x  0 moveto
+   !x  !y 0 !y !r arcto 4 {pop} repeat
+   0 !y lineto
+   stroke}if
+  1 eq
+  {newpath
+   !x neg 0 moveto
+   !x neg !y neg 0 !y neg  !r arcto 4 {pop} repeat
+   0 !y neg lineto
+   stroke}if
+  1 eq
+  {newpath
+   !x  0 moveto
+   !x  !y neg 0 !y neg !r arcto 4 {pop} repeat
+   0 !y neg lineto
+   stroke}if
+  }def
+/!V2{
+  !BP
+  2 copy exch
+  atan
+  /a exch def
+  2 copy
+  newpath
+  0 0 moveto
+  lineto          % <x*unitlength> <y*unitlength>
+  3 2 roll
+  setlinewidth  % @wholewidth
+  stroke
+  translate       % <x*unitlength> <y*unitlength>
+  a rotate
+  !A                    % @arrowlength
+  }def
+/!L2{
+  !BP
+  newpath
+  0 0 moveto
+  lineto          % <x*unitlength> <y*unitlength>
+  setlinewidth  % @wholewidth
+  stroke
+  }def
+/!C2{
+  !BP
+  /!s exch def
+  /!y exch def
+  /!x exch def
+  newpath
+  0 0 moveto
+  0 0
+  !x 2 div !y 10 div !s mul add
+  !y 2 div  !x 10 div  !s mul sub
+  !x !y
+  curveto
+  setlinewidth  % @wholewidth
+  stroke
+  }def
+p +usy.map
+% Thomas Esser, 2002, public domain.
+
+% Usage: dvips -Pbuiltin35 ...
+% 
+% Purpose: set up dvips to consider the base 35 PostScript fonts as
+%          provided by your ps interpreter or printer, that is,
+%          do not download them.
+%
+% The default behavior of downloads with dvips is set in updmap.cfg.
+
+p +builtin35.map
+% Thomas Esser, 1998, public domain.
+
+% Usage: dvips -Pdfaxhigh ...
+% Purpose: set up dvips' resolution to be optimal for a G3 fax at high
+%          resolution (204x196)
+
+M gtfax
+X 204
+Y 196
+% Thomas Esser, 1998, public domain.
+
+% Usage: dvips -Pdfaxlo ...
+% Purpose: set up dvips' resolution to be optimal for a G3 fax at low
+%          resolution (204x98)
+
+M gtfaxlo
+X 204
+Y 98
+% Thomas Esser, 2002, public domain.
+
+% Usage: dvips -Pdownload35 ...
+% Purpose: set up dvips to download the "base 35" laserwriter fonts
+%          with your document.
+
+% This file can be used to change the behaviour of dvips if the default
+% of dvips is to consider the "base 35" as build in of the ps interpreter
+% or printer. This default behaviour of dvips can be set by the updmap tool.
+
+p +download35.map
+% Thomas Esser, 2002, public domain.
+
+% Usage: this file is implicitly used by gsftopk. We set up all available
+%        type 1 fonts for gsftopk by using psfonts_t1.map.
+
+p +psfonts_t1.map
+% $Id: config.maxmem 29709 2013-04-07 17:28:46Z karl $
+% Public domain.
+
+% Set Dvips' idea of available printiner memory to (effectively)
+% infinite, to disable Dvips breaking the output into sections.  Only
+% works with dvips 5.993 (TeX Live 2013) and later.  See the `Headers
+% and memory usage' node in the manual.
+% 
+m -1
+% Thomas Esser, 2002, public domain.
+
+% Usage: dvips -Poutline
+% Purpose: set up all available type 1 fonts for use with dvips.
+
+p psfonts_t1.map
+% This is a config file for dvips, meant to produce PostScript optimized
+% for distilling to PDF. Created 12 Apr 1999 by Timothy van Zandt, later
+% modified te (papersize, o line).
+% Public domain.
+
+% Memory available: The default for Distiller 3.0x is 8meg.
+% Reduce to be on safe side:
+
+m 6000000
+
+% Default is to save output as file.
+% If possible, change this so that it pipes output to distiller.
+% If not, use command line ``-o file'' option to change name
+% of output file.
+
+o
+
+% Default resolution. Attempt to make `resolution independent'.
+% Resolution set to 8000dpi (could be as high as 10000).
+
+D 8000
+
+% Use outline fonts, not bitmaps.
+
+p psfonts_t1.map
+
+% Last resort sizes.
+% If you accidentally include a bitmapped pk font, it will probably go
+% at 600dpi.
+
+R 300 600
+
+% Partial Type1 font downloading. This will happen by default. Uncomment
+% this is you want to download entire fonts, which is not recommended.
+
+% j0
+
+% Switching algorithm for drawing rules. texc.pro is loaded by default,
+% but the h tex.pro is need so that it comes before the patch. See
+% below for more details.
+
+h tex.pro
+h alt-rule.pro
+% Thomas Esser, 2002, public domain.
+
+% Usage: dvips -Ppk ...
+% Purpose: instruct dvips to prefer bitmap fonts over type 1 fonts.
+
+p psfonts_pk.map
+% Thomas Esser, 1998, 2002, public domain.
+
+% Usage: dvips -Pwww
+% Purpose: create ps files "for the web". Output is send to a file and
+%          not to any printer. Outline fonts are used whenever available
+%          since we do not know at which resolution the user will print
+%          out output file.
+
+o
+p psfonts_t1.map
+% original config.xdvi -- Configuration file for Type 1 rendering in xdvi.
+% (If you change or delete `original' in the first line of this file,
+% new xdvik installations won't overwrite the file.)
+%
+% This file is part of xdvik (notwithstanding its location).
+%
+% Lines starting with `%' are comments.
+%
+% This file indicates which map files are to be used when running xdvi.
+% (It is not used by dvips, unless you type "dvips -Pxdvi ...", which is not
+% likely.  Doing so, however, would allow you to use the same map files
+% in dvips as are used in xdvi.)
+%
+% The format is the same as for dvips configuration files, except that only
+% the `p' and `p+' directives are used.  A line
+%
+%	p file.map
+%
+% clears the existing list of map files and sets the list to the given file.
+% A line
+%
+%	p+ file2.map
+%
+% adds the given map file to the end of the list.  If you use "p file.map"
+% anywhere other than as the first (non-comment, non-blank) line of the file,
+% then you are probably making a mistake.
+%
+% If a font entry is found in several files, the earlier entry will be used
+% (as is done in dvips).  Therefore, to override font entries in the standard
+% file psfonts.map, you should use entries such as:
+%
+%	p myfile.map
+%	p+ anotherfile.map
+%	p+ psfonts.map
+%
+% However, normally it isn't necessary to add any other map file here
+% because psfonts.map is (normally) a generated file (by the updmap
+% script).  Instead, map files should be added to the updmap.cfg file.
+%
+% p psfonts.map
+p +uzd.map

@@ -1,0 +1,12 @@
+{
+  "name": "fmt-pdflatex",
+  "files": [
+    {
+      "path": "/texlive/texmf-dist/texmf-var/web2c/pdftex",
+      "name": "pdflatex.fmt",
+      "start": 0,
+      "end": 2300766
+    }
+  ],
+  "totalSize": 2300766
+}

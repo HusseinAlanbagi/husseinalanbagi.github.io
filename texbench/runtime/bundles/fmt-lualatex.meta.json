@@ -1,0 +1,12 @@
+{
+  "name": "fmt-lualatex",
+  "files": [
+    {
+      "path": "/texlive/texmf-dist/texmf-var/web2c/luahbtex",
+      "name": "luahblatex.fmt",
+      "start": 0,
+      "end": 6746133
+    }
+  ],
+  "totalSize": 6746133
+}

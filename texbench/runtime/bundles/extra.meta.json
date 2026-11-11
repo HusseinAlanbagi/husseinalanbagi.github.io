@@ -1,0 +1,414 @@
+{
+  "name": "extra",
+  "files": [
+    {
+      "path": "/texlive",
+      "name": "fonts.conf",
+      "start": 0,
+      "end": 174
+    },
+    {
+      "path": "/texlive/tex/latex/tex-ini-files",
+      "name": "dvilualatex.ini",
+      "start": 174,
+      "end": 258
+    },
+    {
+      "path": "/texlive/tex/latex/tex-ini-files",
+      "name": "latex.ini",
+      "start": 258,
+      "end": 878
+    },
+    {
+      "path": "/texlive/tex/latex/tex-ini-files",
+      "name": "lualatex.ini",
+      "start": 878,
+      "end": 1545
+    },
+    {
+      "path": "/texlive/tex/latex/tex-ini-files",
+      "name": "lualatexquotejobname.lua",
+      "start": 1545,
+      "end": 2565
+    },
+    {
+      "path": "/texlive/tex/latex/tex-ini-files",
+      "name": "mllatex.ini",
+      "start": 2565,
+      "end": 2672
+    },
+    {
+      "path": "/texlive/tex/latex/tex-ini-files",
+      "name": "pdflatex.ini",
+      "start": 2672,
+      "end": 2802
+    },
+    {
+      "path": "/texlive/tex/latex/tex-ini-files",
+      "name": "xelatex.ini",
+      "start": 2802,
+      "end": 3288
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/cmap/dvipdfmx",
+      "name": "EUC-UCS2",
+      "start": 3288,
+      "end": 105028
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/cmap/dvipdfmx",
+      "name": "README",
+      "start": 105028,
+      "end": 105916
+    },
+    {
+      "path": "/texlive/texmf-dist/fonts/cmap/dvipdfmx",
+      "name": "UTF8-UCS2",
+      "start": 105916,
+      "end": 131602
+    },
+    {
+      "path": "/texlive/texmf-dist/makeindex/babel",
+      "name": "bbglo.ist",
+      "start": 131602,
+      "end": 132288
+    },
+    {
+      "path": "/texlive/texmf-dist/makeindex/babel",
+      "name": "bbind.ist",
+      "start": 132288,
+      "end": 132979
+    },
+    {
+      "path": "/texlive/texmf-dist/makeindex/base",
+      "name": "din.ist",
+      "start": 132979,
+      "end": 134053
+    },
+    {
+      "path": "/texlive/texmf-dist/makeindex/base",
+      "name": "icase.ist",
+      "start": 134053,
+      "end": 134864
+    },
+    {
+      "path": "/texlive/texmf-dist/makeindex/base",
+      "name": "latex.ist",
+      "start": 134864,
+      "end": 135228
+    },
+    {
+      "path": "/texlive/texmf-dist/makeindex/base",
+      "name": "math.ist",
+      "start": 135228,
+      "end": 137753
+    },
+    {
+      "path": "/texlive/texmf-dist/makeindex/base",
+      "name": "mkind.ist",
+      "start": 137753,
+      "end": 138340
+    },
+    {
+      "path": "/texlive/texmf-dist/makeindex/base",
+      "name": "puncts.ist",
+      "start": 138340,
+      "end": 139549
+    },
+    {
+      "path": "/texlive/texmf-dist/makeindex/base",
+      "name": "tex.ist",
+      "start": 139549,
+      "end": 140155
+    },
+    {
+      "path": "/texlive/texmf-dist/makeindex/fixlatvian",
+      "name": "lv.ist",
+      "start": 140155,
+      "end": 141033
+    },
+    {
+      "path": "/texlive/texmf-dist/makeindex/latex",
+      "name": "gglo.ist",
+      "start": 141033,
+      "end": 143800
+    },
+    {
+      "path": "/texlive/texmf-dist/makeindex/latex",
+      "name": "gind.ist",
+      "start": 143800,
+      "end": 146543
+    },
+    {
+      "path": "/texlive/texmf-dist/makeindex/plain",
+      "name": "plaintex.ist",
+      "start": 146543,
+      "end": 146597
+    },
+    {
+      "path": "/texlive/texmf-dist/metafont/base",
+      "name": "mf.mf",
+      "start": 146597,
+      "end": 146629
+    },
+    {
+      "path": "/texlive/texmf-dist/metafont/base",
+      "name": "plain.mf",
+      "start": 146629,
+      "end": 169518
+    },
+    {
+      "path": "/texlive/texmf-dist/metafont/config",
+      "name": "cmmf.ini",
+      "start": 169518,
+      "end": 169611
+    },
+    {
+      "path": "/texlive/texmf-dist/metafont/config",
+      "name": "mf.ini",
+      "start": 169611,
+      "end": 169690
+    },
+    {
+      "path": "/texlive/texmf-dist/metafont/misc",
+      "name": "mode2dpi.mf",
+      "start": 169690,
+      "end": 169883
+    },
+    {
+      "path": "/texlive/texmf-dist/metafont/misc",
+      "name": "mode2dpixy.mf",
+      "start": 169883,
+      "end": 170175
+    },
+    {
+      "path": "/texlive/texmf-dist/metafont/misc",
+      "name": "modename.mf",
+      "start": 170175,
+      "end": 170335
+    },
+    {
+      "path": "/texlive/texmf-dist/metafont/misc",
+      "name": "ps2mfbas.mf",
+      "start": 170335,
+      "end": 171121
+    },
+    {
+      "path": "/texlive/texmf-dist/metapost/minim-mp",
+      "name": "minim-lamp.mp",
+      "start": 171121,
+      "end": 171393
+    },
+    {
+      "path": "/texlive/texmf-dist/metapost/minim-mp",
+      "name": "minim-mp.mp",
+      "start": 171393,
+      "end": 184110
+    },
+    {
+      "path": "/texlive/texmf-dist/metapost/minim-mp",
+      "name": "minim.mp",
+      "start": 184110,
+      "end": 187882
+    },
+    {
+      "path": "/texlive/texmf-dist/mft/base",
+      "name": "README",
+      "start": 187882,
+      "end": 187925
+    },
+    {
+      "path": "/texlive/texmf-dist/mft/base",
+      "name": "cmbase.mft",
+      "start": 187925,
+      "end": 191690
+    },
+    {
+      "path": "/texlive/texmf-dist/mft/base",
+      "name": "mplain.mft",
+      "start": 191690,
+      "end": 195772
+    },
+    {
+      "path": "/texlive/texmf-dist/mft/base",
+      "name": "plain.mft",
+      "start": 195772,
+      "end": 197440
+    },
+    {
+      "path": "/texlive/texmf-dist/mft/knuth-local",
+      "name": "e.mft",
+      "start": 197440,
+      "end": 199593
+    },
+    {
+      "path": "/texlive/texmf-dist/texconfig",
+      "name": "README",
+      "start": 199593,
+      "end": 200314
+    },
+    {
+      "path": "/texlive/texmf-dist/texconfig/g",
+      "name": "generic",
+      "start": 200314,
+      "end": 201295
+    },
+    {
+      "path": "/texlive/texmf-dist/texconfig",
+      "name": "tcfmgr",
+      "start": 201295,
+      "end": 210858
+    },
+    {
+      "path": "/texlive/texmf-dist/texconfig",
+      "name": "tcfmgr.map",
+      "start": 210858,
+      "end": 211215
+    },
+    {
+      "path": "/texlive/texmf-dist/texconfig/v",
+      "name": "vt100",
+      "start": 211215,
+      "end": 212445
+    },
+    {
+      "path": "/texlive/texmf-dist/texconfig/x",
+      "name": "xterm",
+      "start": 212445,
+      "end": 213813
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/fonts/conf",
+      "name": "texlive-fontconfig.conf",
+      "start": 213813,
+      "end": 214158
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/tex/generic/config",
+      "name": "language.dat",
+      "start": 214158,
+      "end": 217107
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/tex/generic/config",
+      "name": "language.dat.lua",
+      "start": 217107,
+      "end": 219103
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/tex/generic/config",
+      "name": "language.def",
+      "start": 219103,
+      "end": 220815
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/web2c/luahbtex",
+      "name": "luahbtex.log",
+      "start": 220815,
+      "end": 225793
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/web2c/luahbtex",
+      "name": "lualatex.log",
+      "start": 225793,
+      "end": 275642
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/web2c/luahbtex",
+      "name": "optex.log",
+      "start": 275642,
+      "end": 289812
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/web2c/pdftex",
+      "name": "etex.log",
+      "start": 289812,
+      "end": 295381
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/web2c/pdftex",
+      "name": "latex.log",
+      "start": 295381,
+      "end": 364922
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/web2c/pdftex",
+      "name": "mptopdf.log",
+      "start": 364922,
+      "end": 369216
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/web2c/pdftex",
+      "name": "pdfetex.log",
+      "start": 369216,
+      "end": 375181
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/web2c/pdftex",
+      "name": "pdflatex.log",
+      "start": 375181,
+      "end": 444918
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/web2c/pdftex",
+      "name": "pdftex.log",
+      "start": 444918,
+      "end": 450879
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/web2c",
+      "name": "updmap.log",
+      "start": 450879,
+      "end": 470714
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/web2c/xetex",
+      "name": "xelatex-dev.log",
+      "start": 470714,
+      "end": 521160
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/web2c/xetex",
+      "name": "xelatex.log",
+      "start": 521160,
+      "end": 571417
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/web2c/xetex",
+      "name": "xetex.log",
+      "start": 571417,
+      "end": 576665
+    },
+    {
+      "path": "/texlive/texmf-dist/xdvi",
+      "name": "XDvi",
+      "start": 576665,
+      "end": 590577
+    },
+    {
+      "path": "/texlive/texmf-dist/xdvi/pixmap",
+      "name": "toolbar.xpm",
+      "start": 590577,
+      "end": 598743
+    },
+    {
+      "path": "/texlive/texmf-dist/xdvi/pixmap",
+      "name": "toolbar2.xpm",
+      "start": 598743,
+      "end": 606871
+    },
+    {
+      "path": "/texlive",
+      "name": "texmf.cnf",
+      "start": 606871,
+      "end": 607486
+    },
+    {
+      "path": "/texlive",
+      "name": "texmfcnf.lua",
+      "start": 607486,
+      "end": 608197
+    }
+  ],
+  "totalSize": 608197
+}

@@ -1,0 +1,336 @@
+{
+  "name": "dvips",
+  "files": [
+    {
+      "path": "/texlive/texmf-dist/dvipdfmx",
+      "name": "dvipdfmx-unsafe.cfg",
+      "start": 0,
+      "end": 994
+    },
+    {
+      "path": "/texlive/texmf-dist/dvipdfmx",
+      "name": "dvipdfmx.cfg",
+      "start": 994,
+      "end": 9822
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/base",
+      "name": "color.pro",
+      "start": 9822,
+      "end": 12905
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/base",
+      "name": "crop.pro",
+      "start": 12905,
+      "end": 13217
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/base",
+      "name": "finclude.pro",
+      "start": 13217,
+      "end": 13418
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/base",
+      "name": "hps.pro",
+      "start": 13418,
+      "end": 16938
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/base",
+      "name": "resolution400.ps",
+      "start": 16938,
+      "end": 17373
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/base",
+      "name": "special.pro",
+      "start": 17373,
+      "end": 20528
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/base",
+      "name": "tex.pro",
+      "start": 20528,
+      "end": 23653
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/base",
+      "name": "texc.pro",
+      "start": 23653,
+      "end": 27641
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/base",
+      "name": "texps.pro",
+      "start": 27641,
+      "end": 28496
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "alt-rule.pro",
+      "start": 28496,
+      "end": 28992
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "canonex.cfg",
+      "start": 28992,
+      "end": 29008
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.bakoma",
+      "start": 29008,
+      "end": 29057
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.canonex",
+      "start": 29057,
+      "end": 29073
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.cx",
+      "start": 29073,
+      "end": 29084
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.deskjet",
+      "start": 29084,
+      "end": 29100
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.dvired",
+      "start": 29100,
+      "end": 29157
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.epson",
+      "start": 29157,
+      "end": 29171
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.ibmvga",
+      "start": 29171,
+      "end": 29186
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.ljfour",
+      "start": 29186,
+      "end": 29201
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.luc",
+      "start": 29201,
+      "end": 29318
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.mbn",
+      "start": 29318,
+      "end": 29329
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.mga",
+      "start": 29329,
+      "end": 29340
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.mirrorprint",
+      "start": 29340,
+      "end": 29478
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.ot2",
+      "start": 29478,
+      "end": 29502
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.ps",
+      "start": 29502,
+      "end": 45564
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.qms",
+      "start": 45564,
+      "end": 45576
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.toshiba",
+      "start": 45576,
+      "end": 45592
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.unms",
+      "start": 45592,
+      "end": 45604
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "config.xyp",
+      "start": 45604,
+      "end": 45617
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "cx.cfg",
+      "start": 45617,
+      "end": 45628
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "deskjet.cfg",
+      "start": 45628,
+      "end": 45644
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "dfaxhigh.cfg",
+      "start": 45644,
+      "end": 45664
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "dvired.cfg",
+      "start": 45664,
+      "end": 45721
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "epson.cfg",
+      "start": 45721,
+      "end": 45735
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "ibmvga.cfg",
+      "start": 45735,
+      "end": 45750
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "ljfour.cfg",
+      "start": 45750,
+      "end": 45765
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "qms.cfg",
+      "start": 45765,
+      "end": 45777
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/config",
+      "name": "toshiba.cfg",
+      "start": 45777,
+      "end": 45793
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/l3backend",
+      "name": "l3backend-dvips.pro",
+      "start": 45793,
+      "end": 55360
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/pspicture",
+      "name": "pspicture.ps",
+      "start": 55360,
+      "end": 57649
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/symbol",
+      "name": "config.usy",
+      "start": 57649,
+      "end": 57660
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/tetex",
+      "name": "config.builtin35",
+      "start": 57660,
+      "end": 57986
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/tetex",
+      "name": "config.dfaxhigh",
+      "start": 57986,
+      "end": 58178
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/tetex",
+      "name": "config.dfaxlo",
+      "start": 58178,
+      "end": 58367
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/tetex",
+      "name": "config.download35",
+      "start": 58367,
+      "end": 58779
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/tetex",
+      "name": "config.gsftopk",
+      "start": 58779,
+      "end": 58969
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/tetex",
+      "name": "config.maxmem",
+      "start": 58969,
+      "end": 59295
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/tetex",
+      "name": "config.outline",
+      "start": 59295,
+      "end": 59441
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/tetex",
+      "name": "config.pdf",
+      "start": 59441,
+      "end": 60568
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/tetex",
+      "name": "config.pk",
+      "start": 60568,
+      "end": 60716
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/tetex",
+      "name": "config.www",
+      "start": 60716,
+      "end": 61045
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/xdvi",
+      "name": "config.xdvi",
+      "start": 61045,
+      "end": 62539
+    },
+    {
+      "path": "/texlive/texmf-dist/dvips/zapfding",
+      "name": "config.uzd",
+      "start": 62539,
+      "end": 62550
+    }
+  ],
+  "totalSize": 62550
+}

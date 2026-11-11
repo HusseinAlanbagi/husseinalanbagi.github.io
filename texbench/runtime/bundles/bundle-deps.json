@@ -1,0 +1,8 @@
+{
+  "engines": {},
+  "bundles": {
+    "cm-super": {
+      "requires": []
+    }
+  }
+}

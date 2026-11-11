@@ -1,0 +1,66 @@
+{
+  "name": "extra-maps",
+  "files": [
+    {
+      "path": "/texlive/texmf-dist/texmf-var/fonts/map/dvipdfmx/updmap",
+      "name": "kanjix.map",
+      "start": 0,
+      "end": 387
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/fonts/map/dvips/updmap",
+      "name": "builtin35.map",
+      "start": 387,
+      "end": 16251
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/fonts/map/dvips/updmap",
+      "name": "download35.map",
+      "start": 16251,
+      "end": 37588
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/fonts/map/dvips/updmap",
+      "name": "ps2pk.map",
+      "start": 37588,
+      "end": 113797
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/fonts/map/dvips/updmap",
+      "name": "psfonts.map",
+      "start": 113797,
+      "end": 190011
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/fonts/map/dvips/updmap",
+      "name": "psfonts_pk.map",
+      "start": 190011,
+      "end": 262291
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/fonts/map/dvips/updmap",
+      "name": "psfonts_t1.map",
+      "start": 262291,
+      "end": 338505
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/fonts/map/pdftex/updmap",
+      "name": "pdftex.map",
+      "start": 338505,
+      "end": 414721
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/fonts/map/pdftex/updmap",
+      "name": "pdftex_dl14.map",
+      "start": 414721,
+      "end": 490937
+    },
+    {
+      "path": "/texlive/texmf-dist/texmf-var/fonts/map/pdftex/updmap",
+      "name": "pdftex_ndl14.map",
+      "start": 490937,
+      "end": 565488
+    }
+  ],
+  "totalSize": 565488
+}
