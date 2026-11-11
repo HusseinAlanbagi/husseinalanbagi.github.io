@@ -58,7 +58,7 @@ export default {
       if (dock?.open) return post({ type: 'focus' });
       ready = false; range = null; lastText = null; dockText = '';
       frame = h('iframe', { src: new URL('./equation/index.html?embed=dock', document.baseURI).href, title: 'Equation editor' });
-      dock = ctx.ui.openDock({ title: 'Equation', body: frame, actions: [insertBtn], height: 320, onClose: () => { dock = null; frame = null; ready = false; btn?.classList.remove('on'); ctx.editor.focus(); } });
+      dock = ctx.ui.openDock({ title: 'Equation', body: frame, actions: [insertBtn], height: 270, onClose: () => { dock = null; frame = null; ready = false; btn?.classList.remove('on'); ctx.editor.focus(); } });
       btn?.classList.add('on');
     }
     const toggle = () => { if (dock?.open) dock.close(); else open(); };

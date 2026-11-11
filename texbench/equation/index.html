@@ -217,7 +217,9 @@
   /* docked under the source in the LaTeX editor: only the visual box and the tools */
   .dock body { background:#fff; font-family:"Instrument Sans",system-ui,sans-serif; } .dock[data-theme=dark] body { background:#1a2029; }
   .dock main { max-width:none !important; padding:8px 12px 12px; }
-  .dock .topbar, .dock .banner, .dock .embedbar, .dock .panes > .pane:first-child, .dock #tipsBtn, .dock .tips { display:none !important; }
+  .dock .topbar, .dock .banner, .dock .embedbar, .dock .panes > .pane:first-child, .dock #tipsBtn, .dock .tips, .dock #tools, .dock #keysPanel, .dock #clear, .dock #cleanBtn { display:none !important; }
+  .dock .toolbar { gap:6px; padding:0 0 6px; flex-wrap:wrap; } .dock .toolbar.bottom { padding:6px 0 0; } .dock .tgroup { gap:4px; }
+  .dock .pane math-field { min-height:84px !important; padding-top:12px !important; } .dock .editor .checks { margin-top:4px; } .dock .checks .ok { display:none; } .dock #unitsBtn, .dock #expBtn { display:none !important; }
   .dock .card.editor { border:0; padding:0; margin:0; background:none; }
   .dock .panes { grid-template-columns:1fr; }
   .embed .topbar h1, .embed .topbar .sub, .embed .topbar a { display: none; }

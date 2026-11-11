@@ -26,14 +26,13 @@ await sleep(500); await p.evaluate(() => [...document.querySelectorAll('#dockAct
 console.log('inserted:', (await T()).includes('a^2+b^2=c^2'), '| info:', await p.$eval('#dockInfo', e => e.textContent));
 await p.click('#dockClose'); await sleep(200);
 // ---- typeset view: whole page
-await p.evaluate(() => document.querySelector('#edButtons button').click()); await sleep(100);
-console.log('view menu:', await p.$$eval('.menu button', e => e.map(x => x.textContent.trim())));
-await p.evaluate(() => [...document.querySelectorAll('.menu button')].find(x => /whole page/.test(x.textContent)).click());
+await p.click('.vz-switch'); await sleep(100);
+console.log('visual on:', await p.$eval('.vz-switch', e => e.getAttribute('aria-checked')));
 await p.evaluate(() => window.texbench.app.editor.view.dispatch({ selection: { anchor: 0 }, scrollIntoView: true })); await sleep(2500);
 await p.screenshot({ path: '/tmp/n4.png' });
 await p.evaluate(() => [...document.querySelectorAll('#topTools button')][0].click()); await sleep(600); await p.screenshot({ path: '/tmp/n5.png' });
 await p.evaluate(() => [...document.querySelectorAll('#topTools button')][0].click());
-await p.evaluate(() => document.querySelector('#edButtons button').click()); await p.evaluate(() => [...document.querySelectorAll('.menu button')].find(x => /Source only/.test(x.textContent)).click());
+await p.click('.vz-switch');
 // ---- linked folder (using the browser's private file system as the folder)
 const r = await p.evaluate(async () => {
   const root = await navigator.storage.getDirectory(); try { await root.removeEntry('paper', { recursive: true }); } catch {}

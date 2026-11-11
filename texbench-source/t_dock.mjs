@@ -1,0 +1,10 @@
+import { open } from './t_app.mjs';
+const { b, p, errs } = await open();
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+await p.waitForSelector('body.ready', { timeout: 30000 }); await sleep(1500);
+await p.evaluate(() => { const v = window.texbench.app.editor.view; const t = v.state.doc.toString(); const i = t.indexOf('\\begin{equation}'); v.focus(); v.dispatch({ selection: { anchor: i + 20 } }); });
+await p.keyboard.down('Control'); await p.keyboard.press('e'); await p.keyboard.up('Control'); await sleep(2500);
+await p.screenshot({ path: '/tmp/d1.png' });
+const f = p.frames().find(x => /equation/.test(x.url()));
+console.log('tools visible:', await f.$eval('#tools', e => getComputedStyle(e).display), 'iframe height', await p.$eval('#dockBody iframe', e => e.getBoundingClientRect().height), 'content height', await f.evaluate(() => document.documentElement.scrollHeight));
+console.log(errs.slice(0, 5)); await b.close();

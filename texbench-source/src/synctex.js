@@ -72,3 +72,24 @@ export function inverse(data, pageNo, x, y) {
   }
   return best && { file: best.file, line: best.line };
 }
+// Where each page starts in one source file: [{ page, line }] for every page after the first that holds text
+// from that file. The first piece of the file's text at the top of a page (in reading order) marks the start.
+export function pageStarts(data, file) {
+  let tag = null;
+  for (const [t, name] of data.inputs) if (name === file) { tag = t; break; }
+  if (tag == null) return [];
+  const out = []; let prev = 0;
+  for (const pg of data.pages) {
+    let ents = pg.pts.concat(pg.boxes).filter(e => e.tag === tag && e.line > 0).sort((a, b) => a.y - b.y || a.x - b.x);
+    if (!ents.length) continue;
+    // the page box and the header area carry the line where TeX finished the page, not text on it: skip them
+    const box = pg.pts.concat(pg.boxes).find(e => Math.abs(e.x) < 1 && Math.abs(e.y) < 1);
+    if (box) { const firstOther = ents.find(e => e.line !== box.line); if (firstOther) ents = ents.filter(e => e.line !== box.line || e.y >= firstOther.y); }
+    const top = ents.find(e => e.line >= prev) || ents[0];
+    const row = ents.filter(e => Math.abs(e.y - top.y) < 3 && e.line >= prev);
+    const line = row.length ? Math.min(...row.map(e => e.line)) : top.line;
+    if (pg.n > 1) out.push({ page: pg.n, line });
+    prev = line;
+  }
+  return out;
+}

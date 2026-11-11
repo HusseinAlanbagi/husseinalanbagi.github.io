@@ -1,0 +1,42 @@
+import { open } from './t_app.mjs';
+import fs from 'node:fs';
+const { b, p, errs, waitCompiled } = await open();
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+await p.waitForSelector('body.ready', { timeout: 30000 }); await waitCompiled();
+await p.evaluate((main, bib) => { const a = window.texbench.app; a.project.write('refs.bib', bib); a.project.write('main.tex', main, { open: true }); }, fs.readFileSync('/tmp/vt/main.tex', 'utf8'), fs.readFileSync('/tmp/vt/refs.bib', 'utf8'));
+await sleep(400);
+console.log('estimated breaks', await p.$$eval('.tb-pb', e => e.map(x => x.textContent)));
+await p.evaluate(() => window.texbench.app.compile()); await sleep(800); console.log(await waitCompiled());
+await sleep(500);
+console.log('measured breaks', await p.$$eval('.tb-pb', e => e.map(x => x.textContent + ' ' + x.className)), 'pdf pages', await p.$$eval('.pdfpage', e => e.length));
+const lines = await p.evaluate(() => { const v = window.texbench.app.editor.view; return [...document.querySelectorAll('.tb-pb')].map(el => v.state.doc.lineAt(v.posAtDOM(el)).number); });
+console.log('break lines', lines);
+await p.evaluate(() => window.texbench.app.editor.view.dispatch({ selection: { anchor: 0 } }));
+await p.screenshot({ path: '/tmp/v0.png' });
+// switch on
+await p.click('.vz-switch'); await sleep(2500);
+await p.screenshot({ path: '/tmp/v1.png' });
+const scroll = async (y, f) => { await p.evaluate((y) => { document.querySelector('.cm-scroller').scrollTop = y; }, y); await sleep(700); await p.screenshot({ path: f }); };
+await scroll(700, '/tmp/v2.png'); await scroll(1600, '/tmp/v3.png'); await scroll(2400, '/tmp/v4.png');
+await p.evaluate(() => { document.querySelector('.cm-scroller').scrollTop = 1e6; }); await sleep(800); await p.screenshot({ path: '/tmp/v5.png' });
+console.log('cites', await p.$$eval('.vz-cite', e => e.map(x => x.textContent)), 'refs', await p.$$eval('.vz-ref', e => e.map(x => x.textContent)));
+console.log('mathjax errors', await p.$$eval('.vz-err', e => e.map(x => x.title)));
+// title click opens editor
+await p.evaluate(() => { document.querySelector('.cm-scroller').scrollTop = 0; }); await sleep(500);
+const before = await p.$eval('#cursorInfo', e => e.textContent);
+await p.click('.vz-title'); await sleep(300);
+console.log('pop', !!(await p.$('.vz-pop')), 'cursor unchanged', before === await p.$eval('#cursorInfo', e => e.textContent));
+await p.screenshot({ path: '/tmp/v6.png' });
+await p.focus('.vz-pop textarea'); await p.keyboard.down('Control'); await p.keyboard.press('a'); await p.keyboard.up('Control'); await p.keyboard.type('A Medium Model'); await sleep(300);
+console.log('title in source', await p.evaluate(() => /\\title\{A Medium Model\}/.test(window.texbench.app.editor.getText())), 'drawn', await p.$eval('.vz-title-t', e => e.textContent));
+await p.keyboard.press('Escape'); await sleep(200);
+// panel toggles
+await p.click('.vz-more'); await sleep(200);
+const rows = () => p.$$eval('.vz-panel .vz-row', e => e.map(x => x.textContent.slice(0, 22) + '=' + x.getAttribute('aria-checked')));
+console.log(await rows());
+await p.evaluate(() => [...document.querySelectorAll('.vz-panel .vz-row')].find(x => /Page sheet/.test(x.textContent)).click()); await sleep(200);
+await p.evaluate(() => [...document.querySelectorAll('.vz-panel .vz-row')].find(x => /Page sheet/.test(x.textContent)).click()); await sleep(200);
+console.log('after twice', await rows(), await p.$eval('.cm-editor', e => e.className));
+await p.mouse.click(700, 600); await sleep(200); console.log('panel closed', !(await p.$('.vz-panel')));
+await p.click('.vz-switch'); await sleep(300); console.log('off:', await p.$eval('.cm-editor', e => e.className.includes('cm-typeset')), await p.$$eval('.tb-pb', e => e.length));
+console.log(errs.slice(0, 8)); await b.close();

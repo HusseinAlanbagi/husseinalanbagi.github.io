@@ -7,7 +7,8 @@ import { createEditor } from './editor.js';
 import { createPdfView } from './pdfview.js';
 import { initEngine, compileProject, onEngineLog, engineLog, clearEngineCache } from './engine.js';
 import { parseLog } from './logparse.js';
-import { parseSyncTeX, forward, inverse } from './synctex.js';
+import { explain } from './explain.js';
+import { parseSyncTeX, forward, inverse, pageStarts } from './synctex.js';
 import { createModuleHost } from './modules.js';
 import { SAMPLE_MAIN, SAMPLE_BIB, BLANK_MAIN } from './template.js';
 
@@ -139,6 +140,8 @@ function showPanel(id, toggle = false) {
 const app = {
   name: APP_NAME, version: VERSION, editor, project: projectApi, ui, events, pdf,
   compile: () => runCompile(), get lastResult() { return lastResult; },
+  // page starts in a file from the last compile, with the length of that file's text when it was compiled
+  pageStarts: (file) => sync && lastResult?.sizes ? { lines: pageStarts(sync, file), size: lastResult.sizes[file] } : null,
   goto, setProblems(source, list) { problems.set(source, list); if (!list.length) problems.delete(source); renderProblems(); },
 };
 const modules = createModuleHost(app);
@@ -229,9 +232,14 @@ async function runCompile() {
   try { r = await compileProject(files, main, project.engine || 'pdflatex'); }
   catch (e) { r = { success: false, error: e.message, log: String(e.stack || e), ms: 0 }; }
   compiling = false;
-  lastResult = { ...r, mainFile: main };
+  lastResult = { ...r, mainFile: main, sizes: Object.fromEntries([...files].map(([p, v]) => [p, typeof v === 'string' ? v.length : 0])) };
   const list = parseLog(r.log, main, Object.keys(project.files));
   if (!r.success && !list.some(p => p.severity === 'error')) list.unshift({ severity: 'error', file: main, line: null, message: r.error || 'Compilation failed. See the log for details.' });
+  for (const p of list) if (!p.line && (m => m && (p.key = m[1]))(/database entry for "(.+?)"/.exec(p.message))) {
+    for (const f of Object.keys(project.files)) { const t = project.files[f].t; if (t == null || !/\.tex$/i.test(f)) continue; const k = t.split('\n').findIndex(l => new RegExp(`\\\\\\w*cite\\w*\\*?(\\[[^\\]]*\\])*\\{[^}]*\\b${p.key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(l)); if (k >= 0) { p.file = f; p.line = k + 1; break; } }
+  }
+  const seen = new Set(list.filter(p => /Citation [`'](.+?)'/.test(p.message)).map(p => /Citation [`'](.+?)'/.exec(p.message)[1]));
+  for (let k = list.length - 1; k >= 0; k--) if (list[k].key && seen.has(list[k].key)) list.splice(k, 1);
   problems.set('compile', list); renderProblems();
   $('logText').textContent = r.log || r.error || '';
   const errs = list.filter(p => p.severity === 'error').length, warns = list.filter(p => p.severity === 'warning').length;
@@ -251,18 +259,80 @@ function setStatus(text, kind = '') { const s = $('status'); s.textContent = tex
 
 // ---------------------------------------------------------------- problems + log
 function allProblems() { return [...problems.entries()].flatMap(([source, list]) => list.map(p => ({ ...p, source: source === 'compile' ? 'LaTeX' : source }))); }
+// what a fix needs to know about the project
+const explainEnv = () => ({
+  main: mainFile(), files: Object.keys(project.files), text: (f) => project.files[f]?.t ?? null,
+  labels: () => Object.values(project.files).flatMap(f => f.t ? [...f.t.matchAll(/\\label\{([^}]+)\}/g)].map(m => m[1]) : []),
+  bibKeys: () => Object.entries(project.files).flatMap(([p, f]) => /\.bib$/i.test(p) && f.t ? [...f.t.matchAll(/@\w+\s*\{\s*([^,\s]+)\s*,/g)].map(m => m[1]) : []),
+});
+function explained(p) {
+  if (p.source !== 'LaTeX') return p;
+  let x = null; try { x = explain(p, explainEnv()); } catch (e) { console.warn('explain', e); }
+  return x ? { ...p, title: x.title, why: x.why, fixes: x.fixes } : p;
+}
+// change a file; the open file is changed through the editor so the change can be undone
+function editFile(file, fn) {
+  const before = file === active ? editor.getText() : project.files[file]?.t;
+  if (before == null) return false;
+  const after = fn(before);
+  if (after == null || after === before) return false;
+  if (file === active) {
+    let a = 0; while (a < before.length && a < after.length && before[a] === after[a]) a++;
+    let b = 0; while (b < before.length - a && b < after.length - a && before[before.length - 1 - b] === after[after.length - 1 - b]) b++;
+    editor.view.dispatch({ changes: { from: a, to: before.length - b, insert: after.slice(a, after.length - b) }, userEvent: 'input.fix', scrollIntoView: true });
+  } else projectApi.write(file, after);
+  return true;
+}
+const toPreamble = (text, line) => {
+  if (text.split('\n').some(l => l.trim() === line)) return text;
+  const bd = text.indexOf('\\begin{document}'); if (bd < 0) return line + '\n' + text;
+  const pre = text.slice(0, bd), last = [...pre.matchAll(/^\\(usepackage|RequirePackage|newcommand|newtheorem|DeclareMathOperator)\b.*$/gm)].filter(m => /^\\usepackage/.test(line) ? /^\\usepackage/.test(m[0]) : true).pop();
+  const at = last ? last.index + last[0].length + 1 : bd;
+  return text.slice(0, at) + line + '\n' + text.slice(at);
+};
+function applyFix(fix) {
+  if (fix.goto) { goto(fix.goto.file, fix.goto.line); return; }
+  const e = fix.edit; if (!e) return;
+  let ok;
+  if (e.preamble) ok = editFile(e.file, (t) => toPreamble(t, e.preamble));
+  else ok = editFile(e.file, (t) => {
+    const lines = t.split('\n'), i = (e.line || 1) - 1; if (i >= lines.length) return null;
+    if (e.insertAfter != null) { lines.splice(i + 1, 0, e.insertAfter); return lines.join('\n'); }
+    const next = typeof e.find === 'string' ? lines[i].replace(e.find, () => e.replace) : lines[i].replace(e.find, e.replace);
+    if (next === lines[i]) return null;
+    lines[i] = next; if (e.move && !next.trim()) lines.splice(i, 1);
+    return lines.join('\n');
+  });
+  if (ok && e.move) editFile(e.move.file, (t) => toPreamble(t, e.move.preamble));
+  if (ok) { toast('Fixed: ' + fix.label.replace(/^(Add|Change|Use|Write|Escape|Remove|Move|Define it:) ?/, (m) => m.toLowerCase())); if (e.line && e.file) goto(e.file, e.line); }
+  else toast('That fix no longer applies: the line has changed.', 'warn');
+}
+function fixButtons(p) {
+  return (p.fixes || []).map(f => h('button', { class: 'fix' + (f.edit ? ' do' : ''), title: f.edit ? 'Make this change' : 'Show it', onClick: (ev) => { ev.stopPropagation(); applyFix(f); } }, f.label));
+}
 function renderProblems() {
   const order = { error: 0, warning: 1, info: 2 };
-  const list = allProblems().sort((a, b) => order[a.severity] - order[b.severity]);
+  const list = allProblems().map(explained).sort((a, b) => order[a.severity] - order[b.severity]);
   const errs = list.filter(p => p.severity === 'error').length;
   $('tabProblems').textContent = `Problems${list.length ? ` (${list.length})` : ''}`;
   $('tabProblems').classList.toggle('has-err', errs > 0);
-  $('problemList').replaceChildren(...(list.length ? list.map(p => h('button', { class: 'problem ' + p.severity, onClick: () => p.file && goto(p.file, p.line) },
-    h('span', { class: 'sev', title: p.severity }, p.severity === 'error' ? '●' : p.severity === 'warning' ? '▲' : '○'), h('span', { class: 'msg' }, p.message),
-    h('span', { class: 'where' }, (p.source !== 'LaTeX' ? p.source + ' · ' : '') + (p.file || '') + (p.line ? ':' + p.line : '')))) : [h('p', { class: 'muted pad' }, 'No problems found.')]));
+  $('problemList').replaceChildren(...(list.length ? list.map(p => h('div', { class: 'problem ' + p.severity },
+    h('button', { class: 'p-head', title: p.file ? 'Go to the line' : '', onClick: () => p.file && goto(p.file, p.line) },
+      h('span', { class: 'sev', title: p.severity }, p.severity === 'error' ? '●' : p.severity === 'warning' ? '▲' : '○'),
+      h('span', { class: 'msg' }, p.title || p.message),
+      h('span', { class: 'where' }, (p.source !== 'LaTeX' ? p.source + ' · ' : '') + (p.file || '') + (p.line ? ':' + p.line : ''))),
+    p.title || p.context ? h('div', { class: 'p-body' },
+      p.why ? h('p', { class: 'p-why' }, p.why) : null,
+      h('p', { class: 'p-raw' }, h('span', {}, p.title ? p.message : ''), p.context ? h('code', { title: 'Where TeX stopped reading' }, p.context.length > 90 ? '…' + p.context.slice(-90) : p.context) : null),
+      p.fixes?.length ? h('div', { class: 'p-fixes' }, ...fixButtons(p)) : null) : null)) : [h('p', { class: 'muted pad' }, 'No problems found.')]));
   applyDiagnostics();
 }
-function applyDiagnostics() { if (active && projectApi.isText(active)) editor.setDiagnostics(allProblems().filter(p => p.file === active)); }
+function applyDiagnostics() {
+  if (!active || !projectApi.isText(active)) return;
+  editor.setDiagnostics(allProblems().filter(p => p.file === active).map(explained).map(p => ({ ...p,
+    message: p.title ? p.title + (p.why ? ' — ' + p.why : '') : p.message,
+    renderMessage: p.title ? () => h('div', { class: 'diag' }, h('div', { class: 'diag-t' }, p.title), p.why ? h('div', { class: 'diag-w' }, p.why) : null, h('div', { class: 'diag-r' }, p.message), p.fixes?.length ? h('div', { class: 'p-fixes' }, ...fixButtons(p)) : null) : undefined })));
+}
 function showBottom(which) {
   const open = which && !(document.body.dataset.bottom === which);
   document.body.dataset.bottom = open ? which : '';

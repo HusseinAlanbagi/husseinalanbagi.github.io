@@ -23,9 +23,10 @@ const baseTheme = EditorView.theme({
   '.cm-content': { padding: '10px 0', caretColor: 'var(--accent)' },
   '.cm-gutters': { backgroundColor: 'var(--paper)', color: 'var(--faint)', border: 'none', borderRight: '1px solid var(--line)' },
   '.cm-activeLine': { backgroundColor: 'var(--active-line)' }, '.cm-activeLineGutter': { backgroundColor: 'var(--active-line)', color: 'var(--ink)' },
-  '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionLayer .cm-selectionBackground': { backgroundColor: 'var(--sel) !important', opacity: '1' },
-  '.cm-content ::selection, .cm-line::selection': { backgroundColor: 'var(--sel) !important' },
-  '.cm-selectionMatch': { backgroundColor: 'color-mix(in srgb, var(--sel) 45%, transparent)' },
+  // The selection is drawn above the text and blended, so it shows on the current line, on the page sheet and over drawn equations.
+  '.cm-selectionLayer': { zIndex: '3 !important', mixBlendMode: 'var(--sel-blend, multiply)', pointerEvents: 'none' },
+  '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionLayer .cm-selectionBackground': { backgroundColor: 'var(--sel) !important', borderRadius: '2px' },
+  '.cm-selectionMatch': { backgroundColor: 'transparent', boxShadow: 'inset 0 -2px 0 color-mix(in srgb, var(--accent) 55%, transparent)' },
   '.cm-cursor': { borderLeftColor: 'var(--accent)', borderLeftWidth: '2px' },
   '.cm-tooltip': { backgroundColor: 'var(--panel)', color: 'var(--ink)', border: '1px solid var(--line)', borderRadius: '6px', boxShadow: '0 6px 24px rgba(0,0,0,.18)' },
   '.cm-tooltip-autocomplete ul li[aria-selected]': { backgroundColor: 'var(--accent)', color: '#fff' },
@@ -103,7 +104,7 @@ export function createEditor(parent, { onChange, onCursor }) {
     focus: () => view.focus(),
     setDiagnostics(list) {
       const doc = view.state.doc;
-      const diags = list.filter(p => p.line && p.line <= doc.lines).map(p => { const ln = doc.line(p.line); return { from: ln.from + (ln.text.length - ln.text.trimStart().length), to: ln.to, severity: p.severity, message: p.message, source: p.source }; });
+      const diags = list.filter(p => p.line && p.line <= doc.lines).map(p => { const ln = doc.line(p.line); return { from: ln.from + (ln.text.length - ln.text.trimStart().length), to: ln.to, severity: p.severity, message: p.message, source: p.source, renderMessage: p.renderMessage }; });
       view.dispatch(setDiagnostics(view.state, diags));
     },
     addCompletionSource(fn) { sources.add(fn); return () => sources.delete(fn); },

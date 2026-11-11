@@ -1803,7 +1803,7 @@ async function handleCompile(request) {
     const fetchedPackages = new Set();
     // Use global cache for Range-fetched files (persists across compiles)
     let lastExitCode = -1;
-    let texLog = '';
+    let texLog = '', bibWarnings = '';
     let compileError = '';
     let Module = null;
     let FS = null;
@@ -1970,12 +1970,12 @@ async function handleCompile(request) {
             if (engine === 'pdflatex') {
                 result = Module.callMainWithRedirects([
                     'pdflatex', '--no-shell-escape', '--interaction=nonstopmode',
-                    '--file-line-error', '--halt-on-error', '--synctex=-1', '--fmt=' + fmtPath, sourcePath
+                    '--file-line-error', '--synctex=-1', '--fmt=' + fmtPath, sourcePath
                 ]);
             } else {
                 result = Module.callMainWithRedirects([
                     'xelatex', '--no-shell-escape', '--interaction=nonstopmode',
-                    '--file-line-error', '--halt-on-error', '--synctex=-1', '--no-pdf',
+                    '--file-line-error', '--synctex=-1', '--no-pdf',
                     '--fmt=/texlive/texmf-dist/texmf-var/web2c/xetex/xelatex.fmt',
                     sourcePath
                 ]);
@@ -2049,7 +2049,9 @@ async function handleCompile(request) {
                         const bib = Module.callMainWithRedirects(['bibtex8', '--8bit', docBase.slice(docBase.lastIndexOf('/') + 1)]);
                         let bibLog = [bib.stdout, bib.stderr].filter(Boolean).join('\n');
                         try { bibLog = FS.readFile(docBase + '.blg', { encoding: 'utf8' }); } catch {}
-                        if (bib.exit_code !== 0) {
+                        // exit code 1 means warnings only (for example a key missing from the .bib): carry on, keep the warnings in the log
+                        if (bib.exit_code === 1) bibWarnings = bibLog;
+                        if (bib.exit_code > 1) {
                             lastExitCode = bib.exit_code;
                             texLog += '\n' + bibLog;
                             throw new Error('BibTeX failed: ' + (bibLog.match(/^(?:I couldn.t|I found no|.*---line).*$/m)?.[0] || 'check the bibliography file and full log.'));
@@ -2524,7 +2526,7 @@ async function handleCompile(request) {
         exitCode: lastExitCode,
         auxFilesToCache: auxFiles,
         stats,
-        log: texLog,
+        log: texLog + (bibWarnings ? '\n' + bibWarnings : ''),
     }, pdfData ? [pdfData.buffer] : []);
 }
 

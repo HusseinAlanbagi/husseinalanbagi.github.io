@@ -10,30 +10,28 @@ export function parseLog(log, mainFile, projectFiles) {
     const L = lines[i];
     let m;
     if ((m = /^(?:\.\/|\/)?([^\s:()]+\.\w+):(\d+): (.*)$/.exec(L))) {
-      let msg = m[3];
-      // the offending token is on the "l.N ..." line that follows
-      for (let k = i + 1; k < Math.min(i + 8, lines.length); k++) {
-        const c = /^l\.\d+ (.*)$/.exec(lines[k]);
-        if (c) { const tail = c[1].trim().split(/\s+/).pop(); if (tail && /Undefined control sequence/.test(msg)) msg += ' ' + tail; break; }
-      }
-      problems.push({ severity: 'error', file: known.has(norm(m[1])) ? norm(m[1]) : mainFile, line: +m[2], message: msg.replace(/^LaTeX Error: /, '') });
+      const msg = m[3], ctx = context(lines, i);
+      problems.push({ severity: 'error', file: known.has(norm(m[1])) ? norm(m[1]) : mainFile, line: +m[2], message: msg.replace(/^LaTeX Error: /, '') + (ctx.token && /Undefined control sequence/.test(msg) ? ' ' + ctx.token : ''), ...ctx });
       continue;
     }
     if ((m = /^! (.*)$/.exec(L)) && !/^! ==>/.test(L)) {
       let line = null;
       for (let k = i + 1; k < Math.min(i + 12, lines.length); k++) { const c = /^l\.(\d+)/.exec(lines[k]); if (c) { line = +c[1]; break; } }
-      const msg = m[1].replace(/^LaTeX Error: /, '');
-      if (!problems.some(p => p.message.startsWith(msg.slice(0, 30)) && p.line === line)) problems.push({ severity: 'error', file: stack[stack.length - 1], line, message: msg });
+      const msg = m[1].replace(/^LaTeX Error: /, ''), ctx = context(lines, i);
+      if (!problems.some(p => p.message.startsWith(msg.slice(0, 30)) && p.line === line)) problems.push({ severity: 'error', file: stack[stack.length - 1], line, message: msg + (ctx.token && /Undefined control sequence/.test(msg) ? ' ' + ctx.token : ''), ...ctx });
       continue;
     }
     if ((m = /^(?:LaTeX|Package|Class) (?:(\S+) )?Warning: (.*)$/.exec(L))) {
       let msg = m[2];
       while (i + 1 < lines.length && /^\(\S+\)\s+/.test(lines[i + 1])) msg += ' ' + lines[++i].replace(/^\(\S+\)\s+/, '');
       const ln = /on input line (\d+)/.exec(msg);
-      if (/^(There were undefined references|Label\(s\) may have changed|There were multiply-defined|Shell escape feature is not enabled)/.test(msg)) continue;
+      if (/^(There were undefined references|There were undefined citations|Label\(s\) may have changed|There were multiply-defined|Shell escape feature is not enabled)/.test(msg)) continue;
       problems.push({ severity: 'warning', file: stack[stack.length - 1], line: ln ? +ln[1] : null, message: (m[1] ? m[1] + ': ' : '') + msg.replace(/ on input line \d+\.?/, '').trim() });
       continue;
     }
+    // BibTeX: "Warning--I didn't find a database entry for "key"" and "I was expecting a `,'---line 5 of file refs.bib"
+    if ((m = /^Warning--(.*)$/.exec(L))) { if (!/^(empty|to sort, need)/.test(m[1])) problems.push({ severity: 'warning', file: mainFile, line: null, message: m[1] }); continue; }
+    if ((m = /^(.*?)---line (\d+) of file (\S+)/.exec(L))) { const f = norm(m[3]); problems.push({ severity: 'error', file: known.has(f) ? f : [...known].find(k => k.endsWith('/' + f) || k === f + '.bib') || f, line: +m[2], message: m[1].trim() || 'BibTeX error' }); continue; }
     if ((m = /^(Overfull|Underfull) \\hbox .* at lines (\d+)--\d+/.exec(L))) {
       if (m[1] === 'Overfull') problems.push({ severity: 'info', file: stack[stack.length - 1], line: +m[2], message: L.replace(/ in paragraph.*/, '') + ' (text sticks out into the margin)' });
       continue;
@@ -47,6 +45,14 @@ export function parseLog(log, mainFile, projectFiles) {
     }
   }
   return problems;
+}
+// The code TeX was reading when it stopped: "l.12 ...text" (and the rest on the next line). The token is the last command.
+function context(lines, i) {
+  for (let k = i + 1; k < Math.min(i + 12, lines.length); k++) {
+    const c = /^l\.\d+ (.*)$/.exec(lines[k]);
+    if (c) { const before = c[1].replace(/^\.\.\./, ''), after = (lines[k + 1] || '').trim(); const tok = (/(\\[A-Za-z@]+\*?|\\.)\s*$/.exec(before) || [])[1]; return { context: (before + (after ? ' ' + after : '')).trim(), token: tok || null }; }
+  }
+  return {};
 }
 // TeX wraps log lines at 79 characters; glue them back together.
 function unwrap(log) {

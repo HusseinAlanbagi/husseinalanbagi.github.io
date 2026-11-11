@@ -11,10 +11,10 @@ export function createModuleHost(app) {
     return {
       app: { name: app.name, version: app.version },
       cm: app.editor.cm, h: app.ui.h,
-      editor: { ...app.editor, ...wrap(app.editor, ['addCompletionSource', 'addExtension', 'addKeymap']) },
+      editor: Object.assign(Object.create(app.editor), wrap(app.editor, ['addCompletionSource', 'addExtension', 'addKeymap'])),     // getters such as path stay live
       project: app.project,
       ui: { ...app.ui, ...wrap(app.ui, ['addPanel', 'addToolbarButton', 'addCommand', 'addStatusItem', 'addEditorButton']) },
-      compile: { run: app.compile, last: () => app.lastResult },
+      compile: { run: app.compile, last: () => app.lastResult, pageStarts: (file) => app.pageStarts(file) },
       pdf: app.pdf,
       goto: app.goto,
       problems: { set: (list) => app.setProblems(id, list), clear: () => app.setProblems(id, []) },
