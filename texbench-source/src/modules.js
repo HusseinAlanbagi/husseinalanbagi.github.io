@@ -13,7 +13,7 @@ export function createModuleHost(app) {
       cm: app.editor.cm, h: app.ui.h,
       editor: { ...app.editor, ...wrap(app.editor, ['addCompletionSource', 'addExtension', 'addKeymap']) },
       project: app.project,
-      ui: { ...app.ui, ...wrap(app.ui, ['addPanel', 'addToolbarButton', 'addCommand', 'addStatusItem']) },
+      ui: { ...app.ui, ...wrap(app.ui, ['addPanel', 'addToolbarButton', 'addCommand', 'addStatusItem', 'addEditorButton']) },
       compile: { run: app.compile, last: () => app.lastResult },
       pdf: app.pdf,
       goto: app.goto,

@@ -18,6 +18,7 @@
   </div>
   <div id="toolbar" class="grp" role="toolbar" aria-label="Tools"></div>
   <span class="spacer"></span>
+  <button id="pdfModeBtn" title="Show the PDF beside the editor, hide it, or open it in its own tab" aria-haspopup="menu">PDF ▾</button>
   <button id="paletteBtn">Commands</button>
   <button id="featBtn" title="Switch features on or off, and other settings">⚙ Features</button>
 </header>
@@ -32,7 +33,7 @@
   <div class="split" id="split1" role="separator" aria-orientation="vertical"></div>
   <section id="edwrap" aria-label="Source">
     <div class="bar"><span id="fileName" class="fname"></span><span class="spacer"></span><span id="cursorInfo" class="muted"></span>
-      <button id="syncBtn" class="small">Show in PDF →</button></div>
+      <span id="edButtons" class="grp"></span><button id="syncBtn" class="small">Show in PDF →</button></div>
     <div id="ed"></div>
     <div id="binview" hidden></div>
     <div id="bottom">
@@ -43,7 +44,7 @@
   <div class="split" id="split2" role="separator" aria-orientation="vertical"></div>
   <section id="pdfwrap" aria-label="PDF preview">
     <div class="bar"><button id="zoomOut" class="icon" title="Zoom out" aria-label="Zoom out">−</button><span id="zoomInfo" class="muted">100%</span><button id="zoomIn" class="icon" title="Zoom in" aria-label="Zoom in">＋</button>
-      <button id="zoomFit" class="small" title="Fit the page width">Fit</button><span class="spacer"></span><span id="pageInfo" class="muted"></span><button id="pdfDownload" class="small" title="Download the PDF">Download PDF</button></div>
+      <button id="zoomFit" class="small" title="Fit the page width">Fit</button><span class="spacer"></span><span id="pageInfo" class="muted"></span><button id="pdfDownload" class="small" title="Download the PDF">Download PDF</button><button id="pdfTabBtn" class="icon" title="Open the PDF in its own browser tab (handy on a second screen)" aria-label="Open the PDF in its own tab">⧉</button><button id="pdfHideBtn" class="icon" title="Hide the PDF (show it again from the PDF menu at the top)" aria-label="Hide the PDF">✕</button></div>
     <div id="pdf"><div id="pdfEmpty" class="muted pad">The PDF appears here after the first compile. The first run downloads the TeX engine (about 35 MB) and keeps it for next time.</div></div>
   </section>
 </main>

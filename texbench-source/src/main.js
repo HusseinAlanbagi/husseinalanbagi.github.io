@@ -94,6 +94,7 @@ const ui = {
     const b = h('button', { title: title || label, onClick }, icon ? h('span', { class: 'ic' }, icon) : null, label);
     $('toolbar').append(b); const off = () => b.remove(); off.el = b; return off;
   },
+  addEditorButton(el) { $('edButtons').append(el); return () => el.remove(); },
   addStatusItem(render) { const el = h('span', { class: 'status-item' }); $('statusItems').append(el); render(el); return () => el.remove(); },
   addCommand(cmd) { commands.set(cmd.id, cmd); return () => commands.delete(cmd.id); },
   runCommand: (id) => commands.get(id)?.run(),
@@ -202,6 +203,7 @@ async function runCompile() {
   const errs = list.filter(p => p.severity === 'error').length, warns = list.filter(p => p.severity === 'warning').length;
   if (r.success && r.pdf) {
     try { await pdf.load(r.pdf); $('pdfEmpty').hidden = true; } catch (e) { console.error(e); }
+    sendPdfToTab();
     sync = r.syncTexData ? parseSyncTeX(r.syncTexData) : null;
     setStatus(`Compiled in ${(r.ms / 1000).toFixed(1)} s` + (errs ? ` · ${errs} error${errs > 1 ? 's' : ''}` : warns ? ` · ${warns} warning${warns > 1 ? 's' : ''}` : ''), errs ? 'err' : 'ok');
   } else {
@@ -379,13 +381,53 @@ function palette() {
 function showInPdf() {
   if (!sync || !active) return toast('Compile first, then try again.');
   const hit = forward(sync, active, editor.getCursor().line);
-  if (hit) pdf.reveal(hit.page, hit); else toast('This line does not appear in the PDF.');
+  if (!hit) return toast('This line does not appear in the PDF.');
+  if (pdfMode === 'tab') return pdfCh.postMessage({ type: 'show', page: hit.page, rect: { x: hit.x, y: hit.y, w: hit.w, h: hit.h } });
+  if (pdfMode === 'hidden') { setPdfMode('side'); return setTimeout(() => pdf.reveal(hit.page, hit), 250); }
+  pdf.reveal(hit.page, hit);
+}
+
+// ---------------------------------------------------------------- where the PDF is shown: beside, hidden, or in its own tab
+const winId = sessionStorage.getItem('texbench-win') || Math.random().toString(36).slice(2, 10);
+sessionStorage.setItem('texbench-win', winId);
+const pdfCh = new BroadcastChannel('texbench-pdf-' + winId);
+let pdfMode = 'side', tabAlive = false;
+const PDF_MODES = { side: 'Beside the editor', hidden: 'Hidden', tab: 'In a separate tab' };
+function setPdfMode(mode, remember = true) {
+  if (mode === 'tab' && !tabAlive) {
+    const w = window.open('pdf.html?ch=' + winId, 'texbench-pdf-' + winId);
+    if (!w) return toast('The browser blocked the new tab. Allow pop-ups for this site and try again.', 'err');
+  }
+  if (mode !== 'tab' && tabAlive) { pdfCh.postMessage({ type: 'close' }); tabAlive = false; }
+  pdfMode = mode;
+  document.body.classList.toggle('pdf-off', mode !== 'side');
+  $('pdfModeBtn').textContent = mode === 'side' ? 'PDF ▾' : mode === 'hidden' ? 'PDF: hidden ▾' : 'PDF: in tab ▾';
+  if (remember && mode !== 'tab') prefs.set('pdfMode', mode);
+  editor.view.requestMeasure();
+}
+function sendPdfToTab() {
+  if (!tabAlive || !pdf.bytes || !lastResult?.success) return;
+  pdfCh.postMessage({ type: 'pdf', bytes: pdf.bytes, title: project?.name || 'Document', name: (mainFile() || 'document').split('/').pop().replace(/\.tex$/i, '') + '.pdf' });
+}
+pdfCh.onmessage = (e) => {
+  const m = e.data || {};
+  if (m.type === 'hello') { tabAlive = true; if (pdfMode !== 'tab') setPdfMode('tab', false); sendPdfToTab(); }
+  else if (m.type === 'alive?') pdfCh.postMessage({ type: 'ping' });
+  else if (m.type === 'bye') { tabAlive = false; if (pdfMode === 'tab') setPdfMode(prefs.get('pdfMode', 'side') === 'hidden' ? 'hidden' : 'side', false); }
+  else if (m.type === 'dock') { tabAlive = false; setPdfMode('side'); }
+  else if (m.type === 'click') { if (!sync) return; const hit = inverse(sync, m.page, m.x, m.y); if (hit && project.files[hit.file]) { goto(hit.file, hit.line); window.focus(); } }
+};
+function pdfModeMenu() {
+  menu($('pdfModeBtn'), Object.entries(PDF_MODES).map(([k, label]) => ({ label: (pdfMode === k ? '✓ ' : '\u2003') + label, onClick: () => setPdfMode(k) })));
 }
 function downloadPdf() { if (lastResult?.success && pdf.bytes) download(new Blob([pdf.bytes], { type: 'application/pdf' }), (mainFile() || 'document').split('/').pop().replace(/\.tex$/i, '') + '.pdf'); else toast('There is no PDF yet.'); }
 
 // ---------------------------------------------------------------- wiring
 [
   { id: 'core.compile', name: 'Compile now', key: 'Mod+Enter', run: runCompile },
+  { id: 'core.pdfSide', name: 'PDF: show beside the editor', run: () => setPdfMode('side') },
+  { id: 'core.pdfHide', name: 'PDF: hide (or show again)', key: 'Mod+Shift+H', run: () => setPdfMode(pdfMode === 'side' ? 'hidden' : 'side') },
+  { id: 'core.pdfTab', name: 'PDF: open in a separate tab', run: () => setPdfMode('tab') },
   { id: 'core.showInPdf', name: 'Show this line in the PDF', key: 'Mod+J', run: showInPdf },
   { id: 'core.newFile', name: 'New file…', run: newFile },
   { id: 'core.upload', name: 'Upload files…', run: async () => addFiles(await pickFiles()) },
@@ -406,12 +448,14 @@ $('featBtn').onclick = featuresDialog; $('paletteBtn').onclick = palette; $('pal
 $('newFileBtn').onclick = newFile; $('uploadBtn').onclick = async () => addFiles(await pickFiles());
 $('tabProblems').onclick = () => showBottom('problems'); $('tabLog').onclick = () => showBottom('log');
 $('zoomOut').onclick = () => pdf.setZoom(pdf.zoom / 1.15); $('zoomIn').onclick = () => pdf.setZoom(pdf.zoom * 1.15); $('zoomFit').onclick = () => pdf.setZoom(1);
+$('pdfModeBtn').onclick = pdfModeMenu; $('pdfTabBtn').onclick = () => setPdfMode('tab'); $('pdfHideBtn').onclick = () => setPdfMode('hidden');
 $('pdfDownload').onclick = downloadPdf; $('syncBtn').onclick = showInPdf; $('syncBtn').title = `Show the cursor's line in the PDF (${MOD}+J). Double-click the PDF to jump to the source.`;
 addEventListener('keydown', (e) => {
   const mod = e.ctrlKey || e.metaKey;
   if (mod && (e.key === 'Enter' || (e.key.toLowerCase() === 's' && !e.shiftKey))) { e.preventDefault(); runCompile(); }
   else if (mod && e.shiftKey && e.key.toLowerCase() === 'p') { e.preventDefault(); palette(); }
   else if (mod && e.key.toLowerCase() === 'j') { e.preventDefault(); showInPdf(); }
+  else if (mod && e.shiftKey && e.key.toLowerCase() === 'h') { e.preventDefault(); setPdfMode(pdfMode === 'side' ? 'hidden' : 'side'); }
 }, true);
 const tree = $('side');
 tree.addEventListener('dragover', (e) => { e.preventDefault(); tree.classList.add('drop'); });
@@ -422,6 +466,8 @@ document.documentElement.style.setProperty('--pdf-w', prefs.get('pdfW', Math.rou
 splitter($('split1'), { varName: '--side-w', min: 140, max: () => innerWidth * 0.4, onEnd: v => prefs.set('sideW', v) });
 splitter($('split2'), { varName: '--pdf-w', min: 220, max: () => innerWidth * 0.7, invert: true, onEnd: v => prefs.set('pdfW', v) });
 applyPrefs();
+if (prefs.get('pdfMode', 'side') === 'hidden') setPdfMode('hidden', false);
+pdfCh.postMessage({ type: 'ping' });
 onEngineLog((m) => { if (/Downloading|Fetching .* from TexLive|loading bundle/i.test(m) && compiling) setStatus(/cm-super/.test(m) ? 'Downloading fonts (one time)…' : 'Fetching a LaTeX package…', 'busy'); });
 
 // ---------------------------------------------------------------- start

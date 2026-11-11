@@ -8,5 +8,6 @@
  "outline.js",
  "snippets.js",
  "spell-check.js",
+ "visual-mode.js",
  "word-count.js"
 ]

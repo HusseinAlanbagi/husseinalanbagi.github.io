@@ -43,7 +43,7 @@ Everything registered through `ctx` is removed automatically when the module is 
 |---|---|
 | `ctx.editor` | `getText()`, `getSelection()`, `getCursor()`, `insert(text)`, `replaceRange(from, to, text)`, `insertSnippet(template)`, `gotoLine(n)`, `addKeymap([...])`, `addCompletionSource(fn)`, `addExtension(ext)`; `ctx.cm` holds the CodeMirror classes |
 | `ctx.project` | `files()`, `read(path)`, `write(path, content)`, `remove(path)`, `rename(a, b)`, `open(path)`, `exists(path)`, `isText(path)`, `mainFile`, `activeFile` |
-| `ctx.ui` | `addToolbarButton`, `addPanel` (side bar), `addStatusItem`, `addCommand` (command list), `modal`, `menu`, `toast`, `confirm`, `prompt`, `pickFiles`, `download` |
+| `ctx.ui` | `addToolbarButton`, `addEditorButton(element)` (bar above the editor), `addPanel` (side bar), `addStatusItem`, `addCommand` (command list), `modal`, `menu`, `toast`, `confirm`, `prompt`, `pickFiles`, `download` |
 | `ctx.problems` | `set([{ file, line, severity, message }])`, `clear()`: entries for the Problems list |
 | `ctx.compile` | `run()`, `last()` |
 | `ctx.pdf`, `ctx.goto(file, line)` | the preview, and jumping to a source line |
