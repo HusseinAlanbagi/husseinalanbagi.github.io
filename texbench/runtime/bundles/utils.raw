@@ -1,0 +1,3115 @@
+%%
+%% This is file `uniquecounter.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% uniquecounter.dtx  (with options: `package')
+%% 
+%% This is a generated file.
+%% 
+%% Project: uniquecounter
+%% Version: 2019/12/15 v1.4
+%% 
+%% Copyright (C)
+%%    2009, 2011 Heiko Oberdiek
+%%    2016-2019 Oberdiek Package Support Group
+%% 
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either
+%% version 1.3c of this license or (at your option) any later
+%% version. This version of this license is in
+%%    https://www.latex-project.org/lppl/lppl-1-3c.txt
+%% and the latest version of this license is in
+%%    https://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of
+%% LaTeX version 2005/12/01 or later.
+%% 
+%% This work has the LPPL maintenance status "maintained".
+%% 
+%% The Current Maintainers of this work are
+%% Heiko Oberdiek and the Oberdiek Package Support Group
+%% https://github.com/ho-tex/uniquecounter/issues
+%% 
+%% 
+%% The Base Interpreter refers to any `TeX-Format',
+%% because some files are installed in TDS:tex/generic//.
+%% 
+%% This work consists of the main source file uniquecounter.dtx
+%% and the derived files
+%%    uniquecounter.sty, uniquecounter.pdf, uniquecounter.ins,
+%%    uniquecounter.drv, uniquecounter-example.tex,
+%%    uniquecounter-test1.tex, uniquecounter-test2.tex,
+%%    uniquecounter-test3.tex.
+%% 
+\begingroup\catcode61\catcode48\catcode32=10\relax%
+  \catcode13=5 % ^^M
+  \endlinechar=13 %
+  \catcode35=6 % #
+  \catcode39=12 % '
+  \catcode44=12 % ,
+  \catcode45=12 % -
+  \catcode46=12 % .
+  \catcode58=12 % :
+  \catcode64=11 % @
+  \catcode123=1 % {
+  \catcode125=2 % }
+  \expandafter\let\expandafter\x\csname ver@uniquecounter.sty\endcsname
+  \ifx\x\relax % plain-TeX, first loading
+  \else
+    \def\empty{}%
+    \ifx\x\empty % LaTeX, first loading,
+      % variable is initialized, but \ProvidesPackage not yet seen
+    \else
+      \expandafter\ifx\csname PackageInfo\endcsname\relax
+        \def\x#1#2{%
+          \immediate\write-1{Package #1 Info: #2.}%
+        }%
+      \else
+        \def\x#1#2{\PackageInfo{#1}{#2, stopped}}%
+      \fi
+      \x{uniquecounter}{The package is already loaded}%
+      \aftergroup\endinput
+    \fi
+  \fi
+\endgroup%
+\begingroup\catcode61\catcode48\catcode32=10\relax%
+  \catcode13=5 % ^^M
+  \endlinechar=13 %
+  \catcode35=6 % #
+  \catcode39=12 % '
+  \catcode40=12 % (
+  \catcode41=12 % )
+  \catcode44=12 % ,
+  \catcode45=12 % -
+  \catcode46=12 % .
+  \catcode47=12 % /
+  \catcode58=12 % :
+  \catcode64=11 % @
+  \catcode91=12 % [
+  \catcode93=12 % ]
+  \catcode123=1 % {
+  \catcode125=2 % }
+  \expandafter\ifx\csname ProvidesPackage\endcsname\relax
+    \def\x#1#2#3[#4]{\endgroup
+      \immediate\write-1{Package: #3 #4}%
+      \xdef#1{#4}%
+    }%
+  \else
+    \def\x#1#2[#3]{\endgroup
+      #2[{#3}]%
+      \ifx#1\@undefined
+        \xdef#1{#3}%
+      \fi
+      \ifx#1\relax
+        \xdef#1{#3}%
+      \fi
+    }%
+  \fi
+\expandafter\x\csname ver@uniquecounter.sty\endcsname
+\ProvidesPackage{uniquecounter}%
+  [2019/12/15 v1.4 Provide unlimited unique counter (HO)]%
+\begingroup\catcode61\catcode48\catcode32=10\relax%
+  \catcode13=5 % ^^M
+  \endlinechar=13 %
+  \catcode123=1 % {
+  \catcode125=2 % }
+  \catcode64=11 % @
+  \def\x{\endgroup
+    \expandafter\edef\csname uqc@AtEnd\endcsname{%
+      \endlinechar=\the\endlinechar\relax
+      \catcode13=\the\catcode13\relax
+      \catcode32=\the\catcode32\relax
+      \catcode35=\the\catcode35\relax
+      \catcode61=\the\catcode61\relax
+      \catcode64=\the\catcode64\relax
+      \catcode123=\the\catcode123\relax
+      \catcode125=\the\catcode125\relax
+    }%
+  }%
+\x\catcode61\catcode48\catcode32=10\relax%
+\catcode13=5 % ^^M
+\endlinechar=13 %
+\catcode35=6 % #
+\catcode64=11 % @
+\catcode123=1 % {
+\catcode125=2 % }
+\def\TMP@EnsureCode#1#2{%
+  \edef\uqc@AtEnd{%
+    \uqc@AtEnd
+    \catcode#1=\the\catcode#1\relax
+  }%
+  \catcode#1=#2\relax
+}
+\TMP@EnsureCode{33}{12}% !
+\TMP@EnsureCode{39}{12}% '
+\TMP@EnsureCode{42}{12}% *
+\TMP@EnsureCode{43}{12}% +
+\TMP@EnsureCode{46}{12}% .
+\TMP@EnsureCode{47}{12}% /
+\TMP@EnsureCode{91}{12}% [
+\TMP@EnsureCode{93}{12}% ]
+\TMP@EnsureCode{96}{12}% `
+\edef\uqc@AtEnd{\uqc@AtEnd\noexpand\endinput}
+\begingroup\expandafter\expandafter\expandafter\endgroup
+\expandafter\ifx\csname RequirePackage\endcsname\relax
+  \def\TMP@RequirePackage#1[#2]{%
+    \begingroup\expandafter\expandafter\expandafter\endgroup
+    \expandafter\ifx\csname ver@#1.sty\endcsname\relax
+      \input #1.sty\relax
+    \fi
+  }%
+  \TMP@RequirePackage{bigintcalc}[2007/11/11]%
+  \TMP@RequirePackage{infwarerr}[2007/09/09]%
+\else
+  \RequirePackage{bigintcalc}[2007/11/11]%
+  \RequirePackage{infwarerr}[2007/09/09]%
+\fi
+\begingroup\expandafter\expandafter\expandafter\endgroup
+\expandafter\ifx\csname numexpr\endcsname\relax
+  \def\uqc@IncNum#1{%
+    \begingroup
+      \count@=\csname uqc@cnt@#1\endcsname\relax
+      \advance\count@\@ne
+      \expandafter\xdef\csname uqc@cnt@#1\endcsname{%
+        \number\count@
+      }%
+      \ifnum\count@=2147483647 %
+        \global\expandafter\let\csname uqc@inc@#1\endcsname
+        \uqc@IncBig
+      \fi
+    \endgroup
+  }%
+\else
+  \def\uqc@IncNum#1{%
+    \expandafter\xdef\csname uqc@cnt@#1\endcsname{%
+      \number\numexpr\csname uqc@cnt@#1\endcsname+1%
+    }%
+    \ifnum\csname uqc@cnt@#1\endcsname=2147483647 %
+      \global\expandafter\let\csname uqc@inc@#1\endcsname
+      \uqc@IncBig
+    \fi
+  }%
+\fi
+\def\uqc@IncBig#1{%
+  \expandafter\xdef\csname uqc@cnt@#1\endcsname{%
+    \expandafter\expandafter\expandafter
+    \BigIntCalcInc\csname uqc@cnt@#1\endcsname!%
+  }%
+}
+\begingroup\expandafter\expandafter\expandafter\endgroup
+\expandafter\ifx\csname newcommand\endcsname\relax
+  \def\uqc@Def#1{\def#1##1}%
+\else
+  \def\uqc@Def#1{\newcommand*{#1}[1]}%
+\fi
+\uqc@Def\UniqueCounterNew{%
+  \expandafter\ifx\csname uqc@cnt@#1\endcsname\relax
+    \expandafter\xdef\csname uqc@cnt@#1\endcsname{0}%
+    \global\expandafter\let\csname uqc@inc@#1\endcsname\uqc@IncNum
+    \@PackageInfo{uniquecounter}{New unique counter `#1'}%
+  \else
+    \@PackageError{uniquecounter}{Unique counter `#1' is already defined}\@ehc
+  \fi
+}
+\uqc@Def\UniqueCounterIncrement{%
+  \expandafter\ifx\csname uqc@cnt@#1\endcsname\relax
+    \@PackageError{uniquecounter}{Unique counter `#1' is undefined}\@ehc
+  \else
+    \csname uqc@inc@#1\endcsname{#1}%
+  \fi
+}
+\uqc@Def\UniqueCounterGet{%
+  \csname uqc@cnt@#1\endcsname
+}
+\uqc@Def\UniqueCounterCall{%
+  \expandafter\ifx\csname uqc@cnt@#1\endcsname\relax
+    \@PackageError{uniquecounter}{Unique counter `#1' is undefined}\@ehc
+    \expandafter\uqc@Call\expandafter0%
+  \else
+    \UniqueCounterIncrement{#1}%
+    \expandafter\expandafter\expandafter\uqc@Call
+    \expandafter\expandafter\expandafter{%
+      \csname uqc@cnt@#1\expandafter\endcsname\expandafter
+    }%
+  \fi
+}
+\long\def\uqc@Call#1#2{#2{#1}}%
+\uqc@AtEnd%
+%% \section{Installation}
+\endinput
+%%
+%% End of file `uniquecounter.sty'.
+%%
+%% This is file `auxhook.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% auxhook.dtx  (with options: `package')
+%% 
+%% This is a generated file.
+%% 
+%% Project: auxhook
+%% Version: 2019-12-17 v1.6
+%% 
+%% Copyright (C)
+%%    2006, 2007, 2009, 2011 Heiko Oberdiek
+%%    2016-2019 Oberdiek Package Support Group
+%% 
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either
+%% version 1.3c of this license or (at your option) any later
+%% version. This version of this license is in
+%%    https://www.latex-project.org/lppl/lppl-1-3c.txt
+%% and the latest version of this license is in
+%%    https://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of
+%% LaTeX version 2005/12/01 or later.
+%% 
+%% This work has the LPPL maintenance status "maintained".
+%% 
+%% The Current Maintainers of this work are
+%% Heiko Oberdiek and the Oberdiek Package Support Group
+%% https://github.com/ho-tex/auxhook/issues
+%% 
+%% 
+%% This work consists of the main source file auxhook.dtx
+%% and the derived files
+%%    auxhook.sty, auxhook.pdf, auxhook.ins, auxhook.drv.
+%% 
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{auxhook}%
+  [2019-12-17 v1.6 Hooks for auxiliary files (HO)]%
+\providecommand*{\@beginmainauxhook}{}
+\providecommand*{\@beginpartauxhook}{}
+\ifx\AtBeginDocument\@firstofone
+  \global\let\@beginmainauxhook\relax
+\else
+  \g@addto@macro{\@beginmainauxhook}{%
+    \global\let\@beginmainauxhook\relax
+  }%
+\fi
+\newcommand{\AddLineBeginMainAux}[1]{%
+  \ifx\@beginmainauxhook\relax
+    \if@filesw
+      \PackageInfo{auxhook}{%
+        \@backslashchar AddLineBeginMainAux comes a little late,%
+        \MessageBreak
+        because the main .aux file is already opened%
+      }%
+      \immediate\write\@mainaux{#1}%
+    \fi
+  \else
+    \g@addto@macro\@beginmainauxhook{%
+      \immediate\write\@mainaux{#1}%
+    }%
+  \fi
+}
+\newcommand{\AddLineBeginPartAux}[1]{%
+  \g@addto@macro\@beginpartauxhook{%
+    \immediate\write\@partaux{#1}%
+  }%
+}
+\newcommand{\AddLineBeginAux}[1]{%
+  \AddLineBeginMainAux{#1}%
+  \AddLineBeginPartAux{#1}%
+}
+\begingroup
+  \@ifundefined{beamer@origdocument}{%
+    \def\auxhook@document{\document}%
+  }{%
+    \def\auxhook@document{\beamer@origdocument}%
+  }%
+  \long\def\y#1\immediate\write\@mainaux#2#3\auxhook@nil{%
+    \toks@{%
+      #1\immediate\write\@mainaux{#2}%
+      \@beginmainauxhook
+      #3%
+    }%
+    \expandafter\xdef\auxhook@document{\the\toks@}%
+    \endgroup
+  }%
+  \long\def\x#1\immediate\write\@mainaux#2#3\auxhook@nil{%
+    \toks@{#3}%
+    \edef\x{\the\toks@}%
+    \ifx\x\@empty
+      \PackageWarningNoLine{auxhook}{%
+        Cannot patch \expandafter\string\auxhook@document,%
+        \MessageBreak
+        using \string\AtBeginDocument\space instead%
+      }%
+      \endgroup
+      \AtBeginDocument{%
+        \if@filesw
+          \@beginmainauxhook
+        \fi
+      }%
+    \else
+      \expandafter\expandafter\expandafter\y\auxhook@document
+          \auxhook@nil
+    \fi
+  }%
+\expandafter\expandafter\expandafter\x\auxhook@document
+    \immediate\write\@mainaux{}\auxhook@nil
+\begingroup
+  \long\def\y#1\immediate\write\@partaux#2#3\auxhook@nil#4{%
+    \endgroup
+    \def#4##1 {%
+      #1\immediate\write\@partaux{#2}%
+      \@beginpartauxhook
+      #3%
+    }%
+  }%
+  \long\def\x#1\immediate\write\@partaux#2#3\auxhook@nil#4{%
+    \toks@{#3}%
+    \edef\x{\the\toks@}%
+    \ifx\x\@empty
+      \PackageWarningNoLine{auxhook}{%
+        Cannot patch \string#4,\MessageBreak
+        patch dropped%
+      }%
+      \endgroup
+    \else
+      \expandafter\y#4{##1} \auxhook@nil#4%
+    \fi
+  }%
+\@ifundefined{ReFiCh@org@include}{%
+  \expandafter\x\@include{#1} %
+  \immediate\write\@partaux{}\auxhook@nil\@include
+}{%
+  \expandafter\x\ReFiCh@org@include{#1} %
+  \immediate\write\@partaux{}\auxhook@nil\ReFiCh@org@include
+}%
+\endinput
+%%
+%% End of file `auxhook.sty'.
+\ProvidesFile{etoolbox.def}
+  [2025/10/02 v2.5m etoolbox debug messages (JAW)]
+
+\begingroup
+\makeatletter
+\@makeother\+
+\@makeother\-
+\@makeother\=
+\@makeother\>
+
+\long\gdef\etb@dbg@trce#1{\typeout{%
+  [debug] tracing \string#1\on@line}}%
+\long\gdef\etb@dbg@init#1{\typeout{%
+  [debug] analyzing '\detokenize\expandafter{\string#1}'}}%
+\gdef\etb@dbg@info#1{\typeout{%
+  [debug] ++ \csuse{etb@msg@i@#1}}}%
+\gdef\etb@dbg@succ#1{\typeout{%
+  [debug] == \csuse{etb@msg@s@#1}}}%
+\gdef\etb@dbg@fail#1{\typeout{%
+  [debug] -- \csuse{etb@msg@f@#1}}}%
+
+\gdef\etb@msg@ex{^^J[debug] -> }%
+\gdef\etb@msg@br{^^J[debug]\@spaces}
+
+\gdef\etb@msg@i@def{%
+  control sequence is defined}
+\gdef\etb@msg@i@mac{%
+  control sequence is a macro}
+\gdef\etb@msg@i@prm{%
+  control sequence is a macro with parameters}
+\gdef\etb@msg@i@prl{%
+  control sequence is a macro without parameters}
+\xdef\etb@msg@i@pro{%
+  control sequence is a \string\protected\space macro}
+\gdef\etb@msg@i@tok{%
+  macro can be retokenized cleanly}
+\gdef\etb@msg@i@pat{%
+  search pattern found in replacement text}
+\gdef\etb@msg@i@pos{%
+  patching possible}
+\gdef\etb@msg@s@red{%
+  redefining macro now}
+\gdef\etb@msg@s@ret{%
+  retokenizing macro now}
+\xdef\etb@msg@f@def{%
+  control sequence is undefined or \string\relax}
+\gdef\etb@msg@f@mac{%
+  control sequence is not a macro}
+\xdef\etb@msg@f@tok{%
+  macro cannot be retokenized cleanly\noexpand\etb@msg@ex
+  the macro may have been defined under a category\noexpand\etb@msg@br
+  code regime different from the current one\noexpand\etb@msg@ex
+  the replacement text may contain special control\noexpand\etb@msg@br
+  sequence tokens formed with
+  \string\csname...\string\endcsname;\noexpand\etb@msg@ex
+  the replacement text may contain carriage return,\noexpand\etb@msg@br
+  newline, or similar characters}
+\xdef\etb@msg@f@hsh{%
+  nested patching command and parameters in patch\noexpand\etb@msg@ex
+  the patching command seems to be nested in the\noexpand\etb@msg@br
+  argument to some other command\noexpand\etb@msg@ex
+  the patch text seems to contain \string# characters\noexpand\etb@msg@ex
+  either avoid nesting or use \string# characters with\noexpand\etb@msg@br
+  category code 12 in the patch text\noexpand\etb@msg@ex
+  simply doubling the \string# characters will not work}
+\gdef\etb@msg@f@pat{%
+  search pattern not found in replacement text}
+
+\endgroup
+\endinput
+% Copyright (c) 2007-2011 Philipp Lehman.
+%           (c) 2015-2020 Joseph Wright
+%
+% Permission is granted to copy, distribute and/or modify this
+% software under the terms of the LaTeX Project Public License
+% (LPPL), version 1.3c or any later version.
+%
+% This software is provided 'as is', without warranty of any kind,
+% either expressed or implied, including, but not limited to, the
+% implied warranties of merchantability and fitness for a
+% particular purpose.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{etoolbox}
+  [2025/10/02 v2.5m e-TeX tools for LaTeX (JAW)]
+
+\begingroup
+\@ifundefined{eTeXversion}
+  {\PackageError{etoolbox}
+     {Not running under e-TeX}
+     {This package requires e-TeX. Try compiling the document
+      with\MessageBreak 'elatex' instead of 'latex'. When using
+      pdfTeX, try 'pdfelatex'\MessageBreak instead of 'pdflatex'.
+      This is a fatal error. I'm aborting now.}%
+   \aftergroup\endinput}
+  {}
+\endgroup
+
+\ifdefined\extrafloats
+  \expandafter\@gobble
+\else
+  \expandafter\@firstofone
+\fi
+  {\RequirePackage{etex}}
+
+\def\etb@catcodes{\do\&\do\|\do\:\do\-\do\=\do\<\do\>}
+\def\do#1{\catcode\number`#1=\the\catcode`#1\relax}
+\edef\etb@catcodes{\etb@catcodes}
+\let\do\noexpand
+\AtEndOfPackage{\etb@catcodes\undef\etb@catcodes}
+
+\catcode`\&=3
+\catcode`\|=3
+\@makeother\:
+\@makeother\-
+\@makeother\=
+\@makeother\<
+\@makeother\>
+
+\protected\def\etb@error{\PackageError{etoolbox}}
+\protected\def\etb@warning{\PackageWarning{etoolbox}}
+\protected\def\etb@info{\PackageInfo{etoolbox}}
+\newcount\etb@tempcnta
+
+% {<cstoken>}[<arguments>][<optarg default>]{<definition>}
+
+\newcommand*{\newrobustcmd}{}
+\protected\def\newrobustcmd{\@star@or@long\etb@new@command}
+
+\def\etb@new@command#1{\@testopt{\etb@newcommand#1}0}
+
+\def\etb@newcommand#1[#2]{%
+  \@ifnextchar[%]
+    {\etb@xargdef#1[#2]}
+    {\let\pr@tectedrel@x\protected
+     \ifx\l@ngrel@x\relax
+       \let\l@ngrel@x\protected
+     \else
+       \protected\def\l@ngrel@x{\protected\long}%
+     \fi
+     \@argdef#1[#2]}}
+
+\long\def\etb@xargdef#1[#2][#3]#4{%
+  \@ifdefinable#1{%
+    \expandafter\protected
+    \expandafter\def
+    \expandafter#1%
+    \expandafter{%
+      \expandafter\@testopt
+      \csname\string#1\endcsname{#3}}%
+    \expandafter\@yargdef\csname\string#1\endcsname\tw@{#2}{#4}}}
+
+% {<cstoken>}[<arguments>][<optarg default>]{<definition>}
+
+\newrobustcmd*{\renewrobustcmd}{\@star@or@long\etb@renew@command}
+
+\def\etb@renew@command#1{%
+  \ifundef{#1}
+     {\etb@error{\string#1 undefined}\@ehc}
+     {}%
+  \let\@ifdefinable\@rc@ifdefinable
+  \etb@new@command#1}
+
+% {<cstoken>}[<arguments>][<optarg default>]{<definition>}
+
+\newrobustcmd*{\providerobustcmd}{\@star@or@long\etb@provide@command}
+
+\def\etb@provide@command#1{%
+  \ifundef{#1}
+    {\def\reserved@a{\etb@new@command#1}}
+    {\def\reserved@a{\etb@renew@command\reserved@a}}%
+  \reserved@a}
+
+% {<csname>}
+
+\newrobustcmd*{\csshow}[1]{%
+  \begingroup\expandafter\endgroup
+  \expandafter\show\csname#1\endcsname}
+
+% {<csname>}
+
+\newcommand*{\csmeaning}[1]{%
+  \ifcsname #1\endcsname
+    \expandafter\meaning\csname #1\endcsname
+  \else
+    \detokenize{undefined}%
+  \fi}
+
+% {<cstoken>}{<true>}{<false>}
+
+\newcommand{\ifdef}[1]{%
+  \ifdefined#1%
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi}
+
+% {<cstoken>}{<true>}{<false>}
+
+\newcommand{\ifundef}[1]{%
+  \ifdefined#1%
+    \ifx#1\relax
+      \expandafter\expandafter
+      \expandafter\@firstoftwo
+    \else
+      \expandafter\expandafter
+      \expandafter\@secondoftwo
+    \fi
+  \else
+    \expandafter\@firstoftwo
+  \fi}
+
+% {<csname>}{<true>}{<false>}
+
+\newcommand*{\ifcsdef}[1]{%
+  \ifcsname#1\endcsname
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi}
+
+% {<csname>}{<true>}{<false>}
+
+\newcommand*{\ifcsundef}[1]{%
+  \ifcsname#1\endcsname
+    \expandafter\ifx\csname#1\endcsname\relax
+      \expandafter\expandafter
+      \expandafter\@firstoftwo
+    \else
+      \expandafter\expandafter
+      \expandafter\@secondoftwo
+    \fi
+  \else
+    \expandafter\@firstoftwo
+  \fi}
+
+% {<cstoken>}{<true}{<false>}
+
+\newcommand{\ifdefmacro}{}
+\long\edef\ifdefmacro#1{%
+  \noexpand\expandafter\noexpand\etb@ifdefmacro
+  \noexpand\meaning#1\detokenize{macro}:&}
+\edef\etb@ifdefmacro{%
+  \def\noexpand\etb@ifdefmacro##1\detokenize{macro}:##2&}
+\etb@ifdefmacro{\notblank{#2}}
+
+% {<csname>}{<true>}{<false>}
+
+\newcommand*{\ifcsmacro}[1]{%
+  \ifcsdef{#1}
+    {\expandafter\ifdefmacro\csname#1\endcsname}
+    {\@secondoftwo}}
+
+% {<cstoken>}{<true}{<false>}
+
+\newcommand{\ifdefprefix}[1]{%
+  \ifdefmacro{#1}
+    {\etb@ifdefprefix{#1}}
+    {\@secondoftwo}}
+\long\edef\etb@ifdefprefix#1{%
+  \noexpand\expandafter\noexpand\etb@ifdefprefix@i
+  \noexpand\meaning#1\detokenize{macro}:&}
+\edef\etb@ifdefprefix@i{%
+  \def\noexpand\etb@ifdefprefix@i##1\detokenize{macro}:##2&}
+\etb@ifdefprefix@i{\notblank{#1}}
+
+% {<csname>}{<true>}{<false>}
+
+\newcommand*{\ifcsprefix}[1]{%
+  \ifcsdef{#1}
+    {\expandafter\ifdefprefix\csname#1\endcsname}
+    {\@secondoftwo}}
+
+% {<cstoken>}{<true}{<false>}
+
+\newcommand{\ifdefparam}{}
+\long\edef\ifdefparam#1{%
+  \noexpand\expandafter\noexpand\etb@ifdefparam
+  \noexpand\meaning#1\detokenize{macro}:->&}
+\edef\etb@ifdefparam{%
+  \def\noexpand\etb@ifdefparam##1\detokenize{macro}:##2->##3&}
+\etb@ifdefparam{\notblank{#2}}
+
+% {<csname>}{<true>}{<false>}
+
+\newcommand*{\ifcsparam}[1]{%
+  \ifcsdef{#1}
+    {\expandafter\ifdefparam\csname#1\endcsname}
+    {\@secondoftwo}}
+
+% {<cstoken>}{<true}{<false>}
+
+\newcommand{\ifdefprotected}{}
+\long\edef\ifdefprotected#1{%
+  \noexpand\expandafter\noexpand\etb@ifdefprotected
+  \noexpand\meaning#1\string\protected&}
+\edef\etb@ifdefprotected{%
+  \def\noexpand\etb@ifdefprotected##1\string\protected##2&}
+\etb@ifdefprotected{\notblank{#2}}
+
+% {<csname>}{<true>}{<false>}
+
+\newcommand*{\ifcsprotected}[1]{%
+  \ifcsdef{#1}
+    {\expandafter\ifdefprotected\csname#1\endcsname}
+    {\@secondoftwo}}
+
+% {<cstoken>}{<true}{<false>}
+
+\newrobustcmd{\ifdefltxprotect}[1]{%
+  \begingroup
+  \edef\etb@resrvda{\string#1}%
+  \def\etb@resrvdb{#1}%
+  \edef\etb@resrvdb{\expandafter\strip@prefix\meaning\etb@resrvdb}%
+  \edef\etb@resrvda{%
+    \ifx\etb@resrvda\etb@resrvdb
+      \noexpand\x@protect
+      \noexpand#1%
+    \fi
+    \noexpand\protect\expandafter\noexpand
+    \csname\expandafter\@gobble\string#1 \endcsname}%
+  \expandafter\endgroup\ifx#1\etb@resrvda
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi}
+
+% {<csname>}{<true>}{<false>}
+
+\newrobustcmd*{\ifcsltxprotect}[1]{%
+  \ifcsdef{#1}
+    {\expandafter\ifdefltxprotect\csname#1\endcsname}
+    {\@secondoftwo}}
+
+% {<cstoken>}{<true>}{<false>}
+
+\newcommand{\ifdefempty}[1]{%
+  \ifundef{#1}
+    {\@secondoftwo}
+    {\ifdefmacro{#1}
+       {\ifdefparam{#1}
+          {\@secondoftwo}
+          {\etb@ifdefempty{#1}}}
+       {\@secondoftwo}}}
+
+\def\etb@ifdefempty#1{%
+  \expandafter\expandafter
+  \expandafter\ifstrempty
+  \expandafter\expandafter
+  \expandafter{%
+  \expandafter\strip@prefix\meaning#1}}
+
+% {<csname>}{<true>}{<false>}
+
+\newcommand*{\ifcsempty}[1]{%
+  \ifcsundef{#1}
+    {\@secondoftwo}
+    {\expandafter\ifdefparam\csname#1\endcsname
+       {\@secondoftwo}
+       {\expandafter\etb@ifdefempty\csname#1\endcsname}}}
+
+% {<cstoken>}{<true>}{<false>}
+
+\newcommand{\ifdefvoid}[1]{%
+  \ifundef{#1}
+    {\@firstoftwo}
+    {\ifdefmacro{#1}
+       {\ifdefparam{#1}
+          {\@secondoftwo}
+          {\etb@ifdefempty{#1}}}
+       {\@secondoftwo}}}
+
+% {<csname>}{<true>}{<false>}
+
+\newcommand*{\ifcsvoid}[1]{%
+  \ifcsundef{#1}
+    {\@firstoftwo}
+    {\expandafter\ifdefparam\csname#1\endcsname
+       {\@secondoftwo}
+       {\expandafter\etb@ifdefempty\csname#1\endcsname}}}
+
+% {<cstoken1>}{<cstoken2>}{<true>}{<false>}
+
+\newcommand{\ifdefequal}[2]{%
+  \ifundef{#1}
+    {\@secondoftwo}
+    {\ifundef{#2}
+       {\@secondoftwo}
+       {\ifx#1#2%
+          \expandafter\@firstoftwo
+        \else
+          \expandafter\@secondoftwo
+        \fi}}}
+
+% {<csname1>}{<csname2>}{<true>}{<false>}
+
+\newcommand*{\ifcsequal}[2]{%
+  \ifcsundef{#1}
+    {\@secondoftwo}
+    {\ifcsundef{#2}
+       {\@secondoftwo}
+       {\expandafter\ifx
+        \csname#1\expandafter\endcsname
+        \csname#2\endcsname
+          \expandafter\@firstoftwo
+        \else
+          \expandafter\@secondoftwo
+        \fi}}}
+
+% {<cstoken1>}{<cstoken2>}{<true>}{<false>}
+
+\newrobustcmd{\ifdefstrequal}[2]{%
+  \ifdefmacro{#1}
+    {\ifdefmacro{#2}
+       {\begingroup
+        \edef\etb@tempa{\expandafter\strip@prefix\meaning#1}%
+        \edef\etb@tempb{\expandafter\strip@prefix\meaning#2}%
+        \ifx\etb@tempa\etb@tempb
+          \aftergroup\@firstoftwo
+        \else
+          \aftergroup\@secondoftwo
+        \fi
+        \endgroup}
+       {\@secondoftwo}}
+    {\@secondoftwo}}
+
+% {<csname1>}{<csname2>}{<true>}{<false>}
+
+\newcommand*{\ifcsstrequal}[2]{%
+  \ifcsundef{#1}
+    {\@secondoftwo}
+    {\ifcsundef{#2}
+       {\@secondoftwo}
+       {\expandafter\ifdefstrequal
+        \csname#1\expandafter\endcsname
+        \csname#2\endcsname}}}
+
+% {<cstoken>}{<string>}{<true>}{<false>}
+
+\newrobustcmd{\ifdefstring}[2]{%
+  \ifdefmacro{#1}
+    {\begingroup
+     \edef\etb@tempa{\expandafter\strip@prefix\meaning#1}%
+     \edef\etb@tempb{\detokenize{#2}}%
+     \ifx\etb@tempa\etb@tempb
+       \aftergroup\@firstoftwo
+     \else
+       \aftergroup\@secondoftwo
+     \fi
+     \endgroup}
+    {\@secondoftwo}}
+
+% {<csname>}{<string>}{<true>}{<false>}
+
+\newrobustcmd{\ifcsstring}[2]{%
+  \ifcsundef{#1}
+    {\@secondoftwo}
+    {\expandafter\ifdefstring\csname#1\endcsname{#2}}}
+
+% {<cstoken>}{<true}{<false>}
+
+\newcommand{\ifdefcounter}[1]{\etb@ifcounter#1&}
+\long\def\etb@ifcounter#1#2&{%
+  \ifx\count#1%
+    \expandafter\@secondoftwo
+  \else
+    \expandafter\etb@ifcounter@i\meaning#1:%
+  \fi}
+\edef\etb@ifcounter@i#1:#2\fi{\noexpand\fi
+  \noexpand\etb@ifcounter@ii#1\string\count&}
+\edef\etb@ifcounter@ii{%
+  \def\noexpand\etb@ifcounter@ii##1\string\count##2&}
+\etb@ifcounter@ii{\ifblank{#1}}
+
+% {<csname>}{<true>}{<false>}
+
+\newcommand*{\ifcscounter}[1]{%
+  \ifcsdef{#1}
+    {\expandafter\ifdefcounter\csname#1\endcsname}
+    {\@secondoftwo}}
+
+% {<name>}{<true>}{<false>}
+
+\newcommand*{\ifltxcounter}[1]{%
+  \ifcsdef{c@#1}
+    {\expandafter\ifdefcounter\csname c@#1\endcsname}
+    {\@secondoftwo}}
+
+% {<cstoken>}{<true}{<false>}
+
+\newcommand{\ifdeflength}[1]{\etb@iflength#1&}
+\long\def\etb@iflength#1#2&{%
+  \ifx\skip#1%
+    \expandafter\@secondoftwo
+  \else
+    \expandafter\etb@iflength@i\meaning#1:%
+  \fi}
+\edef\etb@iflength@i#1:#2\fi{\noexpand\fi
+  \noexpand\etb@iflength@ii#1\string\skip&}
+\edef\etb@iflength@ii{%
+  \def\noexpand\etb@iflength@ii##1\string\skip##2&}
+\etb@iflength@ii{\ifblank{#1}}
+
+% {<csname>}{<true>}{<false>}
+
+\newcommand*{\ifcslength}[1]{%
+  \ifcsdef{#1}
+    {\expandafter\ifdeflength\csname#1\endcsname}
+    {\@secondoftwo}}
+
+% {<cstoken>}{<true}{<false>}
+
+\newcommand{\ifdefdimen}[1]{\etb@ifdimen#1&}
+\long\def\etb@ifdimen#1#2&{%
+  \ifx\dimen#1%
+    \expandafter\@secondoftwo
+  \else
+    \expandafter\etb@ifdimen@i\meaning#1:%
+  \fi}
+\edef\etb@ifdimen@i#1:#2\fi{\noexpand\fi
+  \noexpand\etb@ifdimen@ii#1\string\dimen&}
+\edef\etb@ifdimen@ii{%
+  \def\noexpand\etb@ifdimen@ii##1\string\dimen##2&}
+\etb@ifdimen@ii{\ifblank{#1}}
+
+% {<csname>}{<true>}{<false>}
+
+\newcommand*{\ifcsdimen}[1]{%
+  \ifcsdef{#1}
+    {\expandafter\ifdefdimen\csname#1\endcsname}
+    {\@secondoftwo}}
+
+% {<string1>}{<string2>}{<true>}{<false>}
+
+\newrobustcmd{\ifstrequal}[2]{%
+  \begingroup
+  \edef\etb@tempa{\detokenize{#1}}%
+  \edef\etb@tempb{\detokenize{#2}}%
+  \ifx\etb@tempa\etb@tempb
+    \aftergroup\@firstoftwo
+  \else
+    \aftergroup\@secondoftwo
+  \fi
+  \endgroup}
+
+% {<string>}{<true>}{<false>}
+
+\newcommand{\ifstrempty}[1]{%
+  \expandafter\ifx\expandafter&\detokenize{#1}&%
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi}
+
+% {<string>}{<true>}{<false>}
+
+\newcommand{\ifblank}[1]{% from expl3
+  \expandafter\ifx\expandafter\relax\detokenize\expandafter{\@gobble#1?}\relax
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi}
+
+\newcommand{\notblank}[1]{%
+  \expandafter\ifx\expandafter\relax\detokenize\expandafter{\@gobble#1?}\relax
+    \expandafter\@secondoftwo
+  \else
+    \expandafter\@firstoftwo
+  \fi}
+
+% {<numexpr>}{<comp>}{<numexpr>}{<true>}{<false>}
+
+\newcommand*{\ifnumcomp}[3]{%
+  \ifnum\numexpr#1\relax#2\numexpr#3\relax
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi}
+
+% {<numexpr>}{<numexpr>}{<true>}{<false>}
+
+\newcommand*{\ifnumequal}[1]{%
+  \ifnumcomp{#1}=}
+
+\newcommand*{\ifnumgreater}[1]{%
+  \ifnumcomp{#1}>}
+
+\newcommand*{\ifnumless}[1]{%
+  \ifnumcomp{#1}<}
+
+% {<numexpr>}{<true>}{<false>}
+
+\newcommand*{\ifnumodd}[1]{%
+  \ifodd\numexpr#1\relax
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi}
+
+% {<dimexpr>}{<comp>}{<dimexpr>}{<true>}{<false>}
+
+\newcommand*{\ifdimcomp}[3]{%
+  \ifdim\dimexpr#1\relax#2\dimexpr#3\relax
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi}
+
+% {<dimexpr>}{<dimexpr>}{<true>}{<false>}
+
+\newcommand*{\ifdimequal}[1]{%
+  \ifdimcomp{#1}=}
+
+\newcommand*{\ifdimgreater}[1]{%
+  \ifdimcomp{#1}>}
+
+\newcommand*{\ifdimless}[1]{%
+  \ifdimcomp{#1}<}
+
+% {<expr>}{<true>}{<false>}
+
+\newcommand{\ifboolexpe}[1]{%
+  \etb@be@beg\etb@be@bgroup#1(&\etb@be@end}
+
+\let\etb@be@true\@empty
+\def\etb@be@false{-\@ne}
+
+\def\etb@be@beg{%
+  \ifnum\numexpr\z@\ifnum\numexpr\z@}
+
+\def\etb@be@end{%
+  <\z@
+    \expandafter\etb@be@false
+  \fi
+  <\z@
+    \expandafter\@secondoftwo
+  \else
+    \expandafter\@firstoftwo
+  \fi}
+
+\long\def\etb@be@bgroup#1(#2&{%
+  \etb@be@egroup#1)&%
+  \ifblank{#2}
+    {}
+    {\etb@be@beg
+     \etb@be@bgroup#2&}}
+
+\long\def\etb@be@egroup#1)#2&{%
+  \etb@be@and#1and&%
+  \ifblank{#2}
+    {}
+    {\etb@be@end\etb@be@true\etb@be@false
+     \etb@be@egroup#2&}}
+
+\long\def\etb@be@and#1and#2&{%
+  \etb@be@or#1or&%
+  \ifblank{#2}
+    {}
+    {<\z@
+       \expandafter\@firstofone
+     \else
+       \expandafter\@gobble
+     \fi
+     {=\z@\fi\ifnum\numexpr\m@ne}%
+     \ifnum\numexpr\z@
+     \etb@be@and#2&}}
+
+\long\def\etb@be@or#1or#2&{%
+  \etb@be@not#1not&%
+  \ifblank{#2}
+    {}
+    {<\z@
+       \expandafter\@secondoftwo
+     \else
+       \expandafter\@firstoftwo
+     \fi
+     {=\z@\fi\ifnum\numexpr\z@
+      \ifnum\numexpr\@ne}
+     {=\z@\fi\ifnum\numexpr\z@
+      \ifnum\numexpr\z@}%
+     \etb@be@or#2&}}
+
+\long\def\etb@be@not#1not#2&{%
+  \etb@be@togl#1togl&%
+  \ifblank{#2}
+    {}
+    {>\z@
+       \expandafter\@firstoftwo
+     \else
+       \expandafter\@secondoftwo
+     \fi
+     {\unless\ifnum\numexpr\m@ne}
+     {\unless\ifnum\numexpr\z@}%
+     \etb@be@not#2&}}
+
+\long\def\etb@be@togl#1togl#2&{%
+  \etb@be@bool#1bool&%
+  \ifblank{#2}
+    {}
+    {\etb@be@togl@i#2&}}
+
+\long\def\etb@be@togl@i#1#2&{%
+  \ifcsdef{etb@tgl@#1}
+    {\csname etb@tgl@#1\endcsname\etb@be@true\etb@be@false}
+    {\etb@be@err{Toggle '#1' undefined}{}}%
+  \etb@be@togl#2&}
+
+\long\def\etb@be@bool#1bool#2&{%
+  \etb@be@test#1test&%
+  \ifblank{#2}
+    {}
+    {\etb@be@bool@i#2&}}
+
+\long\def\etb@be@bool@i#1#2&{%
+  \ifcsundef{if#1}
+    {\etb@be@err{Boolean '#1' undefined}{}}
+    {\csname if#1\endcsname
+     \else
+       \etb@be@false
+     \fi}%
+  \etb@be@bool#2&}
+
+\long\def\etb@be@test#1test#2&{%
+  \ifblank{#1}
+    {}
+    {\etb@be@err{The invalid part is: '\detokenize{#1}'}{}}%
+  \ifblank{#2}
+    {}
+    {\etb@be@test@i#2&}}
+
+\long\def\etb@be@test@i#1#2&{%
+  #1\etb@be@true\etb@be@false
+  \etb@be@test#2&}
+
+\long\def\etb@be@err#1#2{%
+  \expandafter\ifnum\the\numexpr
+    \expandafter\ifnum\the\currentiftype=-3
+      \expandafter\thr@@
+    \else
+      \expandafter\currentiftype
+    \fi
+  =\thr@@
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+  {=\z@\fi
+   \etb@be@err{#1}{#2\ifnum\numexpr\m@ne}}
+  {\etb@err@expr{#1}#2}}
+
+% {<expr>}{<true>}{<false>}
+
+\newrobustcmd{\ifboolexpr}[1]{\etb@boolexpr{#1}}
+
+\long\def\etb@boolexpr#1{%
+  \begingroup
+  \let\etb@br@neg\@firstoftwo
+  \etb@tempcnta\z@
+  \etb@br@beg
+  \etb@br@bgroup#1(&%
+  \etb@br@end
+  \etb@br@eval}
+
+\def\etb@br@beg{%
+  \begingroup
+  \let\etb@br@neg\@firstoftwo
+  \etb@tempcnta\z@}
+
+\def\etb@br@end{%
+  \etb@br@eval\etb@br@true\etb@br@false}
+
+\def\etb@br@eval{%
+  \ifnum\etb@tempcnta<\z@
+    \aftergroup\@secondoftwo
+  \else
+    \aftergroup\@firstoftwo
+  \fi
+  \endgroup}
+
+\def\etb@br@true{%
+  \advance\etb@tempcnta\etb@br@neg\z@\m@ne
+  \let\etb@br@neg\@firstoftwo}
+
+\def\etb@br@false{%
+  \advance\etb@tempcnta\etb@br@neg\m@ne\z@
+  \let\etb@br@neg\@firstoftwo}
+
+\long\def\etb@br@bgroup#1(#2&{%
+  \etb@br@egroup#1)&%
+  \ifblank{#2}
+    {}
+    {\etb@br@beg
+     \etb@br@bgroup#2&}}
+
+\long\def\etb@br@egroup#1)#2&{%
+  \etb@br@and#1and&%
+  \ifblank{#2}
+    {}
+    {\etb@br@end
+     \etb@br@egroup#2&}}
+
+\long\def\etb@br@and#1and#2&{%
+  \etb@br@or#1or&%
+  \ifblank{#2}
+    {}
+    {\ifnum\etb@tempcnta<\z@
+       \etb@tempcnta\m@ne
+     \else
+       \etb@tempcnta\z@
+     \fi
+     \etb@br@and#2&}}
+
+\long\def\etb@br@or#1or#2&{%
+  \etb@br@not#1not&%
+  \ifblank{#2}
+    {}
+    {\ifnum\etb@tempcnta<\z@
+       \etb@tempcnta\z@
+     \else
+       \etb@tempcnta\@ne
+     \fi
+     \etb@br@or#2&}}
+
+\long\def\etb@br@not#1not#2&{%
+  \etb@br@togl#1togl&%
+  \ifblank{#2}
+    {}
+    {\let\etb@br@neg\@secondoftwo
+     \etb@br@not#2&}}
+
+\long\def\etb@br@togl#1togl#2&{%
+  \etb@br@bool#1bool&%
+  \ifblank{#2}
+    {}
+    {\etb@br@togl@i#2&}}
+
+\long\def\etb@br@togl@i#1#2&{%
+  \ifcsdef{etb@tgl@#1}
+    {\csname etb@tgl@#1\endcsname\etb@br@true\etb@br@false}
+    {\etb@err@expr{Toggle '#1' undefined}\etb@br@false}%
+  \etb@br@togl#2&}
+
+\long\def\etb@br@bool#1bool#2&{%
+  \etb@br@test#1test&%
+  \ifblank{#2}
+    {}
+    {\etb@br@bool@i#2&}}
+
+\long\def\etb@br@bool@i#1#2&{%
+  \ifcsundef{if#1}
+    {\etb@err@expr{Boolean '#1' undefined}\etb@br@false}
+    {\csname if#1\endcsname
+       \etb@br@true
+     \else
+       \etb@br@false
+     \fi}%
+  \etb@br@bool#2&}
+
+\long\def\etb@br@test#1test#2&{%
+  \ifblank{#1}
+    {}
+    {\etb@err@expr{The invalid part is: '\detokenize{#1}'}}%
+  \ifblank{#2}
+    {}
+    {\etb@br@test@i#2&}}
+
+\long\def\etb@br@test@i#1#2&{%
+  \ignorespaces#1\etb@br@true\etb@br@false
+  \etb@br@test#2&}
+
+\long\def\etb@err@expr#1{%
+  \etb@error
+    {Invalid boolean expression}
+    {#1.}}
+
+% {<expr>}{<code>}
+
+\newrobustcmd{\whileboolexpr}[2]{%
+  \etb@boolexpr{#1}{#2\whileboolexpr{#1}{#2}}{}}
+
+% {<expr>}{<code>}
+
+\newrobustcmd{\unlessboolexpr}[2]{%
+  \etb@boolexpr{#1}{}{#2\unlessboolexpr{#1}{#2}}}
+
+% {<cstoken>}
+
+\newcommand{\expandonce}[1]{%
+  \unexpanded\expandafter{#1}}
+
+% {<csname>}
+
+\newcommand*{\csexpandonce}[1]{%
+  \expandafter\expandonce\csname#1\endcsname}
+
+% {<code>}
+
+\newcommand*{\protecting}{}
+\def\protecting#{%
+  \ifx\protect\@typeset@protect
+    \etb@protecting\@firstofone
+  \fi
+  \ifx\protect\@unexpandable@protect
+    \etb@protecting\etb@unexpandable
+  \fi
+  \ifx\protect\noexpand
+    \etb@protecting\unexpanded
+  \fi
+  \ifx\protect\string
+    \etb@protecting\detokenize
+  \fi
+  \relax\@firstofone}
+
+\def\etb@protecting#1#2\relax\@firstofone{\fi#1}
+\long\def\etb@unexpandable#1{\unexpanded{\protecting{#1}}}
+
+% {<csname>}
+
+\newrobustcmd*{\csdef}[1]{\expandafter\def\csname#1\endcsname}
+\newrobustcmd*{\csedef}[1]{\expandafter\edef\csname#1\endcsname}
+\newrobustcmd*{\csgdef}[1]{\expandafter\gdef\csname#1\endcsname}
+\newrobustcmd*{\csxdef}[1]{\expandafter\xdef\csname#1\endcsname}
+\newrobustcmd*{\protected@csedef}{\etb@protected\csedef}
+\newrobustcmd*{\protected@csxdef}{\etb@protected\csxdef}
+
+\def\etb@protected{%
+  \let\@@protect\protect
+  \let\protect\@unexpandable@protect
+  \afterassignment\restore@protect}
+
+% {<csname>}{<cstoken>}
+
+\newrobustcmd{\cslet}[2]{%
+  \expandafter\let\csname#1\endcsname#2}
+
+% {<cstoken>}{<csname>}
+
+\newrobustcmd{\letcs}[2]{%
+  \ifcsdef{#2}
+    {\expandafter\let\expandafter#1\csname#2\endcsname}
+    {\undef#1}}
+
+% {<csname>}{<csname>}
+
+\newrobustcmd*{\csletcs}[2]{%
+  \ifcsdef{#2}
+    {\expandafter\let
+     \csname#1\expandafter\endcsname
+     \csname#2\endcsname}
+    {\csundef{#1}}}
+
+\ifdef\NewCommandCopy
+  {%
+    \long\def\etb@carsquare#1#2#3\@nil{#1#2}
+    %
+    % {<cstoken>}{<true>}{<false>}
+    %
+    \newrobustcmd*{\etb@if@robustcmd}[1]{%
+      \begingroup
+        \escapechar=`\\
+        \edef\etb@tempa{%
+      \endgroup
+      \def\noexpand\etb@tempa{\noexpand\@testopt
+        \expandafter\noexpand\csname\string#1\endcsname}%
+      \def\noexpand\etb@tempb{\unexpanded\expandafter\expandafter\expandafter
+        {\expandafter\etb@carsquare#1{}{}\@nil}}%
+      }\etb@tempa
+      \ifx\etb@tempa\etb@tempb
+        \expandafter\@firstoftwo
+      \else
+        \expandafter\@secondoftwo
+      \fi}
+    %
+    % {<cstoken>}{<cstoken>}
+    %
+    \newrobustcmd*{\etb@copy@robustcmd}[2]{%
+      \begingroup
+        \escapechar=`\\
+        \edef\etb@tempa{%
+      \endgroup
+      \protected\def\noexpand#1{\noexpand\@testopt
+        \expandafter\noexpand\csname\string#1\endcsname
+        \unexpanded\expandafter\expandafter\expandafter
+          {\expandafter\@gobbletwo#2}}%
+      \let\expandafter\noexpand\csname\string#1\endcsname
+          \expandafter\noexpand\csname\string#2\endcsname
+      }\etb@tempa}
+    \g@addto@macro\@declarecommandcopylisthook
+      {{\etb@if@robustcmd\etb@copy@robustcmd}}
+  }{}
+% {<csname>}
+
+\newcommand*{\csuse}[1]{%
+  \ifcsname#1\endcsname
+    \csname#1\expandafter\endcsname
+  \fi}
+
+% {<cstoken>}
+
+\newrobustcmd{\undef}[1]{\let#1\etb@undefined}
+\newrobustcmd{\gundef}[1]{\global\let#1\etb@undefined}
+
+% {<csname>}
+
+\newrobustcmd*{\csundef}[1]{\cslet{#1}\etb@undefined}
+\newrobustcmd*{\csgundef}[1]{\global\cslet{#1}\etb@undefined}
+
+% {<cstoken>}{<code>}
+
+\newrobustcmd{\appto}[2]{%
+  \ifundef{#1}
+    {\edef#1{\unexpanded{#2}}}
+    {\edef#1{\expandonce#1\unexpanded{#2}}}}
+\newrobustcmd{\eappto}[2]{%
+  \ifundef{#1}
+    {\edef#1{#2}}
+    {\edef#1{\expandonce#1#2}}}
+\newrobustcmd{\gappto}[2]{%
+  \ifundef{#1}
+    {\xdef#1{\unexpanded{#2}}}
+    {\xdef#1{\expandonce#1\unexpanded{#2}}}}
+\newrobustcmd{\xappto}[2]{%
+  \ifundef{#1}
+    {\xdef#1{#2}}
+    {\xdef#1{\expandonce#1#2}}}
+
+\newrobustcmd*{\protected@eappto}{\etb@protected\eappto}
+\newrobustcmd*{\protected@xappto}{\etb@protected\xappto}
+
+% {<cstoken>}{<code>}
+
+\newrobustcmd{\preto}[2]{%
+  \ifundef{#1}
+    {\edef#1{\unexpanded{#2}}}
+    {\edef#1{\unexpanded{#2}\expandonce#1}}}
+\newrobustcmd{\epreto}[2]{%
+  \ifundef{#1}
+    {\edef#1{#2}}
+    {\edef#1{#2\expandonce#1}}}
+\newrobustcmd{\gpreto}[2]{%
+  \ifundef{#1}
+    {\xdef#1{\unexpanded{#2}}}
+    {\xdef#1{\unexpanded{#2}\expandonce#1}}}
+\newrobustcmd{\xpreto}[2]{%
+  \ifundef{#1}
+    {\xdef#1{#2}}
+    {\xdef#1{#2\expandonce#1}}}
+
+\newrobustcmd*{\protected@epreto}{\etb@protected\epreto}
+\newrobustcmd*{\protected@xpreto}{\etb@protected\xpreto}
+
+% {<csname>}{<code>}
+
+\newrobustcmd*{\csappto}[1]{\expandafter\appto\csname#1\endcsname}
+\newrobustcmd*{\cseappto}[1]{\expandafter\eappto\csname#1\endcsname}
+\newrobustcmd*{\csgappto}[1]{\expandafter\gappto\csname#1\endcsname}
+\newrobustcmd*{\csxappto}[1]{\expandafter\xappto\csname#1\endcsname}
+\newrobustcmd*{\protected@cseappto}{\etb@protected\cseappto}
+\newrobustcmd*{\protected@csxappto}{\etb@protected\csxappto}
+
+% {<csname>}{<code>}
+
+\newrobustcmd*{\cspreto}[1]{\expandafter\preto\csname#1\endcsname}
+\newrobustcmd*{\csepreto}[1]{\expandafter\epreto\csname#1\endcsname}
+\newrobustcmd*{\csgpreto}[1]{\expandafter\gpreto\csname#1\endcsname}
+\newrobustcmd*{\csxpreto}[1]{\expandafter\xpreto\csname#1\endcsname}
+\newrobustcmd*{\protected@csepreto}{\etb@protected\csepreto}
+\newrobustcmd*{\protected@csxpreto}{\etb@protected\csxpreto}
+
+% {<cstoken>}{<numexpr>}
+
+\newrobustcmd*{\numdef}[2]{%
+  \ifundef#1{\let#1\z@}{}%
+  \edef#1{\the\numexpr#2}}
+\newrobustcmd*{\numgdef}[2]{%
+  \ifundef#1{\let#1\z@}{}%
+  \xdef#1{\the\numexpr#2}}
+
+% {<csname>}{<numexpr>}
+
+\newrobustcmd*{\csnumdef}[1]{%
+  \expandafter\numdef\csname#1\endcsname}
+\newrobustcmd*{\csnumgdef}[1]{%
+  \expandafter\numgdef\csname#1\endcsname}
+
+% {<cstoken>}{<dimexpr>}
+
+\newrobustcmd*{\dimdef}[2]{%
+  \ifundef#1{\let#1\z@}{}%
+  \edef#1{\the\dimexpr#2}}
+\newrobustcmd*{\dimgdef}[2]{%
+  \ifundef#1{\let#1\z@}{}%
+  \xdef#1{\the\dimexpr#2}}
+
+% {<csname>}{<dimexpr>}
+
+\newrobustcmd*{\csdimdef}[1]{%
+  \expandafter\dimdef\csname#1\endcsname}
+\newrobustcmd*{\csdimgdef}[1]{%
+  \expandafter\dimgdef\csname#1\endcsname}
+
+% {<cstoken>}{<glueexpr>}
+
+\newrobustcmd*{\gluedef}[2]{%
+  \ifundef#1{\let#1\z@skip}{}%
+  \edef#1{\the\glueexpr#2}}
+\newrobustcmd*{\gluegdef}[2]{%
+  \ifundef#1{\let#1\z@skip}{}%
+  \xdef#1{\the\glueexpr#2}}
+
+% {<csname>}{<glueexpr>}
+
+\newrobustcmd*{\csgluedef}[1]{%
+  \expandafter\gluedef\csname#1\endcsname}
+\newrobustcmd*{\csgluegdef}[1]{%
+  \expandafter\gluegdef\csname#1\endcsname}
+
+% {<cstoken>}{<muexpr>}
+
+\newrobustcmd*{\mudef}[2]{%
+  \ifundef#1{\def#1{0mu}}{}%
+  \edef#1{\the\muexpr#2}}
+\newrobustcmd*{\mugdef}[2]{%
+  \ifundef#1{\let#1\z@}{}%
+  \xdef#1{\the\muexpr#2}}
+
+% {<csname>}{<muexpr>}
+
+\newrobustcmd*{\csmudef}[1]{%
+  \expandafter\mudef\csname#1\endcsname}
+\newrobustcmd*{\csmugdef}[1]{%
+  \expandafter\mugdef\csname#1\endcsname}
+
+% {<counter>}{<numexpr>}
+
+\newrobustcmd*{\defcounter}[2]{%
+  \ifcsundef{c@#1}
+    {\etb@noglobal\@nocounterr{#1}}%
+    {\csname c@#1\endcsname\numexpr#2\relax}}
+
+% {<length>}{<glueexpr>}
+
+\newrobustcmd*{\deflength}[2]{%
+  \ifundef{#1}
+    {\etb@noglobal\etb@err@nolen{#1}}%
+    {#1\glueexpr#2\relax}}
+
+\protected\def\etb@err@nolen#1{%
+  \etb@error{Length '\string#1' undefined}\@eha}
+
+% {<name>}
+
+\newrobustcmd*{\newbool}[1]{%
+  \expandafter\@ifdefinable\csname if#1\endcsname{%
+    \expandafter\newif\csname if#1\endcsname}}
+
+% {<name>}
+
+\newrobustcmd*{\providebool}[1]{%
+  \ifcsundef{if#1}
+    {\expandafter\newif\csname if#1\endcsname}
+    {\begingroup
+     \edef\@tempa{\expandafter\meaning\csname if#1\endcsname}%
+     \ifx\@tempa\etb@isfalse
+     \else
+       \ifx\@tempa\etb@istrue
+       \else
+         \etb@error{\@backslashchar if#1 not a boolean}\@eha
+       \fi
+     \fi
+     \endgroup}}
+
+% {<name>}{<true>|<false>}
+
+\newrobustcmd*{\setbool}[2]{%
+  \ifcsundef{if#1}
+    {\etb@noglobal\etb@err@nobool{#1}}
+    {\ifcsundef{#1#2}
+       {\etb@noglobal\etb@err@boolval{#2}}
+       {\csname#1#2\endcsname}}}
+
+% {<name>}
+
+\newrobustcmd*{\booltrue}[1]{%
+  \ifcsundef{if#1}
+    {\etb@noglobal\etb@err@nobool{#1}}
+    {\csname#1true\endcsname}}
+
+% {<name>}
+
+\newrobustcmd*{\boolfalse}[1]{%
+  \ifcsundef{if#1}
+    {\etb@noglobal\etb@err@nobool{#1}}
+    {\csname#1false\endcsname}}
+
+\edef\etb@istrue{\meaning\iftrue}
+\edef\etb@isfalse{\meaning\iffalse}
+\protected\def\etb@noglobal{\let\relax\relax}
+
+% {<name>}{<true}{<false>}
+
+\newcommand*{\ifbool}[1]{%
+  \ifcsundef{if#1}
+    {\etb@err@nobool{#1}\@gobbletwo}
+    {\csname if#1\endcsname
+       \expandafter\@firstoftwo
+     \else
+       \expandafter\@secondoftwo
+     \fi}}
+
+% {<name>}{<not true}{<not false>}
+
+\newcommand*{\notbool}[1]{%
+  \ifcsundef{if#1}
+    {\etb@err@nobool{#1}\@gobbletwo}
+    {\csname if#1\endcsname
+       \expandafter\@secondoftwo
+     \else
+       \expandafter\@firstoftwo
+     \fi}}
+
+\protected\def\etb@err@nobool#1{%
+  \etb@error{Boolean '\@backslashchar if#1' undefined}\@eha}
+
+\def\etb@err@boolval#1{%
+  \etb@error
+    {Invalid boolean value '#1'}
+    {Valid boolean values are 'true' and 'false'.}}
+
+% {<name>}
+
+\newrobustcmd*{\newtoggle}[1]{%
+  \ifcsdef{etb@tgl@#1}
+    {\etb@error{Toggle '#1' already defined}\@eha}
+    {\cslet{etb@tgl@#1}\@secondoftwo}}
+
+% {<name>}
+
+\newrobustcmd*{\providetoggle}[1]{%
+  \ifcsdef{etb@tgl@#1}
+    {}
+    {\cslet{etb@tgl@#1}\@secondoftwo}}
+
+% {<name>}{<true>|<false>}
+
+\newrobustcmd*{\settoggle}[2]{%
+  \ifcsdef{etb@tgl@#1}
+    {\ifcsdef{etb@toggle#2}
+       {\csletcs{etb@tgl@#1}{etb@toggle#2}}
+       {\etb@noglobal\etb@err@boolval{#2}}}
+    {\etb@noglobal\etb@err@notoggle{#1}}}
+
+% {<name>}
+
+\newrobustcmd*{\toggletrue}[1]{%
+  \ifcsdef{etb@tgl@#1}
+    {\cslet{etb@tgl@#1}\etb@toggletrue}
+    {\etb@noglobal\etb@err@notoggle{#1}}}
+
+% {<name>}
+
+\newrobustcmd*{\togglefalse}[1]{%
+  \ifcsdef{etb@tgl@#1}
+    {\cslet{etb@tgl@#1}\etb@togglefalse}
+    {\etb@noglobal\etb@err@notoggle{#1}}}
+
+\let\etb@toggletrue\@firstoftwo
+\let\etb@togglefalse\@secondoftwo
+
+% {<name>}{<true}{<false>}
+
+\newcommand*{\iftoggle}[1]{%
+  \ifcsdef{etb@tgl@#1}
+    {\csname etb@tgl@#1\endcsname}
+    {\etb@err@notoggle{#1}\@gobbletwo}}
+
+% {<name>}{<not true}{<not false>}
+
+\newcommand*{\nottoggle}[1]{%
+  \ifcsdef{etb@tgl@#1}
+    {\csname etb@tgl@#1\endcsname\@secondoftwo\@firstoftwo}
+    {\etb@err@notoggle{#1}\@gobbletwo}}
+
+\protected\def\etb@err@notoggle#1{%
+  \etb@error{Toggle '#1' undefined}\@eha}
+
+% {<cstoken>}{<true}{<false>}
+
+\protected\def\etb@ifscanable#1{%
+  \begingroup
+  \edef\etb@resrvda{%
+    \def\noexpand\etb@resrvda####1\detokenize{macro}:####2->####3&{%
+      ####1\def\string\etb@resrvda####2{####3}}%
+    \edef\noexpand\etb@resrvda{\noexpand\etb@resrvda\meaning#1&}}%
+  \etb@resrvda
+  \makeatletter
+  \endlinechar\m@ne
+  \newlinechar\m@ne
+  \scantokens\expandafter{\etb@resrvda}%
+  \expandafter\endgroup\ifx#1\etb@resrvda
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi}
+
+% {<cstoken>}{<search>}{<true}{<false>}
+
+\protected\long\def\etb@ifpattern#1#2{%
+  \begingroup
+  \edef\etb@resrvda{%
+    \def\noexpand\etb@resrvda####1\detokenize{#2}####2&{%
+      \endgroup\noexpand\noexpand\noexpand\ifblank{####2}}%
+    \edef\noexpand\etb@resrvda{\noexpand\etb@resrvda
+      \expandafter\strip@prefix\meaning#1\detokenize{#2}&}%
+    \noexpand\etb@resrvda}%
+  \etb@resrvda\@secondoftwo\@firstoftwo}
+
+% {<string>}{<true}{<false>}
+
+\protected\long\def\etb@ifhashcheck#1{%
+  \begingroup
+  \edef\etb@resrvda{\detokenize{#1}}%
+  \expandafter\endgroup
+  \expandafter\etb@ifhashcheck@i\meaning\etb@resrvda&}
+
+\edef\etb@ifhashcheck@i#1&{%
+  \noexpand\expandafter
+  \noexpand\etb@ifhashcheck@ii
+  \noexpand\strip@prefix#1\string#\string#&}
+
+\edef\etb@ifhashcheck@ii{%
+  \def\noexpand\etb@ifhashcheck@ii##1\string#\string###2&}
+\etb@ifhashcheck@ii{\ifblank{#2}}
+
+% {<cstoken>}
+
+\newrobustcmd*{\robustify}[1]{%
+  \ifundef{#1}
+    {\etb@error{\string#1 undefined}\@eha}
+    {\ifdefmacro{#1}
+       {\ifdefltxprotect{#1}
+          {\letcs\etb@resrvda{\expandafter\@gobble\string#1 }%
+           \@tempswatrue}
+          {\let\etb@resrvda#1%
+           \@tempswafalse}%
+        \ifdefparam\etb@resrvda
+          {\etb@ifscanable\etb@resrvda
+             {\etb@robustify\etb@resrvda
+              \let#1\etb@resrvda}
+             {\etb@error{Failed to robustify \string#1}
+                {The command is special and cannot be
+                 handled by \string\robustify.}%
+              \@tempswafalse}}
+          {\protected\edef#1{\expandonce\etb@resrvda}}%
+        \if@tempswa
+          \csundef{\expandafter\@gobble\string#1 }%
+        \fi
+        \undef\etb@resrvda}
+       {\etb@error{\string#1 not a macro}\@eha}}}
+
+\def\etb@robustify#1{%
+  \begingroup
+  \edef\etb@resrvdb{%
+    \def\noexpand\etb@resrvdb####1\detokenize{macro}:####2->####3&{%
+      \protected####1\def\string#1\space####2{####3}}%
+    \edef\noexpand\etb@resrvdb{%
+      \noexpand\etb@resrvdb\meaning#1&}}%
+  \etb@resrvdb
+  \etb@patchcmd@scantoks\etb@resrvdb}
+
+%  {<cstoken>}{<search>}{<true}{<false>}
+% *{<cstoken>}{<true}{<false>}
+
+\newrobustcmd{\ifpatchable}{%
+  \etb@dbg@trce\ifpatchable
+  \begingroup
+  \@makeother\#%
+  \@ifstar\etb@ifpatchable@i\etb@ifpatchable}
+
+\long\def\etb@ifpatchable#1#2{%
+  \endgroup
+  \etb@dbg@init#1%
+  \ifundef{#1}
+    {\etb@dbg@fail{def}\@secondoftwo}
+    {\etb@dbg@info{def}%
+     \ifdefmacro{#1}
+       {\etb@dbg@info{mac}%
+        \etb@ifscanable{#1}
+          {\etb@ifhashcheck{#2}
+             {\etb@dbg@info{tok}%
+              \etb@ifpattern#1{#2}
+                 {\etb@dbg@info{pat}%
+                  \etb@dbg@info{pos}\@firstoftwo}
+                 {\etb@dbg@fail{pat}\@secondoftwo}}
+             {\etb@dbg@fail{hsh}\@secondoftwo}}
+          {\etb@dbg@fail{tok}\@secondoftwo}}
+       {\etb@dbg@fail{mac}\@secondoftwo}}}
+
+\long\def\etb@ifpatchable@i#1{%
+  \endgroup
+  \etb@dbg@init#1%
+  \ifundef{#1}
+    {\etb@dbg@fail{def}\@secondoftwo}
+    {\etb@dbg@info{def}%
+     \ifdefmacro{#1}
+       {\etb@dbg@info{mac}%
+        \ifdefparam{#1}
+          {\etb@dbg@info{prm}%
+           \etb@ifscanable{#1}
+             {\etb@dbg@info{tok}%
+              \etb@dbg@info{pos}\@firstoftwo}
+             {\etb@dbg@fail{tok}\@secondoftwo}}
+          {\etb@dbg@info{prl}%
+           \ifdefprotected{#1}
+             {\etb@dbg@info{pro}}
+             {}%
+           \etb@dbg@info{pos}\@firstoftwo}}
+       {\etb@dbg@fail{mac}\@secondoftwo}}}
+
+% [<prefix>]{<cstoken>}{<search>}{<replace>}{<success>}{<failure>}
+
+\newrobustcmd*{\patchcmd}{%
+  \etb@dbg@trce\patchcmd
+  \begingroup
+  \@makeother\#%
+  \etb@patchcmd}
+
+\newcommand{\etb@patchcmd}[4][########1]{%
+  \etb@ifpatchable#2{#3}
+    {\etb@dbg@succ{ret}%
+     \begingroup
+     \edef\etb@resrvda{%
+       \def\noexpand\etb@resrvda####1\detokenize{macro:}####2->####3&{%
+         #1\def\string\etb@resrvda\space####2{\noexpand\etb@resrvdb####3&}}%
+       \def\noexpand\etb@resrvdb####1\detokenize{#3}####2&{%
+         ####1\detokenize{#4}####2}%
+       \edef\noexpand\etb@resrvda{%
+         \noexpand\etb@resrvda\meaning#2&}}%
+     \etb@resrvda
+     \etb@patchcmd@scantoks\etb@resrvda
+     \let#2\etb@resrvda
+     \undef\etb@resrvda
+     \@firstoftwo}%
+    {\@secondoftwo}}
+
+\def\etb@patchcmd@scantoks#1{%
+  \edef\etb@resrvda{\endgroup
+    \endlinechar\m@ne
+    \unexpanded{\makeatletter\scantokens}{#1}%
+    \endlinechar\the\endlinechar\relax
+    \catcode\number`\@=\the\catcode`\@\relax}%
+  \etb@resrvda}
+
+% {<cstoken>}{<code>}{<success>}{<failure>}
+
+\newrobustcmd*{\apptocmd}{%
+  \etb@dbg@trce\apptocmd
+  \begingroup
+  \@makeother\#%
+  \etb@hooktocmd\etb@append}
+
+\newrobustcmd*{\pretocmd}{%
+  \etb@dbg@trce\pretocmd
+  \begingroup
+  \@makeother\#%
+  \etb@hooktocmd\etb@prepend}
+
+\long\def\etb@hooktocmd#1#2#3{%
+  \endgroup
+  \etb@dbg@init#2%
+  \ifundef{#2}
+    {\etb@dbg@fail{def}\@secondoftwo}
+    {\etb@dbg@info{def}%
+     \ifdefmacro{#2}
+       {\etb@dbg@info{mac}%
+        \ifdefparam{#2}
+          {\etb@dbg@info{prm}%
+           \etb@ifscanable{#2}
+             {\etb@ifhashcheck{#3}
+                {\etb@dbg@info{tok}%
+                 \etb@dbg@succ{ret}%
+                 \etb@hooktocmd@i#1#2{#3}%
+                 \@firstoftwo}
+                {\etb@dbg@fail{hsh}\@secondoftwo}}
+             {\etb@dbg@fail{tok}\@secondoftwo}}
+          {\etb@dbg@info{prl}%
+           \ifdefprotected{#2}
+             {\etb@dbg@info{pro}%
+              \etb@dbg@succ{red}%
+              \protected}
+             {\etb@dbg@succ{red}}%
+           \edef#2{#1{\expandonce#2}{\unexpanded{#3}}}%
+           \@firstoftwo}}
+       {\etb@dbg@fail{mac}\@secondoftwo}}}
+
+\long\def\etb@hooktocmd@i#1#2#3{%
+  \begingroup
+  \edef\etb@resrvda{%
+    \def\noexpand\etb@resrvda####1\detokenize{macro}:####2->####3&{%
+      ####1\def\string\etb@resrvda\space####2{#1{####3}{\detokenize{#3}}}}%
+    \edef\noexpand\etb@resrvda{%
+      \noexpand\etb@resrvda\meaning#2&}}%
+  \etb@resrvda
+  \etb@patchcmd@scantoks\etb@resrvda
+  \let#2\etb@resrvda
+  \undef\etb@resrvda}
+
+\long\def\etb@append#1#2{#1#2}
+\long\def\etb@prepend#1#2{#2#1}
+
+\newrobustcmd*{\tracingpatches}{%
+  \etb@info{Enabling tracing}%
+  \input{etoolbox.def}%
+  \global\let\tracingpatches\relax}
+\@onlypreamble\tracingpatches
+
+\let\etb@dbg@trce\@gobble
+\let\etb@dbg@init\@gobble
+\let\etb@dbg@info\@gobble
+\let\etb@dbg@succ\@gobble
+\let\etb@dbg@fail\@gobble
+
+% {<numeral>}
+
+\newcommand{\rmntonum}[1]{%
+  \ifblank{#1}
+    {}
+    {\expandafter\etb@rti@end\number\numexpr
+     \expandafter\etb@rti@prs\detokenize{#1}&\relax}}
+
+\def\etb@rti@prs#1#2{%
+  \ifx&#1%
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+  {#1#2}
+  {\ifx&#2%
+     \expandafter\@firstoftwo
+   \else
+     \expandafter\@secondoftwo
+   \fi
+   {\etb@rti@chk#1+\etb@rti@num#1#2}
+   {\etb@rti@chk#1\etb@rti@chk#2%
+    \ifnum\etb@rti@num#1<\etb@rti@num#2 %
+      \expandafter\@firstoftwo
+    \else
+      \expandafter\@secondoftwo
+    \fi
+    {+\etb@rti@num#2-\etb@rti@num#1\etb@rti@prs}
+    {+\etb@rti@num#1\etb@rti@prs#2}}}}
+
+\def\etb@rti@chk#1{%
+  \ifcsname etb@rmn@#1\endcsname
+  \else
+    \expandafter\etb@rti@brk
+  \fi}
+
+\def\etb@rti@brk#1&{+\z@&-1}
+\def\etb@rti@end#1&#2\relax{\ifblank{#2}{#1}{#2}}
+\def\etb@rti@num#1{\csname etb@rmn@#1\endcsname}
+
+\chardef\etb@rmn@i=1
+\chardef\etb@rmn@I=1
+\chardef\etb@rmn@v=5
+\chardef\etb@rmn@V=5
+\chardef\etb@rmn@x=10
+\chardef\etb@rmn@X=10
+\chardef\etb@rmn@l=50
+\chardef\etb@rmn@L=50
+\chardef\etb@rmn@c=100
+\chardef\etb@rmn@C=100
+\mathchardef\etb@rmn@d=500
+\mathchardef\etb@rmn@D=500
+\mathchardef\etb@rmn@m=1000
+\mathchardef\etb@rmn@M=1000
+
+% {<numeral>}{<true>}{<false>}
+
+\newcommand{\ifrmnum}[1]{%
+  \ifblank{#1}
+    {\@secondoftwo}
+    {\expandafter\etb@ifr@prs\detokenize{#1}\relax}}
+
+\def\etb@ifr@prs#1{%
+  \ifx\relax#1%
+    \expandafter\@firstoftwo
+  \else
+    \ifcsname etb@rmn@#1\endcsname
+      \expandafter\expandafter
+      \expandafter\etb@ifr@prs
+    \else
+      \expandafter\expandafter
+      \expandafter\etb@ifr@brk
+    \fi
+  \fi}
+
+\def\etb@ifr@brk#1\relax{\@secondoftwo}
+
+% <*>{<command>}{<separator>}
+
+\newrobustcmd*{\DeclareListParser}{%
+  \@ifstar
+    {\etb@defparser\etb@defparser@arg}
+    {\etb@defparser\etb@defparser@do}}
+
+\def\etb@defparser#1#2#3{%
+  \@ifdefinable#2{#1{#2}{#3}}}
+
+\def\etb@defparser@do#1#2{%
+  \ifblank{#2}{\long\def#1##1{%
+    \etb@lst@@notoken@do##1\etb@lst@q@end&}}
+    {\etb@defparser@do@aux{#1}{#2}}}
+
+\def\etb@defparser@do@aux#1#2{%
+  \begingroup
+  \edef\@tempa{\endgroup
+    \long\def\noexpand#1####1{%
+      \expandafter\noexpand
+      \csname etb@lst@\expandafter\@gobble\string#1\endcsname
+      \noexpand\@nil####1\noexpand#2\noexpand\etb@lst@q@end\noexpand#2&}%
+    \long\csdef{etb@lst@\expandafter\@gobble\string#1}%
+      ####1\noexpand#2{%
+      \noexpand\expandafter\noexpand\ifx\noexpand\expandafter
+      \noexpand\etb@lst@q@end\noexpand\@gobble####1\noexpand\@empty
+        \noexpand\expandafter\noexpand\@firstoftwo
+      \noexpand\else
+        \noexpand\expandafter\noexpand\@secondoftwo
+      \noexpand\fi
+        {\noexpand\listbreak}
+        {\noexpand\etb@listitem\noexpand\do{####1}%
+         \expandafter\noexpand
+         \csname etb@lst@\expandafter\@gobble\string#1\endcsname
+         \noexpand\@nil}}}%
+  \@tempa}
+
+\long\def\etb@lst@@notoken@do#1{%
+  \ifx\etb@lst@q@end#1\@empty
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+    {\listbreak}
+    {\do{#1}%
+    \etb@lst@@notoken@do}}
+
+\def\etb@lst@q@end{\etb@lst@q@end}
+
+\def\etb@defparser@arg#1#2{%
+  \ifblank{#2}{\long\def#1##1##2{%
+    \etb@lst@@notoken@arg{##1}##2\etb@lst@q@end&}}
+    {\etb@defparser@arg@aux{#1}{#2}}}
+
+\def\etb@defparser@arg@aux#1#2{%
+  \begingroup
+  \edef\@tempa{\endgroup
+    \long\def\noexpand#1####1####2{%
+      \expandafter\noexpand
+      \csname etb@lst@\expandafter\@gobble\string#1\endcsname
+      {####1}\noexpand\@nil####2\noexpand#2\noexpand\etb@lst@q@end\noexpand#2&}%
+    \long\csdef{etb@lst@\expandafter\@gobble\string#1}####1####2\noexpand#2{%
+      \noexpand\expandafter\noexpand\ifx\noexpand\expandafter
+      \noexpand\etb@lst@q@end\noexpand\@gobble####2\noexpand\@empty
+        \noexpand\expandafter\noexpand\@firstoftwo
+      \noexpand\else
+        \noexpand\expandafter\noexpand\@secondoftwo
+      \noexpand\fi
+        {\noexpand\listbreak}
+        {\noexpand\etb@listitem{####1}{####2}%
+         \expandafter\noexpand
+         \csname etb@lst@\expandafter\@gobble\string#1\endcsname
+                {####1}\noexpand\@nil}}}%
+  \@tempa}
+
+\long\def\etb@lst@@notoken@arg#1#2{%
+  \ifx\etb@lst@q@end#2\@empty
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+    {\listbreak}
+    {#1{#2}%
+    \etb@lst@@notoken@arg{#1}}}
+
+\long\def\etb@listitem#1#2{%
+  \expandafter\ifblank\expandafter{\@gobble#2}
+    {}
+    {\expandafter\etb@listitem@i
+     \expandafter{\@secondoftwo#2}{#1}}}
+\long\def\etb@listitem@i#1#2{#2{#1}}
+
+\newcommand*{\listbreak}{}
+\long\def\listbreak#1&{}
+
+% {<item1>,<item2>,...} => \do{<item1>}\do{<item2>}...
+
+\DeclareListParser{\docsvlist}{,}
+
+% {<handler>}{<item1>,<item2>,...} => <handler>{<item1>}<handler>{<item2>}...
+
+\DeclareListParser*{\forcsvlist}{,}
+
+% {<listmacro>}{<string>}
+
+\newrobustcmd{\listadd}[2]{%
+  \ifblank{#2}{}{\appto#1{#2|}}}
+\newrobustcmd{\listeadd}[2]{%
+  \begingroup
+  \edef\etb@tempa{\endgroup\noexpand\ifblank{#2}}%
+  \etb@tempa{}{\eappto#1{#2|}}}
+\newrobustcmd{\listgadd}[2]{%
+  \ifblank{#2}{}{\gappto#1{#2|}}}
+\newrobustcmd{\listxadd}[2]{%
+  \begingroup
+  \edef\etb@tempa{\endgroup\noexpand\ifblank{#2}}%
+  \etb@tempa{}{\xappto#1{#2|}}}
+
+% {<listcsname>}{<string>}
+
+\newrobustcmd{\listcsadd}[1]{%
+  \expandafter\listadd\csname#1\endcsname}
+\newrobustcmd{\listcseadd}[1]{%
+  \expandafter\listeadd\csname#1\endcsname}
+\newrobustcmd{\listcsgadd}[1]{%
+  \expandafter\listgadd\csname#1\endcsname}
+\newrobustcmd{\listcsxadd}[1]{%
+  \expandafter\listxadd\csname#1\endcsname}
+
+% {<listmacro>}{<string>}
+
+\newrobustcmd{\listremove}[2]{%
+  \etb@listremove{#1}{#2}\def}
+\newrobustcmd{\listgremove}[2]{%
+  \etb@listremove{#1}{#2}\gdef}
+
+\protected\long\def\etb@listremove#1#2#3{%
+  \ifblank{#2}
+    {}
+    {\ifinlist{#2}{#1}{%
+     \begingroup
+     \def\etb@tempa##1|#2|##2&{\endgroup
+       \expandafter#3\expandafter#1\expandafter{\@gobble##1|##2}}%
+    \expandafter\etb@tempa\expandafter|#1&}{}}%
+}
+
+% {<listcsname>}{<string>}
+
+\newrobustcmd{\listcsremove}[1]{%
+  \expandafter\listremove\csname#1\endcsname}
+\newrobustcmd{\listcsgremove}[1]{%
+  \expandafter\listgremove\csname#1\endcsname}
+
+% {<string>}{<listmacro>}{<true>}{<false>}
+
+\newrobustcmd{\ifinlist}[2]{%
+  \begingroup
+  \def\etb@tempa##1|#1|##2&{\endgroup
+    \ifblank{##2}\@secondoftwo\@firstoftwo}%
+  \expandafter\etb@tempa\expandafter|#2|#1|&}
+
+\newrobustcmd{\xifinlist}[1]{%
+  \begingroup
+  \edef\etb@tempa{\endgroup\ifinlist{#1}}%
+  \etb@tempa}
+
+% {<string>}{<listcsname>}{<true>}{<false>}
+
+\newrobustcmd{\ifinlistcs}[2]{%
+  \expandafter\etb@ifinlistcs@i\csname #2\endcsname{#1}}
+\long\def\etb@ifinlistcs@i#1#2{\ifinlist{#2}{#1}}
+
+\newrobustcmd{\xifinlistcs}[1]{%
+  \begingroup
+  \edef\etb@tempa{\endgroup\ifinlistcs{#1}}%
+  \etb@tempa}
+
+% {<handler>}{<listmacro>} => <handler>{<item1>}<handler>{<item2>}...
+
+\newcommand*{\forlistloop}[2]{%
+  \expandafter\etb@forlistloop\expandafter{#2}{#1}}
+
+\long\def\etb@forlistloop#1#2{\etb@forlistloop@i{#2}#1|\etb@lst@q@end|&}
+
+\long\def\etb@forlistloop@i#1#2|{%
+  \ifx\etb@lst@q@end#2\@empty
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+    {\listbreak}
+    {\ifblank{#2}
+      {}
+      {#1{#2}}%
+      \etb@forlistloop@i{#1}}}
+
+% {<handler>}{<listcsname>} => <handler>{<item1>}<handler>{<item2>}...
+
+\newcommand*{\forlistcsloop}[2]{%
+  \expandafter\expandafter\expandafter\etb@forlistloop
+  \expandafter\expandafter\expandafter{\csname#2\endcsname}{#1}}
+
+% {<listmacro>} => \do{<item1>}\do{<item2>}...
+
+\newcommand*{\dolistloop}{\forlistloop\do}
+
+% {<listcsname>} => \do{<item1>}\do{<item2>}...
+
+\newcommand*{\dolistcsloop}{\forlistcsloop\do}
+
+\providecommand\IfFormatAtLeastTF{\@ifl@t@r\fmtversion}
+\IfFormatAtLeastTF{2020-10-01}
+  {%
+    \newrobustcmd*{\AtEndPreamble}{\AddToHook{begindocument/before}}%
+    \let\AfterPreamble\AtBeginDocument
+    \newrobustcmd*{\AfterEndPreamble}{\AddToHook{begindocument/end}}%
+    \newrobustcmd*{\AfterEndDocument}{\AddToHook{enddocument/end}}%
+    \endinput
+  }
+  {}
+
+% {<code>}
+
+\newrobustcmd*{\AtEndPreamble}{\gappto\@endpreamblehook}
+\newcommand*{\@endpreamblehook}{}
+
+\preto\document{%
+  \endgroup
+  \let\AtEndPreamble\@firstofone
+  \@endpreamblehook
+  \protected\def\AtEndPreamble{\@notprerr\@gobble}%
+  \undef\@endpreamblehook
+  \begingroup}
+
+% {<code>}
+
+\newrobustcmd*{\AfterPreamble}{\AtBeginDocument}
+\AtEndPreamble{\let\AfterPreamble\@firstofone}
+
+% {<code>}
+
+\newrobustcmd*{\AfterEndPreamble}{\gappto\@afterendpreamblehook}
+\newcommand*{\@afterendpreamblehook}{}
+
+\appto\document{%
+  \let\AfterEndPreamble\@firstofone
+  \@afterendpreamblehook
+  \protected\def\AfterEndPreamble{\@notprerr\@gobble}%
+  \undef\@afterendpreamblehook
+  \ignorespaces}
+
+\AtEndDocument{\let\AfterEndPreamble\@gobble}
+
+% {<code>}
+
+\newrobustcmd*{\AfterEndDocument}{\gappto\@afterenddocumenthook}
+\newcommand*{\@afterenddocumenthook}{}
+
+\patchcmd\enddocument
+  {\deadcycles}
+  {\let\AfterEndDocument\@firstofone
+   \@afterenddocumenthook
+   \deadcycles}
+  {}
+  {\AtEndDocument{%
+     \let\etb@@end\@@end
+     \def\@@end{%
+       \let\AfterEndDocument\@firstofone
+       \@afterenddocumenthook
+       \etb@@end}}}
+
+% {<environment>}{<code>}
+
+\newrobustcmd{\AtBeginEnvironment}[1]{%
+  \csgappto{@begin@#1@hook}}
+
+\ifcsname begin \endcsname
+  \expandafter\patchcmd\csname begin \endcsname
+    {\csname #1\endcsname}
+    {\csuse{@begin@#1@hook}%
+     \csname #1\endcsname}
+    {}
+    {\etb@warning{%
+       Patching '\string\begin' failed!\MessageBreak
+       '\string\AtBeginEnvironment' will not work\@gobble}}
+\else
+  \patchcmd\begin
+    {\csname #1\endcsname}
+    {\csuse{@begin@#1@hook}%
+     \csname #1\endcsname}
+    {}
+    {\etb@warning{%
+       Patching '\string\begin' failed!\MessageBreak
+       '\string\AtBeginEnvironment' will not work\@gobble}}
+\fi
+
+% {<environment>}{<code>}
+
+\newrobustcmd{\AtEndEnvironment}[1]{%
+  \csgappto{@end@#1@hook}}
+
+\ifcsname end \endcsname
+\expandafter\patchcmd\csname end \endcsname
+  {\csname end#1\endcsname}
+  {\csuse{@end@#1@hook}%
+   \csname end#1\endcsname}
+  {}
+  {\etb@warning{%
+     Patching '\string\end' failed!\MessageBreak
+     '\string\AtEndEnvironment' will not work\@gobble}}
+\else
+\patchcmd\end
+  {\csname end#1\endcsname}
+  {\csuse{@end@#1@hook}%
+   \csname end#1\endcsname}
+  {}
+  {\etb@warning{%
+     Patching '\string\end' failed!\MessageBreak
+     '\string\AtEndEnvironment' will not work\@gobble}}
+\fi
+
+% {<environment>}{<code>}
+
+\newrobustcmd{\BeforeBeginEnvironment}[1]{%
+  \csgappto{@beforebegin@#1@hook}}
+
+\ifcsname begin \endcsname
+  \expandafter\pretocmd\csname begin \endcsname
+    {\csuse{@beforebegin@#1@hook}}
+    {}
+    {\etb@warning{%
+       Patching '\string\begin' failed!\MessageBreak
+       '\string\BeforeBeginEnvironment' will not work\@gobble}}
+\else
+  \pretocmd\begin
+    {\csuse{@beforebegin@#1@hook}}
+    {}
+    {\etb@warning{%
+       Patching '\string\begin' failed!\MessageBreak
+       '\string\BeforeBeginEnvironment' will not work\@gobble}}
+\fi
+
+% {<environment>}{<code>}
+
+\newrobustcmd{\AfterEndEnvironment}[1]{%
+  \csgappto{@afterend@#1@hook}}
+
+\let\if@ignore\relax
+\ifcsname end \endcsname
+  \expandafter\patchcmd\csname end \endcsname
+    {\if@ignore}
+    {\csuse{@afterend@#1@hook}%
+     \if@ignore}
+    {}
+    {\etb@warning{%
+       Patching '\string\end' failed!\MessageBreak
+       '\string\AfterEndEnvironment' will not work\@gobble}}
+\else
+  \patchcmd\end
+    {\if@ignore}
+    {\csuse{@afterend@#1@hook}%
+     \if@ignore}
+    {}
+    {\etb@warning{%
+       Patching '\string\end' failed!\MessageBreak
+       '\string\AfterEndEnvironment' will not work\@gobble}}
+\fi
+\let\if@ignore\iffalse
+
+\endinput
+%%
+%% This is file `refcount.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% refcount.dtx  (with options: `package')
+%% 
+%% This is a generated file.
+%% 
+%% Project: refcount
+%% Version: 2019/12/15 v3.6
+%% 
+%% Copyright (C)
+%%    1998, 2000, 2006, 2008, 2010, 2011 Heiko Oberdiek
+%%    2016-2019 Oberdiek Package Support Group
+%% 
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either
+%% version 1.3c of this license or (at your option) any later
+%% version. This version of this license is in
+%%    https://www.latex-project.org/lppl/lppl-1-3c.txt
+%% and the latest version of this license is in
+%%    https://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of
+%% LaTeX version 2005/12/01 or later.
+%% 
+%% This work has the LPPL maintenance status "maintained".
+%% 
+%% The Current Maintainers of this work are
+%% Heiko Oberdiek and the Oberdiek Package Support Group
+%% https://github.com/ho-tex/refcount/issues
+%% 
+%% 
+%% This work consists of the main source file refcount.dtx
+%% and the derived files
+%%    refcount.sty, refcount.pdf, refcount.ins, refcount.drv,
+%%    refcount-test1.tex, refcount-test2.tex, refcount-test3.tex,
+%%    refcount-test4.tex, refcount-test5.tex.
+%% 
+\begingroup\catcode61\catcode48\catcode32=10\relax%
+  \catcode13=5 % ^^M
+  \endlinechar=13 %
+  \catcode35=6 % #
+  \catcode39=12 % '
+  \catcode44=12 % ,
+  \catcode45=12 % -
+  \catcode46=12 % .
+  \catcode58=12 % :
+  \catcode64=11 % @
+  \catcode123=1 % {
+  \catcode125=2 % }
+  \expandafter\let\expandafter\x\csname ver@refcount.sty\endcsname
+  \ifx\x\relax % plain-TeX, first loading
+  \else
+    \def\empty{}%
+    \ifx\x\empty % LaTeX, first loading,
+      % variable is initialized, but \ProvidesPackage not yet seen
+    \else
+      \expandafter\ifx\csname PackageInfo\endcsname\relax
+        \def\x#1#2{%
+          \immediate\write-1{Package #1 Info: #2.}%
+        }%
+      \else
+        \def\x#1#2{\PackageInfo{#1}{#2, stopped}}%
+      \fi
+      \x{refcount}{The package is already loaded}%
+      \aftergroup\endinput
+    \fi
+  \fi
+\endgroup%
+\begingroup\catcode61\catcode48\catcode32=10\relax%
+  \catcode13=5 % ^^M
+  \endlinechar=13 %
+  \catcode35=6 % #
+  \catcode39=12 % '
+  \catcode40=12 % (
+  \catcode41=12 % )
+  \catcode44=12 % ,
+  \catcode45=12 % -
+  \catcode46=12 % .
+  \catcode47=12 % /
+  \catcode58=12 % :
+  \catcode64=11 % @
+  \catcode91=12 % [
+  \catcode93=12 % ]
+  \catcode123=1 % {
+  \catcode125=2 % }
+  \expandafter\ifx\csname ProvidesPackage\endcsname\relax
+    \def\x#1#2#3[#4]{\endgroup
+      \immediate\write-1{Package: #3 #4}%
+      \xdef#1{#4}%
+    }%
+  \else
+    \def\x#1#2[#3]{\endgroup
+      #2[{#3}]%
+      \ifx#1\@undefined
+        \xdef#1{#3}%
+      \fi
+      \ifx#1\relax
+        \xdef#1{#3}%
+      \fi
+    }%
+  \fi
+\expandafter\x\csname ver@refcount.sty\endcsname
+\ProvidesPackage{refcount}%
+  [2019/12/15 v3.6 Data extraction from label references (HO)]%
+\begingroup\catcode61\catcode48\catcode32=10\relax%
+  \catcode13=5 % ^^M
+  \endlinechar=13 %
+  \catcode123=1 % {
+  \catcode125=2 % }
+  \catcode64=11 % @
+  \def\x{\endgroup
+    \expandafter\edef\csname rc@AtEnd\endcsname{%
+      \endlinechar=\the\endlinechar\relax
+      \catcode13=\the\catcode13\relax
+      \catcode32=\the\catcode32\relax
+      \catcode35=\the\catcode35\relax
+      \catcode61=\the\catcode61\relax
+      \catcode64=\the\catcode64\relax
+      \catcode123=\the\catcode123\relax
+      \catcode125=\the\catcode125\relax
+    }%
+  }%
+\x\catcode61\catcode48\catcode32=10\relax%
+\catcode13=5 % ^^M
+\endlinechar=13 %
+\catcode35=6 % #
+\catcode64=11 % @
+\catcode123=1 % {
+\catcode125=2 % }
+\def\TMP@EnsureCode#1#2{%
+  \edef\rc@AtEnd{%
+    \rc@AtEnd
+    \catcode#1=\the\catcode#1\relax
+  }%
+  \catcode#1=#2\relax
+}
+\TMP@EnsureCode{33}{12}% !
+\TMP@EnsureCode{39}{12}% '
+\TMP@EnsureCode{42}{12}% *
+\TMP@EnsureCode{45}{12}% -
+\TMP@EnsureCode{46}{12}% .
+\TMP@EnsureCode{47}{12}% /
+\TMP@EnsureCode{91}{12}% [
+\TMP@EnsureCode{93}{12}% ]
+\TMP@EnsureCode{96}{12}% `
+\edef\rc@AtEnd{\rc@AtEnd\noexpand\endinput}
+\begingroup\expandafter\expandafter\expandafter\endgroup
+\expandafter\ifx\csname RequirePackage\endcsname\relax
+  \input ltxcmds.sty\relax
+  \input infwarerr.sty\relax
+\else
+  \RequirePackage{ltxcmds}[2011/11/09]%
+  \RequirePackage{infwarerr}[2010/04/08]%
+\fi
+\ltx@IfUndefined{@ifdefinable}{%
+  \def\rc@IfDefinable#1{%
+    \ifx#1\ltx@undefined
+      \expandafter\ltx@firstofone
+    \else
+      \ifx#1\relax
+        \expandafter\expandafter\expandafter\ltx@firstofone
+      \else
+        \@PackageError{refcount}{%
+          Command \string#1 is already defined.\MessageBreak
+          It will not redefined by this package%
+        }\@ehc
+        \expandafter\expandafter\expandafter\ltx@gobble
+      \fi
+    \fi
+  }%
+}{%
+  \let\rc@IfDefinable\@ifdefinable
+}
+\ltx@IfUndefined{protected}{%
+  \ltx@IfUndefined{DeclareRobustCommand}{%
+    \def\rc@RobustDefOne#1#2#3#4{%
+      \rc@IfDefinable#3{%
+        #1\def#3##1{#4}%
+      }%
+    }%
+    \def\rc@RobustDefZero#1#2{%
+      \rc@IfDefinable#1{%
+        \def#1{#2}%
+      }%
+    }%
+  }{%
+    \def\rc@RobustDefOne#1#2#3#4{%
+      \rc@IfDefinable#3{%
+        \DeclareRobustCommand#2#3[1]{#4}%
+      }%
+    }%
+    \def\rc@RobustDefZero#1#2{%
+      \rc@IfDefinable#1{%
+        \DeclareRobustCommand#1{#2}%
+      }%
+    }%
+  }%
+}{%
+  \def\rc@RobustDefOne#1#2#3#4{%
+    \rc@IfDefinable#3{%
+      \protected#1\def#3##1{#4}%
+    }%
+  }%
+  \def\rc@RobustDefZero#1#2{%
+    \rc@IfDefinable#1{%
+      \protected\def#1{#2}%
+    }%
+  }%
+}
+\ltx@IfUndefined{newcommand}{%
+  \def\rc@newcommand*#1[#2]#3{% hash-ok
+    \rc@IfDefinable#1{%
+      \ifcase#2 %
+        \def#1{#3}%
+      \or
+        \def#1##1{#3}%
+      \or
+        \def#1##1##2{#3}%
+      \else
+        \rc@InternalError
+      \fi
+    }%
+  }%
+}{%
+  \let\rc@newcommand\newcommand
+}
+\rc@RobustDefOne\long{}\setrefcountdefault{%
+  \def\rc@default{#1}%
+}
+\setrefcountdefault{0}
+\ltx@IfUndefined{G@refundefinedtrue}{%
+  \rc@RobustDefOne{}{*}\refused{%
+    \begingroup
+      \csname @safe@activestrue\endcsname
+      \ltx@IfUndefined{r@#1}{%
+        \protect\G@refundefinedtrue
+        \rc@WarningUndefined{#1}%
+      }{}%
+    \endgroup
+  }%
+}{%
+  \rc@RobustDefOne{}{*}\refused{%
+    \begingroup
+      \csname @safe@activestrue\endcsname
+      \ltx@IfUndefined{r@#1}{%
+        \csname protect\expandafter\endcsname
+        \csname G@refundefinedtrue\endcsname
+        \rc@WarningUndefined{#1}%
+      }{}%
+    \endgroup
+  }%
+}
+\ltx@IfUndefined{@latex@warning}{%
+  \def\rc@WarningUndefined#1{%
+    \ltx@ifundefined{thepage}{%
+      \def\thepage{\number\count0 }%
+    }{}%
+    \@PackageWarning{refcount}{%
+      Reference `#1' on page \thepage\space undefined%
+    }%
+  }%
+}{%
+  \def\rc@WarningUndefined#1{%
+    \@latex@warning{%
+      Reference `#1' on page \thepage\space undefined%
+    }%
+  }%
+}
+\def\rc@set#1#2#3#4{%
+  \begingroup
+    \csname @safe@activestrue\endcsname
+    \refused{#4}%
+    \expandafter\rc@@set\csname r@#4\endcsname{#1}{#2}{#3}%
+  \endgroup
+}
+\def\rc@@set#1#2#3#4{%
+  \ifx#1\relax
+    #2{#4}{\rc@default}%
+  \else
+    #2{#4}{%
+      \expandafter#3#1\rc@default\rc@default\@nil
+    }%
+  \fi
+}
+\rc@RobustDefZero\setcounterref{%
+  \rc@set\setcounter\ltx@car
+}
+\rc@RobustDefZero\addtocounterref{%
+  \rc@set\addtocounter\ltx@car
+}
+\rc@RobustDefZero\setcounterpageref{%
+  \rc@set\setcounter\ltx@carsecond
+}
+\rc@RobustDefZero\addtocounterpageref{%
+  \rc@set\addtocounter\ltx@carsecond
+}
+\rc@newcommand*{\getrefnumber}[1]{%
+  \romannumeral
+  \ltx@ifundefined{r@#1}{%
+    \expandafter\ltx@zero
+    \rc@default
+  }{%
+    \expandafter\expandafter\expandafter\rc@extract@
+    \expandafter\expandafter\expandafter!%
+    \csname r@#1\expandafter\endcsname
+    \expandafter{\rc@default}\@nil
+  }%
+}
+\rc@newcommand*{\getpagerefnumber}[1]{%
+  \romannumeral
+  \ltx@ifundefined{r@#1}{%
+    \expandafter\ltx@zero
+    \rc@default
+  }{%
+    \expandafter\expandafter\expandafter\rc@extract@page
+    \expandafter\expandafter\expandafter!%
+    \csname r@#1\expandafter\expandafter\expandafter\endcsname
+    \expandafter\expandafter\expandafter{%
+      \expandafter\rc@default
+    \expandafter}\expandafter{\rc@default}\@nil
+  }%
+}
+\rc@newcommand*{\getrefbykeydefault}[2]{%
+  \romannumeral
+  \expandafter\rc@getrefbykeydefault
+    \csname r@#1\expandafter\endcsname
+    \csname rc@extract@#2\endcsname
+}
+\long\def\rc@getrefbykeydefault#1#2#3{%
+  \ifx#1\relax
+    % reference is undefined
+    \ltx@ReturnAfterElseFi{%
+      \ltx@zero
+      #3%
+    }%
+  \else
+    \ltx@ReturnAfterFi{%
+      \ifx#2\relax
+        % extract method is missing
+        \ltx@ReturnAfterElseFi{%
+          \ltx@zero
+          #3%
+        }%
+      \else
+        \ltx@ReturnAfterFi{%
+          \expandafter
+          \rc@generic#1{#3}{#3}{#3}{#3}{#3}\@nil#2{#3}%
+        }%
+      \fi
+    }%
+  \fi
+}
+\long\def\rc@generic#1#2\@nil#3#4{%
+  #3{#1\TR@TitleReference\@empty{#4}\@nil}{#1}#2\@nil
+}
+\long\def\rc@extract@#1#2#3\@nil{%
+  \ltx@zero
+  #2%
+}
+\long\def\rc@extract@page#1#2#3#4\@nil{%
+  \ltx@zero
+  #3%
+}
+\long\def\rc@extract@name#1#2#3#4#5\@nil{%
+  \ltx@zero
+  #4%
+}
+\long\def\rc@extract@anchor#1#2#3#4#5#6\@nil{%
+  \ltx@zero
+  #5%
+}
+\long\def\rc@extract@url#1#2#3#4#5#6#7\@nil{%
+  \ltx@zero
+  #6%
+}
+\long\def\rc@extract@title#1#2\@nil{%
+  \rc@@extract@title#1%
+}
+\long\def\rc@@extract@title#1\TR@TitleReference#2#3#4\@nil{%
+  \ltx@zero
+  #3%
+}
+\rc@newcommand*{\IfRefUndefinedExpandable}[1]{%
+  \ltx@ifundefined{r@#1}\ltx@firstoftwo\ltx@secondoftwo
+}
+\rc@RobustDefOne{}*\IfRefUndefinedBabel{%
+  \begingroup
+    \csname safe@actives@true\endcsname
+  \expandafter\expandafter\expandafter\endgroup
+  \expandafter\ifx\csname r@#1\endcsname\relax
+    \expandafter\ltx@firstoftwo
+  \else
+    \expandafter\ltx@secondoftwo
+  \fi
+}
+\rc@AtEnd%
+%% \section{Installation}
+\endinput
+%%
+%% End of file `refcount.sty'.
+%%
+%% This is file `rerunfilecheck.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% rerunfilecheck.dtx  (with options: `package')
+%% 
+%% This is a generated file.
+%% 
+%% Project: rerunfilecheck
+%% Version: 2025-06-21 v1.11
+%% 
+%% Copyright (C)
+%%    2009-2011 Heiko Oberdiek
+%%    2016-2025 Oberdiek Package Support Group
+%% 
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either
+%% version 1.3c of this license or (at your option) any later
+%% version. This version of this license is in
+%%    https://www.latex-project.org/lppl/lppl-1-3c.txt
+%% and the latest version of this license is in
+%%    https://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of
+%% LaTeX version 2005/12/01 or later.
+%% 
+%% This work has the LPPL maintenance status "maintained".
+%% 
+%% The Current Maintainers of this work are
+%% Heiko Oberdiek and the Oberdiek Package Support Group
+%% https://github.com/ho-tex/rerunfilecheck/issues
+%% 
+%% This work consists of the main source file rerunfilecheck.dtx
+%% and the derived files
+%%    rerunfilecheck.sty, rerunfilecheck.pdf, rerunfilecheck.ins,
+%%    rerunfilecheck.drv, rerunfilecheck-example.cfg,
+%%    rerunfilecheck-test1.tex.
+%% 
+\begingroup\catcode61\catcode48\catcode32=10\relax%
+  \catcode13=5 % ^^M
+  \endlinechar=13 %
+  \catcode123=1 % {
+  \catcode125=2 % }
+  \catcode64=11 % @
+  \def\x{\endgroup
+    \expandafter\edef\csname ReFiCh@AtEnd\endcsname{%
+      \endlinechar=\the\endlinechar\relax
+      \catcode13=\the\catcode13\relax
+      \catcode32=\the\catcode32\relax
+      \catcode35=\the\catcode35\relax
+      \catcode61=\the\catcode61\relax
+      \catcode64=\the\catcode64\relax
+      \catcode123=\the\catcode123\relax
+      \catcode125=\the\catcode125\relax
+    }%
+  }%
+\x\catcode61\catcode48\catcode32=10\relax%
+\catcode13=5 % ^^M
+\endlinechar=13 %
+\catcode35=6 % #
+\catcode64=11 % @
+\catcode123=1 % {
+\catcode125=2 % }
+\def\TMP@EnsureCode#1#2{%
+  \edef\ReFiCh@AtEnd{%
+    \ReFiCh@AtEnd
+    \catcode#1=\the\catcode#1\relax
+  }%
+  \catcode#1=#2\relax
+}
+\TMP@EnsureCode{39}{12}% '
+\TMP@EnsureCode{40}{12}% (
+\TMP@EnsureCode{41}{12}% )
+\TMP@EnsureCode{42}{12}% *
+\TMP@EnsureCode{44}{12}% ,
+\TMP@EnsureCode{46}{12}% .
+\TMP@EnsureCode{47}{12}% /
+\TMP@EnsureCode{58}{12}% :
+\TMP@EnsureCode{59}{12}% ;
+\TMP@EnsureCode{60}{12}% <
+\TMP@EnsureCode{62}{12}% >
+\TMP@EnsureCode{91}{12}% [
+\TMP@EnsureCode{93}{12}% ]
+\TMP@EnsureCode{96}{12}% `
+\edef\ReFiCh@AtEnd{\ReFiCh@AtEnd\noexpand\endinput}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{rerunfilecheck}%
+  [2025-06-21 v1.11 Rerun checks for auxiliary files (HO)]
+\RequirePackage{kvoptions}[2010/02/22]
+\SetupKeyvalOptions{%
+  family=rerunfilecheck,%
+  prefix=ReFiCh@%
+}
+\newcommand*{\RerunFileCheckSetup}{%
+  \setkeys{rerunfilecheck}%
+}
+\DeclareBoolOption{mainaux}
+\DeclareBoolOption{partaux}
+\DeclareBoolOption{starttoc}
+\DeclareBoolOption{index}
+\DeclareBoolOption{glossary}
+\define@key{rerunfilecheck}{aux}[true]{%
+  \RerunFileCheckSetup{%
+    mainaux={#1},%
+    partaux={#1},%
+    starttoc={#1},%
+    index={#1},%
+    glossary={#1}%
+  }%
+}
+\InputIfFileExists{rerunfilecheck.cfg}{}{}
+\ProcessLocalKeyvalOptions*
+\def\ReFiCh@DisableOption{%
+  \DisableKeyvalOption[%
+    action=warning,%
+    package=rerunfilecheck%
+  ]{rerunfilecheck}%
+}
+\RequirePackage{infwarerr}[2007/09/09]
+\RequirePackage{pdftexcmds}[2009/04/10]
+\begingroup\expandafter\expandafter\expandafter\endgroup
+\expandafter\ifx\csname pdf@filemdfivesum\endcsname\relax
+  \@PackageInfoNoLine{rerunfilecheck}{%
+    Feature \string\pdfmdfivesum\space is not available\MessageBreak
+    (e.g. pdfTeX or LuaTeX with package `pdftexcmds').\MessageBreak
+    Therefore file contents cannot be checked efficiently\MessageBreak
+    and the loading of the package is aborted%
+  }%
+  \newcommand*{\RerunFileCheck}[3]{}%
+  \renewcommand*{\RerunFileCheckSetup}[1]{}%
+  \expandafter\ReFiCh@AtEnd
+\fi%
+\ifReFiCh@partaux
+  \let\ReFiCh@org@include\@include
+  \def\@include#1 {%
+    \if@filesw
+      \RerunFileCheck{#1.aux}{}{}%
+    \fi
+    \ReFiCh@org@include{#1} %
+  }%
+\fi
+\ifReFiCh@mainaux
+  \AtBeginDocument{%
+    \ReFiCh@mainauxfalse
+  }%
+  \ifReFiCh@mainaux
+    \AtEndOfPackage{%
+      \RerunFileCheck{\jobname.aux}{}{}%
+    }%
+  \else
+    \if@filesw
+      \@PackageWarningNoLine{rerunfilecheck}{%
+        Main aux file check is disabled,\MessageBreak
+        because the file is already opened.\MessageBreak
+        Load the package before \string\begin{document}%
+      }%
+    \fi
+  \fi
+\fi
+\ifReFiCh@starttoc
+  \let\ReFiCh@org@starttoc\@starttoc
+  \def\@starttoc#1{%
+    \if@filesw
+      \RerunFileCheck{\jobname.#1}{%
+        \@ifundefined{tf@#1}{%
+        }{%
+          \immediate\closeout\csname tf@#1\endcsname
+        }%
+      }{}%
+    \fi
+    \ReFiCh@org@starttoc{#1}%
+  }%
+\fi
+\ifReFiCh@index
+  \ifx\makeindex\@empty
+    \@PackageWarningNoLine{rerunfilecheck}{%
+      Option `index' ignored,\MessageBreak
+      because \string\makeindex\space has already been called%
+    }%
+  \else
+    \def\ReFiCh@temp{%
+      \newwrite\@indexfile
+      \immediate\openout\@indexfile=\jobname.idx %
+      \def\index{%
+        \@bsphack
+        \begingroup
+        \@sanitize
+        \@wrindex
+      }%
+      \typeout{Writing index file \jobname.idx}%
+      \let\makeindex\@empty
+    }%
+    \ifx\ReFiCh@temp\makeindex
+      \def\makeindex{%
+        \newwrite\@indexfile
+        \RerunFileCheck{\jobname.idx}{%
+          \immediate\closeout\@indexfile
+        }{%
+          Rerun LaTeX/makeindex to get index right%
+        }%
+        \immediate\openout\@indexfile=\jobname.idx %
+        \def\index{%
+          \@bsphack
+          \begingroup
+          \@sanitize
+          \@wrindex
+        }%
+        \typeout{Writing index file \jobname.idx}%
+        \let\makeindex\@empty
+      }%
+    \else
+      \@PackageInfoNoLine{rerunfilecheck}{%
+        Option `index': unsupported version of \string\makeindex
+      }%
+    \fi
+  \fi
+\fi
+\ifReFiCh@glossary
+  \ifx\makeglossary\@empty
+    \@PackageWarningNoLine{rerunfilecheck}{%
+      Option `glossary' ignored,\MessageBreak
+      because \string\makeglossary\space has already been called%
+    }%
+  \else
+    \def\ReFiCh@temp{%
+      \newwrite\@glossaryfile
+      \immediate\openout\@glossaryfile=\jobname.glo %
+      \def\glossary{%
+        \@bsphack
+        \begingroup
+        \@sanitize
+        \@wrglossary
+      }%
+      \typeout{Writing glossary file \jobname.glo }%
+      \let\makeglossary\@empty
+    }%
+    \ifx\ReFiCh@temp\makeglossary
+      \def\makeglossary{%
+        \newwrite\@glossaryfile
+        \RerunFileCheck{\jobname.glo}{%
+          \immediate\closeout\@glossaryfile
+        }{%
+          Rerun LaTeX/makeindex to get glossary right%
+        }%
+        \immediate\openout\@glossaryfile=\jobname.glo %
+        \def\glossary{%
+          \@bsphack
+          \begingroup
+          \@sanitize
+          \@wrglossary
+        }%
+        \typeout{Writing glossary file \jobname.glo}%
+        \let\makeglossary\@empty
+      }%
+    \else
+      \@PackageInfoNoLine{rerunfilecheck}{%
+        Option `glossary': unsupported version of \string\makeglossary
+      }%
+    \fi
+  \fi
+\fi
+\ReFiCh@DisableOption{mainaux}
+\ReFiCh@DisableOption{partaux}
+\ReFiCh@DisableOption{starttoc}
+\ReFiCh@DisableOption{index}
+\ReFiCh@DisableOption{glossary}
+\ReFiCh@DisableOption{aux}
+\RequirePackage{uniquecounter}[2009/12/18]
+\begingroup\expandafter\expandafter\expandafter\endgroup
+\expandafter\ifx\csname pdf@filesize\endcsname\relax
+  \def\ReFiCh@CheckSum{%
+    \pdf@filemdfivesum
+  }%
+\else
+  \def\ReFiCh@CheckSum#1{%
+    \pdf@filemdfivesum{#1}%
+    \ReFiCh@Separator
+    \pdf@filesize{#1}%
+  }%
+\fi
+\def\ReFiCh@Separator{;}
+\def\ReFiCh@NoFile{<no file>}
+\UniqueCounterNew{rerunfilecheck}
+\newcommand*{\RerunFileCheck}{%
+  \UniqueCounterCall{rerunfilecheck}\ReFiCh@RerunFileCheck
+}
+\def\ReFiCh@RerunFileCheck#1{%
+  \expandafter\ReFiCh@@RerunFileCheck\csname ReFiCh@#1\endcsname
+}
+\def\ReFiCh@Check#1#2#3{%
+    #1\edef#2{\ReFiCh@CheckSum{#3}}%
+    \ifx#2\ReFiCh@Separator
+      #1\let#2\ReFiCh@NoFile
+    \fi
+}
+\def\ReFiCh@@RerunFileCheck#1#2#3#4{%
+  \ReFiCh@Check\global#1{#2}%
+  \AddToHook{enddocument/info}{%
+    \begingroup
+      #3%
+      \ReFiCh@Check{}\x{#2}%
+      \ifx#1\x
+        \@PackageInfoNoLine{rerunfilecheck}{%
+          File `#2' has not changed.\MessageBreak
+          Checksum: \x
+        }%
+      \else
+        \ifnum
+          \ReFiCh@IsAux#2\relax.aux\relax\@nil
+          \ifx#1\ReFiCh@NoFile 1\else 0\fi
+          \ifx\x\ReFiCh@AuxEmptyUnix 1%
+          \else
+            \ifx\x\ReFiCh@AuxEmptyDos 1\fi
+          \fi
+        =111 %
+          \@PackageInfoNoLine{rerunfilecheck}{%
+            File `#2' is empty .aux file.\MessageBreak
+            Before: #1\MessageBreak
+            After: \space\x
+          }%
+        \else
+          \@PackageWarningNoLine{rerunfilecheck}{%
+            File `#2' has changed.%
+            \ifx\\#4\\%
+              \space Rerun%
+            \else
+              \MessageBreak
+              #4%
+            \fi
+          }%
+          \@PackageInfoNoLine{rerunfilecheck}{%
+            Checksums for `#2':\MessageBreak
+            Before: #1\MessageBreak
+            After: \space\x
+          }%
+        \fi
+      \fi
+    \endgroup
+  }%
+}
+\def\ReFiCh@IsAux#1.aux\relax#2\@nil{%
+  \ifx\hbox#2\hbox
+    0%
+  \else
+    1%
+  \fi
+}
+\def\ReFiCh@AuxEmptyUnix{A94A2480D3289E625EEA47CD1B285758;8}%
+\@onelevel@sanitize\ReFiCh@AuxEmptyUnix
+\def\ReFiCh@AuxEmptyDos{A62A15ECE803E2EBE94952FCC9933BC0;9}%
+\@onelevel@sanitize\ReFiCh@AuxEmptyDos
+\ReFiCh@AtEnd%
+%% \section{Installation}
+\endinput
+%%
+%% End of file `rerunfilecheck.sty'.

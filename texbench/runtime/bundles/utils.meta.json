@@ -1,0 +1,42 @@
+{
+  "name": "utils",
+  "files": [
+    {
+      "path": "/texlive/texmf-dist/tex/generic/uniquecounter",
+      "name": "uniquecounter.sty",
+      "start": 0,
+      "end": 7008
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/auxhook",
+      "name": "auxhook.sty",
+      "start": 7008,
+      "end": 10943
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/etoolbox",
+      "name": "etoolbox.def",
+      "start": 10943,
+      "end": 13322
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/etoolbox",
+      "name": "etoolbox.sty",
+      "start": 13322,
+      "end": 60207
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/refcount",
+      "name": "refcount.sty",
+      "start": 60207,
+      "end": 70085
+    },
+    {
+      "path": "/texlive/texmf-dist/tex/latex/rerunfilecheck",
+      "name": "rerunfilecheck.sty",
+      "start": 70085,
+      "end": 79769
+    }
+  ],
+  "totalSize": 79769
+}
