@@ -1,0 +1,519 @@
+{
+  "releaseId": "tl2026-0cc2592f50103429",
+  "texLiveYear": 2026,
+  "engineVersion": "0.2.2",
+  "files": {
+    "amsmath.data.gz": {
+      "size": 122952,
+      "sha256": "cb41d14aad13c55eb77ec336f3220ba92413e4a4ce884f81ccc27c309b024e56"
+    },
+    "amsmath.meta.json": {
+      "size": 4236,
+      "sha256": "e733ccf49e1a3a4ae040811faad73f49d72ae723a5dbee284ec292128d696c32"
+    },
+    "amsmath.raw": {
+      "size": 538302,
+      "sha256": "e14fd36b09d019e20024c8da347ea0d5766abbcc364dcf66a951e3384f4b612f"
+    },
+    "babel.data.gz": {
+      "size": 421704,
+      "sha256": "518019c2eb301bdfa9fbe6604f89893cf105c6f21d59805f66708df2558a0140"
+    },
+    "babel.meta.json": {
+      "size": 165004,
+      "sha256": "d89480f0963bcb28c5091bb24a551cc7c8b91e8c0ce0e70f7c32b78b1025b8d8"
+    },
+    "babel.raw": {
+      "size": 2729198,
+      "sha256": "f0e32aa44b1d24c3f6a36f3de9cb4925501d7c08e12dcdf6f02d761e82843144"
+    },
+    "bibtex.data.gz": {
+      "size": 39723,
+      "sha256": "aa8d1c548fea8117ecf2fd43f3de35dddf4584fe08a129a30b08218d047a4989"
+    },
+    "bibtex.meta.json": {
+      "size": 5027,
+      "sha256": "205559f2c48ae4638faa35b18e02375673d03dcca2216f6ca18b69149115a608"
+    },
+    "bibtex.raw": {
+      "size": 843151,
+      "sha256": "ab8351deb482a0da343b8db87670e36bad768eb22e443d2f0551282ad826813b"
+    },
+    "bundle-deps.json": {
+      "size": 84,
+      "sha256": "52dd929498eee9eff82e28566360e7793be79f77507145d13d477f589cfbe5df"
+    },
+    "bundles.json": {
+      "size": 22856,
+      "sha256": "418b324a7bf2ee0b6ac198f913b661d361cc4cdabf312529e873294589213ede"
+    },
+    "cm-super.data.gz": {
+      "size": 59498638,
+      "sha256": "31dc1892322e97ed40686db65be474373bd6426b71159a30a28dde32a4b92de8"
+    },
+    "cm-super.meta.json": {
+      "size": 65155,
+      "sha256": "d0d083add72f783f861cf5a01dc150ca16bc6ad97a1efa41e8d46c0acfb39608"
+    },
+    "cm-super.raw": {
+      "size": 59933435,
+      "sha256": "ea5b2bf2c60b413a5fa63617b768d7aee33bf563fa1714601819477ff5da6037"
+    },
+    "core.data.gz": {
+      "size": 784276,
+      "sha256": "bd1f196b91ab9fd5e20a0965bc51a8b181bd2bdc21c16e008d4f44a03f17581f"
+    },
+    "core.meta.json": {
+      "size": 67528,
+      "sha256": "8c7357ccd0cc9c4cc25de30ead2c2c2f1167da9a0b79a0a35a232cb5d6f572f1"
+    },
+    "core.raw": {
+      "size": 4537322,
+      "sha256": "108fa1558b37d15c472ba91a867c213d557c0406e636461a5e04d322d87a732c"
+    },
+    "dvips.data.gz": {
+      "size": 18352,
+      "sha256": "766e5b102c55f0078d80226f1961ec8eac1ec5b0ff857b3fb9d9c1f838fe0068"
+    },
+    "dvips.meta.json": {
+      "size": 7363,
+      "sha256": "92645d43d43f09eaf10e6df43c24d0bb5266e4ab699cbb9f7e275384d7d5b7b4"
+    },
+    "dvips.raw": {
+      "size": 62550,
+      "sha256": "993613b30ddeb29458590c2fc2043ff24bf178d7bfcee99b125271d6a6ae39a7"
+    },
+    "extra-maps.data.gz": {
+      "size": 59854,
+      "sha256": "570124e5f08ab9c44bd6a2f1a060a4ca1d3685cce08fe5cbd32a740f5ae7438f"
+    },
+    "extra-maps.meta.json": {
+      "size": 1623,
+      "sha256": "064aba901db4270e056aeacd32398371fb035e4f35921d53b30c07436c6df0fa"
+    },
+    "extra-maps.raw": {
+      "size": 565488,
+      "sha256": "e7af0fdf3ac3498fda15f423849840edd1ebe7de2236f5250d21ccee6e7315ba"
+    },
+    "extra-xetex-lang.data.gz": {
+      "size": 224588,
+      "sha256": "b28315bc76296a35bfc003405072165e0043883f85aa617e4bc9ae6262e8bdfd"
+    },
+    "extra-xetex-lang.meta.json": {
+      "size": 22695,
+      "sha256": "2aedeeb7d001fcdca4c0254be53e22c5780313640f60fb1b242be0730fe45b0f"
+    },
+    "extra-xetex-lang.raw": {
+      "size": 750107,
+      "sha256": "cc92fda31cb0282bb55393793af691b9ec02274bcfd8a5b0b9095c290ce5f521"
+    },
+    "extra.data.gz": {
+      "size": 140536,
+      "sha256": "8f44214499ef6efff1fe1d5d3591ba468ea03e39b007adce564b3b5c8306f456"
+    },
+    "extra.meta.json": {
+      "size": 9282,
+      "sha256": "896f9da9b41fb5c63050cbe76e75f6e84699ca6c75f7026fd2c7d238c8290595"
+    },
+    "extra.raw": {
+      "size": 608197,
+      "sha256": "48c73ee839e6c8e68c7f3cfc9b9099b08e9a0cff3b660ce41d581bafd280d9b7"
+    },
+    "file-manifest.json": {
+      "size": 977916,
+      "sha256": "fbb47cb69e18932d0c294e2b49c778d7901cec345863d961e1a478700f3aa658"
+    },
+    "file-to-package.json": {
+      "size": 542401,
+      "sha256": "5cea1ff39ca09409c34e997475c0b61bf2f1ecc4367f2cb2bdf8a5bdce5f88d7"
+    },
+    "fmt-lualatex.data.gz": {
+      "size": 4254545,
+      "sha256": "cb9ae4e0c405fcca5028de0ebb4081254d3ed5ec9dd00f6d0467aff31e89a61a"
+    },
+    "fmt-lualatex.meta.json": {
+      "size": 215,
+      "sha256": "275aaaf5d1e0cfc586936b77d4febda2632d7ac61b603e35f4030c0bcee36d56"
+    },
+    "fmt-lualatex.raw": {
+      "size": 6746133,
+      "sha256": "f2970233c6f9a2cf2839967631436edeee07784d73ebfdd8448ef61d9b169ab7"
+    },
+    "fmt-pdflatex.data.gz": {
+      "size": 2258515,
+      "sha256": "9dd2789c8ffdb95dbf7962ccc4d7a0ac3acf1d7abe0d6a5f35a0bf832931d544"
+    },
+    "fmt-pdflatex.meta.json": {
+      "size": 211,
+      "sha256": "7a2a9fc09f0da4e557b9e078278cb6bc7eac1b0c8912cce1efab6723ada50a90"
+    },
+    "fmt-pdflatex.raw": {
+      "size": 2300766,
+      "sha256": "57b99c0e19801e9a34f5f5bcf4ebd74cdb6ce9bedd20510fe5251f8ec94d83bd"
+    },
+    "fmt-xelatex.data.gz": {
+      "size": 2454120,
+      "sha256": "7b013cf770028ced4f8711eed8a107ee3d2bac0453e455aba83e5872dd5be442"
+    },
+    "fmt-xelatex.meta.json": {
+      "size": 208,
+      "sha256": "33d139b3ed70466cc6a9c3eb782aee9044bf0d9c1519643a9d7d8454df114268"
+    },
+    "fmt-xelatex.raw": {
+      "size": 4489547,
+      "sha256": "e4147725e823365348312436f2e4563107fb9b92b620418dfab78afc9388bfef"
+    },
+    "font-file-to-package.json": {
+      "size": 2972986,
+      "sha256": "5dee57f5d5650b5d55fa0ffb5c6ed9663aa1b4081677a4a56965242321660cf2"
+    },
+    "font-name-to-package.json": {
+      "size": 232090,
+      "sha256": "dc629790518361011502843ad0a7a280e22480a85e78a15820b9de41e75743c7"
+    },
+    "fonts-cm.data.gz": {
+      "size": 4068426,
+      "sha256": "ca40ab0b4ec6aef920e3a4588816fcc666b367bbf856c1adab49102423480cf5"
+    },
+    "fonts-cm.meta.json": {
+      "size": 88826,
+      "sha256": "20693a84bb752a41f72e98a0ab34100ffd70676cbd1e870dab2cb6e32e140879"
+    },
+    "fonts-cm.raw": {
+      "size": 5907701,
+      "sha256": "10479982fe8d059f8f6ae259114106d91fa158ccc4dd89810c8f700ebfc7ea8e"
+    },
+    "fonts-cmextra.data.gz": {
+      "size": 31300,
+      "sha256": "dffe6c3d072999756c0ab01871858b0c7fc6923e6d40ba9c7fc59bd237a20aa3"
+    },
+    "fonts-cmextra.meta.json": {
+      "size": 2364,
+      "sha256": "01b0ba3cf9f6ffbffa17bd49a7e0df8bb804410a26cb3e2420a4f082a79c225b"
+    },
+    "fonts-cmextra.raw": {
+      "size": 149112,
+      "sha256": "a0785c08fa4a804f9d0bea75c089a4143e521f5dbd2a1b56cf3b85eb5810f353"
+    },
+    "fonts-cyrillic.data.gz": {
+      "size": 11533,
+      "sha256": "6c60e421489b46f7858a2bd7d418c5ad13fab965b1a0fddd0d744b3fa57ad556"
+    },
+    "fonts-cyrillic.meta.json": {
+      "size": 842,
+      "sha256": "d3fc337cc11393a0e6bfa82dc02d6493edd8bfd487c33fd45911705bb33074e4"
+    },
+    "fonts-cyrillic.raw": {
+      "size": 55933,
+      "sha256": "ac55104aa011dc1d1a88a15340c1bd44bcc24261a3c68d7894dbbbbb45a46141"
+    },
+    "fonts-euler.data.gz": {
+      "size": 24710,
+      "sha256": "46481f91db9cc23cbd0f63f9ca4762878c9de9bff7573bfb31bd0c88cd6f0a71"
+    },
+    "fonts-euler.meta.json": {
+      "size": 3373,
+      "sha256": "244e40c4dfcea3abba9b567f41767bc0c564cf8445fdd8abd319a9f84189932a"
+    },
+    "fonts-euler.raw": {
+      "size": 110203,
+      "sha256": "db4f40c0dfb3cf433a172d98f5d68a040a3c3ae3da496376d188b9ee58763a99"
+    },
+    "fonts-lm-afm.data.gz": {
+      "size": 2494379,
+      "sha256": "397a009140a3f191150ae637c470abfff4f3e9d025085acc573e7ecc22c4b57b"
+    },
+    "fonts-lm-afm.meta.json": {
+      "size": 16171,
+      "sha256": "5805ee4f3ee11028b7090ea845edd3519810ec9d1794b0edfc34be7441f93811"
+    },
+    "fonts-lm-afm.raw": {
+      "size": 19190567,
+      "sha256": "2775fe5351a3f28de294593bc78f6cca4aa92bb6a4296fd750114a0b2c5abf2f"
+    },
+    "fonts-lm-otf.data.gz": {
+      "size": 3913841,
+      "sha256": "5d000ad2c38b16754f787b920f65b14b6a0e8f648329f71f059c4c25b6647557"
+    },
+    "fonts-lm-otf.meta.json": {
+      "size": 11550,
+      "sha256": "3d8ecf1301422fcef2a6b9e0799f6c064f03a0b2d40bf1335851db6ea4d6608a"
+    },
+    "fonts-lm-otf.raw": {
+      "size": 7398528,
+      "sha256": "1cb3df7190e11bc0cb79eaceb7c59e8ba7e7747919857b48169f08e854ee5331"
+    },
+    "fonts-lm-tfm.data.gz": {
+      "size": 622707,
+      "sha256": "fceb97b06f2a701b8bb490538b727d4496744b01650f4b2dd1ce139124d4638c"
+    },
+    "fonts-lm-tfm.meta.json": {
+      "size": 87483,
+      "sha256": "031d38b15d01067e4406d99f789ee392e9269489351281bb455cf7033ab3a6f8"
+    },
+    "fonts-lm-tfm.raw": {
+      "size": 4952288,
+      "sha256": "6669fefd176bf6b3e5375e9f4676624dda61588e0beca1b3b560b7a44b4eb22f"
+    },
+    "fonts-lm-type1.data.gz": {
+      "size": 9007354,
+      "sha256": "7b743224696bd8aeffef3ff419850ec16ccba38ebe0abe3576c66e5f16fc42bb"
+    },
+    "fonts-lm-type1.meta.json": {
+      "size": 26721,
+      "sha256": "fc4d6faa2c710507ce9d8e8c1150470b7ed1ed670b96a9dece2eb86b1a933a64"
+    },
+    "fonts-lm-type1.raw": {
+      "size": 9389591,
+      "sha256": "ab89726fc83e0da96b259eafebb9cb14fcf13ade2d94b15e8afd1dbda8f6b311"
+    },
+    "fonts-misc.data.gz": {
+      "size": 721580,
+      "sha256": "2a57f1c4e5c0748320bc1d218abd694106c93ba18fcecdf53ae39d814a8274eb"
+    },
+    "fonts-misc.meta.json": {
+      "size": 109543,
+      "sha256": "eaefddeca4d7a0c648667cda5352c3f56277a70a23f4105e1974e2778dcae530"
+    },
+    "fonts-misc.raw": {
+      "size": 2283969,
+      "sha256": "535fd44f66b27ae5778959ee711aef450530cb990af1495af31e8ebbcc5426b5"
+    },
+    "fonts-source.data.gz": {
+      "size": 360113,
+      "sha256": "3f131f3d00d01ecaa7b83043a7e147110731d0db312d79851a52a46d6a535179"
+    },
+    "fonts-source.meta.json": {
+      "size": 119940,
+      "sha256": "40b9700b5ec03e3bd7b5ff37d391350319aeb88b90097b4e34034eed47f78d7b"
+    },
+    "fonts-source.raw": {
+      "size": 2191751,
+      "sha256": "3cf7f6415316d7bb41cf895847323cc16f59d2bb11f303cfb24e78c2f61fd9df"
+    },
+    "fonts-symbols.data.gz": {
+      "size": 23706,
+      "sha256": "601fb7aeb5677674d5d94d28d931a430d24a9da896059100445ac9debb4e548f"
+    },
+    "fonts-symbols.meta.json": {
+      "size": 2320,
+      "sha256": "126ea97a0c986abe12aa9be4d0939028ef420ab94aea9a3b814120acdeac1a22"
+    },
+    "fonts-symbols.raw": {
+      "size": 135594,
+      "sha256": "12238ffc135b84bd75d07e6aa32d8650ca5db644fc315119952a8871b1f92c03"
+    },
+    "format-provenance.sha256": {
+      "size": 672,
+      "sha256": "a0bbcff22fb178528ef6ddb2f21f1fcf106093f33669b5d4770775d0c76f7ac5"
+    },
+    "graphics.data.gz": {
+      "size": 29807,
+      "sha256": "af40eb522e15bc43efcda15be7341b54f9c5766f9dce5ad8f91414868d13c800"
+    },
+    "graphics.meta.json": {
+      "size": 4157,
+      "sha256": "a56b5b866c391e648f19804ee12a0d39da29e84e709f9a2e9ae1db5b189192e4"
+    },
+    "graphics.raw": {
+      "size": 193995,
+      "sha256": "1537d93b0f9965f363533239ceba3eefd419d3a0c9879b98214a7a89ee2c99e4"
+    },
+    "hyperref.data.gz": {
+      "size": 186707,
+      "sha256": "d7574c37fe43a0e591c5cbd56ac276fd6c8232e291ec3e02001f8a334e807d78"
+    },
+    "hyperref.meta.json": {
+      "size": 5758,
+      "sha256": "a11349f6ea56391fc6f470fcda1b88b94eb4a4ce4356c89eb69f4170368f9b59"
+    },
+    "hyperref.raw": {
+      "size": 946816,
+      "sha256": "2a5449b2c127e909c8419fa606f6a6dfecf70ba04d682f21ba5c0fded575a506"
+    },
+    "l3.data.gz": {
+      "size": 304494,
+      "sha256": "ed051900e2e713b742dc33c10b744e9b99d69e8226ed870c0b24d49a0fe79931"
+    },
+    "l3.meta.json": {
+      "size": 5979,
+      "sha256": "7bd092425aacb2bae19c3a722e5eb9170fcad5d11b3f1172cea3387439090111"
+    },
+    "l3.raw": {
+      "size": 1988881,
+      "sha256": "00d9830c19fa3951032c8f4f96a801b9f102013300217fa8139ea9235c669328"
+    },
+    "normalized/_index.json": {
+      "size": 16,
+      "sha256": "dd2feb7a6be89fa6e5b34df3e8c8acd4bb1cdcaf1f09065b28a856ba6452e741"
+    },
+    "normalized/acrotex.json": {
+      "size": 777041,
+      "sha256": "792997a7c8d24a0ce3d88faa57588154c18f44e7fe67394f7a28200193076717"
+    },
+    "package-deps.json": {
+      "size": 23783,
+      "sha256": "44b8762827d94d1b606c594517af1b30131270bf92c2ba5059e489f6869dffa2"
+    },
+    "package-map.json": {
+      "size": 28,
+      "sha256": "c1fbfa888351e2130777bb98c0af533188a966c66cf8519f9beb64ddff7ed25b"
+    },
+    "registry.json": {
+      "size": 2583,
+      "sha256": "faa6d8c58eebf1f803e6319eda2aa8327bb4373affa0c16bc68025b8092e539d"
+    },
+    "tex-context.data.gz": {
+      "size": 41317,
+      "sha256": "d3c0a1cda9741bf230fb437582f5994d73e8125f654fcb5af2cca760fba72b01"
+    },
+    "tex-context.meta.json": {
+      "size": 1146,
+      "sha256": "be112a96dc7a154719976a2066441719331472ac89898c519d394b2bce04ffc1"
+    },
+    "tex-context.raw": {
+      "size": 152346,
+      "sha256": "0fda3c602c8ee3746c6af848c1219ce76a382d4e42d25ec81665d7999df94d4e"
+    },
+    "tex-generic.data.gz": {
+      "size": 1131125,
+      "sha256": "3f7ed847264613ff9c02c2ffed48c2a61520ae288949b6a38675058c63dc69a2"
+    },
+    "tex-generic.meta.json": {
+      "size": 27391,
+      "sha256": "fcc92feca885e547d903c186cb4dac23af4c01e01a7cddfffdcd77a9b74ebc3d"
+    },
+    "tex-generic.raw": {
+      "size": 5517769,
+      "sha256": "cda8c94bcc0bf8cb40cbd19006f08aba079a2e08e97915514b6f7fe5fb5f480c"
+    },
+    "tex-latex-dev.data.gz": {
+      "size": 729760,
+      "sha256": "e85303dea9429bbde1d32e11ca014bfe39267bc158785e6dbeb3ece5dd2f288c"
+    },
+    "tex-latex-dev.meta.json": {
+      "size": 29175,
+      "sha256": "984a8d5a8b0c74bf6e628c9a07297a65655014a2ff8415417326901744af917a"
+    },
+    "tex-latex-dev.raw": {
+      "size": 4606163,
+      "sha256": "b2221190979eb7f35a8a00452777f80fc29ce9883d1a9d82e05dd0dba88afc14"
+    },
+    "tex-latex-misc.data.gz": {
+      "size": 1427074,
+      "sha256": "4db8dbc35c535a38ac766ab8241cdad22ab741a135fc7b426fa5e4225905e3f7"
+    },
+    "tex-latex-misc.meta.json": {
+      "size": 61079,
+      "sha256": "95808e1227a2dab405993dace8ed664f29d3663f62f40a09dc5d009259580c1b"
+    },
+    "tex-latex-misc.raw": {
+      "size": 4356692,
+      "sha256": "a1e03c62cbeed5a2f650204f94899038013cf16a32fad5acf08fc8e7b76934be"
+    },
+    "tex-lualatex.data.gz": {
+      "size": 2592455,
+      "sha256": "7ff68cd371e39e8d6ce81cbd7baa94dd99d4645af29eb9f5dbd59e4926ed1432"
+    },
+    "tex-lualatex.meta.json": {
+      "size": 33105,
+      "sha256": "a421f0b0237659a205627ede3483ab611ef00be5dc46251c326e1331708de9af"
+    },
+    "tex-lualatex.raw": {
+      "size": 4511059,
+      "sha256": "c37603a01f67941919630ba56ef4b871b11c0f17004b4a5ba1c67077a12bad2b"
+    },
+    "tex-luatex.data.gz": {
+      "size": 2134059,
+      "sha256": "952edfde2f6346f053f512d40d2ef7fa508ff970628eefc8a73038fbc2799a9a"
+    },
+    "tex-luatex.meta.json": {
+      "size": 43113,
+      "sha256": "344923da10e0fc636a3f5a2b54a8fc5a02a0da011d5d9850b09788af591b30b9"
+    },
+    "tex-luatex.raw": {
+      "size": 12876488,
+      "sha256": "09af4e6ff8462956983b5f5022b720a95aac668fdec561c1a27310a33ac4c5dc"
+    },
+    "tex-optex.data.gz": {
+      "size": 1014191,
+      "sha256": "1a354dbb2c8d510b973e9b94626fee0ea1d40b333dc18b2a00e64c72e960fa5c"
+    },
+    "tex-optex.meta.json": {
+      "size": 20708,
+      "sha256": "e2e9a7fa8014257e75dcdc9b153ae42ab51e1bad31bc6d0c215bba0c80c964d4"
+    },
+    "tex-optex.raw": {
+      "size": 2202303,
+      "sha256": "3325a90edafeefda33c5246a32c9fe73fb8436ad092e392f25cdb555e542322d"
+    },
+    "tex-plain.data.gz": {
+      "size": 72367,
+      "sha256": "ecbcdb30f850453c9494aab01a5791f025ad62d5d6cb9d4f1deededf8448791e"
+    },
+    "tex-plain.meta.json": {
+      "size": 4606,
+      "sha256": "1e6c19322e377b39d2d625c92c7f6357b206a5c343a1cc2897454d7dbadbe0ab"
+    },
+    "tex-plain.raw": {
+      "size": 237393,
+      "sha256": "3da6fee17175cd34a892caa6cff90b1c9cf6de1303927a814ab527a2df26d29f"
+    },
+    "tex-xelatex.data.gz": {
+      "size": 441180,
+      "sha256": "49e1410a5c1c626906adac52f6dff74bb8e944c7521666040a61fa1cfa582854"
+    },
+    "tex-xelatex.meta.json": {
+      "size": 5189,
+      "sha256": "46a1a09d4ed87e28da6026729ddfcd3bec21268dcdb0e9dafe0b242d5c14ba45"
+    },
+    "tex-xelatex.raw": {
+      "size": 2131860,
+      "sha256": "810776749a1235494722e9fbcf553db97dd71ea6a9a1d7b02a66e3c507f6602e"
+    },
+    "tex-xetex.data.gz": {
+      "size": 87629,
+      "sha256": "845676b3395da982dd9f81664283466c2333248f8adfebf0e9ea4cc34d36347c"
+    },
+    "tex-xetex.meta.json": {
+      "size": 2425,
+      "sha256": "c2d8ee033d9f5300b0885357261cb27f3200e2ecea8856387f8002a7e537cf41"
+    },
+    "tex-xetex.raw": {
+      "size": 383993,
+      "sha256": "afb39b42aa0f4c730aea627e3f04a4a4e954bbf6badce8c6c6b3ef05b9473ad8"
+    },
+    "texlive-packages.lock.json": {
+      "size": 6299,
+      "sha256": "f1ab9757fe8b4928f87ddf4cf141bd3b76be4826f0d6352c6043a85363a1c303"
+    },
+    "utils.data.gz": {
+      "size": 15336,
+      "sha256": "9fc02bc667ef12195b55d01cfabb37ba75bf475a69d44231ed601617d05ae34d"
+    },
+    "utils.meta.json": {
+      "size": 916,
+      "sha256": "518d628734e937809886b2fc1e87064c03a9db587600877aa7009546902fd59c"
+    },
+    "utils.raw": {
+      "size": 79769,
+      "sha256": "844cf7b61e768690867b8b4d1436248b398d2ed4144072322bd124a35fbd300a"
+    },
+    "wasm/busytex.js": {
+      "size": 299658,
+      "sha256": "036ecf65da27d4ac611d2864d60b3422af17d6093f386c260675e53c52c55636"
+    },
+    "wasm/busytex.wasm": {
+      "size": 32282976,
+      "sha256": "76646057f2178846311c3ed121a0028ccf7e647f01a5df2d1d3b1523446d49f1"
+    },
+    "worker.js": {
+      "size": 129880,
+      "sha256": "8eadd5609ef98040768b36fd803d2f3c38b8bc45186f89e97ce0538459bc531d"
+    },
+    "xzwasm.js": {
+      "size": 24746,
+      "sha256": "f71eb30bb46d258e5d67c77033e949e9feff75ff6beaac5e4f8d54fb5aa5e5ff"
+    }
+  }
+}
