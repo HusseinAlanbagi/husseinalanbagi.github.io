@@ -408,6 +408,51 @@ export function estimateBreaks(doc) {
   return out;
 }
 
+
+// ---------------------------------------------------------------- fitting long equations (web layout)
+// Break a row of maths at top-level operators so each piece fits `avail` px; continuation lines are indented.
+const REL = /^(=|<|>|\\(leq|geq|le|ge|neq|ne|approx|equiv|sim|simeq|propto|to|rightarrow|Rightarrow|iff|implies|coloneqq|ll|gg|subset|subseteq|in)(?![A-Za-z]))/;
+const BIN = /^([+-]|\\(cdot|times|pm|mp)(?![A-Za-z]))/;
+function breakPoints(tex) {
+  const pts = []; let d = 0, prev = '';
+  for (let i = 0; i < tex.length; i++) {
+    const c = tex[i], rest = tex.slice(i);
+    if (c === '\\') {
+      const w = /^\\([A-Za-z]+|.)/.exec(rest)[0];
+      if (w === '\\left' || w === '\\begin') d++; else if (w === '\\right' || w === '\\end') d--;
+      if (d === 0 && (REL.test(rest) || BIN.test(rest)) && prev && !/[=(\[{,&]$|\\(left|right)$/.test(prev)) pts.push({ at: i, rel: REL.test(rest) });
+      i += w.length - 1; prev = w; continue;
+    }
+    if (c === '{' || c === '(' || c === '[') d++; else if (c === '}' || c === ')' || c === ']') d--;
+    else if (d === 0 && (c === '=' || c === '<' || c === '>' || c === '+' || c === '-') && prev && !/[=(\[{,&+\-<>^_]$/.test(prev.trim() ? prev : '=')) pts.push({ at: i, rel: c === '=' || c === '<' || c === '>' });
+    if (!/\s/.test(c)) prev = c;
+  }
+  return pts;
+}
+// width in px of a piece of maths (MathJax gives ex; pxPerEx is measured from the full equation)
+const widthEx = (tex, macros) => { try { const n = window.MathJax.tex2svg(macros + tex, { display: true }); const w = n.querySelector('svg')?.getAttribute('width') || '0'; return parseFloat(w); } catch { return 0; } };
+export function breakRow(row, availEx, macros) {
+  const amp = row.indexOf('&') >= 0 && !/\\begin\{/.test(row) ? row.indexOf('&') : -1;
+  const all = breakPoints(row), rel = amp >= 0 ? { at: amp } : all.find(p => p.rel);
+  // continuation lines line up after the relation, unless the left side is wide: then they start near the margin
+  const lhsEx = rel ? widthEx(row.slice(0, rel.at).replace(/&/g, ''), macros) : 0;
+  const underRel = rel && lhsEx < availEx * 0.4, offset = underRel ? lhsEx + 3 : 4;
+  const pts = all.filter(p => p.at > (rel ? rel.at + 1 : 0));
+  if (!pts.length) return null;
+  const lines = []; let start = 0, last = null;
+  for (let k = 0; k <= pts.length; k++) {
+    const end = k < pts.length ? pts[k].at : row.length;
+    const room = lines.length ? availEx - offset : availEx;
+    if (widthEx(row.slice(start, end).replace(/&/g, ''), macros) > room && last != null && last > start) { lines.push(row.slice(start, last)); start = last; k--; last = null; continue; }
+    last = end;
+  }
+  lines.push(row.slice(start));
+  if (lines.length < 2) return null;
+  let first = lines[0].replace(/&/g, '');
+  if (underRel) { const at = amp >= 0 ? amp : rel.at; first = lines[0].slice(0, at).replace(/&/g, '') + '&' + lines[0].slice(at).replace(/&/g, ''); return [first, ...lines.slice(1).map(l => '&\\quad ' + l.replace(/^\s+/, ''))]; }
+  return ['&' + first, ...lines.slice(1).map(l => '&\\qquad ' + l.replace(/^\s+/, ''))];
+}
+
 // ---------------------------------------------------------------- the module
 export default {
   id: 'visual-mode',
@@ -422,11 +467,11 @@ export default {
       ['format', 'Headings, lists and tables', 'Numbered sections, emphasis, lists, tables, captions, theorems and the title block'],
       ['tags', 'Citations and references', 'Author–year or numbered citations, and \\ref as the number it will print'],
       ['preamble', 'Fold the preamble', 'Collapse everything before \\begin{document} into one line'],
-      ['page', 'Page sheet', 'Serif text on a page, without line numbers or comments'],
+      ['page', 'Layout', ''],
     ];
     const ALL = () => Object.fromEntries(LAYERS.map(([k]) => [k, true]));
     // settings: on/off, which layers, page breaks (older versions stored only the layers)
-    let layers = ctx.settings.get('layers2', null), on = ctx.settings.get('on', null), breaksOn = ctx.settings.get('breaks', true);
+    let layers = ctx.settings.get('layers2', null), on = ctx.settings.get('on', null), breaksOn = ctx.settings.get('breaks', true), layout = ctx.settings.get('layout', 'page');
     if (!layers) { const old = ctx.settings.get('layers', {}); const any = Object.values(old).some(Boolean); layers = any ? old : ALL(); if (on == null) on = any; }
     if (!Object.values(layers).some(Boolean)) layers = ALL();
     on = !!on;
@@ -448,8 +493,8 @@ export default {
     const reveal = (view, pos) => (e) => { if (e.button !== 0) return; e.preventDefault(); view.dispatch({ selection: { anchor: pos }, scrollIntoView: false }); view.focus(); };
     const contentWidth = (view) => { const c = view.contentDOM, cs = getComputedStyle(c); return Math.round((c.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) / 20) * 20; };
     class MathWidget extends WidgetType {
-      constructor(it, macros, ready) { super(); this.it = it; this.macros = macros; this.ready = ready; this.tex = mathTex(it); }
-      eq(o) { return o.tex === this.tex && o.macros === this.macros && o.ready === this.ready && o.it.from === this.it.from; }
+      constructor(it, macros, ready, fit) { super(); this.it = it; this.macros = macros; this.ready = ready; this.fit = fit; this.tex = mathTex(it); }
+      eq(o) { return o.tex === this.tex && o.macros === this.macros && o.ready === this.ready && o.fit === this.fit && o.it.from === this.it.from; }
       toDOM(view) {
         const display = this.it.kind === 'dmath';
         const el = h(display ? 'div' : 'span', { class: display ? 'vz-dmath' : 'vz-imath', title: 'Click to edit the LaTeX · Ctrl+E opens the equation editor' });
@@ -459,10 +504,43 @@ export default {
           if (r.error) { el.classList.add('vz-err'); el.title = 'This equation has a problem: ' + r.error; }
         } else { el.textContent = (this.it.tex || this.it.body || '').trim(); el.classList.add('vz-wait'); }
         el.addEventListener('mousedown', reveal(view, display ? this.it.inner : this.it.from + 1));
+        if (display && this.fit && this.ready) watchFit(el, () => fitMath(el, this, view));
         return el;
       }
+      destroy(el) { el._ro?.disconnect(); }
       ignoreEvent() { return true; }
       get estimatedHeight() { return this.it.kind === 'dmath' ? 48 : -1; }
+    }
+    // run fn now and whenever the element's width changes
+    function watchFit(el, fn) {
+      let w = -1;
+      const go = () => { if (!el.isConnected) return; const cw = el.clientWidth; if (cw && cw !== w) { w = cw; fn(); } };
+      requestAnimationFrame(go);
+      el._ro = new ResizeObserver(() => requestAnimationFrame(go)); el._ro.observe(el);
+    }
+    // web layout: a display equation wider than the column is broken at + − = (as an aligned block); if a piece
+    // cannot be broken (a wide matrix, one long fraction), it is scaled down to fit
+    function fitMath(el, wd, view) {
+      const avail = el.clientWidth - 4; if (avail < 80) return;
+      const draw = (tex) => { const r = renderMath(tex, true, wd.macros, Math.round(avail / 20) * 20); if (r.html) el.innerHTML = r.html; return el.querySelector('svg'); };
+      let svg = draw(wd.tex); if (!svg) return;
+      const W = svg.getBoundingClientRect().width;
+      if (W > avail + 1) {
+        const ex = parseFloat(svg.getAttribute('width')) || 0, pxPerEx = ex && !/%/.test(svg.getAttribute('width')) ? W / ex : (parseFloat(svg.style.minWidth) ? W / parseFloat(svg.style.minWidth) : 8);
+        const it = wd.it, rows = it.rows || [{ tex: it.body, num: null }];
+        const tagW = rows.some(r => r.num) ? 4.5 : 0, availEx = avail / pxPerEx - tagW - 1;
+        let changed = false;
+        const out = rows.map(r => { if (widthEx(r.tex.replace(/&/g, ''), wd.macros) <= availEx) return [{ tex: r.tex, num: r.num }]; const parts = breakRow(r.tex.trim(), availEx, wd.macros); if (!parts) return [{ tex: r.tex, num: r.num }]; changed = true; return parts.map((t, i) => ({ tex: t, num: i === parts.length - 1 ? r.num : null })); }).flat();
+        if (changed) {
+          const anyAmp = out.some(r => r.tex.includes('&'));
+          const body = out.map(r => (anyAmp && !r.tex.includes('&') ? '&' : '') + r.tex + (r.num ? `\\tag{${r.num}}` : '')).join('\\\\');
+          svg = draw(`\\begin{align*}${body}\\end{align*}`) || svg;
+        }
+        const W2 = svg.getBoundingClientRect().width;
+        if (W2 > avail + 1) { const z = Math.max(0.45, avail / W2); const c = el.firstElementChild; if (c) c.style.zoom = z; }
+        el.classList.toggle('vz-fitted', true);
+      }
+      view.requestMeasure();
     }
     function mathTex(it) {
       if (it.kind === 'imath') return it.tex;
@@ -526,7 +604,9 @@ export default {
         table.append(tr);
       }
       if (pending.trim() && table.lastChild) table.lastChild.classList.add(...pending.trim().split(/\s+/).map(r => 'after-' + r));
-      return h('div', { class: 'vz-tablewrap', title: 'Click to edit the table' }, table);
+      const wrapEl = h('div', { class: 'vz-tablewrap', title: 'Click to edit the table' }, table);
+      if (layers.page && layout === 'web') watchFit(wrapEl, () => { table.style.zoom = ''; const a = wrapEl.clientWidth - 4, w = table.getBoundingClientRect().width; if (w > a) table.style.zoom = Math.max(0.5, a / w); });
+      return wrapEl;
     }
     function splitCells(row) {
       const out = []; let d = 0, last = 0;
@@ -595,6 +675,7 @@ export default {
     // ---- decorations
     function build(state, P) {
       const { items, blocks, info } = P;
+      const fitOn = layers.page && layout === 'web';
       const ranges = [], sel = state.selection.ranges, L = layers, doc = state.doc;
       const zones = blocks.filter(b => FLOATS.test(b.env) || TABULAR.test(b.env)).map(b => ({ from: b.from, to: b.to }));
       const near = (it) => sel.some(r => r.from <= it.to && r.to >= it.from && !(it.kind === 'preamble' && r.to === 0));
@@ -614,7 +695,7 @@ export default {
           case 'comment': hideRange(it.from, it.to); break;
           case 'dmath': {
             const from = it.block ? doc.lineAt(it.from).from : it.from, to = it.block ? doc.lineAt(it.to).to : it.to;
-            ranges.push(Decoration.replace({ block: it.block, widget: new MathWidget(it, info.macros, ready) }).range(from, to)); covered.push({ from: it.from, to: it.to }); break;
+            ranges.push(Decoration.replace({ block: it.block, widget: new MathWidget(it, info.macros, ready, fitOn) }).range(from, to)); covered.push({ from: it.from, to: it.to }); break;
           }
           case 'imath': ranges.push(Decoration.replace({ widget: new MathWidget(it, info.macros, ready) }).range(it.from, it.to)); break;
           case 'heading': {
@@ -670,7 +751,7 @@ export default {
           }
           case 'table': {
             const from = it.block ? doc.lineAt(it.from).from : it.from, to = it.block ? doc.lineAt(it.to).to : it.to;
-            ranges.push(Decoration.replace({ block: it.block, widget: new Html('tab' + it.spec + it.body + ready, () => tableEl(it, info.macros), it.from + 1) }).range(from, to)); covered.push({ from: it.from, to: it.to }); break;
+            ranges.push(Decoration.replace({ block: it.block, widget: new Html('tab' + it.spec + it.body + ready + fitOn, () => tableEl(it, info.macros), it.from + 1) }).range(from, to)); covered.push({ from: it.from, to: it.to }); break;
           }
         }
       }
@@ -765,10 +846,10 @@ export default {
     let sw, panel = null;
     const apply = () => {
       const active = on && Object.values(layers).some(Boolean);
-      const key = (active ? 'v' + (layers.page ? 'p' : '') + JSON.stringify(layers) : '') + (breaksOn ? 'b' : '');
+      const key = (active ? 'v' + layout + JSON.stringify(layers) : '') + (breaksOn ? 'b' : '');
       if (key !== extKey) {
         extKey = key; offExt && offExt();
-        offExt = ctx.editor.addExtension([active ? [field, EditorView.editorAttributes.of({ class: 'cm-typeset' + (layers.page ? ' cm-page' : '') })] : [], breaksOn ? breaksField : []]);
+        offExt = ctx.editor.addExtension([active ? [field, EditorView.editorAttributes.of({ class: 'cm-typeset' + (layers.page ? ' cm-page' + (layout === 'web' ? ' cm-web' : '') : '') })] : [], breaksOn ? breaksField : []]);
       } else poke();
       if (breaksOn) measure();
       sw.setAttribute('aria-checked', String(on)); sw.classList.toggle('on', on);
@@ -776,8 +857,9 @@ export default {
       if (active && layers.math && !ready) loadMathJax().then(() => { ready = true; poke(); }).catch((e) => ctx.ui.toast('Equations cannot be drawn: ' + e.message, 'err'));
     };
     const poke = () => { try { view().dispatch({ effects: refresh.of(null) }); } catch {} };
-    const save = () => { ctx.settings.set('on', on); ctx.settings.set('layers2', layers); ctx.settings.set('breaks', breaksOn); };
+    const save = () => { ctx.settings.set('layout', layout); ctx.settings.set('on', on); ctx.settings.set('layers2', layers); ctx.settings.set('breaks', breaksOn); };
     const setOn = (v) => { on = v; if (on && !Object.values(layers).some(Boolean)) layers = ALL(); save(); apply(); };
+    const setLayout = (k) => { if (k === 'inline') layers = { ...layers, page: false }; else { layers = { ...layers, page: true }; layout = k; } on = true; save(); apply(); };
     const setLayer = (k, v) => { layers = { ...layers, [k]: v }; if (v) on = true; if (!Object.values(layers).some(Boolean)) on = false; save(); apply(); };
     const swEl = (checked, label, hint, onChange) => {
       const b = h('button', { class: 'vz-row', role: 'switch', 'aria-checked': String(checked), title: hint || '', onClick: () => onChange(!checked) }, h('span', { class: 'vz-row-l' }, h('span', {}, label), hint ? h('small', {}, hint) : null), h('span', { class: 'vz-track' }, h('span', { class: 'vz-knob' })));
@@ -786,8 +868,13 @@ export default {
     function renderPanel() {
       panel.replaceChildren(
         swEl(on, 'Visual view', 'Draw the document the way it will print', setOn),
+        h('div', { class: 'vz-sep' }, 'Layout'),
+        h('div', { class: 'vz-seg', role: 'radiogroup', 'aria-label': 'Layout' }, ...[['page', 'Page', 'As printed, page by page'], ['web', 'Web', 'Fits the window, no pages; long equations wrap'], ['inline', 'In the code', 'Drawn inside the source, with line numbers']].map(([k, label, hint]) => {
+          const cur = !layers.page ? 'inline' : layout;
+          return h('button', { role: 'radio', 'aria-checked': String(cur === k), class: cur === k ? 'on' : '', title: hint, onClick: () => setLayout(k) }, h('span', {}, label), h('small', {}, hint));
+        })),
         h('div', { class: 'vz-sep' }, 'What is drawn'),
-        ...LAYERS.map(([k, label, hint]) => swEl(!!layers[k], label, hint, (v) => setLayer(k, v))),
+        ...LAYERS.filter(([k]) => k !== 'page').map(([k, label, hint]) => swEl(!!layers[k], label, hint, (v) => setLayer(k, v))),
         h('div', { class: 'vz-sep' }, 'In both views'),
         swEl(breaksOn, 'Page breaks', 'Mark where each page starts; exact after a compile, estimated before', (v) => { breaksOn = v; save(); apply(); }),
       );
@@ -807,6 +894,8 @@ export default {
     const wrap = h('span', { class: 'vz-wrap' }, sw, more);
     ctx.ui.addEditorButton(wrap);
     ctx.ui.addCommand({ id: 'visual.toggle', name: 'Visual view: on or off', key: 'Mod+Shift+V', run: () => setOn(!on) });
+    ctx.ui.addCommand({ id: 'visual.page', name: 'Visual view: page layout', run: () => setLayout('page') });
+    ctx.ui.addCommand({ id: 'visual.web', name: 'Visual view: web layout (long equations wrap)', run: () => setLayout('web') });
     ctx.ui.addCommand({ id: 'visual.breaks', name: 'Page breaks: show or hide', run: () => { breaksOn = !breaksOn; save(); apply(); } });
     ctx.editor.addKeymap([{ key: 'Mod-Shift-v', run: () => (setOn(!on), true) }]);
     ctx.on('open', () => setTimeout(measure, 0));
@@ -826,10 +915,10 @@ export default {
 [aria-checked="true"] > .vz-track, .vz-switch.on .vz-track { background: var(--accent); }
 [aria-checked="true"] > .vz-track .vz-knob, .vz-switch.on .vz-knob { transform: translateX(11px); }
 @media (prefers-reduced-motion: reduce) { .vz-track, .vz-knob { transition: none; } }
-.vz-panel { position: fixed; z-index: 60; width: 320px; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 36px rgba(15,23,32,.18); padding: 6px; }
-.vz-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; width: 100%; text-align: left; border: 0; background: none; padding: 8px 10px; border-radius: 7px; color: var(--ink); }
+.vz-panel { position: fixed; z-index: 60; width: 340px; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 36px rgba(15,23,32,.18); padding: 6px; }
+.vz-row { white-space: normal; display: flex; align-items: center; justify-content: space-between; gap: 14px; width: 100%; text-align: left; border: 0; background: none; padding: 8px 10px; border-radius: 7px; color: var(--ink); }
 .vz-row:hover { background: var(--panel-2); } .vz-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-.vz-row-l { display: flex; flex-direction: column; gap: 1px; font: 500 13px var(--ui); } .vz-row-l small { font: 12px var(--ui); color: var(--muted); }
+.vz-row-l { display: flex; flex-direction: column; gap: 1px; font: 500 13px var(--ui); min-width: 0; flex: 1; } .vz-row-l small { font: 12px var(--ui); color: var(--muted); }
 .vz-panel > .vz-row:first-child { padding: 10px; } .vz-panel > .vz-row:first-child .vz-row-l > span { font-weight: 600; }
 .vz-sep { font: 600 11.5px var(--ui); color: var(--faint); padding: 10px 10px 4px; border-top: 1px solid var(--line); margin-top: 4px; }
 .vz-pop { position: fixed; z-index: 70; width: min(440px, calc(100vw - 16px)); background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 36px rgba(15,23,32,.2); padding: 12px 14px; display: grid; gap: 10px; }
@@ -856,6 +945,19 @@ export default {
 .cm-page .cm-activeLine { background: transparent; }
 .cm-page .vz-src-math, .cm-page .vz-envtag { font-family: var(--mono); }
 .vz-gone { height: 0; }
+/* web layout: no pages; the text fits the editor, at a readable width */
+.cm-page.cm-web .cm-scroller { background: var(--paper); }
+.cm-page.cm-web .cm-content { min-width: 0 !important; width: 100%; box-sizing: border-box; max-width: 54rem; margin: 0 auto; padding: 30px clamp(18px, 5%, 56px) 90px; background: transparent; box-shadow: none; min-height: 0; }
+.cm-page.cm-web .tb-pb { display: none; }
+.cm-page.cm-web .vz-preamble { margin: 0 0 20px; box-sizing: border-box; }
+.cm-page.cm-web .vz-dmath { overflow: hidden; padding: 8px 0; min-width: 0; }
+.cm-page.cm-web .vz-dmath > mjx-container { min-width: 0 !important; }
+.cm-page.cm-web .vz-tablewrap { overflow: hidden; min-width: 0; }
+.vz-seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 2px 6px 6px; }
+.vz-seg button { min-width: 0; white-space: normal; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 7px 8px; border: 1px solid var(--line); border-radius: 7px; background: var(--paper); color: var(--ink); font: 500 13px var(--ui); }
+.vz-seg button small { font: 11px/1.3 var(--ui); color: var(--muted); }
+.vz-seg button:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.vz-seg button.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 @container (max-width: 640px) { .cm-page .cm-content { padding: 28px 26px 48px; margin: 10px 8px 40px; } .cm-page .tb-pb { margin: 20px -26px 30px; } }
 
 .vz-h { font-weight: 700; color: var(--ink); }
