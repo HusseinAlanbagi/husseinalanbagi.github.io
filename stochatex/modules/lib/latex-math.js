@@ -36,7 +36,8 @@ export function blank(src) {
 // Scan one equation. Returns { symbols, operators } with character positions in `eq`.
 //   symbol:   { key, tex, time, steady, pos, end }     time: null | 0 | ±n ; steady: null | 'bar' | 'ss' | 'star'
 //   operator: { pos, from, to }                        an expectation operator and the stretch of text it covers
-export function scan(eq, offset = 0, out = { symbols: [], operators: [] }) {
+//   multi:    optional Set of multi-letter names (rer, cw …) to read as one symbol instead of a product of letters
+export function scan(eq, offset = 0, out = { symbols: [], operators: [] }, multi = null) {
   const s = offset ? eq : blank(eq);
   let i = 0;
   const n = s.length;
@@ -53,7 +54,7 @@ export function scan(eq, offset = 0, out = { symbols: [], operators: [] }) {
       else if (BIGOPS.has(name)) { i = skipScripts(s, i); continue; }
       else if (name === 'imath') base = 'i'; else if (name === 'jmath') base = 'j'; else if (name === 'ell') base = '\\ell';
       else continue;       // \frac, \sqrt, \cdot, \log … : structure, not symbols
-    } else if (/[A-Za-z]/.test(c)) { base = c; i++; }
+    } else if (/[A-Za-z]/.test(c)) { const w = multiAt(s, i, multi); base = w || c; i += w ? w.length : 1; }
     else { i++; continue; }
 
     // scripts
@@ -75,7 +76,7 @@ export function scan(eq, offset = 0, out = { symbols: [], operators: [] }) {
         else if (p === 'ss') steady = 'ss';
         else if (p === '\\prime') primes += "'";
         else if (/^[A-Za-z]{1,3}$/.test(p)) label = p;               // R^k_t, \pi^w_t: a label, not a power
-        else scan(' '.repeat(offset + a.start) + raw, 1, out).symbols;   // a power: look inside it
+        else scan(' '.repeat(offset + a.start) + raw, 1, out, multi).symbols;   // a power: look inside it
       }
       i = a.end;
     }
@@ -85,6 +86,19 @@ export function scan(eq, offset = 0, out = { symbols: [], operators: [] }) {
   }
   if (!offset) for (const sym of out.symbols) sym.expected = out.operators.some(o => sym.pos >= o.from && sym.pos < o.to);
   return out;
+}
+// the longest listed multi-letter name starting at i (not inside a longer word)
+function multiAt(s, i, multi) {
+  if (!multi || !multi.size || /[A-Za-z\\]/.test(s[i - 1] || '')) return null;
+  let best = null;
+  for (const w of multi) if (w.length > 1 && s.startsWith(w, i) && !/[A-Za-z]/.test(s[i + w.length] || '') && (!best || w.length > best.length)) best = w;
+  return best;
+}
+// Letter runs written like one name, such as rer_t or cw_{t+1}: suggestions for the multi-letter list
+export function multiLetterCandidates(eq) {
+  const out = new Set(), s = blank(eq);
+  for (const m of s.matchAll(/(?<![A-Za-z\\])([A-Za-z]{2,5})(?=\s*_\s*\{?\s*t\b)/g)) out.add(m[1]);
+  return [...out];
 }
 function skipScripts(s, i) {
   for (;;) { let j = i; while (s[j] === ' ') j++; if (s[j] !== '_' && s[j] !== '^') return i; i = readArg(s, j + 1).end; }
@@ -116,19 +130,38 @@ function scope(s, i) {
   return { from: j, to: m };
 }
 
-// Find the display equations of a .tex source. Returns [{ tex, line, env }], one per row of an align.
+// Find the display equations of a .tex source. Returns one entry per row of an align (a multline is one equation):
+//   { tex, line, env, index, star, numbered, override, envLine, envIndex }
+//   numbered: LaTeX gives it a number (not starred, no \nonumber or \notag, or it has a \tag)
+//   override: 'in' | 'out' | null, from a comment  % model  or  % not model  on the \begin line (whole environment)
+//             or on the row's own line
 const ENVS = 'equation|align|gather|multline|eqnarray|flalign|alignat';
+export const MODEL_COMMENT = /%[ \t]*(not[ \t-]*)?model\b(?!-)[ \t]*$/i;
 export function findEquations(src) {
-  const out = [], lineAt = (idx) => src.slice(0, idx).split('\n').length;
+  const out = [], starts = [0];
+  for (let i = src.indexOf('\n'); i >= 0; i = src.indexOf('\n', i + 1)) starts.push(i + 1);
+  const lineAt = (idx) => { let lo = 0, hi = starts.length - 1; while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (starts[mid] <= idx) lo = mid; else hi = mid - 1; } return lo + 1; };
+  const lineText = (n) => src.slice(starts[n - 1], (starts[n] ?? src.length + 1) - 1);
+  const overrideOn = (n) => { const m = MODEL_COMMENT.exec(lineText(n)); return m ? (m[1] ? 'out' : 'in') : null; };
   const clean = src.replace(/(^|[^\\])%.*$/gm, (m, a) => a + ' '.repeat(m.length - a.length));
   const re = new RegExp(`\\\\begin\\{(${ENVS})(\\*?)\\}(?:\\{[^}]*\\})?([\\s\\S]*?)\\\\end\\{\\1\\2\\}|\\\\\\[([\\s\\S]*?)\\\\\\]`, 'g');
   for (const m of clean.matchAll(re)) {
-    const body = m[3] ?? m[4], start = m.index + m[0].indexOf(body);
+    const body = m[3] ?? m[4], start = m.index + m[0].indexOf(body), env = m[1] || 'display', star = !!m[2] || !m[1];
+    const envLine = lineAt(m.index), envOver = overrideOn(envLine);
+    const rows = env === 'multline' || env === 'equation' ? [body] : splitRows(body);
     let at = 0;
-    for (const row of splitRows(body)) {
+    for (const row of rows) {
       const idx = start + at; at += row.length + 2;
       const lead = row.length - row.trimStart().length;
-      if (row.trim()) out.push({ tex: src.slice(idx, idx + row.length), line: lineAt(idx + lead), env: m[1] || 'display', index: idx });
+      if (!row.trim()) continue;
+      const tex = src.slice(idx, idx + row.length), first = lineAt(idx + lead), last = lineAt(idx + row.trimEnd().length - 1);
+      const tagged = /\\tag\*?\s*\{/.test(row);
+      const numbered = tagged || (!star && !/\\(nonumber|notag)(?![A-Za-z])/.test(row) && env !== 'display');
+      // a row's own comment: on its last line (after its \\) or its first line, if that is not the \begin line
+      let over = null;
+      const endLine = rows.length > 1 && at <= body.length ? lineAt(idx + row.length) : last;
+      for (const n of [endLine, last, first]) if (n !== envLine || rows.length === 1) { over = overrideOn(n); if (over) break; }
+      out.push({ tex, line: first, env, index: idx, star, numbered, override: over || envOver, envOverride: envOver, envLine, envIndex: m.index });
     }
   }
   return out;
@@ -145,18 +178,23 @@ function splitRows(body) {
 }
 
 // LaTeX equation -> Dynare model line (a draft: always check it before running).
-export function toDynare(eq, { dropAccents = true } = {}) {
+// Dynare name of a symbol (without its time index): \hat{y}_t -> y, \pi^w_t -> pi_w, R^k -> R_k
+export function symName(sym, dropAccents = true) {
+  let b = sym.base.replace(/^\\(?:mathbb|mathcal|mathbf|bm|boldsymbol|mathsf)\{(.*)\}$/, '$1').replace(/^\\/, '').replace(/^var(epsilon|phi|theta|rho|sigma|pi)$/, '$1').replace(/^epsilon$/, 'eps').replace(/^ell$/, 'l');
+  let name = b + (sym.label ? '_' + sym.label : '') + sym.subs.map(x => '_' + x.replace(/^\\/, '').replace(/[^A-Za-z0-9]/g, '')).join('');
+  if (sym.accent && !(dropAccents && /^(hat|widehat|tilde|widetilde)$/.test(sym.accent))) name += '_' + sym.accent.replace('overline', 'bar').replace(/^wide/, '');
+  if (sym.steady === 'ss' || sym.steady === 'star') name += '_ss';
+  return name.replace(/'/g, '_p');
+}
+//   multi:  multi-letter names (see scan);  rename(sym): a chosen Dynare name, or null to use the automatic one
+export function toDynare(eq, { dropAccents = true, multi = null, rename = null } = {}) {
   const names = new Map(), notes = [];
   const body = blank(eq).replace(/&/g, ' ').replace(/[.,;]\s*$/, '').trim();
   const text = conv(body);
   return { text: text.replace(/\s+/g, ' ').replace(/\( /g, '(').replace(/ \)/g, ')').replace(/\(- /g, '(-').replace(/^- /, '-').replace(/= - /g, '= -').trim() + ';', names, notes };
 
   function ident(sym) {
-    let b = sym.base.replace(/^\\(?:mathbb|mathcal|mathbf|bm|boldsymbol|mathsf)\{(.*)\}$/, '$1').replace(/^\\/, '').replace(/^var(epsilon|phi|theta|rho|sigma|pi)$/, '$1').replace(/^epsilon$/, 'eps').replace(/^ell$/, 'l');
-    let name = b + (sym.label ? '_' + sym.label : '') + sym.subs.map(x => '_' + x.replace(/^\\/, '').replace(/[^A-Za-z0-9]/g, '')).join('');
-    if (sym.accent && !(dropAccents && /^(hat|widehat|tilde|widetilde)$/.test(sym.accent))) name += '_' + sym.accent.replace('overline', 'bar').replace(/^wide/, '');
-    if (sym.steady === 'ss' || sym.steady === 'star') name += '_ss';
-    name = name.replace(/'/g, '_p');
+    const name = (rename && rename(sym)) || symName(sym, dropAccents);
     names.set(name, sym.time !== null ? 'var' : (names.get(name) || 'param'));
     return name + (sym.time ? `(${sym.time > 0 ? '+' : ''}${sym.time})` : '');
   }
@@ -180,7 +218,7 @@ export function toDynare(eq, { dropAccents = true } = {}) {
         if (name === 'exp' || name === 'log' || name === 'ln') {
           i += m[0].length; let j = i; while (s[j] === ' ') j++;
           if (s[j] === '(' || s[j] === '[' || s[j] === '{') { push(name === 'ln' ? 'log' : name, 'func'); i = j; if (s[j] === '{') { const a = readArg(s, j); out.push({ t: '(' + conv(a.content) + ')', kind: 'close' }); i = a.end; } else { out.push({ t: '(', kind: 'open' }); i = j + 1; } }
-          else { const len = atomLength(s, j), syms = scan(' '.repeat(j) + s.slice(j, j + len), 1).symbols, one = syms[syms.length - 1]; if (one) { const sup = powerOf(s, j, len); push(`${name === 'ln' ? 'log' : name}(${ident(one)}${sup != null ? '^(' + conv(sup) + ')' : ''})`, 'val'); } i = j + Math.max(len, 1); }
+          else { const len = atomLength(s, j), syms = scan(' '.repeat(j) + s.slice(j, j + len), 1, undefined, multi).symbols, one = syms[syms.length - 1]; if (one) { const sup = powerOf(s, j, len); push(`${name === 'ln' ? 'log' : name}(${ident(one)}${sup != null ? '^(' + conv(sup) + ')' : ''})`, 'val'); } i = j + Math.max(len, 1); }
           continue;
         }
         if (name === 'cdot' || name === 'times' || name === 'ast') { out.push({ t: '*', kind: 'op' }); i += m[0].length; continue; }
@@ -190,7 +228,7 @@ export function toDynare(eq, { dropAccents = true } = {}) {
         if (name === '\\') { i += 2; continue; }
       }
       // a symbol (or an expectation operator, which Dynare does not need)
-      const r = scan(' '.repeat(i) + firstAtom(s, i), 1);
+      const r = scan(' '.repeat(i) + firstAtom(s, i), 1, undefined, multi);
       const len = atomLength(s, i);
       if (r.symbols.length) {
         const sym = r.symbols[r.symbols.length - 1];
@@ -209,7 +247,7 @@ export function toDynare(eq, { dropAccents = true } = {}) {
   function atomLength(s, i) {
     let j = i;
     if (s[j] === '\\') { const m = /^\\([a-zA-Z]+|.)/.exec(s.slice(j)); j += m[0].length; if (ACCENTS.has(m[1]) || FONTS.has(m[1])) j = readArg(s, j).end; else if (!GREEK_SET.has(m[1]) && !['imath', 'jmath', 'ell'].includes(m[1])) return m[0].length; }
-    else if (/[A-Za-z]/.test(s[j])) j++; else return 0;
+    else if (/[A-Za-z]/.test(s[j])) j += (multiAt(s, j, multi) || 'x').length; else return 0;
     for (;;) { let k = j; while (s[k] === ' ') k++; if (s[k] === "'") { j = k + 1; continue; } if (s[k] !== '_' && s[k] !== '^') break; j = readArg(s, k + 1).end; }
     return j - i;
   }

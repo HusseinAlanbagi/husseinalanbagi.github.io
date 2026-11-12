@@ -2,6 +2,7 @@
 // variables and a calibration table; and turns equations of the paper back into Dynare model lines.
 import { parseMod, modelToLatex, variableTable, parameterTable } from './lib/dynare.js';
 import { findEquations, toDynare } from './lib/latex-math.js';
+import { modelState } from './lib/model-state.js';
 
 export default {
   id: 'dynare',
@@ -59,6 +60,9 @@ export default {
     function exportDialog() {
       const sel = ctx.editor.getSelection(), all = ctx.editor.getText();
       const src = sel.from !== sel.to ? sel.text : all;
+      // with the model check on (and nothing selected): its equations, variable types and Dynare names
+      const mc = sel.from === sel.to && modelState.result && modelState.result.model.length ? modelState.result : null;
+      if (mc) return exportModel(mc);
       let eqs = findEquations(src);
       if (!eqs.length && sel.from !== sel.to) eqs = [{ tex: sel.text, line: 1 }];
       if (!eqs.length) return ctx.ui.toast('No display equations found. Select some equations, or open the file that has the model.', 'err');
@@ -77,6 +81,30 @@ export default {
       ctx.ui.modal({
         title: 'Equations as Dynare code', wide: true,
         body: h('div', {}, out, h('p', { class: 'muted' }, `${count} equation${count === 1 ? '' : 's'}, ${endo.length} endogenous variable${endo.length === 1 ? '' : 's'}, ${shocks.length} shock${shocks.length === 1 ? '' : 's'}. ` + (sel.from !== sel.to ? 'From your selection.' : 'From every display equation in this file — select the model equations first to convert only those.') + ' This is a draft: hats and tildes are dropped, a symbol with a time index is a variable, one without is a parameter.' + ([...new Set(notes)].length ? ' ' + [...new Set(notes)].join(' ') : ''))),
+        buttons: [{ label: 'Close' }, { label: 'Copy', onClick: () => { navigator.clipboard?.writeText(out.value); ctx.ui.toast('Copied.'); } },
+          { label: 'Save as model.mod in the project', primary: true, onClick: (m) => { let p = 'model.mod', i = 2; while (ctx.project.exists(p)) p = `model-${i++}.mod`; ctx.project.write(p, out.value, { open: true }); m.close(); } }],
+      });
+    }
+
+    function exportModel(mc) {
+      const byKey = new Map(mc.vars.map(v => [v.key, v])), multi = new Set(mc.multi || []);
+      const rename = (sym) => byKey.get(sym.key)?.name || null;
+      const lines = [], notes = [], seen = new Set();
+      for (const e of mc.model) {
+        const tex = e.tex.replace(/%.*$/gm, '').replace(/\\label\{[^}]*\}|\\(?:nonumber|notag)\b|\\tag\*?\{[^}]*\}/g, '');
+        try { const d = toDynare(tex, { multi, rename }); lines.push(`  [name='line ${e.line}'] ` + d.text); notes.push(...d.notes); for (const k of d.names.keys()) seen.add(k); }
+        catch (err) { lines.push(`  // could not convert (line ${e.line}): ${tex.trim().replace(/\s+/g, ' ')}`); }
+      }
+      const names = (t) => [...new Set(mc.vars.filter(v => v.type === t).map(v => v.name))];
+      const endo = names('endo'), shocks = names('shock'), params = names('param');
+      // names in the lines that the table does not list (steady states such as y_bar): parameters
+      const listed = new Set(mc.vars.map(v => v.name));
+      for (const n of seen) if (!listed.has(n)) params.push(n);
+      const text = `// Written from the model equations of the paper (the model check's choice). Check every line before you run it.\nvar ${endo.join(' ')};\nvarexo ${shocks.join(' ')};\nparameters ${params.join(' ')};\n\n${params.map(p => `${p} = ;`).join('\n')}\n\nmodel;\n${lines.join('\n')}\nend;\n` + (notes.length ? '\n// ' + [...new Set(notes)].join('\n// ') + '\n' : '');
+      const out = h('textarea', { spellcheck: false, style: { width: '100%', height: '50vh', fontFamily: 'var(--mono, monospace)', fontSize: '12.5px' } }); out.value = text;
+      ctx.ui.modal({
+        title: 'Model as Dynare code', wide: true,
+        body: h('div', {}, out, h('p', { class: 'muted' }, `${mc.model.length} equation${mc.model.length === 1 ? '' : 's'}, ${endo.length} endogenous variable${endo.length === 1 ? '' : 's'}, ${shocks.length} shock${shocks.length === 1 ? '' : 's'}, ${params.length} parameter${params.length === 1 ? '' : 's'}. Types and names come from the variables table of the model check (Visualise variables); select equations first to export only those.`)),
         buttons: [{ label: 'Close' }, { label: 'Copy', onClick: () => { navigator.clipboard?.writeText(out.value); ctx.ui.toast('Copied.'); } },
           { label: 'Save as model.mod in the project', primary: true, onClick: (m) => { let p = 'model.mod', i = 2; while (ctx.project.exists(p)) p = `model-${i++}.mod`; ctx.project.write(p, out.value, { open: true }); m.close(); } }],
       });

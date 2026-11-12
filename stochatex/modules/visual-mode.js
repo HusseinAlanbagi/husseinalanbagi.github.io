@@ -19,20 +19,71 @@ const FLOATS = /^(figure|table|figure\*|table\*|sidewaystable|sidewaysfigure|wra
 const TABULAR = /^(tabular|tabular\*|tabularx|longtable|tabulary)$/;
 const THM_DEFAULT = { theorem: 'Theorem', lemma: 'Lemma', proposition: 'Proposition', corollary: 'Corollary', definition: 'Definition', assumption: 'Assumption', remark: 'Remark', example: 'Example', conjecture: 'Conjecture', claim: 'Claim', hypothesis: 'Hypothesis', thm: 'Theorem', lem: 'Lemma', prop: 'Proposition', cor: 'Corollary', defn: 'Definition', assu: 'Assumption' };
 
-// ---------------------------------------------------------------- MathJax (shipped with the equation editor)
-let mj = null;
-function loadMathJax() {
-  if (mj) return mj;
-  mj = new Promise((resolve, reject) => {
-    if (window.MathJax && window.MathJax.tex2svg) return resolve(window.MathJax);
-    window.MathJax = { tex: { tags: 'ams' }, svg: { fontCache: 'local' }, startup: { typeset: false, ready() { window.MathJax.startup.defaultReady(); window.MathJax.startup.promise.then(() => { try { document.head.append(window.MathJax.svgStylesheet()); } catch {} resolve(window.MathJax); }); } }, options: { enableMenu: false } };
-    const s = document.createElement('script');
-    s.src = new URL('./equation/mathjax/tex-svg-full.js', document.baseURI).href; s.async = true;
-    s.onerror = () => reject(new Error('MathJax could not be loaded'));
-    document.head.append(s);
-  });
-  return mj;
+// ---------------------------------------------------------------- MathLive (for editing equations in place)
+let ml = null;
+function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = new URL(src, document.baseURI).href; s.onload = res; s.onerror = () => rej(new Error(src + ' could not be loaded')); document.head.append(s); }); }
+function loadMathLive() {
+  if (ml) return ml;
+  ml = (async () => {
+    if (!window.StochaBrackets) await loadScript('./equation/brackets.js');
+    if (!window.customElements.get('math-field')) await loadScript('./equation/mathlive.min.js');
+    const MF = window.MathfieldElement || window.customElements.get('math-field');
+    if (MF) { MF.fontsDirectory = new URL('./equation/fonts/', document.baseURI).href; MF.soundsDirectory = null; }
+    return MF;
+  })();
+  ml.catch(() => { ml = null; });
+  return ml;
 }
+// macros for MathLive from the \newcommand lines macroDefs() collects
+function mlMacros(defs) {
+  const out = {};
+  for (const m of defs.matchAll(/\\newcommand\{\\([A-Za-z]+)\}(?:\[(\d)\])?\{/g)) {
+    const open = m.index + m[0].length - 1, close = closeBrace(defs, open);
+    if (close > 0) out[m[1]] = { args: m[2] ? +m[2] : 0, def: defs.slice(open + 1, close), captureSelection: true };
+  }
+  return out;
+}
+const EXTRA = /\\label\s*\{[^}]*\}|\\(?:nonumber|notag)(?![A-Za-z])|\\tag\*?\s*\{[^}]*\}/g;
+const MULTI_ROWS = /^(align|gather|multline|flalign)$/;
+// what the in-place editor shows for an equation, and how to put an edit back. null: not editable in place
+export function editModel(it) {
+  if (it.kind === 'imath') return { field: it.tex.trim(), body: it.tex, toBody: (v) => v };
+  if (/^(alignat|eqnarray)$/.test(it.env)) return null;
+  const body = it.body, lead = body.match(/^\s*/)[0], trail = body.match(/\s*$/)[0];
+  const indent = (lead.match(/\n([ \t]*)$/) || [, ''])[1];
+  if (MULTI_ROWS.test(it.env)) {
+    const rows = splitRows(body.trim());
+    const extras = rows.map(r => (r.match(EXTRA) || []).join(' '));
+    const clean = rows.map(r => r.replace(EXTRA, '').trim());
+    const box = /^(align|flalign)$/.test(it.env) ? 'aligned' : 'gathered';
+    const field = clean.length > 1 || box === 'aligned' ? `\\begin{${box}}${clean.join('\\\\')}\\end{${box}}` : clean[0];
+    return {
+      field, body, rows: clean.length,
+      toBody(v) {
+        const m = v.match(/^\s*\\begin\{(?:aligned|gathered|split)\}([\s\S]*)\\end\{(?:aligned|gathered|split)\}\s*$/);
+        const nr = splitRows((m ? m[1] : v).trim()).map(r => r.trim());
+        // labels and \nonumber stay with their row (by position); extra ones go on the last row
+        const out = nr.map((r, i) => r + (extras[i] ? ' ' + extras[i] : ''));
+        if (extras.length > nr.length) out[out.length - 1] += ' ' + extras.slice(nr.length).filter(Boolean).join(' ');
+        return lead + out.join(' \\\\\n' + (indent || '  ')) + trail;
+      },
+    };
+  }
+  // \label, \nonumber, \tag at the start or end keep their place and spacing; any in the middle move to the end
+  const X = EXTRA.source, head = body.match(new RegExp(`^\\s*(?:(?:${X})\\s*)*`))[0], tail = body.slice(head.length).match(new RegExp(`(?:\\s*(?:${X}))*\\s*$`))[0];
+  const mid = body.slice(head.length, body.length - tail.length), midEx = mid.match(EXTRA) || [];
+  const field = mid.replace(EXTRA, '').trim();
+  return { field, body, toBody: (v) => head + v + (midEx.length ? ' ' + midEx.join(' ') : '') + tail };
+}
+// MathLive writes x_{t}=y; put it back the way people type it: x_t = y
+export function tidyTeX(v) {
+  return v.replace(/([_^])\{([A-Za-z0-9])\}(?=(.?))/g, (m, op, c, nx) => op + c + (/[A-Za-z0-9]/.test(nx) ? ' ' : ''))
+    .replace(/\s*(&?)\s*=\s*/g, (m, amp) => (amp ? ' &= ' : ' = ')).replace(/^ +| +$/g, '').replace(/\\\\ +/g, '\\\\ ');
+}
+
+import { loadMathJax } from './lib/mathjax.js';
+import { modelState } from './lib/model-state.js';
+import { MODEL_COMMENT } from './lib/latex-math.js';
 const svgCache = new Map();
 function renderMath(tex, display, macros, width = 0) {
   const key = (display ? 'D' + width : 'I') + macros + '\u0000' + tex;
@@ -419,6 +470,9 @@ function breakPoints(tex) {
     const c = tex[i], rest = tex.slice(i);
     if (c === '\\') {
       const w = /^\\([A-Za-z]+|.)/.exec(rest)[0];
+      // fixed-size brackets (\Biggl[ … \Biggr]) do not need to close on the same line: break inside them freely
+      const sized = /^\\(big|Big|bigg|Bigg)[lrm]?$/.test(w) && /^\s*(\\[{}|]|\\[A-Za-z]+|[()[\]|.])/.exec(tex.slice(i + w.length));
+      if (sized) { i += w.length + sized[0].length - 1; prev = '('; continue; }
       if (w === '\\left' || w === '\\begin') d++; else if (w === '\\right' || w === '\\end') d--;
       if (d === 0 && (REL.test(rest) || BIN.test(rest)) && prev && !/[=(\[{,&]$|\\(left|right)$/.test(prev)) pts.push({ at: i, rel: REL.test(rest) });
       i += w.length - 1; prev = w; continue;
@@ -428,6 +482,35 @@ function breakPoints(tex) {
     if (!/\s/.test(c)) prev = c;
   }
   return pts;
+}
+// A wide \left[ … \right] (a Lagrangian, say) cannot be broken, so it is turned into fixed-size brackets
+// (\Biggl[ … \Biggr], or \Bigl when nothing tall is inside) that may open on one line and close on another.
+const TALLISH = /\\(frac|dfrac|cfrac|sum|prod|int|oint|binom|dbinom|begin|over|displaystyle|overbrace|underbrace|overset|underset|lim|max|min|sup|inf)(?![A-Za-z])/;
+export function unwrapBig(row, availEx, macros) {
+  for (let round = 0; round < 4; round++) {
+    const pairs = []; const st = [];
+    for (let i = 0, braces = 0; i < row.length; i++) {
+      const c = row[i];
+      if (c === '{') { braces++; continue; } if (c === '}') { braces--; continue; }
+      if (c !== '\\') continue;
+      const w = /^\\([A-Za-z]+|.)/.exec(row.slice(i))[0];
+      if (w === '\\left' || w === '\\right') {
+        const dm = /^\s*(\\[{}|]|\\[A-Za-z]+|[()[\]|.])/.exec(row.slice(i + w.length)); if (!dm) { i += w.length - 1; continue; }
+        const tok = { at: i, end: i + w.length + dm[0].length, d: dm[1], braces };
+        if (w === '\\left') st.push(tok); else { const o = st.pop(); if (o && !st.length && o.braces === 0 && braces === 0) pairs.push([o, tok]); }
+        i = tok.end - 1; continue;
+      }
+      i += w.length - 1;
+    }
+    // the widest top-level pair, if it is too wide to keep on one line
+    let best = null, bw = 0;
+    for (const [o, c] of pairs) { const w = widthEx(row.slice(o.end, c.at), macros); if (w > bw) { bw = w; best = [o, c]; } }
+    if (!best || bw < availEx * 0.6) return row;
+    const [o, c] = best, size = TALLISH.test(row.slice(o.end, c.at)) ? 'Bigg' : 'Big';
+    const open = o.d === '.' ? '' : `\\${size}l${o.d} `, close = c.d === '.' ? '' : `\\${size}r${c.d}`;
+    row = row.slice(0, o.at) + open + row.slice(o.end, c.at) + close + row.slice(c.end);
+  }
+  return row;
 }
 // width in px of a piece of maths (MathJax gives ex; pxPerEx is measured from the full equation)
 const widthEx = (tex, macros) => { try { const n = window.MathJax.tex2svg(macros + tex, { display: true }); const w = n.querySelector('svg')?.getAttribute('width') || '0'; return parseFloat(w); } catch { return 0; } };
@@ -493,8 +576,8 @@ export default {
     const reveal = (view, pos) => (e) => { if (e.button !== 0) return; e.preventDefault(); view.dispatch({ selection: { anchor: pos }, scrollIntoView: false }); view.focus(); };
     const contentWidth = (view) => { const c = view.contentDOM, cs = getComputedStyle(c); return Math.round((c.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) / 20) * 20; };
     class MathWidget extends WidgetType {
-      constructor(it, macros, ready, fit) { super(); this.it = it; this.macros = macros; this.ready = ready; this.fit = fit; this.tex = mathTex(it); }
-      eq(o) { return o.tex === this.tex && o.macros === this.macros && o.ready === this.ready && o.fit === this.fit && o.it.from === this.it.from; }
+      constructor(it, macros, ready, fit, mc) { super(); this.it = it; this.macros = macros; this.ready = ready; this.fit = fit; this.tex = mathTex(it); this.mc = mc || null; this.mcKey = mc ? mc.status + (mc.override || '') : ''; }
+      eq(o) { return o.tex === this.tex && o.macros === this.macros && o.ready === this.ready && o.fit === this.fit && o.it.from === this.it.from && o.mcKey === this.mcKey; }
       toDOM(view) {
         const display = this.it.kind === 'dmath';
         const el = h(display ? 'div' : 'span', { class: display ? 'vz-dmath' : 'vz-imath', title: 'Click to edit the LaTeX · Ctrl+E opens the equation editor' });
@@ -503,13 +586,108 @@ export default {
           if (r.html) el.innerHTML = r.html; else el.textContent = this.tex;
           if (r.error) { el.classList.add('vz-err'); el.title = 'This equation has a problem: ' + r.error; }
         } else { el.textContent = (this.it.tex || this.it.body || '').trim(); el.classList.add('vz-wait'); }
-        el.addEventListener('mousedown', reveal(view, display ? this.it.inner : this.it.from + 1));
+        el.addEventListener('mousedown', (e) => {
+          if (e.button !== 0) return;
+          if (!e.altKey && clickEdits() && editModel(this.it)) { e.preventDefault(); startEdit(view, this.it); return; }
+          reveal(view, display ? this.it.inner : this.it.from + 1)(e);
+        });
+        if (this.ready && editModel(this.it)) el.title = clickEdits() ? 'Click to edit in place · Alt+click shows the LaTeX' : 'Click to edit the LaTeX · Ctrl+E opens the equation editor';
         if (display && this.fit && this.ready) watchFit(el, () => fitMath(el, this, view));
+        if (display && this.mc) el.append(mcChip(view, this.it, this.mc));
         return el;
       }
       destroy(el) { el._ro?.disconnect(); }
       ignoreEvent() { return true; }
       get estimatedHeight() { return this.it.kind === 'dmath' ? 48 : -1; }
+    }
+    // ---- editing an equation in place (MathLive), instead of jumping to its LaTeX
+    const setEdit = StateEffect.define();
+    const editField = StateField.define({
+      create: () => null,
+      update(v, tr) {
+        for (const e of tr.effects) if (e.is(setEdit)) return e.value;
+        if (v && tr.docChanged) return { ...v, from: tr.changes.mapPos(v.from, -1), bodyFrom: tr.changes.mapPos(v.bodyFrom, -1), bodyTo: tr.changes.mapPos(v.bodyTo, 1) };
+        return v;
+      },
+    });
+    const clickEdits = () => { const m = ctx.settings.get('clickEdit', 'auto'); return m === 'auto' ? !!layers.page : m === 'visual'; };
+    let session = null;
+    class EditWidget extends WidgetType {
+      constructor(sess) { super(); this.s = sess; }
+      eq(o) { return o.s === this.s; }
+      toDOM() { return this.s.el; }
+      destroy() {}
+      ignoreEvent() { return true; }
+      get estimatedHeight() { return this.s.el.offsetHeight || 56; }
+    }
+    const autoSizeOn = () => { try { return JSON.parse(localStorage.getItem('olve-autosize') || 'false') === true; } catch { return false; } };
+    async function startEdit(view, it) {
+      let MF;
+      try { MF = await loadMathLive(); } catch (e) { ctx.ui.toast('The equation editor could not be loaded: ' + e.message, 'err'); return; }
+      if (!MF) return;
+      if (session) finishEdit(false);
+      const model = editModel(it); if (!model) return;
+      const doc = view.state.doc;
+      const bodyFrom = it.kind === 'imath' ? it.from + (doc.sliceString(it.from, it.from + 1) === '$' ? 1 : 2) : it.inner;
+      const bodyTo = it.kind === 'imath' ? it.to - (doc.sliceString(it.to - 1, it.to) === '$' ? 1 : 2) : it.inner + it.body.length;
+      const display = it.kind === 'dmath';
+      const mf = document.createElement('math-field');
+      mf.smartFence = false; mf.smartSuperscript = false; mf.mathVirtualKeyboardPolicy = 'manual';
+      const macros = (() => { try { return mlMacros(parse(doc.toString()).info.macros); } catch { return {}; } })();
+      mf.value = model.field;
+      const nums = (it.rows || []).map(r => r.num).filter(Boolean);
+      const tag = nums.length ? h('span', { class: 'vz-edit-num' }, nums.length > 1 ? `(${nums[0]})–(${nums[nums.length - 1]})` : `(${nums[0]})`) : null;
+      const bar = h('span', { class: 'vz-edit-bar' },
+        h('button', { title: 'Show the LaTeX of this equation (Alt+click does the same)', onMousedown: (e) => { e.preventDefault(); const pos = view.state.field(editField)?.bodyFrom; finishEdit(true, pos); } }, 'LaTeX'),
+        h('button', { class: 'primary', title: 'Done (Esc)', onMousedown: (e) => { e.preventDefault(); finishEdit(true); } }, 'Done'));
+      const el = h(display ? 'div' : 'span', { class: display ? 'vz-edit' : 'vz-edit vz-edit-i' }, mf, tag, bar);
+      const sess = session = { el, mf, model, view, base: null, orig: model.body };
+      sess.widget = new EditWidget(sess);
+      mf.addEventListener('input', () => {
+        if (session !== sess) return;
+        let v = tidyTeX(mf.getValue('latex'));
+        if (autoSizeOn() && window.StochaBrackets) v = window.StochaBrackets.autoSize(v);
+        const body = sess.base != null && v === sess.base ? sess.orig : model.toBody(v);     // unchanged: the original text, spacing and all
+        const ed = view.state.field(editField, false); if (!ed) return;
+        if (view.state.sliceDoc(ed.bodyFrom, ed.bodyTo) === body) return;
+        view.dispatch({ changes: { from: ed.bodyFrom, to: ed.bodyTo, insert: body }, userEvent: 'input.math' });
+        view.requestMeasure();
+      });
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); finishEdit(true); }
+        else if (e.altKey && e.code === 'Slash' && window.StochaBrackets) { e.preventDefault(); e.stopPropagation(); window.StochaBrackets.flipInField(mf); }
+      }, true);
+      el.addEventListener('focusout', () => setTimeout(() => { if (session === sess && !el.contains(document.activeElement) && document.activeElement !== mf) finishEdit(false); }, 0));
+      view.dispatch({ effects: setEdit.of({ from: it.from, bodyFrom, bodyTo }) });
+      // the paper's own \newcommand macros (MathLive takes them only once the field is on the page)
+      requestAnimationFrame(() => { try { if (Object.keys(macros).length) { mf.macros = { ...mf.macros, ...macros }; mf.value = model.field; } sess.base = tidyTeX(mf.getValue('latex')); mf.focus(); mf.position = mf.lastOffset; } catch {} });
+    }
+    function finishEdit(focus, pos) {
+      const sess = session; if (!sess) return;
+      session = null;
+      const view = sess.view, ed = view.state.field(editField, false);
+      try { view.dispatch({ effects: setEdit.of(null), ...(pos != null ? { selection: { anchor: pos } } : {}) }); } catch {}
+      if (focus) view.focus();
+    }
+    // ---- model check: is this equation part of the model? (a chip on each candidate equation; click to change)
+    const MC_LABEL = { in: 'in the model', out: 'not in the model', part: 'partly in the model' };
+    function mcFor(state, it) {
+      const r = modelState.result; if (!r || !r.envs) return null;
+      const m = r.envs.get(ctx.editor.path); if (!m) return null;
+      const st = m.get(state.doc.lineAt(it.from).number); if (!st) return null;
+      const status = st.in === st.rows ? 'in' : st.in === 0 ? 'out' : 'part', auto = st.auto === st.rows ? 'in' : st.auto === 0 ? 'out' : 'part';
+      return { status, auto, override: st.override };
+    }
+    function mcChip(view, it, mc) {
+      const b = h('button', { class: 'vz-mc vz-mc-' + mc.status + (mc.override ? ' vz-mc-set' : ''), title: (mc.override ? 'Set by the comment % ' + (mc.override === 'in' ? 'model' : 'not model') + ' on its \\begin line. ' : 'Chosen automatically. ') + 'Click to ' + (mc.status === 'in' ? 'leave it out of' : 'put it in') + ' the model check.' }, MC_LABEL[mc.status]);
+      b.addEventListener('mousedown', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const want = mc.status === 'in' ? 'out' : 'in';
+        const line = view.state.doc.lineAt(it.from), text = line.text.replace(MODEL_COMMENT, '').replace(/[ \t]+$/, '');
+        const next = want === mc.auto ? text : text + (want === 'in' ? ' % model' : ' % not model');
+        if (next !== line.text) view.dispatch({ changes: { from: line.from, to: line.to, insert: next }, userEvent: 'input.model' });
+      });
+      return b;
     }
     // run fn now and whenever the element's width changes
     function watchFit(el, fn) {
@@ -530,14 +708,14 @@ export default {
         const it = wd.it, rows = it.rows || [{ tex: it.body, num: null }];
         const tagW = rows.some(r => r.num) ? 4.5 : 0, availEx = avail / pxPerEx - tagW - 1;
         let changed = false;
-        const out = rows.map(r => { if (widthEx(r.tex.replace(/&/g, ''), wd.macros) <= availEx) return [{ tex: r.tex, num: r.num }]; const parts = breakRow(r.tex.trim(), availEx, wd.macros); if (!parts) return [{ tex: r.tex, num: r.num }]; changed = true; return parts.map((t, i) => ({ tex: t, num: i === parts.length - 1 ? r.num : null })); }).flat();
+        const out = rows.map(r => { if (widthEx(r.tex.replace(/&/g, ''), wd.macros) <= availEx) return [{ tex: r.tex, num: r.num }]; const parts = breakRow(unwrapBig(r.tex.trim(), availEx, wd.macros), availEx, wd.macros) || breakRow(r.tex.trim(), availEx, wd.macros); if (!parts) return [{ tex: r.tex, num: r.num }]; changed = true; return parts.map((t, i) => ({ tex: t, num: i === parts.length - 1 ? r.num : null })); }).flat();
         if (changed) {
           const anyAmp = out.some(r => r.tex.includes('&'));
           const body = out.map(r => (anyAmp && !r.tex.includes('&') ? '&' : '') + r.tex + (r.num ? `\\tag{${r.num}}` : '')).join('\\\\');
           svg = draw(`\\begin{align*}${body}\\end{align*}`) || svg;
         }
         const W2 = svg.getBoundingClientRect().width;
-        if (W2 > avail + 1) { const z = Math.max(0.45, avail / W2); const c = el.firstElementChild; if (c) c.style.zoom = z; }
+        if (W2 > avail + 1) { const z = Math.max(0.75, avail / W2); const c = el.firstElementChild; if (c) c.style.zoom = z; }
         el.classList.toggle('vz-fitted', true);
       }
       view.requestMeasure();
@@ -676,7 +854,7 @@ export default {
     function build(state, P) {
       const { items, blocks, info } = P;
       const fitOn = layers.page && layout === 'web';
-      const ranges = [], sel = state.selection.ranges, L = layers, doc = state.doc;
+      const ranges = [], sel = state.selection.ranges, L = layers, doc = state.doc, editing = state.field(editField, false);
       const zones = blocks.filter(b => FLOATS.test(b.env) || TABULAR.test(b.env)).map(b => ({ from: b.from, to: b.to }));
       const near = (it) => sel.some(r => r.from <= it.to && r.to >= it.from && !(it.kind === 'preamble' && r.to === 0));
       const inZone = (it) => zones.some(z => it.from >= z.from && it.to <= z.to && sel.some(r => r.from <= z.to && r.to >= z.from));
@@ -689,13 +867,17 @@ export default {
       for (const it of items) {
         if (!L[layerOf[it.kind] || 'format']) continue;
         if (inCovered(it)) continue;
+        if (editing && session && it.from === editing.from && (it.kind === 'dmath' || it.kind === 'imath')) {
+          const from = it.kind === 'dmath' && it.block ? doc.lineAt(it.from).from : it.from, to = it.kind === 'dmath' && it.block ? doc.lineAt(it.to).to : it.to;
+          ranges.push(Decoration.replace({ block: it.kind === 'dmath' && it.block, widget: session.widget }).range(from, to)); covered.push({ from: it.from, to: it.to }); continue;
+        }
         if (near(it) || inZone(it)) { if (it.kind === 'dmath' || it.kind === 'imath') add(it.from, it.to, Decoration.mark({ class: 'vz-src-math' })); continue; }
         switch (it.kind) {
           case 'preamble': ranges.push(Decoration.replace({ block: true, widget: new Html('pre' + it.lines, () => h('div', { class: 'vz-preamble', title: 'Click to show the preamble' }, `Preamble · ${it.lines} lines of packages and settings`), 1) }).range(it.from, it.to)); break;
           case 'comment': hideRange(it.from, it.to); break;
           case 'dmath': {
             const from = it.block ? doc.lineAt(it.from).from : it.from, to = it.block ? doc.lineAt(it.to).to : it.to;
-            ranges.push(Decoration.replace({ block: it.block, widget: new MathWidget(it, info.macros, ready, fitOn) }).range(from, to)); covered.push({ from: it.from, to: it.to }); break;
+            ranges.push(Decoration.replace({ block: it.block, widget: new MathWidget(it, info.macros, ready, fitOn, mcFor(state, it)) }).range(from, to)); covered.push({ from: it.from, to: it.to }); break;
           }
           case 'imath': ranges.push(Decoration.replace({ widget: new MathWidget(it, info.macros, ready) }).range(it.from, it.to)); break;
           case 'heading': {
@@ -799,7 +981,7 @@ export default {
     const field = StateField.define({
       create(state) { const p = read(state); return { p, deco: build(state, p) }; },
       update(v, tr) {
-        const again = tr.effects.some(e => e.is(refresh));
+        const again = tr.effects.some(e => e.is(refresh) || e.is(setEdit));
         if (!tr.docChanged && !tr.selection && !again) return v;
         const p = tr.docChanged ? read(tr.state) : v.p;
         return { p, deco: build(tr.state, p) };
@@ -849,7 +1031,7 @@ export default {
       const key = (active ? 'v' + layout + JSON.stringify(layers) : '') + (breaksOn ? 'b' : '');
       if (key !== extKey) {
         extKey = key; offExt && offExt();
-        offExt = ctx.editor.addExtension([active ? [field, EditorView.editorAttributes.of({ class: 'cm-typeset' + (layers.page ? ' cm-page' + (layout === 'web' ? ' cm-web' : '') : '') })] : [], breaksOn ? breaksField : []]);
+        offExt = ctx.editor.addExtension([active ? [editField, field, EditorView.editorAttributes.of({ class: 'cm-typeset' + (layers.page ? ' cm-page' + (layout === 'web' ? ' cm-web' : '') : '') })] : [], breaksOn ? breaksField : []]);
       } else poke();
       if (breaksOn) measure();
       sw.setAttribute('aria-checked', String(on)); sw.classList.toggle('on', on);
@@ -875,6 +1057,7 @@ export default {
         })),
         h('div', { class: 'vz-sep' }, 'What is drawn'),
         ...LAYERS.filter(([k]) => k !== 'page').map(([k, label, hint]) => swEl(!!layers[k], label, hint, (v) => setLayer(k, v))),
+        swEl(clickEdits(), 'Edit equations in place', 'Click an equation to edit it as drawn; Alt+click shows its LaTeX. Off: clicking shows the LaTeX', (v) => { ctx.settings.set('clickEdit', v ? 'visual' : 'latex'); svgCache.clear(); renderPanel(); poke(); }),
         h('div', { class: 'vz-sep' }, 'In both views'),
         swEl(breaksOn, 'Page breaks', 'Mark where each page starts; exact after a compile, estimated before', (v) => { breaksOn = v; save(); apply(); }),
       );
@@ -901,7 +1084,8 @@ export default {
     ctx.on('open', () => setTimeout(measure, 0));
     ctx.on('compile', () => setTimeout(measure, 0));
     apply();
-    ctx.onDispose(() => { closePanel(); closePop();  urls.forEach(u => URL.revokeObjectURL(u)); });
+    const offMc = modelState.on(() => poke());
+    ctx.onDispose(() => { offMc(); finishEdit(false); closePanel(); closePop();  urls.forEach(u => URL.revokeObjectURL(u)); });
 
     const css = h('style', {}, `
 .vz-wrap { display: inline-flex; align-items: center; gap: 0; margin-left: 4px; }
@@ -950,7 +1134,7 @@ export default {
 .cm-page.cm-web .cm-content { min-width: 0 !important; width: 100%; box-sizing: border-box; max-width: 54rem; margin: 0 auto; padding: 30px clamp(18px, 5%, 56px) 90px; background: transparent; box-shadow: none; min-height: 0; }
 .cm-page.cm-web .tb-pb { display: none; }
 .cm-page.cm-web .vz-preamble { margin: 0 0 20px; box-sizing: border-box; }
-.cm-page.cm-web .vz-dmath { overflow: hidden; padding: 8px 0; min-width: 0; }
+.cm-page.cm-web .vz-dmath { overflow-x: auto; overflow-y: hidden; justify-content: safe center; padding: 8px 0; min-width: 0; }
 .cm-page.cm-web .vz-dmath > mjx-container { min-width: 0 !important; }
 .cm-page.cm-web .vz-tablewrap { overflow: hidden; min-width: 0; }
 .vz-seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 2px 6px 6px; }
@@ -966,6 +1150,20 @@ export default {
 .cm-line:has(.vz-h2) .vz-secnum { font-size: 1.17em; } .cm-line:has(.vz-h3) .vz-secnum { font-size: 1.04em; } .cm-line:has(.vz-h0) .vz-secnum { font-size: 1.1em; display: block; }
 .cm-page .cm-line:has(.vz-h1), .cm-page .cm-line:has(.vz-h0) { padding-top: .5em; } .cm-page .cm-line:has(.vz-h2) { padding-top: .3em; }
 .vz-b { font-weight: 700; } .vz-i { font-style: italic; } .vz-u { text-decoration: underline; } .vz-tt { font-family: var(--mono); font-size: .92em; } .vz-sc { font-variant: small-caps; } .vz-sf { font-family: var(--ui); }
+.vz-mc { position: absolute; left: 0; top: 2px; font: 500 10.5px var(--ui); padding: 0 6px; height: 17px; line-height: 15px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); opacity: 0; transition: opacity .12s; cursor: pointer; z-index: 1; }
+.vz-dmath:hover .vz-mc, .vz-mc.vz-mc-set, .vz-mc:focus-visible { opacity: 1; }
+.vz-mc-in { color: var(--ok, #177245); border-color: color-mix(in srgb, var(--ok, #177245) 40%, var(--line)); }
+.vz-mc-out { text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent); }
+.vz-mc-set { border-style: dashed; }
+.vz-edit { position: relative; display: flex; align-items: center; gap: 10px; padding: 6px 0 6px; }
+.vz-edit math-field { flex: 1; min-width: 0; font-size: 1.15em; border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line)); border-radius: 8px; padding: 6px 10px; background: var(--paper); color: var(--ink); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent); --caret-color: var(--accent); --selection-background-color: var(--sel, #c3d9f5); }
+.vz-edit math-field::part(menu-toggle), .vz-edit math-field::part(virtual-keyboard-toggle) { display: none; }
+.vz-edit-i { display: inline-flex; padding: 0; vertical-align: middle; } .vz-edit-i math-field { font-size: 1em; padding: 1px 6px; min-width: 3em; }
+.vz-edit-num { font-family: var(--serif, serif); color: var(--ink); white-space: nowrap; }
+.vz-edit-bar { position: absolute; right: 0; top: -14px; display: inline-flex; gap: 4px; z-index: 2; }
+.vz-edit-i .vz-edit-bar { top: -24px; }
+.vz-edit-bar button { font: 500 11px var(--ui); padding: 1px 7px; height: 20px; border-radius: 5px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); }
+.vz-edit-bar button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 .vz-dmath { display: flex; justify-content: center; align-items: center; position: relative; padding: 6px 0; min-height: 2.2em; cursor: text; overflow-x: auto; }
 .vz-dmath mjx-container { margin: 0 !important; } .vz-dmath mjx-container[width="full"] { width: 100%; }
 .vz-dmath:hover, .vz-imath:hover, .vz-tablewrap:hover, .vz-title:hover { background: color-mix(in srgb, var(--accent-soft) 70%, transparent); border-radius: 4px; }

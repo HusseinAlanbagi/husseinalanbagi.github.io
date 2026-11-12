@@ -12,8 +12,46 @@ export default {
     const post = (m) => frame?.contentWindow?.postMessage({ target: 'equation-editor', ...m }, location.origin);
     const lineOf = (pos) => ctx.editor.view.state.doc.lineAt(Math.min(pos, ctx.editor.view.state.doc.length)).number;
     const insertBtn = h('button', { class: 'small primary', hidden: true, onClick: () => insertNew() }, 'Insert at the cursor');
+    const fullBtn = h('button', { class: 'small', title: 'Open this equation in the full editor in a new tab. Changes there come straight back to the paper.', onClick: () => openFull() }, 'Open full editor');
+    // ---- the full editor in its own tab, linked live over a BroadcastChannel ----
+    let chan = null, linkRange = null, linkText = null, linkTimer = 0;
+    const linkPost = (m) => chan?.postMessage({ target: 'equation-editor', ...m });
+    function unlink() { try { chan?.close(); } catch (e) {} chan = null; linkRange = null; linkText = null; }
+    function openFull() {
+      const text = ctx.editor.getText();
+      const r = range || findMath(text, ctx.editor.getCursor().pos);
+      if (!r && !dockText.trim()) return ctx.ui.toast('Put the cursor in an equation first, or type one in the strip.');
+      if (!r) { insertNew(); if (!range) return; }
+      if (chan) { linkPost({ type: 'gone' }); unlink(); }
+      const id = Math.random().toString(36).slice(2, 10);
+      chan = new BroadcastChannel('stochatex-eq-' + id);
+      linkRange = { ...(r || range) }; linkText = null;
+      chan.onmessage = (e) => {
+        const d = e.data; if (!d || d.source !== 'equation-editor') return;
+        if (d.type === 'ready') { linkText = ctx.editor.view.state.sliceDoc(linkRange.from, linkRange.to); linkPost({ type: 'set', latex: linkText, theme: document.documentElement.dataset.theme, focus: true }); }
+        else if (d.type === 'change' && linkRange) {
+          const latex = d.latex || '', cur = ctx.editor.view.state.sliceDoc(linkRange.from, linkRange.to);
+          linkText = latex; if (cur === latex) return;
+          const at = linkRange.from;
+          ctx.editor.view.dispatch({ changes: { from: linkRange.from, to: linkRange.to, insert: latex }, userEvent: 'input' });
+          linkRange = { from: at, to: at + latex.length };
+          if (range && range.from === at) { range = { ...linkRange }; lastText = dockText = latex; post({ type: 'set', latex, focus: false }); }
+        } else if (d.type === 'closed') unlink();
+      };
+      const w = window.open(new URL('./equation/index.html?link=' + id, document.baseURI).href, '_blank');
+      if (!w) { unlink(); ctx.ui.toast('Your browser blocked the new tab. Allow pop-ups for this site and try again.'); }
+    }
     // keep the tracked equation in place while the text around it changes
-    ctx.editor.addExtension(EditorView.updateListener.of((u) => { if (u.docChanged && range) range = { from: u.changes.mapPos(range.from, -1), to: u.changes.mapPos(range.to, 1) }; }));
+    ctx.editor.addExtension(EditorView.updateListener.of((u) => {
+      if (!u.docChanged) return;
+      if (range) range = { from: u.changes.mapPos(range.from, -1), to: u.changes.mapPos(range.to, 1) };
+      if (linkRange) {
+        linkRange = { from: u.changes.mapPos(linkRange.from, -1), to: u.changes.mapPos(linkRange.to, 1) };
+        // edited from the strip or the source: show it in the linked tab too
+        clearTimeout(linkTimer);
+        linkTimer = setTimeout(() => { if (!chan || !linkRange) return; const t = u.view.state.sliceDoc(linkRange.from, linkRange.to); if (t !== linkText) { linkText = t; linkPost({ type: 'set', latex: t, focus: false }); } }, 150);
+      }
+    }));
 
     function follow(focus = false) {
       if (!dock || !ready) return;
@@ -58,7 +96,7 @@ export default {
       if (dock?.open) return post({ type: 'focus' });
       ready = false; range = null; lastText = null; dockText = '';
       frame = h('iframe', { src: new URL('./equation/index.html?embed=dock', document.baseURI).href, title: 'Equation editor' });
-      dock = ctx.ui.openDock({ title: 'Equation', body: frame, actions: [insertBtn], height: 270, onClose: () => { dock = null; frame = null; ready = false; btn?.classList.remove('on'); ctx.editor.focus(); } });
+      dock = ctx.ui.openDock({ title: 'Equation', body: frame, actions: [insertBtn, fullBtn], height: 270, onClose: () => { dock = null; frame = null; ready = false; btn?.classList.remove('on'); ctx.editor.focus(); } });
       btn?.classList.add('on');
     }
     const toggle = () => { if (dock?.open) dock.close(); else open(); };
@@ -68,12 +106,14 @@ export default {
     const themeWatch = new MutationObserver(() => post({ type: 'theme', theme: document.documentElement.dataset.theme }));
     themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     ctx.ui.addCommand({ id: 'equation.edit', name: 'Equation editor: open, or move into it', key: 'Mod+E', run: open });
+    ctx.ui.addCommand({ id: 'equation.full', name: 'Equation editor: open the full editor in a new tab (linked)', run: openFull });
     ctx.ui.addCommand({ id: 'equation.close', name: 'Equation editor: close', run: () => dock?.close() });
     ctx.editor.addKeymap([{ key: 'Mod-e', run: () => (open(), true) }]);
     btn = ctx.ui.addToolbarButton({ label: 'Equation', icon: 'sigma', title: 'Show or hide the visual equation editor under the source (Ctrl+E)', onClick: toggle }).el;
     if (ctx.settings.get('open', false)) setTimeout(open, 0);
     ctx.on('modules', () => {});
-    ctx.onDispose(() => { removeEventListener('message', onMsg); clearTimeout(timer); themeWatch.disconnect(); dock?.close(); });
+    const bye = () => { linkPost({ type: 'gone' }); }; addEventListener('pagehide', bye);
+    ctx.onDispose(() => { bye(); unlink(); removeEventListener('pagehide', bye); removeEventListener('message', onMsg); clearTimeout(timer); themeWatch.disconnect(); dock?.close(); });
     // remember whether the dock was open
     const remember = setInterval(() => ctx.settings.set('open', !!dock?.open), 2000); ctx.onDispose(() => clearInterval(remember));
   },

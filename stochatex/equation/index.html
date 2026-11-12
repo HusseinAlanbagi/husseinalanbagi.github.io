@@ -217,8 +217,9 @@
   /* docked under the source in the LaTeX editor: only the visual box and the tools */
   .dock body { background:#fff; font-family:"Instrument Sans",system-ui,sans-serif; } .dock[data-theme=dark] body { background:#1a2029; }
   .dock main { max-width:none !important; padding:8px 12px 12px; }
-  .dock .topbar, .dock .banner, .dock .embedbar, .dock .panes > .pane:first-child, .dock #tipsBtn, .dock .tips, .dock #tools, .dock #keysPanel, .dock #clear, .dock #cleanBtn { display:none !important; }
-  .dock .toolbar { gap:6px; padding:0 0 6px; flex-wrap:wrap; } .dock .toolbar.bottom { padding:6px 0 0; } .dock .tgroup { gap:4px; }
+  .dock .topbar, .dock .banner, .dock .embedbar, .dock .panes > .pane:first-child, .dock #tipsBtn, .dock .tips, .dock #tools, .dock #keysPanel, .dock #clear { display:none !important; }
+  .dock .clean { position:fixed; right:8px; bottom:8px; width:min(440px, calc(100% - 16px)); max-height:calc(100vh - 16px); overflow:auto; margin:0; padding:8px 10px; font-size:13px; z-index:30; box-shadow:0 6px 24px rgba(0,0,0,.18); } .dock .clean .row button { padding:3px 8px; } .dock .clean h3 { font-size:13px; } .dock .clean .sum { display:none; } .dock .clean .why { display:none; }
+  .dock .toolbar { gap:6px; padding:0 0 6px; flex-wrap:wrap; } .dock .toolbar .lbl { display:none; } .dock .toolbar .status:empty, .dock .toolbar .note:empty { display:none; } .dock .toolbar.bottom { padding:6px 0 0; } .dock .tgroup { gap:4px; }
   .dock .pane math-field { min-height:84px !important; padding-top:12px !important; } .dock .editor .checks { margin-top:4px; } .dock .checks .ok { display:none; } .dock #unitsBtn, .dock #expBtn { display:none !important; }
   .dock .card.editor { border:0; padding:0; margin:0; background:none; }
   .dock .panes { grid-template-columns:1fr; }
@@ -259,6 +260,8 @@
         <option value="multline">multline</option>
       </select>
         <button id="numBtn" title="Numbering on/off (Alt+N)">#</button>
+        <button id="sizeBtn" title="Auto-size brackets: ( ) [ ] { } | | grow with tall content (\left…\right) and stay plain otherwise" aria-pressed="false">( )<span class="lbl"> Auto-size</span></button>
+        <button id="flipBtn" title="Flip the fraction at the cursor: a/b becomes b/a (Alt+/)">a/b ⇄<span class="lbl"> b/a</span></button>
       </div>
       <span class="status" id="status"></span><span class="note" id="note"></span>
       <select id="unitStyle" style="display:none"><option value="qty">qty</option><option value="SI">SI</option></select>
@@ -362,6 +365,7 @@
   </div>
 </main>
 
+<script src="brackets.js"></script>
 <script>
 const SOURCES = [
   'mathlive.min.js',
@@ -417,8 +421,9 @@ function start() {
     return { body: s, pre, post, multi, extras };
   }
 
-  function buildOutput() {
+  function buildOutput(edited) {
     let body = mf.getValue('latex');
+    if (edited && autoSize) body = autoSizeBrackets(body);
     if (wrap.multi) {
       // unwrap the aligned block; anything typed after it joins the last row
       const m = body.match(/^\\begin\{aligned\}([\s\S]*?)\\end\{aligned\}([\s\S]*)$/);
@@ -437,7 +442,9 @@ function start() {
   }
 
   input.addEventListener('input', load);
-  mf.addEventListener('input', () => { buildOutput(); input.value = output.value; clearHl(); });
+  mf.addEventListener('input', () => { buildOutput(true); input.value = output.value; clearHl(); });
+  // with auto-size on, the field shows plain brackets while typing; tidy the picture when you leave it
+  mf.addEventListener('blur', () => { if (autoSize && mf.getValue('latex') !== fieldLatex(input.value)) { try { load(); } catch (e) {} } });
 
   // ---- Shade the part of the equation matching the selected LaTeX ----
   // Approach: read the LaTeX's structure, widen the selection to whole pieces
@@ -655,6 +662,28 @@ function start() {
   // a command name glued to a following letter would change meaning: \alpha b -> \alphab
   const glue = (rep, src, after) => (/\\[a-zA-Z]+$/.test(rep) && /[a-zA-Z]/.test(src[after] || '')) ? rep + ' ' : rep;
   const TALL = /\\(frac|dfrac|tfrac|cfrac|sum|prod|int|iint|iiint|oint|bigcup|bigcap|lim|binom|dbinom|sqrt|begin|over|matrix|pmatrix|bmatrix|displaystyle|overbrace|underbrace|overset|underset|stackrel)\b|\^|_/;
+  // ---- auto-size brackets and flipping fractions live in brackets.js (shared with the visual view) ----
+  let autoSize = recall('olve-autosize', false);
+  const autoSizeBrackets = (t) => window.StochaBrackets.autoSize(t);
+  const flipInText = (t, a, b) => window.StochaBrackets.flipInText(t, a, b);
+  window.__olveAutoSize = autoSizeBrackets; window.__olveFlip = flipInText; // used by the tests
+  function flipFraction() {
+    if (lastFocus === 'input' && document.activeElement !== mf) {
+      const r = flipInText(input.value, input.selectionStart, input.selectionEnd);
+      if (!r) { flash('Put the cursor inside a fraction first'); return false; }
+      pushUndo(input.value);
+      input.value = r.text; load();
+      try { input.setSelectionRange(r.start, r.end); } catch (e) {}
+      return true;
+    }
+    const before = input.value;
+    if (!window.StochaBrackets.flipInField(mf)) { flash('Put the cursor inside a fraction first'); return false; }
+    pushUndo(before);
+    return true;
+  }
+  function flash(msg) { const st = document.getElementById('status'); if (!st) return; st.textContent = msg; setTimeout(() => { if (st.textContent === msg) st.textContent = ''; }, 2200); }
+  window.__olveFlip = flipInText; // used by the tests
+
   const FUNCS = 'sin|cos|tan|cot|sec|csc|sinh|cosh|tanh|coth|arcsin|arccos|arctan|log|ln|lg|exp|lim|liminf|limsup|max|min|sup|inf|det|dim|deg|gcd|hom|ker|arg|Pr';
 
   function scanIssues(txt) {
@@ -737,7 +766,7 @@ function start() {
       const rd = txt.slice(r).match(/^\\right\s*(\\[}|]|\\[a-zA-Z]+|[()[\]|.])/);
       if (!rd || m[1] === '.' || rd[1] === '.') continue;
       const inner = txt.slice(inner0, r);
-      if (TALL.test(inner) || /\\left/.test(inner)) continue;
+      if (autoSize || TALL.test(inner) || /\\left/.test(inner)) continue;
       add('leftRight', [[start, inner0, glue(m[1], txt, inner0)], [r, r + rd[0].length, glue(rd[1], txt, r + rd[0].length)]]);
     }
     // \displaystyle in display maths
@@ -828,7 +857,7 @@ function start() {
       });
       h += `</div></div>`;
     });
-    h += `<div class="row"><button class="primary" id="cleanApply">Apply selected</button>
+    h += `<div class="row"><button class="primary" id="cleanEvery" title="Apply every suggestion above">Clean all</button><button id="cleanApply">Apply selected</button>
       <button id="cleanAll">Select all</button><button id="cleanNone">Select none</button><button id="cleanClose">Close</button></div>`;
     cleanBox.innerHTML = h;
     cleanBox.classList.add('on');
@@ -858,6 +887,7 @@ function start() {
     document.getElementById('cleanNone').onclick = () => { cleanBox.querySelectorAll('.ichk').forEach(x => x.checked = false); issues.forEach((_, gi) => syncGroup(gi)); };
     document.getElementById('cleanClose').onclick = () => { cleanBox.classList.remove('on'); clearHl(); };
     document.getElementById('cleanApply').onclick = applyClean;
+    document.getElementById('cleanEvery').onclick = () => { cleanBox.querySelectorAll('.ichk').forEach(x => x.checked = true); applyClean(); };
   }
 
   let undoStack = [];
@@ -911,6 +941,16 @@ function start() {
     undoBtn.disabled = !undoStack.length;
   };
   undoBtn.disabled = true;
+  {
+    const sb = document.getElementById('sizeBtn');
+    const paint = () => { sb.setAttribute('aria-pressed', autoSize); sb.classList.toggle('sel', autoSize); };
+    sb.addEventListener('mousedown', e => e.preventDefault());
+    sb.onclick = () => { autoSize = !autoSize; store('olve-autosize', autoSize); paint(); flash(autoSize ? 'Brackets you edit now grow with tall content' : 'Auto-size off'); if (cleanBox.classList.contains('on')) renderClean(); };
+    paint();
+    const fb = document.getElementById('flipBtn');
+    fb.addEventListener('mousedown', e => e.preventDefault());
+    fb.onclick = () => flipFraction();
+  }
 
   function store(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
   function recall(key, dflt) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : dflt; } catch (e) { return dflt; } }
@@ -2043,6 +2083,7 @@ function start() {
     ['Alt + L', 'Jump to the LaTeX box', () => input.focus()],
     ['Alt + D', 'Dark / light mode', () => themeBtn.click()],
     ['Alt + K', 'Show these shortcuts', () => document.getElementById('keysBtn').click()],
+    ['Alt + /', 'Flip the fraction (a/b → b/a)', () => flipFraction()],
     ['Alt + H / T / B', 'Hat / tilde / bar on the selection', null],
     ['Alt + V / P / O', 'Vector arrow / prime / overline', null],
     ['Ctrl + wheel', 'Zoom the visual equation (over the visual pane)', null],
@@ -2050,7 +2091,7 @@ function start() {
     ['Double-click', 'Select a symbol; again to grow the selection', null],
     ['Esc', 'Close open panels', null],
   ];
-  const KEYMAP = { Enter: 0, KeyC: 1, KeyF: 2, KeyM: 3, KeyU: 4, KeyA: 5, KeyN: 6, KeyI: 7, KeyZ: 8, KeyE: 9, KeyL: 10, KeyD: 11, KeyK: 12 };
+  const KEYMAP = { Enter: 0, KeyC: 1, KeyF: 2, KeyM: 3, KeyU: 4, KeyA: 5, KeyN: 6, KeyI: 7, KeyZ: 8, KeyE: 9, KeyL: 10, KeyD: 11, KeyK: 12, Slash: 13 };
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); SHORTCUTS[0][2](); return; }
     if (e.altKey && !e.ctrlKey && !e.metaKey && KEYMAP[e.code] > 0) { e.preventDefault(); e.stopPropagation(); SHORTCUTS[KEYMAP[e.code]][2](); return; }
@@ -2251,36 +2292,51 @@ function start() {
 
   // =================== Embedded in the LaTeX editor ===================
   // Opened as  index.html?embed  inside the editor: it receives an equation and sends the result back.
-  if (new URLSearchParams(location.search).has('embed') && window.parent !== window) {
-    document.documentElement.classList.add('embed');
+  // Opened as  index.html?link=<id>  in its own tab: same messages over a BroadcastChannel, full tool set.
+  const QS = new URLSearchParams(location.search), linkId = QS.get('link');
+  const chan = linkId && 'BroadcastChannel' in window ? new BroadcastChannel('stochatex-eq-' + linkId) : null;
+  if ((QS.has('embed') && window.parent !== window) || chan) {
+    if (!chan) document.documentElement.classList.add('embed');
     const setAll = (latex) => {
       cards = [makeCard('')]; active = 0; renderCards();
       syncing = true; NV.set.call(input, ''); syncing = false;
       input.value = latex || ''; autosize(cur()); maybeSplit(cur());
       load(); clearHl();
     };
-    const dockMode = new URLSearchParams(location.search).get('embed') === 'dock';
+    const dockMode = !chan && QS.get('embed') === 'dock', live = dockMode || !!chan;
     if (dockMode) document.documentElement.classList.add('dock');
     const bar = document.createElement('div');
     bar.hidden = dockMode;
     bar.className = 'embedbar';
-    bar.innerHTML = '<span>Editing an equation from your document.</span><span style="flex:1"></span><button id="embedCancel">Cancel</button><button class="primary" id="embedApply" title="Ctrl+Enter">⤶ Put into document</button>';
+    bar.innerHTML = chan
+      ? '<span id="linkInfo">🔗 Linked to your document: changes here go straight into the paper.</span><span style="flex:1"></span><button class="primary" id="embedApply" title="Close this tab">Done</button>'
+      : '<span>Editing an equation from your document.</span><span style="flex:1"></span><button id="embedCancel">Cancel</button><button class="primary" id="embedApply" title="Ctrl+Enter">⤶ Put into document</button>';
     document.body.prepend(bar);
-    const send = (type, extra) => window.parent.postMessage({ source: 'equation-editor', type, ...extra }, location.origin);
-    document.getElementById('embedApply').onclick = () => send('apply', { latex: allText() });
-    document.getElementById('embedCancel').onclick = () => send('cancel');
-    window.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); e.stopImmediatePropagation(); send('apply', { latex: allText() }); }
-    }, true);
-    window.addEventListener('message', (e) => {
-      if (e.origin !== location.origin || !e.data || e.data.target !== 'equation-editor') return;
+    const send = (type, extra) => chan ? chan.postMessage({ source: 'equation-editor', type, ...extra }) : window.parent.postMessage({ source: 'equation-editor', type, ...extra }, location.origin);
+    if (chan) {
+      document.title = 'Equation — linked · StochaTeX';
+      document.getElementById('embedApply').onclick = () => { send('change', { latex: allText() }); send('closed'); window.close(); };
+      addEventListener('pagehide', () => send('closed'));
+    } else {
+      document.getElementById('embedApply').onclick = () => send('apply', { latex: allText() });
+      document.getElementById('embedCancel').onclick = () => send('cancel');
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); e.stopImmediatePropagation(); send('apply', { latex: allText() }); }
+      }, true);
+    }
+    const onMsg = (data) => {
+      if (!data || data.target !== 'equation-editor') return;
+      if (data.type === 'gone') { const li = document.getElementById('linkInfo'); if (li) li.textContent = '⚠ The document was closed — this tab is no longer linked. Copy your equation before closing.'; return; }
+      const e = { data };
       if (e.data.type === 'set') { if (e.data.theme) setTheme(e.data.theme); setAll(e.data.latex); dockBase = allText(); if (e.data.focus !== false) setTimeout(() => { try { mf.focus(); } catch (err) {} }, 50); }
       if (e.data.type === 'theme' && e.data.theme) setTheme(e.data.theme);
       if (e.data.type === 'focus') { try { mf.focus(); } catch (err) {} }
-    });
+    };
+    if (chan) chan.onmessage = (e) => onMsg(e.data);
+    else window.addEventListener('message', (e) => { if (e.origin === location.origin) onMsg(e.data); });
     // docked: every change goes to the editor straight away (no Apply step)
     let dockBase = allText();
-    if (dockMode) setInterval(() => { const t = allText(); if (t !== dockBase) { dockBase = t; send('change', { latex: t }); } }, 120);
+    if (live) setInterval(() => { const t = allText(); if (t !== dockBase) { dockBase = t; send('change', { latex: t }); } }, 120);
     send('ready');
   }
 
@@ -2405,6 +2461,7 @@ function start() {
   const SEL_ACTIONS = [
     ['\\frac{#@}{#?}', 'Make it a numerator', '\\frac{a}{\\square}'],
     ['\\frac{#?}{#@}', 'Make it a denominator', '\\frac{\\square}{a}'],
+    ['#flip', 'Flip the fraction (Alt+/)', '\\tfrac{a}{b}\\rightleftarrows\\tfrac{b}{a}'],
     null,
     ['\\left(#@\\right)', 'Wrap in ( )', '(a)'],
     ['\\left[#@\\right]', 'Wrap in [ ]', '[a]'],
@@ -2424,7 +2481,7 @@ function start() {
   const selbar = document.getElementById('selbar');
   selbar.innerHTML = '<span class="sl">Selection:</span>' + SEL_ACTIONS.map((a, i) => a ? `<button data-i="${i}" title="${a[1]}">${renderStatic(a[2])}</button>` : '<span class="sep"></span>').join('');
   selbar.addEventListener('mousedown', e => e.preventDefault());
-  selbar.querySelectorAll('button').forEach(b => b.onclick = () => { hideSelbar(); applyTemplate(SEL_ACTIONS[+b.dataset.i][0]); });
+  selbar.querySelectorAll('button').forEach(b => b.onclick = () => { hideSelbar(); const t = SEL_ACTIONS[+b.dataset.i][0]; if (t === '#flip') flipFraction(); else applyTemplate(t); });
   let selbarHideT = 0;
   function showSelbarAt(rect) {
     clearTimeout(selbarHideT);

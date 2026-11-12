@@ -106,7 +106,7 @@ const ui = {
     $('dockActions').replaceChildren(...actions); $('dockBody').replaceChildren(body);
     document.documentElement.style.setProperty('--dock-h', prefs.get('dockH', height) + 'px');
     $('dock').hidden = false; dockOnClose = onClose || null; editor.view.requestMeasure();
-    return { close: closeDock, setInfo: (t) => { $('dockInfo').textContent = t; }, get open() { return !$('dock').hidden && $('dockBody').firstChild === body; } };
+    return { close: closeDock, setInfo: (t) => { $('dockInfo').textContent = t; $('dockInfo').title = t; }, get open() { return !$('dock').hidden && $('dockBody').firstChild === body; } };
   },
   addEditorButton(el) { $('edButtons').append(el); return () => el.remove(); },
   addStatusItem(render) { const el = h('span', { class: 'status-item' }); $('statusItems').append(el); render(el); return () => el.remove(); },
