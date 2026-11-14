@@ -10,7 +10,7 @@
 const CMD_PKG = {
   mathbb: 'amssymb', mathfrak: 'amssymb', varnothing: 'amssymb', lesssim: 'amssymb', gtrsim: 'amssymb', therefore: 'amssymb', because: 'amssymb', square: 'amssymb', blacksquare: 'amssymb', checkmark: 'amssymb', nexists: 'amssymb', leqslant: 'amssymb', geqslant: 'amssymb', mathscr: 'mathrsfs',
   text: 'amsmath', eqref: 'amsmath', boldsymbol: 'amsmath', dfrac: 'amsmath', tfrac: 'amsmath', binom: 'amsmath', operatorname: 'amsmath', DeclareMathOperator: 'amsmath', iint: 'amsmath', iiint: 'amsmath', numberwithin: 'amsmath', intertext: 'amsmath', substack: 'amsmath', xrightarrow: 'amsmath', overset: 'amsmath', underset: 'amsmath', tag: 'amsmath', smash: 'amsmath',
-  coloneqq: 'mathtools', mathclap: 'mathtools', DeclarePairedDelimiter: 'mathtools', bm: 'bm', mathds: 'dsfont', mathbbm: 'bbm',
+  coloneqq: 'mathtools', mathclap: 'mathtools', Aboxed: 'mathtools', boxed: 'amsmath', DeclarePairedDelimiter: 'mathtools', bm: 'bm', mathds: 'dsfont', mathbbm: 'bbm',
   includegraphics: 'graphicx', graphicspath: 'graphicx', rotatebox: 'graphicx', scalebox: 'graphicx', resizebox: 'graphicx',
   toprule: 'booktabs', midrule: 'booktabs', bottomrule: 'booktabs', cmidrule: 'booktabs', addlinespace: 'booktabs', multirow: 'multirow',
   cref: 'cleveref', Cref: 'cleveref', crefrange: 'cleveref', autoref: 'hyperref', href: 'hyperref', url: 'url', hypersetup: 'hyperref', nameref: 'hyperref', phantomsection: 'hyperref',

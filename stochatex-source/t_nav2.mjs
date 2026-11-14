@@ -1,0 +1,26 @@
+import { open } from './t_app.mjs';
+const { b, p, errs } = await open();
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+await p.waitForSelector('body.ready', { timeout: 30000 });
+let body = '';
+for (let s = 1; s <= 6; s++) { body += `\\section{Part ${s}}\n`; for (let k = 1; k <= 3; k++) { body += `\\subsection{Sub ${s}.${k}}\n` + 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '.repeat(14) + '\n\n'; } }
+const doc = `\\documentclass{article}\n\\begin{document}\n${body}\\end{document}\n`;
+await p.evaluate((d) => window.texbench.app.project.write('main.tex', d, { open: true }), doc);
+await p.evaluate(() => window.texbench.app.compile()); await sleep(15000);
+console.log('pageStarts:', await p.evaluate(() => JSON.stringify(window.texbench.app.pageStarts('main.tex'))));
+console.log('ticks editor/pdf:', await p.$$eval('.nv-ticks', t => t.map(x => x.children.length)));
+const sc = () => p.evaluate(() => window.texbench.app.editor.view.scrollDOM.scrollTop);
+await p.evaluate(() => { const v = window.texbench.app.editor.view; v.scrollDOM.scrollTop = v.scrollDOM.scrollHeight * 0.7; });
+await sleep(150); console.log('tip:', await p.$eval('.nv-tip.on', e => e.textContent).catch(() => 'none'));
+await sleep(1200); const at = await sc();
+await p.evaluate(() => { window.texbench.app.editor.view.scrollDOM.scrollTop = 0; }); await sleep(1200);
+console.log('back pill:', await p.$$eval('.nv-back:not([hidden])', x => x.map(y => y.textContent)));
+await p.keyboard.down('Alt'); await p.keyboard.press('ArrowLeft'); await p.keyboard.up('Alt'); await sleep(500);
+console.log('returned:', at, await sc());
+await p.evaluate(() => { const el = document.getElementById('pdf'); el.scrollTop = el.scrollHeight * 0.75; }); await sleep(150);
+console.log('pdf tip:', await p.$$eval('.nv-tip.on', e => e.map(x => x.textContent)));
+await sleep(1000);
+await p.evaluate(() => { document.getElementById('pdf').scrollTop = 0; }); await sleep(1200);
+console.log('pdf back:', await p.$$eval('.nv-back:not([hidden])', x => x.map(y => y.textContent)));
+await p.screenshot({ path: '/tmp/nav.png' });
+console.log(errs.slice(0, 3)); await b.close();

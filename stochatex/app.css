@@ -167,3 +167,5 @@ pre.code { background: var(--panel); border: 1px solid var(--line); border-radiu
 .seg button { border: 0; border-radius: 0; padding: 2px 9px; font-size: 12px; background: var(--paper); color: var(--muted); }
 .seg button + button { border-left: 1px solid var(--line-2); } .seg button.on { background: var(--accent); color: var(--accent-ink); }
 @media (max-width: 820px) { #work, body.pdf-off #work { grid-template-columns: var(--rail-w) 0 0 1fr 5px 45vw; } body.pdf-off #work { grid-template-columns: var(--rail-w) 0 0 1fr 0 0; } #side, #split1 { display: none; } #featBtn .lbl, .check { display: none; } }
+
+#sideHide svg { transform: rotate(90deg); } #sideHide { margin-left: 2px; }

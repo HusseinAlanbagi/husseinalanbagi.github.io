@@ -262,6 +262,7 @@
         <button id="numBtn" title="Numbering on/off (Alt+N)">#</button>
         <button id="sizeBtn" title="Auto-size brackets: ( ) [ ] { } | | grow with tall content (\left…\right) and stay plain otherwise" aria-pressed="false">( )<span class="lbl"> Auto-size</span></button>
         <button id="flipBtn" title="Flip the fraction at the cursor: a/b becomes b/a (Alt+/)">a/b ⇄<span class="lbl"> b/a</span></button>
+        <button id="boxBtn" title="Box the equation, or the selected part; again to remove the box (Alt+X)">▢<span class="lbl"> Box</span></button>
       </div>
       <span class="status" id="status"></span><span class="note" id="note"></span>
       <select id="unitStyle" style="display:none"><option value="qty">qty</option><option value="SI">SI</option></select>
@@ -681,6 +682,38 @@ function start() {
     pushUndo(before);
     return true;
   }
+  // ---- box: \boxed{…} around the selection or the whole equation; align rows get \Aboxed{…} (mathtools)
+  function boxIt() {
+    const before = input.value;
+    const env = /\\begin\{(align|flalign)(\*?)\}([\s\S]*?)\\end\{\1\2\}/.exec(before);
+    if (env) {
+      const body = env[3], rows = body.split(/\\\\/), already = rows.filter(r => r.trim()).every(r => /^\s*\\Aboxed\{/.test(r));
+      const EX = /\\label\{[^}]*\}|\\(?:nonumber|notag)\b/g;
+      const next = rows.map(r => { if (!r.trim()) return r; const lead = r.match(/^\s*/)[0], trail = r.match(/\s*$/)[0], ex = (r.match(EX) || []).join(' '), c = r.replace(EX, '').trim();
+        const m = /^\\Aboxed\{([\s\S]*)\}$/.exec(c); return lead + (already ? (m ? m[1] : c) : `\\Aboxed{${c}}`) + (ex ? ' ' + ex : '') + trail; }).join('\\\\');
+      pushUndo(before); input.value = before.replace(body, next); load();
+      flash(already ? 'Boxes removed' : 'Boxed each row (\\Aboxed needs \\usepackage{mathtools}; StochaTeX adds it when it compiles)');
+      return;
+    }
+    pushUndo(before);
+    const r = mf.selection?.ranges?.[0] || [mf.position, mf.position];
+    const a = Math.min(...r), b = Math.max(...r);
+    if (b > a) { const sel = mf.getValue(a, b, 'latex'), m = /^\\boxed\{([\s\S]*)\}$/.exec(sel.trim()); mf.insert(m ? m[1] : `\\boxed{${sel}}`, { format: 'latex', insertionMode: 'replaceSelection' }); }
+    else { const v = mf.getValue('latex'), m = /^\\boxed\{([\s\S]*)\}$/.exec(v.trim()); mf.value = m ? m[1] : `\\boxed{${v}}`; mf.dispatchEvent(new Event('input', { bubbles: true })); }
+  }
+  // Ctrl+B / Ctrl+I / Ctrl+U in the visual box: bold, italic, underlined maths; copying gives plain LaTeX
+  mf.addEventListener('keydown', (e) => {
+    if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
+    const cmd = { b: 'boldsymbol', i: 'mathit', u: 'underline' }[e.key.toLowerCase()]; if (!cmd) return;
+    e.preventDefault(); e.stopPropagation();
+    const r = mf.selection?.ranges?.[0] || [mf.position, mf.position];
+    mf.insert(r[0] === r[1] ? `\\${cmd}{#0}` : `\\${cmd}{#@}`, { format: 'latex', selectionMode: 'placeholder' });
+  }, true);
+  mf.addEventListener('copy', (e) => {
+    const r = mf.selection?.ranges?.[0] || [0, 0];
+    const t = r[0] === r[1] ? mf.getValue('latex') : mf.getValue(Math.min(...r), Math.max(...r), 'latex');
+    e.clipboardData.setData('text/plain', t); e.preventDefault(); e.stopPropagation();
+  }, true);
   function flash(msg) { const st = document.getElementById('status'); if (!st) return; st.textContent = msg; setTimeout(() => { if (st.textContent === msg) st.textContent = ''; }, 2200); }
   window.__olveFlip = flipInText; // used by the tests
 
@@ -947,6 +980,7 @@ function start() {
     sb.addEventListener('mousedown', e => e.preventDefault());
     sb.onclick = () => { autoSize = !autoSize; store('olve-autosize', autoSize); paint(); flash(autoSize ? 'Brackets you edit now grow with tall content' : 'Auto-size off'); if (cleanBox.classList.contains('on')) renderClean(); };
     paint();
+    const bx = document.getElementById('boxBtn'); bx.addEventListener('mousedown', e => e.preventDefault()); bx.onclick = () => boxIt();
     const fb = document.getElementById('flipBtn');
     fb.addEventListener('mousedown', e => e.preventDefault());
     fb.onclick = () => flipFraction();
@@ -2084,6 +2118,7 @@ function start() {
     ['Alt + D', 'Dark / light mode', () => themeBtn.click()],
     ['Alt + K', 'Show these shortcuts', () => document.getElementById('keysBtn').click()],
     ['Alt + /', 'Flip the fraction (a/b → b/a)', () => flipFraction()],
+    ['Alt + X', 'Box the equation or the selection', () => boxIt()],
     ['Alt + H / T / B', 'Hat / tilde / bar on the selection', null],
     ['Alt + V / P / O', 'Vector arrow / prime / overline', null],
     ['Ctrl + wheel', 'Zoom the visual equation (over the visual pane)', null],
@@ -2091,7 +2126,7 @@ function start() {
     ['Double-click', 'Select a symbol; again to grow the selection', null],
     ['Esc', 'Close open panels', null],
   ];
-  const KEYMAP = { Enter: 0, KeyC: 1, KeyF: 2, KeyM: 3, KeyU: 4, KeyA: 5, KeyN: 6, KeyI: 7, KeyZ: 8, KeyE: 9, KeyL: 10, KeyD: 11, KeyK: 12, Slash: 13 };
+  const KEYMAP = { Enter: 0, KeyC: 1, KeyF: 2, KeyM: 3, KeyU: 4, KeyA: 5, KeyN: 6, KeyI: 7, KeyZ: 8, KeyE: 9, KeyL: 10, KeyD: 11, KeyK: 12, Slash: 13, KeyX: 14 };
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); SHORTCUTS[0][2](); return; }
     if (e.altKey && !e.ctrlKey && !e.metaKey && KEYMAP[e.code] > 0) { e.preventDefault(); e.stopPropagation(); SHORTCUTS[KEYMAP[e.code]][2](); return; }
@@ -2461,6 +2496,7 @@ function start() {
   const SEL_ACTIONS = [
     ['\\frac{#@}{#?}', 'Make it a numerator', '\\frac{a}{\\square}'],
     ['\\frac{#?}{#@}', 'Make it a denominator', '\\frac{\\square}{a}'],
+    ['#box', 'Box it (Alt+X)', '\\boxed{a}'],
     ['#flip', 'Flip the fraction (Alt+/)', '\\tfrac{a}{b}\\rightleftarrows\\tfrac{b}{a}'],
     null,
     ['\\left(#@\\right)', 'Wrap in ( )', '(a)'],
@@ -2481,7 +2517,7 @@ function start() {
   const selbar = document.getElementById('selbar');
   selbar.innerHTML = '<span class="sl">Selection:</span>' + SEL_ACTIONS.map((a, i) => a ? `<button data-i="${i}" title="${a[1]}">${renderStatic(a[2])}</button>` : '<span class="sep"></span>').join('');
   selbar.addEventListener('mousedown', e => e.preventDefault());
-  selbar.querySelectorAll('button').forEach(b => b.onclick = () => { hideSelbar(); const t = SEL_ACTIONS[+b.dataset.i][0]; if (t === '#flip') flipFraction(); else applyTemplate(t); });
+  selbar.querySelectorAll('button').forEach(b => b.onclick = () => { hideSelbar(); const t = SEL_ACTIONS[+b.dataset.i][0]; if (t === '#flip') flipFraction(); else if (t === '#box') boxIt(); else applyTemplate(t); });
   let selbarHideT = 0;
   function showSelbarAt(rect) {
     clearTimeout(selbarHideT);

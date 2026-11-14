@@ -9,5 +9,7 @@
  "proofread.js",
  "model-checks.js",
  "autocomplete.js",
+ "formatting.js",
+ "navigation.js",
  "word-count.js"
 ]

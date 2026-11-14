@@ -88,8 +88,22 @@ export const SAMPLE_BIB = String.raw`@article{calvo1983,
 }
 `;
 export const BLANK_MAIN = String.raw`\documentclass[12pt]{article}
+% Starter preamble for an economics paper. Packages that are not used cost little; remove what you do not want.
 \usepackage[margin=1in]{geometry}
-\usepackage{amsmath,amssymb}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{amsthm}
+\usepackage{booktabs,graphicx,caption}
+\usepackage{setspace}
+\usepackage[authoryear,round]{natbib} % or: \usepackage[style=authoryear]{biblatex} and \addbibresource{refs.bib}
+\usepackage[colorlinks=true,allcolors=blue]{hyperref} % load last
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{lemma}{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
 
 \title{Title}
 \author{Author}
@@ -98,7 +112,12 @@ export const BLANK_MAIN = String.raw`\documentclass[12pt]{article}
 \begin{document}
 \maketitle
 
+\begin{abstract}
+\end{abstract}
+
 \section{Introduction}
 
+% \bibliographystyle{apalike}
+% \bibliography{refs}
 \end{document}
 `;

@@ -126,9 +126,12 @@ function addRail(id, title, ic) {
   if (prefs.get('sidePanel', 'files') === id && !document.body.classList.contains('side-off')) showPanel(id);
   return () => { btn.remove(); rail.delete(id); if (sidePanel === id) showPanel('files'); };
 }
+// Clicking a rail icon opens its panel (and keeps it open if it already is); hiding the side bar is deliberate:
+// the « button in its header or Ctrl+\ (setSide).
+function setSide(open) { document.body.classList.toggle('side-off', !open); prefs.set('sideOff', !open); for (const [k, r] of rail) r.btn.classList.toggle('on', open && k === sidePanel); editor.view.requestMeasure(); }
 function showPanel(id, toggle = false) {
   if (!rail.has(id)) id = 'files';
-  const off = toggle && sidePanel === id && !document.body.classList.contains('side-off');
+  const off = false;
   document.body.classList.toggle('side-off', off); prefs.set('sideOff', off);
   sidePanel = id; if (!off) prefs.set('sidePanel', id);
   for (const [k, r] of rail) r.btn.classList.toggle('on', k === id && !off);
@@ -241,6 +244,7 @@ async function runCompile() {
   const seen = new Set(list.filter(p => /Citation [`'](.+?)'/.test(p.message)).map(p => /Citation [`'](.+?)'/.exec(p.message)[1]));
   for (let k = list.length - 1; k >= 0; k--) if (list[k].key && seen.has(list[k].key)) list.splice(k, 1);
   problems.set('compile', list); renderProblems();
+  if (autoPackages(list)) { compiling = false; dirty = true; }
   $('logText').textContent = r.log || r.error || '';
   const errs = list.filter(p => p.severity === 'error').length, warns = list.filter(p => p.severity === 'warning').length;
   if (r.success && r.pdf) {
@@ -287,7 +291,11 @@ const toPreamble = (text, line) => {
   if (text.split('\n').some(l => l.trim() === line)) return text;
   const bd = text.indexOf('\\begin{document}'); if (bd < 0) return line + '\n' + text;
   const pre = text.slice(0, bd), last = [...pre.matchAll(/^\\(usepackage|RequirePackage|newcommand|newtheorem|DeclareMathOperator)\b.*$/gm)].filter(m => /^\\usepackage/.test(line) ? /^\\usepackage/.test(m[0]) : true).pop();
-  const at = last ? last.index + last[0].length + 1 : bd;
+  let at = last ? last.index + last[0].length + 1 : bd;
+  // hyperref and cleveref go last: any other package is put before them
+  const lateRe = /^\\usepackage\s*(\[[^\]]*\])?\s*\{(hyperref|cleveref)\}/m, late = lateRe.exec(pre);
+  if (late && /^\\usepackage/.test(line) && !lateRe.test(line)) at = Math.min(at, late.index);
+  else if (/\{cleveref\}/.test(line)) { const hr = /^\\usepackage.*\{hyperref\}.*$/m.exec(pre); if (hr) at = Math.max(at, hr.index + hr[0].length + 1); }
   return text.slice(0, at) + line + '\n' + text.slice(at);
 };
 function applyFix(fix) {
@@ -306,6 +314,27 @@ function applyFix(fix) {
   if (ok && e.move) editFile(e.move.file, (t) => toPreamble(t, e.move.preamble));
   if (ok) { toast('Fixed: ' + fix.label.replace(/^(Add|Change|Use|Write|Escape|Remove|Move|Define it:) ?/, (m) => m.toLowerCase())); if (e.line && e.file) goto(e.file, e.line); }
   else toast('That fix no longer applies: the line has changed.', 'warn');
+}
+// "Add missing packages automatically" (on by default): a command or environment that a known package provides
+// gets its \usepackage line in the preamble, with a note and Undo; then the paper is compiled again.
+const autoAdded = new Map(); // project id -> Set of lines added this session (never added twice)
+function autoPackages(list) {
+  if (!prefs.get('autoPkg', true) || !project) return false;
+  const main = mainFile(), done = autoAdded.get(project.id) || new Set(); autoAdded.set(project.id, done);
+  const lines = [];
+  for (const p of list) {
+    if (p.severity !== 'error' || !/^(Undefined control sequence|Environment \S+ undefined)/.test(p.message)) continue;
+    const x = explained({ ...p, source: 'LaTeX' }), f = x.fixes && x.fixes[0];
+    if (f && f.edit && /^\\usepackage/.test(f.edit.preamble || '') && !done.has(f.edit.preamble) && !lines.includes(f.edit.preamble)) lines.push(f.edit.preamble);
+  }
+  if (!lines.length) return false;
+  const before = main === active ? editor.getText() : project.files[main]?.t;
+  lines.sort((x, y) => /cleveref|hyperref/.test(x) - /cleveref|hyperref/.test(y));
+  if (!editFile(main, (t) => lines.reduce(toPreamble, t))) return false;
+  lines.forEach(l => done.add(l));
+  const undo = () => { editFile(main, (t) => t.split('\n').filter((l, i, a) => !lines.includes(l.trim()) || (before || '').split('\n').includes(l)).join('\n')); };
+  toast(h('span', {}, `Added ${lines.join(', ')} to the preamble. `, h('button', { class: 'small', onClick: (e) => { e.target.closest('.toast')?.remove(); undo(); } }, 'Undo'), ' ', h('button', { class: 'small ghost', title: 'Stop adding packages by itself (you can turn it back on in the command list)', onClick: (e) => { e.target.closest('.toast')?.remove(); prefs.set('autoPkg', false); toast('Packages will no longer be added automatically.'); } }, 'Turn off')), '', 12000);
+  return true;
 }
 function fixButtons(p) {
   return (p.fixes || []).map(f => h('button', { class: 'fix' + (f.edit ? ' do' : ''), title: f.edit ? 'Make this change' : 'Show it', onClick: (ev) => { ev.stopPropagation(); applyFix(f); } }, f.label));
@@ -689,7 +718,7 @@ $('projBtn').onclick = projectMenu; $('folderChip').onclick = folderMenu;
 $('compileBtn').onclick = runCompile; $('compileBtn').title = `Compile (${MOD}+Enter)`;
 $('auto').checked = prefs.get('auto', true); $('auto').onchange = (e) => { prefs.set('auto', e.target.checked); if (e.target.checked) scheduleCompile(0); };
 $('featBtn').onclick = featuresDialog; $('paletteBtn').onclick = palette; $('paletteBtn').title = `All commands (${MOD}+Shift+P)`; $('pdfModeBtn').append(icon('chevron', 13));
-$('newFileBtn').onclick = newFile; $('uploadBtn').onclick = async () => addFiles(await pickFiles());
+$('newFileBtn').onclick = newFile; $('sideHide').append(icon('chevron', 14)); $('sideHide').onclick = () => setSide(false); $('sideHide').title = `Hide the side bar (${MOD}+\\). Click any icon on the left to bring it back.`; $('uploadBtn').onclick = async () => addFiles(await pickFiles());
 $('tabProblems').onclick = () => showBottom('problems'); $('tabLog').onclick = () => showBottom('log');
 $('zoomOut').onclick = () => pdf.setZoom(pdf.zoom / 1.15); $('zoomIn').onclick = () => pdf.setZoom(pdf.zoom * 1.15); $('zoomFit').onclick = () => pdf.setZoom(1);
 $('pdfModeBtn').onclick = pdfModeMenu; $('pdfTabBtn').onclick = () => setPdfMode('tab'); $('pdfHideBtn').onclick = () => setPdfMode('hidden');
@@ -699,6 +728,7 @@ addEventListener('keydown', (e) => {
   if (mod && (e.key === 'Enter' || (e.key.toLowerCase() === 's' && !e.shiftKey))) { e.preventDefault(); runCompile(); }
   else if (mod && e.shiftKey && e.key.toLowerCase() === 'p') { e.preventDefault(); palette(); }
   else if (mod && e.key.toLowerCase() === 'j') { e.preventDefault(); showInPdf(); }
+  else if (mod && !e.shiftKey && e.key === '\\') { e.preventDefault(); setSide(document.body.classList.contains('side-off')); }
   else if (mod && e.shiftKey && e.key.toLowerCase() === 'h') { e.preventDefault(); setPdfMode(pdfMode === 'side' ? 'hidden' : 'side'); }
 }, true);
 const tree = $('side');
@@ -712,6 +742,8 @@ splitter($('split2'), { varName: '--pdf-w', min: 220, max: () => innerWidth * 0.
 document.querySelectorAll('.ic-slot').forEach(el => el.replaceWith(icon(el.dataset.icon)));
 addRail('files', 'Files', 'files'); if (prefs.get('sideOff', false)) document.body.classList.add('side-off'); showPanel(prefs.get('sidePanel', 'files'));
 $('dockClose').onclick = closeDock;
+ui.addCommand({ id: 'packages.auto', get name() { return prefs.get('autoPkg', true) ? 'Stop adding missing packages automatically' : 'Add missing packages automatically (\\usepackage lines, with Undo)'; }, run: () => { const v = !prefs.get('autoPkg', true); prefs.set('autoPkg', v); toast(v ? 'Missing packages will be added automatically.' : 'Packages will no longer be added automatically.'); } });
+ui.addCommand({ id: 'side.toggle', name: `Show or hide the side bar (${MOD}+\\)`, run: () => setSide(document.body.classList.contains('side-off')) });
 splitter($('dockGrip'), { varName: '--dock-h', min: 140, max: () => innerHeight * 0.7, invert: true, axis: 'y', onEnd: v => { prefs.set('dockH', v); editor.view.requestMeasure(); } });
 applyPrefs();
 if (prefs.get('pdfMode', 'side') === 'hidden') setPdfMode('hidden', false);

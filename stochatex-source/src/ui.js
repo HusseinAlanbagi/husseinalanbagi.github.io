@@ -71,10 +71,10 @@ export const promptBox = (title, label, value = '') => new Promise((res) => {
   setTimeout(() => input.select(), 40);
 });
 let toastBox;
-export function toast(msg, kind = '') {
+export function toast(msg, kind = '', ms = 0) {
   toastBox ||= document.body.appendChild(h('div', { class: 'toasts', 'aria-live': 'polite' }));
   const t = h('div', { class: 'toast ' + kind }, msg);
-  toastBox.append(t); setTimeout(() => t.remove(), kind === 'err' ? 7000 : 3500);
+  toastBox.append(t); setTimeout(() => t.remove(), ms || (kind === 'err' ? 7000 : 3500));
 }
 export function menu(anchor, items) {
   document.querySelector('.menu')?.remove();

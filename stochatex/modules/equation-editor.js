@@ -82,7 +82,7 @@ export default {
     }
     const onMsg = (e) => {
       if (!frame || e.origin !== location.origin || e.source !== frame.contentWindow || e.data?.source !== 'equation-editor') return;
-      if (e.data.type === 'ready') { ready = true; lastText = null; post({ type: 'theme', theme: document.documentElement.dataset.theme }); follow(true); if (!range) post({ type: 'focus' }); }
+      if (e.data.type === 'ready') { ready = true; lastText = null; post({ type: 'theme', theme: document.documentElement.dataset.theme }); follow(openFocus); if (!range && openFocus) post({ type: 'focus' }); }
       else if (e.data.type === 'change') {
         const latex = e.data.latex || ''; dockText = latex;
         if (!range) return;
@@ -92,17 +92,32 @@ export default {
         ctx.editor.view.dispatch({ changes: { from: range.from, to: range.to, insert: latex }, userEvent: 'input' });
       }
     };
-    function open() {
-      if (dock?.open) return post({ type: 'focus' });
+    let openFocus = true, autoOpened = false, closingAuto = false, dismissedAt = null;
+    function open(focus = true) {
+      if (dock?.open) { if (focus) { autoOpened = false; post({ type: 'focus' }); } return; }
+      openFocus = focus !== false; autoOpened = !openFocus;
       ready = false; range = null; lastText = null; dockText = '';
       frame = h('iframe', { src: new URL('./equation/index.html?embed=dock', document.baseURI).href, title: 'Equation editor' });
-      dock = ctx.ui.openDock({ title: 'Equation', body: frame, actions: [insertBtn, fullBtn], height: 270, onClose: () => { dock = null; frame = null; ready = false; btn?.classList.remove('on'); ctx.editor.focus(); } });
+      dock = ctx.ui.openDock({ title: 'Equation', body: frame, actions: [insertBtn, fullBtn], height: 270, onClose: () => { if (!closingAuto && range) dismissedAt = range.from; closingAuto = false; autoOpened = false; dock = null; frame = null; ready = false; btn?.classList.remove('on'); ctx.editor.focus(); } });
       btn?.classList.add('on');
     }
     const toggle = () => { if (dock?.open) dock.close(); else open(); };
     addEventListener('message', onMsg);
     let timer; const later = () => { clearTimeout(timer); timer = setTimeout(() => follow(false), 120); };
-    ctx.on('cursor', later); ctx.on('open', () => { range = null; later(); });
+    // open by itself when the cursor goes into an equation in the source, close when it leaves (if it opened by itself).
+    // Not in the Page and Web layouts of the visual view, where a click edits the equation in place.
+    const autoOn = () => ctx.settings.get('auto', true);
+    let autoTimer;
+    function autoCheck() {
+      if (!autoOn() || !/\.(tex|ltx)$/i.test(ctx.project.activeFile || '')) return;
+      if (ctx.editor.view.dom.classList.contains('cm-page')) return;
+      const here = findMath(ctx.editor.getText(), ctx.editor.getCursor().pos);
+      if (here) { if (dismissedAt != null && Math.abs(dismissedAt - here.from) < 2) return; if (!dock?.open) open(false); }
+      else { dismissedAt = null; if (dock?.open && autoOpened) { closingAuto = true; dock.close(); } }
+    }
+    ctx.on('cursor', () => { later(); clearTimeout(autoTimer); autoTimer = setTimeout(autoCheck, 250); });
+    ctx.on('open', () => { range = null; later(); });
+    ctx.ui.addCommand({ id: 'equation.auto', get name() { return autoOn() ? 'Equation editor: stop opening by itself in equations' : 'Equation editor: open by itself when the cursor is in an equation'; }, run: () => { ctx.settings.set('auto', !autoOn()); ctx.ui.toast(autoOn() ? 'The equation editor opens when the cursor goes into an equation.' : 'The equation editor opens only with Ctrl+E.'); } });
     const themeWatch = new MutationObserver(() => post({ type: 'theme', theme: document.documentElement.dataset.theme }));
     themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     ctx.ui.addCommand({ id: 'equation.edit', name: 'Equation editor: open, or move into it', key: 'Mod+E', run: open });
@@ -110,7 +125,7 @@ export default {
     ctx.ui.addCommand({ id: 'equation.close', name: 'Equation editor: close', run: () => dock?.close() });
     ctx.editor.addKeymap([{ key: 'Mod-e', run: () => (open(), true) }]);
     btn = ctx.ui.addToolbarButton({ label: 'Equation', icon: 'sigma', title: 'Show or hide the visual equation editor under the source (Ctrl+E)', onClick: toggle }).el;
-    if (ctx.settings.get('open', false)) setTimeout(open, 0);
+    if (ctx.settings.get('open', false)) setTimeout(() => open(false), 0);
     ctx.on('modules', () => {});
     const bye = () => { linkPost({ type: 'gone' }); }; addEventListener('pagehide', bye);
     ctx.onDispose(() => { bye(); unlink(); removeEventListener('pagehide', bye); removeEventListener('message', onMsg); clearTimeout(timer); themeWatch.disconnect(); dock?.close(); });
