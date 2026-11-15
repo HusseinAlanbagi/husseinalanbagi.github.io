@@ -1,16 +1,17 @@
 // The source editor (CodeMirror 6).
 import { EditorState, Compartment, EditorSelection, StateEffect, StateField, Prec, RangeSetBuilder } from '@codemirror/state';
 import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLineGutter, drawSelection, dropCursor, highlightSpecialChars, rectangularSelection, Decoration, ViewPlugin, WidgetType, hoverTooltip, showTooltip } from '@codemirror/view';
-import { defaultKeymap, history, historyKeymap, indentWithTab, toggleComment } from '@codemirror/commands';
+import { defaultKeymap, history, historyKeymap, indentWithTab, toggleComment, undo } from '@codemirror/commands';
 import { StreamLanguage, syntaxHighlighting, HighlightStyle, bracketMatching, indentOnInput, foldGutter, foldKeymap, indentUnit } from '@codemirror/language';
 import { autocompletion, completionKeymap, closeBrackets, closeBracketsKeymap, snippet, snippetCompletion, startCompletion, acceptCompletion } from '@codemirror/autocomplete';
-import { searchKeymap, highlightSelectionMatches, search, openSearchPanel } from '@codemirror/search';
+import { searchKeymap, highlightSelectionMatches, openSearchPanel } from '@codemirror/search';
+import { findBar } from './findbar.js';
 import { setDiagnostics, lintGutter } from '@codemirror/lint';
 import { stex } from '@codemirror/legacy-modes/mode/stex';
 import { tags as t } from '@lezer/highlight';
 
 // Everything modules may need from CodeMirror, so they never have to bundle their own copy.
-export const cm = { EditorState, Compartment, EditorSelection, StateEffect, StateField, Prec, RangeSetBuilder, EditorView, keymap, Decoration, ViewPlugin, WidgetType, hoverTooltip, showTooltip, snippet, snippetCompletion, startCompletion, setDiagnostics, openSearchPanel };
+export const cm = { undo, EditorState, Compartment, EditorSelection, StateEffect, StateField, Prec, RangeSetBuilder, EditorView, keymap, Decoration, ViewPlugin, WidgetType, hoverTooltip, showTooltip, snippet, snippetCompletion, startCompletion, setDiagnostics, openSearchPanel };
 
 const light = HighlightStyle.define([
   { tag: [t.keyword, t.tagName], color: 'var(--syn-cmd)' }, { tag: t.comment, color: 'var(--syn-comment)', fontStyle: 'italic' },
@@ -35,7 +36,8 @@ const baseTheme = EditorView.theme({
   '.cm-flash': { backgroundColor: 'var(--flash)' },
 });
 
-export function createEditor(parent, { onChange, onCursor }) {
+export function createEditor(parent, { onChange, onCursor, find }) {
+  const fb = findBar(find || { files: () => [], read: () => null, activePath: () => null, onOpenFile: () => {} });
   const moduleComp = new Compartment(), langComp = new Compartment(), wrapComp = new Compartment();
   const sources = new Set();           // completion sources registered by modules
   let moduleExts = [], view, suppress = false;
@@ -58,10 +60,10 @@ export function createEditor(parent, { onChange, onCursor }) {
   const base = (path) => [
     lineNumbers(), highlightActiveLineGutter(), highlightSpecialChars(), history(), drawSelection(), dropCursor(),
     EditorState.allowMultipleSelections.of(true), indentOnInput(), bracketMatching(), closeBrackets(), rectangularSelection(),
-    highlightActiveLine(), highlightSelectionMatches(), search({ top: true }), lintGutter(), flashField,
+    highlightActiveLine(), highlightSelectionMatches(), fb.extension, lintGutter(), flashField,
     indentUnit.of('  '), syntaxHighlighting(light), baseTheme,
     autocompletion({ override: [complete], activateOnTyping: true, maxRenderedOptions: 60 }),
-    keymap.of([{ key: 'Tab', run: acceptCompletion }, ...closeBracketsKeymap, ...defaultKeymap, ...searchKeymap, ...historyKeymap, ...foldKeymap, ...completionKeymap, indentWithTab]),
+    keymap.of([{ key: 'Tab', run: acceptCompletion }, ...fb.keys, ...closeBracketsKeymap, ...defaultKeymap, ...searchKeymap, ...historyKeymap, ...foldKeymap, ...completionKeymap, indentWithTab]),
     wrapComp.of(EditorView.lineWrapping),
     langComp.of(/\.(tex|sty|cls|ltx|tikz|bbl|def|clo)$/i.test(path) ? StreamLanguage.define(stex) : []),
     EditorState.languageData.of(() => [{ commentTokens: { line: '%' } }]),

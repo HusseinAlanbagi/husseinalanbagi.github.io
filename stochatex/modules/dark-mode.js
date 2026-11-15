@@ -26,27 +26,34 @@ export default {
       root.style.setProperty('--pdf-filter', pdfDim() && b < 100 ? `brightness(${(1 - t * 0.35).toFixed(3)}) sepia(${(t * 0.25).toFixed(3)})` : 'none');
     }
     let off = null, pop = null;
-    const close = () => { pop?.remove(); pop = null; removeEventListener('mousedown', outside, true); };
+    const close = () => { pop?.remove(); pop = null; removeEventListener('mousedown', outside, true); removeEventListener('keydown', esc, true); };
     const outside = (e) => { if (pop && !pop.contains(e.target) && !e.target.closest('[data-appearance]')) close(); };
     function openPop(anchor) {
       if (pop) return close();
-      const seg = (v, label) => h('button', { class: 'small' + (ctx.settings.get('theme', 'system') === v ? ' primary' : ''), onClick: () => { ctx.settings.set('theme', v); apply(); close(); openPop(anchor); } }, label);
+      const segs = [];
+      const seg = (v, label) => { const b = h('button', { class: 'small' + (ctx.settings.get('theme', 'system') === v ? ' primary' : ''), 'aria-pressed': String(ctx.settings.get('theme', 'system') === v), onClick: () => { ctx.settings.set('theme', v); apply(); segs.forEach(([k, x]) => { x.classList.toggle('primary', k === v); x.setAttribute('aria-pressed', String(k === v)); }); } }, label); segs.push([v, b]); return b; };
       const slider = h('input', { type: 'range', min: 40, max: 100, step: 1, value: bright(), 'aria-label': 'Brightness', onInput: (e) => { ctx.settings.set('bright', +e.target.value); paint(); } });
       pop = h('div', { class: 'ap-pop', role: 'dialog', 'aria-label': 'Appearance' },
+        h('div', { class: 'ap-head' }, h('strong', {}, 'Appearance'), h('button', { class: 'ghost ap-x', title: 'Close (Esc)', 'aria-label': 'Close', onClick: close }, '×')),
         h('div', { class: 'ap-row' }, seg('light', 'Light'), seg('dark', 'Dark'), seg('system', 'System')),
         h('label', { class: 'ap-lab' }, h('span', {}, 'Brightness'), h('span', { class: 'ap-ends' }, h('span', {}, 'Soft'), slider, h('span', {}, 'Bright'))),
         h('label', { class: 'ap-chk' }, h('input', { type: 'checkbox', checked: pdfDim(), onChange: (e) => { ctx.settings.set('pdfDim', e.target.checked); paint(); } }), 'Dim the PDF preview too'),
-        h('button', { class: 'small', onClick: () => { ctx.settings.set('bright', 100); slider.value = 100; paint(); } }, 'Reset'));
+        h('div', { class: 'ap-foot' }, h('button', { class: 'small', onClick: () => { ctx.settings.set('bright', 100); slider.value = 100; paint(); } }, 'Reset'), h('button', { class: 'small primary', onClick: close }, 'OK')));
       document.body.append(pop);
       const r = anchor.getBoundingClientRect();
       pop.style.top = r.bottom + 6 + 'px'; pop.style.left = Math.max(8, Math.min(innerWidth - pop.offsetWidth - 8, r.right - pop.offsetWidth)) + 'px';
-      addEventListener('mousedown', outside, true);
+      addEventListener('mousedown', outside, true); addEventListener('keydown', esc, true);
     }
+    const esc = (e) => { if (e.key === 'Escape' && pop) { e.stopPropagation(); close(); } };
+    let btnEl = null;
     const apply = () => {
-      ctx.ui.setTheme(wanted()); paint(); off && off();
+      ctx.ui.setTheme(wanted()); paint();
       const dark = wanted() === 'dark';
-      off = ctx.ui.addToolbarButton({ label: 'Appearance', icon: dark ? 'moon' : 'sun', where: 'top', title: 'Light or dark theme, and brightness', onClick: (e) => openPop(e.currentTarget) });
-      setTimeout(() => document.querySelectorAll('button[title="Light or dark theme, and brightness"]').forEach(b => b.dataset.appearance = '1'));
+      if (!off) {
+        off = ctx.ui.addToolbarButton({ label: 'Appearance', icon: dark ? 'moon' : 'sun', where: 'top', title: 'Light or dark theme, and brightness', onClick: (e) => openPop(e.currentTarget) });
+        btnEl = [...document.querySelectorAll('button[title="Light or dark theme, and brightness"]')].pop() || null;
+        if (btnEl) btnEl.dataset.appearance = '1';
+      } else if (btnEl) { const old = btnEl.querySelector('svg'); if (old) old.replaceWith(ctx.ui.icon(dark ? 'moon' : 'sun', 16)); }
     };
     const toggle = () => { ctx.settings.set('theme', wanted() === 'dark' ? 'light' : 'dark'); apply(); };
     ctx.ui.addCommand({ id: 'theme.toggle', name: 'Switch between light and dark theme', run: toggle });
@@ -56,7 +63,8 @@ export default {
 .ap-row { display: flex; gap: 6px; } .ap-row button { flex: 1; justify-content: center; }
 .ap-lab { display: grid; gap: 4px; font-weight: 500; } .ap-ends { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; font-weight: 400; } .ap-ends input { flex: 1; accent-color: var(--accent); }
 .ap-chk { display: flex; gap: 6px; align-items: center; color: var(--muted); }
-.ap-pop > button { justify-self: start; }
+.ap-head { display: flex; align-items: center; justify-content: space-between; margin: -4px -4px 0 0; } .ap-x { font-size: 18px; line-height: 1; padding: 0 6px; height: 24px; }
+.ap-foot { display: flex; justify-content: space-between; }
 #pdf canvas, #pdf .page canvas { filter: var(--pdf-filter, none); }`);
     document.head.append(css);
     mq.addEventListener('change', apply);

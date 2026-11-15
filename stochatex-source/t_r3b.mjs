@@ -1,0 +1,33 @@
+import { open } from './t_app.mjs';
+const { b, p, errs } = await open();
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+await p.waitForSelector('body.ready', { timeout: 30000 }); await sleep(1000);
+const V = (f) => Promise.race([p.evaluate(f), new Promise((_, r) => setTimeout(() => r(new Error('TIMEOUT at ' + String(f).slice(0, 80))), 15000))]);
+await V(() => { const v = window.texbench.app.editor.view; const t = v.state.doc.toString(); v.focus(); v.dispatch({ selection: { anchor: t.indexOf('Firms set prices') } }); }); await sleep(400);
+console.log('crumbs:', await V(() => document.getElementById('crumbs').innerText.replace(/\n/g, ' ')));
+console.log('rail quick:', await V(() => [...document.querySelectorAll('#railQuick button')].map(b => b.getAttribute('aria-label'))));
+console.log('rail end:', await V(() => [...document.querySelectorAll('#railEnd button')].map(b => b.title)));
+await p.keyboard.down('Control'); await p.keyboard.press('k'); await p.keyboard.up('Control'); await sleep(300);
+await p.keyboard.type('calvo'); await sleep(200);
+console.log('search calvo:', await V(() => [...document.querySelectorAll('.modal .cmd')].slice(0, 4).map(b => b.innerText.replace(/\n/g, ' '))));
+await p.keyboard.press('Escape'); await sleep(200);
+await V(() => document.getElementById('omniBtn').click()); await sleep(200); await p.keyboard.type('label eq'); await sleep(200);
+console.log('search labels:', await V(() => [...document.querySelectorAll('.modal .cmd')].slice(0, 3).map(b => b.innerText.replace(/\n/g, ' '))));
+await p.keyboard.press('Escape');
+// visual panel audit
+if ((await p.$eval('.vz-switch', e => e.getAttribute('aria-checked'))) !== 'true') await p.click('.vz-switch');
+await p.click('.vz-more'); await sleep(200);
+await V(() => [...document.querySelectorAll('.vz-seg button')].find(x => /^Web/.test(x.textContent)).click()); await sleep(600);
+console.log('web panel:', await V(() => [...document.querySelectorAll('.vz-panel .vz-sep, .vz-panel .vz-row')].map(x => (x.classList.contains('vz-sep') ? '## ' : '') + x.querySelector?.('span')?.textContent + (x.classList.contains('vz-dis') ? ' [greyed: ' + x.querySelector('small')?.textContent + ']' : '')).join(' | ')));
+console.log('page breaks drawn in web:', await V(() => document.querySelectorAll('.tb-pb').length));
+await V(() => [...document.querySelectorAll('.vz-seg button')].find(x => /^Page/.test(x.textContent)).click()); await sleep(800);
+console.log('page breaks in page:', await V(() => document.querySelectorAll('.tb-pb').length));
+await p.keyboard.press('Escape');
+// duplicate project
+p.on('dialog', d => d.accept());
+await V(() => { setTimeout(() => window.texbench.app.ui.runCommand('project.duplicate')); }); await sleep(600);
+console.log('prompt:', await V(() => document.querySelector('.modal input')?.value)); await p.keyboard.press('Enter'); await sleep(1500);
+console.log('project now:', await V(() => document.getElementById('projName').textContent), await V(() => window.texbench.app.project.files().length));
+console.log('toasts:', await V(() => [...document.querySelectorAll('.toast')].map(t => t.textContent)));
+await p.screenshot({ path: '/tmp/r3b.png' });
+console.log(errs.slice(0, 4)); await b.close();

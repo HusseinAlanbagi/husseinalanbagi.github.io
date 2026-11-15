@@ -31,6 +31,8 @@ const pageFor = (starts, line) => { let pg = null; for (const s of starts) { if 
 const sectionAt = (heads, line) => { let h = null; for (const x of heads) { if (x.line <= line) h = x; else break; } return h; };
 const label = (h) => h ? (h.num ? h.num + ' ' : '') + h.title : 'Start';
 
+import * as VP from './lib/viewplace.js';
+
 export default {
   id: 'navigation',
   name: 'Where am I',
@@ -49,78 +51,99 @@ export default {
 .nv-tick:hover { opacity: 1; height: 3px; }
 .nv-back { position: fixed; z-index: 41; display: inline-flex; gap: 6px; align-items: center; font: 500 12px var(--ui); padding: 4px 10px 4px 8px; border-radius: 16px; border: 1px solid color-mix(in srgb, var(--accent) 50%, var(--line-2)); background: var(--panel); color: var(--ink); box-shadow: var(--shadow); cursor: pointer; }
 .nv-back:hover { border-color: var(--accent); }
-.nv-back .x { margin-left: 2px; color: var(--muted); padding: 0 2px; }
+.nv-back .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .nv-back .x { margin-left: 2px; color: var(--muted); padding: 0 2px; }
 @media (prefers-reduced-motion: reduce) { .nv-tip { transition: none; } }`);
     document.head.append(css);
 
     const panes = [];
     let lastPane = null;
-    // one pane: a scroller with describe(top) -> text, ticks() -> [{ frac, level, text, go }]
-    function pane(name, getScroller, describe, ticks, visible = () => true) {
+    const pid = () => ctx.project.id || 'default';
+    // one pane: a scroller and an adapter { capture(), restore(place), distance(place) -> px, describe(place), here() }
+    // "work" is where you were working: where you last typed or clicked, or stayed for a few seconds.
+    // After a long scroll or jump away from it, the Back button takes you there (and then forth again).
+    function pane(name, getScroller, A, ticks, visible = () => true) {
       const tip = h('div', { class: 'nv-tip', 'aria-hidden': 'true' });
       const tickBox = h('div', { class: 'nv-ticks' });
       const back = h('button', { class: 'nv-back', hidden: true });
       document.body.append(tip, tickBox, back);
-      const P = { name, rest: null, anchor: null, moving: false, idle: 0, tipT: 0, el: null };
-      const rect = () => P.el.getBoundingClientRect();
+      const P = { name, el: null, work: null, target: null, label: '', history: [], idle: 0, rest: 0, tipT: 0, jumping: false };
+      const shown = () => { if (!P.el || !visible()) return false; const r = P.el.getBoundingClientRect(); return r.width > 160 && r.height > 80 && P.el.offsetParent !== null; };
       function place() {
-        if (!P.el || !visible()) { tickBox.hidden = true; back.hidden = true; tip.classList.remove('on'); return; }
-        const r = rect(); tickBox.hidden = !r.height;
+        const ok = shown();
+        tickBox.hidden = !ok; if (!ok) { back.hidden = true; tip.classList.remove('on'); return; }
+        const r = P.el.getBoundingClientRect();
         Object.assign(tickBox.style, { top: r.top + 'px', height: r.height + 'px', left: r.right - 9 + 'px' });
-        Object.assign(back.style, { top: r.top + 8 + 'px', right: Math.max(8, innerWidth - r.right + 18) + 'px' });
+        Object.assign(back.style, { top: r.top + 8 + 'px', right: Math.max(8, innerWidth - r.right + 18) + 'px', maxWidth: Math.max(140, r.width - 40) + 'px' });
+        back.hidden = !P.target;
       }
       function drawTicks() {
         if (!P.el) return;
-        place();
-        const r = rect(), list = ticks() || [];
-        tickBox.replaceChildren(...list.map(t => { const d = h('div', { class: 'nv-tick l' + t.level, title: t.text }); d.style.top = Math.min(r.height - 3, Math.max(0, t.frac * r.height)) + 'px'; d.onclick = () => t.go(); return d; }));
+        place(); if (tickBox.hidden) return;
+        const r = P.el.getBoundingClientRect(), list = ticks() || [];
+        tickBox.replaceChildren(...list.map(t => { const d = h('div', { class: 'nv-tick l' + t.level, title: t.text }); d.style.top = Math.min(r.height - 3, Math.max(0, t.frac * r.height)) + 'px'; d.onclick = () => { P.setWork(); t.go(); }; return d; }));
       }
       function showTip() {
-        const r = rect(), el = P.el, frac = el.scrollTop / Math.max(1, el.scrollHeight - el.clientHeight);
-        tip.textContent = describe(el.scrollTop);
+        if (!shown()) return;
+        const r = P.el.getBoundingClientRect(), el = P.el, frac = el.scrollTop / Math.max(1, el.scrollHeight - el.clientHeight);
+        tip.textContent = A.describe(A.capture());
         tip.style.top = Math.min(r.bottom - 26, Math.max(r.top + 4, r.top + frac * (r.height - 24))) + 'px';
         tip.style.right = innerWidth - r.right + 16 + 'px'; tip.style.left = 'auto';
         tip.classList.add('on'); clearTimeout(P.tipT); P.tipT = setTimeout(() => tip.classList.remove('on'), 900);
       }
-      function showBack() {
-        if (P.anchor == null) { back.hidden = true; return; }
-        back.replaceChildren('↩ ', h('span', {}, 'Back to ' + describe(P.anchor)), h('span', { class: 'x', title: 'Dismiss', onClick: (e) => { e.stopPropagation(); P.anchor = null; showBack(); } }, '×'));
-        back.title = `Return to where you were (${backKey}). Click again to come back here.`;
-        place(); back.hidden = !visible();
-      }
+      // the Back button: "↩ Back to <label>"
+      P.offer = (target, label) => {
+        P.target = target;
+        if (!target) { back.hidden = true; return; }
+        P.label = label || 'Back to ' + A.describe(target);
+        back.replaceChildren('↩ ', h('span', { class: 't' }, P.label), h('span', { class: 'x', title: 'Dismiss', onClick: (e) => { e.stopPropagation(); P.offer(null); } }, '×'));
+        back.title = `${P.label} (${backKey}). Click again to come back here.`;
+        place();
+      };
+      P.setWork = (pl) => { P.work = pl || A.capture(); A.save?.(P.work); };
       P.goBack = () => {
-        if (P.anchor == null || !P.el) return false;
-        const here = P.el.scrollTop, to = P.anchor;
-        P.jumping = true; P.el.scrollTo({ top: to }); P.rest = to; P.anchor = here; showBack();
-        setTimeout(() => { P.jumping = false; }, 300);
+        let to = P.target;
+        if (!to && P.history.length) to = P.history.pop();
+        if (!to || !P.el) return false;
+        const here = A.capture();
+        P.jumping = true; A.restore(to); P.work = to; A.save?.(to);
+        P.offer(here); setTimeout(() => { P.jumping = false; }, 1000);
+        lastPane = P;
         return true;
       };
-      back.onclick = () => { P.goBack(); lastPane = P; };
+      back.onclick = () => P.goBack();
       const onScroll = () => {
-        lastPane = P;
-        if (P.rest == null) P.rest = P.el.scrollTop;
-        showTip();
-        clearTimeout(P.idle);
+        lastPane = P; showTip();
+        clearTimeout(P.idle); clearTimeout(P.rest);
         P.idle = setTimeout(() => {
-          const now = P.el.scrollTop, far = P.el.clientHeight * 1.5;
-          if (!P.jumping && Math.abs(now - P.rest) > far) { P.anchor = P.rest; showBack(); }
-          else if (P.anchor != null && Math.abs(now - P.anchor) < P.el.clientHeight * 0.5) { P.anchor = null; showBack(); }
-          P.rest = now;
-        }, 700);
+          if (P.jumping) return;
+          if (!P.work) { P.setWork(); return; }
+          const far = P.el.clientHeight * 1.5, d = A.distance(P.work);
+          if (d > far && P.target !== P.work) P.offer(P.work);
+          else if (d < P.el.clientHeight * 0.5 && P.target) P.offer(null);
+        }, 600);
+        // stayed here a while (and not just passing by after a jump with the Back button shown): this is the new place
+        P.rest = setTimeout(() => { if (!P.target && !P.jumping) P.setWork(); }, 3000);
       };
       P.attach = () => {
         const el = getScroller(); if (el === P.el) return;
         if (P.el) P.el.removeEventListener('scroll', onScroll);
-        P.el = el; P.rest = el ? el.scrollTop : null; P.anchor = null; showBack();
-        if (el) el.addEventListener('scroll', onScroll, { passive: true });
+        P.el = el; if (el) { el.addEventListener('scroll', onScroll, { passive: true }); ro.observe(el); }
         drawTicks();
       };
-      P.refresh = () => { P.attach(); drawTicks(); if (P.anchor != null) showBack(); };
-      P.forget = () => { P.anchor = null; showBack(); };
+      P.refresh = () => { P.attach(); drawTicks(); };
+      P.worked = () => { // typed or clicked here: this is now where you are working
+        const old = P.work, now = A.capture();
+        if (old && A.distance(old) > (P.el?.clientHeight || 600) * 1.5) { P.history.push(old); if (P.history.length > 20) P.history.shift(); }
+        P.work = now; A.save?.(now);
+        if (P.target && !P.jumping) P.offer(null);
+      };
       P.dispose = () => { if (P.el) P.el.removeEventListener('scroll', onScroll); tip.remove(); tickBox.remove(); back.remove(); };
       panes.push(P);
       return P;
     }
+    let raf = 0;
+    const later = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => panes.forEach(p => p.refresh())); };
+    const ro = new ResizeObserver(later);
 
     // ---- the source editor
     const view = () => ctx.editor.view;
@@ -135,18 +158,39 @@ export default {
       const ps = ctx.compile.pageStarts(file); if (!ps || !ps.lines || !ps.lines.length) return null;
       return pageFor(ps.lines, line);
     };
-    const ed = pane('editor', () => view().scrollDOM, (top) => {
-      const v = view(), line = v.state.doc.lineAt(v.lineBlockAtHeight(Math.max(0, top) + 6).from).number;
+    const describeLine = (line) => {
       const sec = sectionAt(curHeads(), line), pg = pageOfLine(ctx.editor.path, line);
       return [label(sec), pg ? 'p. ' + pg : null, 'line ' + line].filter(Boolean).join(' · ');
-    }, () => {
+    };
+    const lastKey = (path) => `last:${pid()}:${path}`;
+    const EA = {
+      capture: () => ({ ...VP.capture(view()), file: ctx.editor.path }),
+      restore: (pl) => { if (pl.file && pl.file !== ctx.editor.path) ctx.goto(pl.file); VP.restore(view(), pl, { scrollIntoView: ctx.cm.EditorView.scrollIntoView }); },
+      distance: (pl) => {
+        if (pl.file && pl.file !== ctx.editor.path) return Infinity;
+        const v = view(), r = VP.relocate(v.state.doc, pl), top = v.scrollDOM.getBoundingClientRect().top - v.documentTop;
+        return Math.abs(v.lineBlockAt(Math.min(r.pos, v.state.doc.length)).top - top);
+      },
+      describe: (pl) => { const v = view(); const pos = VP.relocate(v.state.doc, pl).pos; return describeLine(v.state.doc.lineAt(Math.min(pos, v.state.doc.length)).number); },
+      save: (pl) => { if (ctx.editor.path) ctx.settings.set(lastKey(ctx.editor.path), { ...pl, at: Date.now() }); },
+    };
+    const ed = pane('editor', () => view().scrollDOM, EA, () => {
       const v = view(), H = Math.max(1, v.contentHeight);
       return curHeads().map(x => {
         const pos = v.state.doc.line(Math.min(x.line, v.state.doc.lines)).from;
         return { frac: v.lineBlockAt(pos).top / H, level: x.level, text: label(x), go: () => { v.dispatch({ selection: { anchor: pos }, effects: ctx.cm.EditorView.scrollIntoView(pos, { y: 'start', yMargin: 40 }) }); v.focus(); } };
       });
     });
-
+    // reopening a file: offer the place where you left off (or go there, if that is set)
+    function offerLeftOff() {
+      const path = ctx.editor.path; if (!path) return;
+      const saved = ctx.settings.get(lastKey(path), null);
+      ed.work = null; ed.history = []; ed.offer(null);
+      if (!saved || (saved.line || 1) <= 3) { ed.setWork(); return; }
+      if (ctx.settings.get('autoReturn', false)) { EA.restore(saved); ed.work = saved; return; }
+      ed.setWork(); ed.work = { ...ed.work }; ctx.settings.set(lastKey(path), saved); // keep the old place until you work somewhere
+      ed.offer(saved, 'Back to where you left off · ' + EA.describe(saved));
+    }
     // ---- the PDF preview
     const pdfEl = () => document.getElementById('pdf');
     const pages = () => [...(pdfEl()?.querySelectorAll('.pdfpage') || [])];
@@ -165,25 +209,53 @@ export default {
       return out.sort((a, b) => a.page - b.page);
     }
     let pdfSecs = [];
-    const pdf = pane('pdf', pdfEl, (top) => {
-      const n = pageAt(top), total = pages().length;
-      // the section running at the top of the page: the last one that started on an earlier page
-      const sec = sectionAt(pdfSecs.map(s => ({ ...s, line: s.page + 1 })), n) || pdfSecs.find(s => s.page === n) || null;
-      return [`p. ${n} of ${total}`, sec ? label(sec) : null].filter(Boolean).join(' · ');
-    }, () => {
+    const pdfSecAt = (n) => sectionAt(pdfSecs.map(s => ({ ...s, line: s.page + 1 })), n) || pdfSecs.find(s => s.page === n) || null;
+    const PA = {
+      capture: () => {
+        const el = pdfEl(), ps = pages(); if (!el || !ps.length) return { page: 1, frac: 0 };
+        let pg = ps[0]; for (const p of ps) if (p.offsetTop <= el.scrollTop + 1) pg = p;
+        return { page: +pg.dataset.page || 1, frac: (el.scrollTop - pg.offsetTop) / Math.max(1, pg.offsetHeight) };
+      },
+      restore: (pl) => {
+        const go = () => { const el = pdfEl(), pg = pages().find(p => +p.dataset.page === pl.page); if (el && pg) el.scrollTop = pg.offsetTop + pl.frac * pg.offsetHeight; };
+        go(); setTimeout(go, 150); setTimeout(go, 500);
+      },
+      distance: (pl) => { const el = pdfEl(), pg = pages().find(p => +p.dataset.page === pl.page); return el && pg ? Math.abs(pg.offsetTop + pl.frac * pg.offsetHeight - el.scrollTop) : 0; },
+      describe: (pl) => { const sec = pdfSecAt(pl.page); return [`p. ${pl.page} of ${pages().length}`, sec ? label(sec) : null].filter(Boolean).join(' · '); },
+      save: (pl) => ctx.settings.set(`lastpdf:${pid()}`, pl),
+    };
+    const pdf = pane('pdf', pdfEl, PA, () => {
       const el = pdfEl(), ps = pages(); if (!el || !ps.length) return [];
       return pdfSecs.map(s => { const pg = ps[s.page - 1]; return pg ? { frac: pg.offsetTop / el.scrollHeight, level: s.level, text: `${label(s)} · p. ${s.page}`, go: () => el.scrollTo({ top: pg.offsetTop - 8 }) } : null; }).filter(Boolean);
     }, () => { const w = document.getElementById('pdfwrap'); return !!w && w.offsetParent !== null && !document.body.classList.contains('pdf-off'); });
+    let pdfOffered = false;
+    function offerPdfLeftOff() {
+      if (pdfOffered || !pages().length) return; pdfOffered = true;
+      const saved = ctx.settings.get(`lastpdf:${pid()}`, null);
+      if (!saved || saved.page <= 1 || saved.page > pages().length) return;
+      if (ctx.settings.get('autoReturn', false)) { PA.restore(saved); pdf.work = saved; return; }
+      pdf.offer(saved, 'Back to where you left off · ' + PA.describe(saved));
+    }
 
     // keep everything in place
-    let raf = 0;
-    const later = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => panes.forEach(p => p.refresh())); };
-    ctx.editor.addExtension(ctx.cm.EditorView.updateListener.of((u) => { if (u.docChanged || u.geometryChanged || u.viewportChanged) later(); if (u.docChanged) ed.forget(); }));
-    ctx.on('compile', () => { pdfSecs = pdfSections(); later(); });
-    ctx.on('open', () => { ed.attach(); ed.forget(); later(); });
+    ctx.editor.addExtension(ctx.cm.EditorView.updateListener.of((u) => {
+      if (u.docChanged || u.geometryChanged || u.viewportChanged) later();
+      // typing or clicking: this is where you are working now
+      if (u.docChanged && u.transactions.some(t => t.isUserEvent('input') || t.isUserEvent('delete'))) { clearTimeout(typed); typed = setTimeout(() => ed.worked(), 300); }
+      else if (u.selectionSet && u.transactions.some(t => t.isUserEvent('select.pointer'))) ed.worked();
+    }));
+    let typed = 0;
+    document.getElementById('pdf')?.addEventListener('pointerdown', () => setTimeout(() => pdf.worked(), 50));
+    ctx.on('compile', () => { pdfSecs = pdfSections(); later(); setTimeout(offerPdfLeftOff, 300); });
+    ctx.on('leave', (path) => { try { if (path && ed.work) ctx.settings.set(lastKey(path), { ...EA.capture(), file: path, at: Date.now() }); } catch {} });
+    ctx.on('open', () => { ed.attach(); later(); setTimeout(offerLeftOff, 60); });
     ['files', 'project'].forEach(n => ctx.on(n, later));
-    const ro = new ResizeObserver(later); ro.observe(document.body);
+    ctx.on('project', () => { pdfOffered = false; });
+    ro.observe(document.body);
+    const mo = new MutationObserver(later); mo.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     addEventListener('resize', later);
+    const saveNow = () => { try { if (ctx.editor.path) EA.save(EA.capture()); if (pages().length) PA.save(PA.capture()); } catch {} };
+    addEventListener('pagehide', saveNow);
     const onKey = (e) => {
       const hit = mac ? (e.metaKey && e.key === '[') : (e.altKey && !e.ctrlKey && !e.shiftKey && e.key === 'ArrowLeft');
       if (!hit) return;
@@ -192,7 +264,8 @@ export default {
     };
     addEventListener('keydown', onKey, true);
     ctx.ui.addCommand({ id: 'nav.back', name: `Back to where you were (${backKey})`, run: () => (lastPane || ed).goBack() });
-    setTimeout(() => { ed.attach(); pdf.attach(); pdfSecs = pdfSections(); later(); }, 0);
-    ctx.onDispose(() => { panes.forEach(p => p.dispose()); css.remove(); ro.disconnect(); removeEventListener('resize', later); removeEventListener('keydown', onKey, true); });
+    ctx.ui.addCommand({ id: 'nav.autoReturn', get name() { return ctx.settings.get('autoReturn', false) ? 'Reopen files at the top (offer “where you left off”)' : 'Reopen files where I left off (jump there by itself)'; }, run: () => { const v = !ctx.settings.get('autoReturn', false); ctx.settings.set('autoReturn', v); ctx.ui.toast(v ? 'Files will reopen where you left off.' : 'Files reopen at the top, with a button to go where you left off.'); } });
+    setTimeout(() => { ed.attach(); pdf.attach(); pdfSecs = pdfSections(); later(); offerLeftOff(); offerPdfLeftOff(); }, 0);
+    ctx.onDispose(() => { saveNow(); panes.forEach(p => p.dispose()); css.remove(); ro.disconnect(); mo.disconnect(); removeEventListener('pagehide', saveNow); removeEventListener('resize', later); removeEventListener('keydown', onKey, true); });
   },
 };

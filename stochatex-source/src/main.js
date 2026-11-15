@@ -2,6 +2,7 @@
 // Core: project storage, editor, compile, PDF preview, problems. Everything else lives in modules/.
 import { zipSync, unzipSync, strToU8 } from 'fflate';
 import { store, prefs, isTextPath, uid } from './store.js';
+import { duplicates, clashes, tidy } from './packages.js';
 import { h, icon, modal, toast, menu, confirmBox, promptBox, splitter, download, pickFiles } from './ui.js';
 import { createEditor } from './editor.js';
 import { createPdfView } from './pdfview.js';
@@ -29,6 +30,7 @@ let project = null;        // { id, name, main, engine, files }
 let active = null;         // path of the file shown in the editor
 let saveTimer = null, compileTimer = null, compiling = false, dirty = false, lastResult = null, sync = null;
 const problems = new Map();      // source -> [{ severity, file, line, message }]
+let quickT = 0;
 const commands = new Map();      // id -> { id, name, run, key }
 
 const persist = () => { clearTimeout(saveTimer); saveTimer = setTimeout(flush, 400); };
@@ -39,11 +41,15 @@ addEventListener('pagehide', () => { flush(); folderSync(); });
 
 // ---------------------------------------------------------------- editor + pdf
 const editor = createEditor($('ed'), {
+  find: {
+    files: () => Object.keys(project?.files || {}), read: (p) => project?.files[p]?.t ?? null, activePath: () => active,
+    onOpenFile: (p, from, to) => { if (p !== active) openFile(p); setTimeout(() => { editor.view.dispatch({ selection: { anchor: from, head: to }, scrollIntoView: true }); }, 30); },
+  },
   onChange(path, text) {
     if (!project || !path || !project.files[path]) return;
-    project.files[path] = { t: text }; save(); events.emit('change', path, text); scheduleCompile();
+    project.files[path] = { t: text }; save(); events.emit('change', path, text); scheduleCompile(); checkPackagesSoon();
   },
-  onCursor(state) { const pos = state.selection.main.head, ln = state.doc.lineAt(pos); $('cursorInfo').textContent = `Ln ${ln.number}, Col ${pos - ln.from + 1}`; events.emit('cursor', { line: ln.number, column: pos - ln.from, pos }); },
+  onCursor(state) { const pos = state.selection.main.head, ln = state.doc.lineAt(pos); if (!$('cursorInfo').dataset.note) $('cursorInfo').textContent = `Ln ${ln.number}, Col ${pos - ln.from + 1}`; events.emit('cursor', { line: ln.number, column: pos - ln.from, pos }); crumbsSoon(); },
 });
 const pdf = createPdfView($('pdf'), {
   onDblClick(page, x, y) { if (!sync) return; const hit = inverse(sync, page, x, y); if (hit && project.files[hit.file]) goto(hit.file, hit.line); },
@@ -110,7 +116,7 @@ const ui = {
   },
   addEditorButton(el) { $('edButtons').append(el); return () => el.remove(); },
   addStatusItem(render) { const el = h('span', { class: 'status-item' }); $('statusItems').append(el); render(el); return () => el.remove(); },
-  addCommand(cmd) { commands.set(cmd.id, cmd); return () => commands.delete(cmd.id); },
+  addCommand(cmd) { commands.set(cmd.id, cmd); clearTimeout(quickT); quickT = setTimeout(() => drawQuick(), 100); return () => { commands.delete(cmd.id); clearTimeout(quickT); quickT = setTimeout(() => drawQuick(), 100); }; },
   runCommand: (id) => commands.get(id)?.run(),
   setTheme(name) { document.documentElement.dataset.theme = name; },
 };
@@ -122,7 +128,7 @@ const rail = new Map();        // id -> { title, btn }
 let sidePanel = null;
 function addRail(id, title, ic) {
   const btn = h('button', { class: 'rail-btn', title, 'aria-label': title, onClick: () => showPanel(id, true) }, icon(ic, 19));
-  rail.set(id, { title, btn }); $('rail').append(btn);
+  rail.set(id, { title, btn }); $('railPanels').append(btn);
   if (prefs.get('sidePanel', 'files') === id && !document.body.classList.contains('side-off')) showPanel(id);
   return () => { btn.remove(); rail.delete(id); if (sidePanel === id) showPanel('files'); };
 }
@@ -159,6 +165,7 @@ function goto(file, line) {
 // ---------------------------------------------------------------- files
 function openFile(path) {
   if (!project || !path || !project.files[path]) return;
+  if (active && active !== path && project.files[active]) events.emit('leave', active);
   active = path; project.lastOpen = path;
   const f = project.files[path];
   $('fileName').textContent = path;
@@ -166,7 +173,7 @@ function openFile(path) {
   $('ed').hidden = !text; $('binview').hidden = text;
   if (text) { editor.open(path, f.t); applyDiagnostics(); }
   else showBinary(path, f.b);
-  renderTree(); events.emit('open', path);
+  renderTree(); events.emit('open', path); checkPackagesSoon(); crumbsSoon();
 }
 let binUrl = null;
 function showBinary(path, bytes) {
@@ -262,6 +269,33 @@ async function runCompile() {
 function setStatus(text, kind = '') { const s = $('status'); s.textContent = text; s.className = 'status ' + kind; $('compileBtn').classList.toggle('busy', kind === 'busy'); }
 
 // ---------------------------------------------------------------- problems + log
+// ---------------------------------------------------------------- packages loaded twice, and clashes
+let pkgTimer = 0;
+function checkPackagesSoon() { clearTimeout(pkgTimer); pkgTimer = setTimeout(checkPackages, 900); }
+function checkPackages() {
+  if (!project) return;
+  const list = [];
+  for (const [file, f] of Object.entries(project.files)) {
+    if (f.t == null || !/\.(tex|ltx)$/i.test(file) || !/\\usepackage/.test(f.t)) continue;
+    for (const d of duplicates(f.t)) {
+      const lines = d.uses.map(u => u.line);
+      list.push({ severity: 'warning', file, line: lines[lines.length - 1],
+        message: `${d.name} is loaded ${d.uses.length === 2 ? 'twice' : d.uses.length + ' times'} (lines ${lines.join(' and ')})`,
+        why: d.conflict ? `The copies have options that disagree (${d.conflict}); keep the one you want and delete the other.` : `Loading a package twice does nothing useful and can cause “Option clash” errors.${d.merged && d.merged.length ? ' Keeping one with the options [' + d.merged.join(',') + '].' : ''}`,
+        fixes: d.conflict ? [{ label: 'Go to the first', goto: { file, line: lines[0] } }] : [{ label: 'Keep one', edit: { file, run: (t) => { const r = tidy(t, d.name); return r.text === t ? null : r.text; } } }] });
+    }
+    for (const c of clashes(f.t)) list.push({ severity: 'info', file, line: c.lineB, message: `${c.a} (line ${c.lineA}) and ${c.b} (line ${c.lineB}) do the same job and usually clash`, why: 'Keep the one your paper uses (e.g. natbib or biblatex for citations, subcaption rather than subfig).', fixes: [] });
+  }
+  problems.set('packages', list); renderProblems();
+}
+function tidyPackages() {
+  const file = active && /\.(tex|ltx)$/i.test(active) ? active : mainFile();
+  const before = file === active ? editor.getText() : project.files[file]?.t; if (before == null) return;
+  const r = tidy(before);
+  if (r.text === before) return toast(r.notes.length ? r.notes.join('. ') + '.' : 'No package is loaded twice.');
+  editFile(file, () => r.text); checkPackages();
+  toast(r.notes.join('. ') + '. (Ctrl+Z undoes it.)', '', 8000);
+}
 function allProblems() { return [...problems.entries()].flatMap(([source, list]) => list.map(p => ({ ...p, source: source === 'compile' ? 'LaTeX' : source }))); }
 // what a fix needs to know about the project
 const explainEnv = () => ({
@@ -302,7 +336,8 @@ function applyFix(fix) {
   if (fix.goto) { goto(fix.goto.file, fix.goto.line); return; }
   const e = fix.edit; if (!e) return;
   let ok;
-  if (e.preamble) ok = editFile(e.file, (t) => toPreamble(t, e.preamble));
+  if (e.run) ok = editFile(e.file, e.run);
+  else if (e.preamble) ok = editFile(e.file, (t) => toPreamble(t, e.preamble));
   else ok = editFile(e.file, (t) => {
     const lines = t.split('\n'), i = (e.line || 1) - 1; if (i >= lines.length) return null;
     if (e.insertAfter != null) { lines.splice(i + 1, 0, e.insertAfter); return lines.join('\n'); }
@@ -382,6 +417,30 @@ async function loadProject(p) {
   scheduleCompile(0);
   await folderConnect();
 }
+// a full copy of the project: files, main file, per-project settings; saved next to the original's folder when it has one
+async function duplicateProject() {
+  if (!project) return;
+  const name = await promptBox('Duplicate project', 'Name for the copy', project.name + ' (copy)'); if (!name) return;
+  const old = project, oldDir = folder.dir;
+  const files = {};
+  for (const [p, f] of Object.entries(old.files)) files[p] = f.t != null ? { t: f.t } : { b: f.b instanceof Uint8Array ? new Uint8Array(f.b) : f.b };
+  let parent = null;
+  if (oldDir && window.showDirectoryPicker) {
+    parent = (await store.kvGet('parentdir:' + old.id).catch(() => null)) || null;
+    try { if (parent && (await parent.requestPermission?.({ mode: 'readwrite' })) !== 'granted') parent = null; } catch { parent = null; }
+    if (!parent && await confirmBox('Save the copy on this computer too', `“${old.name}” is saved in the folder “${oldDir.name}”. To put the copy next to it (as “${name}”), choose the folder that contains “${oldDir.name}”. Choose “Not now” to keep the copy in the browser only.`, 'Choose the folder…')) {
+      try { parent = await window.showDirectoryPicker({ id: 'stochatex-parent', mode: 'readwrite', startIn: oldDir }); await store.kvSet('parentdir:' + old.id, parent); } catch { parent = null; }
+    }
+  }
+  const copy = await createProject(name, files, { main: old.main, engine: old.engine });
+  // per-project settings (model check types and names, places, …) keyed by the project id
+  try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('tb:') && k.includes(old.id)) localStorage.setItem(k.split(old.id).join(copy.id), localStorage.getItem(k)); } } catch {}
+  if (parent) {
+    try { const dir = await parent.getDirectoryHandle(name.replace(/[\\/:*?"<>|]/g, '-'), { create: true }); await linkFolder(dir); toast(`Opened the copy “${name}”, saved in “${parent.name}/${dir.name}”. The original is unchanged.`, '', 6000); return; }
+    catch (e) { toast('Could not create the folder for the copy: ' + e.message, 'err'); }
+  }
+  toast(`Opened the copy “${name}”. The original is unchanged.${oldDir ? ' The copy lives in the browser until you link it to a folder.' : ''}`, '', 6000);
+}
 async function createProject(name, files, extra = {}) {
   const p = { id: uid(), name, main: null, engine: 'pdflatex', files, created: Date.now(), updated: Date.now(), ...extra };
   await store.put(p); await loadProject(p); return p;
@@ -395,6 +454,7 @@ async function projectMenu() {
     { label: 'Import a .zip…', title: 'For example a project downloaded from another LaTeX editor', onClick: async () => { const [f] = await pickFiles('.zip', false); if (f) importZip(f, true); } },
     { label: 'Open a folder on this computer…', disabled: !window.showDirectoryPicker, title: window.showDirectoryPicker ? 'The folder becomes a project, and every change is saved to it. An empty folder starts a new project.' : 'Needs Chrome or Edge on a computer', onClick: () => openFolder() },
     '-',
+    { label: 'Duplicate this project…', title: 'A full copy (files and settings); the original stays as it is', onClick: () => duplicateProject() },
     { label: 'Rename this project…', onClick: async () => { const n = await promptBox('Rename project', 'Project name', project.name); if (n) { project.name = n; $('projName').textContent = n; document.title = `${n} — ${APP_NAME}`; save(); } } },
     { label: 'Download as .zip', onClick: exportZip },
     folder.dir ? { label: `Unlink the folder “${folder.dir.name}”`, onClick: unlinkFolder } : { label: 'Link this project to a folder…', disabled: !window.showDirectoryPicker, title: window.showDirectoryPicker ? 'Save every change to a folder on this computer' : 'Needs Chrome or Edge on a computer', onClick: () => linkFolder() },
@@ -633,6 +693,90 @@ function featuresDialog() {
 function applyPrefs() { document.documentElement.style.setProperty('--ed-size', prefs.get('size', 14) + 'px'); editor.setWrap(prefs.get('wrap', true)); }
 
 // ---------------------------------------------------------------- command palette
+// ---------------------------------------------------------------- Search or run (Ctrl+K): commands, files, sections, labels, citations
+function texFiles() { return Object.keys(project?.files || {}).filter(p => project.files[p].t != null); }
+function searchIndex() {
+  const items = [];
+  for (const c of commands.values()) items.push({ kind: 'Command', text: c.name, key: c.key, run: () => c.run(), id: c.id });
+  for (const p of Object.keys(project?.files || {})) items.push({ kind: 'File', text: p, run: () => openFile(p) });
+  for (const p of texFiles()) {
+    const t = project.files[p].t; if (!/\.(tex|ltx)$/i.test(p) && !/\.bib$/i.test(p)) continue;
+    const lineOf = (i) => t.slice(0, i).split('\n').length;
+    if (/\.bib$/i.test(p)) {
+      for (const m of t.matchAll(/@(\w+)\s*\{\s*([^,\s]+)\s*,([\s\S]*?)(?=\n@|$)/g)) {
+        const title = (/\btitle\s*=\s*[{"]+([^}"]*)/i.exec(m[3]) || [])[1] || '', author = (/\bauthor\s*=\s*[{"]+([^}"]*)/i.exec(m[3]) || [])[1] || '', year = (/\byear\s*=\s*[{"]?(\d{4})/i.exec(m[3]) || [])[1] || '';
+        const key = m[2];
+        items.push({ kind: 'Citation', text: `${key} — ${author.split(/ and /)[0] || ''}${year ? ' ' + year : ''}${title ? ': ' + title : ''}`, hint: 'insert \\citet', run: () => { editor.view.dispatch(editor.view.state.replaceSelection(`\\citet{${key}}`)); editor.view.focus(); } });
+      }
+      continue;
+    }
+    for (const m of t.matchAll(/\\(part|chapter|section|subsection|subsubsection)\*?\s*(?:\[[^\]]*\])?\s*\{([^}]*)\}/g)) items.push({ kind: 'Section', text: m[2].replace(/\\[a-zA-Z]+\s*/g, '').replace(/[{}]/g, ''), hint: `${p}:${lineOf(m.index)}`, run: () => goto(p, lineOf(m.index)) });
+    for (const m of t.matchAll(/\\label\{([^}]*)\}/g)) items.push({ kind: 'Label', text: m[1], hint: `${p}:${lineOf(m.index)} · Alt+Enter inserts \\ref`, run: () => goto(p, lineOf(m.index)), alt: () => { editor.view.dispatch(editor.view.state.replaceSelection(/^eq/.test(m[1]) ? `\\eqref{${m[1]}}` : `\\ref{${m[1]}}`)); editor.view.focus(); } });
+  }
+  return items;
+}
+function quickSearch(initial = '') {
+  const input = h('input', { type: 'text', placeholder: 'Search files, sections, labels, citations and commands…', class: 'grow', autofocus: true, 'aria-label': 'Search or run' }), listEl = h('div', { class: 'cmd-list', role: 'listbox' });
+  const all = searchIndex();
+  let sel = 0, shown = [];
+  const m = modal({ title: 'Search or run', body: h('div', {}, input, h('p', { class: 'muted qs-hint' }, 'Enter opens or runs · Alt+Enter on a label inserts a reference · right-click a command to pin it to the side bar'), listEl) });
+  const draw = () => {
+    const q = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+    const score = (it) => { const t = (it.kind + ' ' + it.text + ' ' + (it.hint || '')).toLowerCase(); if (!q.every(w => t.includes(w))) return -1; return (it.text.toLowerCase().startsWith(q[0] || '') ? 2 : 0) + (it.kind === 'Command' ? 0 : 1); };
+    shown = (q.length ? all.map(it => [score(it), it]).filter(x => x[0] >= 0).sort((a, b) => b[0] - a[0] || a[1].text.localeCompare(b[1].text)).map(x => x[1]) : all.filter(it => it.kind !== 'Citation' && it.kind !== 'Label')).slice(0, 80);
+    sel = Math.min(sel, Math.max(0, shown.length - 1));
+    listEl.replaceChildren(...shown.map((it, i) => {
+      const b = h('button', { class: 'cmd' + (i === sel ? ' on' : ''), role: 'option', onClick: () => go(it) }, h('span', { class: 'qs-kind' }, it.kind), h('span', { class: 'qs-text' }, it.text), it.hint ? h('span', { class: 'hint' }, it.hint) : null, it.key ? h('kbd', {}, it.key.replace('Mod', MOD)) : null);
+      if (it.kind === 'Command') b.addEventListener('contextmenu', (e) => { e.preventDefault(); const pinned = quickList().includes(it.id); menu(b, [{ label: pinned ? 'Unpin from the side bar' : 'Pin to the side bar', onClick: () => { setQuick(pinned ? quickList().filter(x => x !== it.id) : [...quickList(), it.id]); toast(pinned ? 'Removed from the side bar.' : 'Pinned to the side bar.'); } }]); });
+      return b;
+    }));
+    listEl.querySelector('.on')?.scrollIntoView({ block: 'nearest' });
+  };
+  const go = (it, alt) => { m.close(); setTimeout(() => (alt && it.alt ? it.alt() : it.run()), 0); };
+  input.value = initial;
+  input.addEventListener('input', () => { sel = 0; draw(); });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') { sel = Math.min(sel + 1, shown.length - 1); draw(); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { sel = Math.max(sel - 1, 0); draw(); e.preventDefault(); }
+    else if (e.key === 'Enter' && shown[sel]) { e.preventDefault(); go(shown[sel], e.altKey); }
+  });
+  draw();
+}
+// where the cursor is: file › section › subsection (click a part to go there)
+let crumbT = 0;
+function crumbsSoon() { clearTimeout(crumbT); crumbT = setTimeout(drawCrumbs, 200); }
+function drawCrumbs() {
+  const el = $('crumbs'); if (!el || !active) return;
+  const t = editor.view.state.doc, line = t.lineAt(editor.view.state.selection.main.head).number;
+  const heads = [];
+  if (/\.(tex|ltx)$/i.test(active)) {
+    const text = t.toString(), lv = { part: -1, chapter: 0, section: 1, subsection: 2, subsubsection: 3 };
+    for (const m of text.matchAll(/^[ \t]*\\(part|chapter|section|subsection|subsubsection)\*?\s*(?:\[[^\]]*\])?\s*\{([^}]*)\}/gm)) {
+      const ln = text.slice(0, m.index).split('\n').length; if (ln > line) break;
+      const level = lv[m[1]]; while (heads.length && heads[heads.length - 1].level >= level) heads.pop();
+      heads.push({ level, title: m[2].replace(/\\[a-zA-Z]+\s*/g, '').replace(/[{}]/g, '').slice(0, 40), line: ln });
+    }
+  }
+  el.replaceChildren(h('button', { class: 'crumb', title: 'Files', onClick: () => showPanel('files') }, active), ...heads.slice(-2).flatMap(x => [h('span', { class: 'sep' }, '›'), h('button', { class: 'crumb', title: `Line ${x.line}`, onClick: () => goto(active, x.line) }, x.title)]));
+}
+// quick-access icons on the left rail (pinned commands)
+const QUICK_DEFAULT = ['quick.findall', 'quick.insert', 'equation.edit', 'equation.full', 'quick.snippets', 'dynare.export', 'irf.figure'];
+const QUICK_ICON = { 'quick.findall': 'findall', 'quick.insert': 'insert', 'equation.edit': 'sigma', 'equation.full': 'panel', 'quick.snippets': 'braces', 'dynare.export': 'swap', 'dynare.import': 'swap', 'irf.figure': 'wave', 'visual.toggle': 'eye', 'packages.tidy': 'sliders', 'nav.back': 'locate' };
+const quickList = () => prefs.get('quick', QUICK_DEFAULT);
+function setQuick(list) { prefs.set('quick', list); drawQuick(); }
+function drawQuick() {
+  const box = $('railQuick'); if (!box) return;
+  const list = quickList().filter(id => commands.has(id));
+  box.replaceChildren(...list.map((id, i) => {
+    const c = commands.get(id), name = c.name.replace(/^[^:]+: /, (m) => /Format|Equation editor|Brackets|Theme|Folder/.test(m) ? '' : m);
+    const b = h('button', { class: 'rail-btn quick', title: c.name + (c.key ? ` (${c.key.replace('Mod', MOD)})` : '') + ' — right-click to unpin, drag to reorder', 'aria-label': c.name, draggable: true, onClick: () => c.run() }, QUICK_ICON[id] ? icon(QUICK_ICON[id], 18) : h('span', { class: 'quick-letter' }, name.trim()[0]?.toUpperCase() || '•'));
+    b.addEventListener('contextmenu', (e) => { e.preventDefault(); menu(b, [{ heading: c.name }, { label: 'Unpin from the side bar', onClick: () => setQuick(quickList().filter(x => x !== id)) }, { label: 'Pin more… (search a command, right-click it)', onClick: () => quickSearch('') }]); });
+    b.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/x-quick', id); });
+    b.addEventListener('dragover', (e) => { if (e.dataTransfer.types.includes('text/x-quick')) e.preventDefault(); });
+    b.addEventListener('drop', (e) => { const from = e.dataTransfer.getData('text/x-quick'); if (!from || from === id) return; e.preventDefault(); const l = quickList().filter(x => x !== from); l.splice(l.indexOf(id), 0, from); setQuick(l); });
+    return b;
+  }));
+}
 function palette() {
   const input = h('input', { type: 'text', placeholder: 'Type a command…', class: 'grow', autofocus: true, 'aria-label': 'Command' }), listEl = h('div', { class: 'cmd-list', role: 'listbox' });
   let sel = 0, shown = [];
@@ -649,10 +793,15 @@ function palette() {
   input.addEventListener('keydown', (e) => { if (e.key === 'ArrowDown') { sel = Math.min(sel + 1, shown.length - 1); draw(); e.preventDefault(); } else if (e.key === 'ArrowUp') { sel = Math.max(sel - 1, 0); draw(); e.preventDefault(); } else if (e.key === 'Enter' && shown[sel]) run(shown[sel]); });
   draw();
 }
+// a short note in the status bar at the bottom (not over the text)
+function note(msg) { const c = $('cursorInfo'); const old = c.dataset.note; c.dataset.note = msg; c.textContent = msg; c.classList.add('note'); clearTimeout(note.t); note.t = setTimeout(() => { delete c.dataset.note; c.classList.remove('note'); const st = editor.view.state, pos = st.selection.main.head, ln = st.doc.lineAt(pos); c.textContent = `Ln ${ln.number}, Col ${pos - ln.from + 1}`; }, 4000); }
 function showInPdf() {
-  if (!sync || !active) return toast('Compile first, then try again.');
-  const hit = forward(sync, active, editor.getCursor().line);
-  if (!hit) return toast('This line does not appear in the PDF.');
+  if (!sync || !active) return note('Compile to see this part in the PDF.');
+  // the nearest line that is in the PDF: blank lines, comments, lines inside equations or added since the compile have none
+  const at = editor.getCursor().line;
+  let hit = null;
+  for (let d = 0; d <= 40 && !hit; d++) hit = forward(sync, active, at - d) || (d ? forward(sync, active, at + d) : null);
+  if (!hit) return note('Compile to see this part in the PDF.');
   if (pdfMode === 'tab') return pdfCh.postMessage({ type: 'show', page: hit.page, rect: { x: hit.x, y: hit.y, w: hit.w, h: hit.h } });
   if (pdfMode === 'hidden') { setPdfMode('side'); return setTimeout(() => pdf.reveal(hit.page, hit), 250); }
   pdf.reveal(hit.page, hit);
@@ -672,7 +821,8 @@ function setPdfMode(mode, remember = true) {
   if (mode !== 'tab' && tabAlive) { pdfCh.postMessage({ type: 'close' }); tabAlive = false; }
   pdfMode = mode;
   document.body.classList.toggle('pdf-off', mode !== 'side');
-  $('pdfModeBtn').firstChild.textContent = mode === 'side' ? 'PDF' : mode === 'hidden' ? 'PDF hidden' : 'PDF in tab'; $('pdfModeBtn').classList.toggle('on', mode !== 'side');
+  $('pdfSw').setAttribute('aria-checked', String(mode === 'side')); $('pdfSw').classList.toggle('on', mode === 'side'); $('pdfSw').classList.toggle('tab', mode === 'tab');
+  $('pdfSw').querySelector('.lbl').textContent = mode === 'tab' ? 'PDF in tab' : 'PDF';
   if (remember && mode !== 'tab') prefs.set('pdfMode', mode);
   editor.view.requestMeasure();
 }
@@ -689,7 +839,8 @@ pdfCh.onmessage = (e) => {
   else if (m.type === 'click') { if (!sync) return; const hit = inverse(sync, m.page, m.x, m.y); if (hit && project.files[hit.file]) { goto(hit.file, hit.line); window.focus(); } }
 };
 function pdfModeMenu() {
-  menu($('pdfModeBtn'), Object.entries(PDF_MODES).map(([k, label]) => ({ label: (pdfMode === k ? '✓ ' : '\u2003') + label, onClick: () => setPdfMode(k) })));
+  menu($('pdfModeBtn'), [...Object.entries(PDF_MODES).map(([k, label]) => ({ label: (pdfMode === k ? '✓ ' : '\u2003') + label, onClick: () => setPdfMode(k) })), '-',
+    { label: '\u2003Download the PDF', disabled: !lastResult?.pdf, onClick: () => $('pdfDownload').click() }]);
 }
 function downloadPdf() { if (lastResult?.success && pdf.bytes) download(new Blob([pdf.bytes], { type: 'application/pdf' }), (mainFile() || 'document').split('/').pop().replace(/\.tex$/i, '') + '.pdf'); else toast('There is no PDF yet.'); }
 
@@ -721,13 +872,14 @@ $('featBtn').onclick = featuresDialog; $('paletteBtn').onclick = palette; $('pal
 $('newFileBtn').onclick = newFile; $('sideHide').append(icon('chevron', 14)); $('sideHide').onclick = () => setSide(false); $('sideHide').title = `Hide the side bar (${MOD}+\\). Click any icon on the left to bring it back.`; $('uploadBtn').onclick = async () => addFiles(await pickFiles());
 $('tabProblems').onclick = () => showBottom('problems'); $('tabLog').onclick = () => showBottom('log');
 $('zoomOut').onclick = () => pdf.setZoom(pdf.zoom / 1.15); $('zoomIn').onclick = () => pdf.setZoom(pdf.zoom * 1.15); $('zoomFit').onclick = () => pdf.setZoom(1);
-$('pdfModeBtn').onclick = pdfModeMenu; $('pdfTabBtn').onclick = () => setPdfMode('tab'); $('pdfHideBtn').onclick = () => setPdfMode('hidden');
+$('pdfModeBtn').onclick = pdfModeMenu; $('pdfSw').onclick = () => setPdfMode(pdfMode === 'side' ? 'hidden' : 'side'); $('pdfTabBtn').onclick = () => setPdfMode('tab'); $('pdfHideBtn').onclick = () => setPdfMode('hidden');
 $('pdfDownload').onclick = downloadPdf; $('syncBtn').onclick = showInPdf; $('syncBtn').title = `Show this line in the PDF (${MOD}+J). Double-click the PDF to jump to the source.`;
 addEventListener('keydown', (e) => {
   const mod = e.ctrlKey || e.metaKey;
   if (mod && (e.key === 'Enter' || (e.key.toLowerCase() === 's' && !e.shiftKey))) { e.preventDefault(); runCompile(); }
   else if (mod && e.shiftKey && e.key.toLowerCase() === 'p') { e.preventDefault(); palette(); }
-  else if (mod && e.key.toLowerCase() === 'j') { e.preventDefault(); showInPdf(); }
+  else if (mod && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'k') { e.preventDefault(); quickSearch(); }
+  else if (mod && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'j') { e.preventDefault(); showInPdf(); }
   else if (mod && !e.shiftKey && e.key === '\\') { e.preventDefault(); setSide(document.body.classList.contains('side-off')); }
   else if (mod && e.shiftKey && e.key.toLowerCase() === 'h') { e.preventDefault(); setPdfMode(pdfMode === 'side' ? 'hidden' : 'side'); }
 }, true);
@@ -740,9 +892,32 @@ document.documentElement.style.setProperty('--pdf-w', prefs.get('pdfW', Math.rou
 splitter($('split1'), { varName: '--side-w', min: 140, max: () => innerWidth * 0.4, onEnd: v => prefs.set('sideW', v) });
 splitter($('split2'), { varName: '--pdf-w', min: 220, max: () => innerWidth * 0.7, invert: true, onEnd: v => prefs.set('pdfW', v) });
 document.querySelectorAll('.ic-slot').forEach(el => el.replaceWith(icon(el.dataset.icon)));
+$('omniBtn').onclick = () => quickSearch(); $('omniBtn').querySelector('kbd').textContent = MOD === '⌘' ? '⌘K' : 'Ctrl K';
+ui.addCommand({ id: 'quick.findall', name: 'Find in all files of the project', run: () => { editor.openSearch(); setTimeout(() => { const b = [...document.querySelectorAll('.fb-tog')].find(x => x.textContent === 'All files'); if (b && b.getAttribute('aria-pressed') !== 'true') b.click(); }, 50); } });
+ui.addCommand({ id: 'quick.insert', name: 'Insert: figure, table, citation, cross-reference, footnote', run: () => insertMenu() });
+ui.addCommand({ id: 'quick.snippets', name: 'Snippets: insert a ready-made block', run: () => { const b = [...document.querySelectorAll('#toolbar button')].find(x => /Snippets/i.test(x.title || x.textContent)); b ? b.click() : quickSearch('snippet'); } });
+ui.addCommand({ id: 'project.duplicate', name: 'Project: duplicate this project', run: () => duplicateProject() });
+ui.addCommand({ id: 'quick.search', name: 'Search or run (files, sections, labels, citations, commands)', key: 'Mod+K', run: () => quickSearch() });
+function insertMenu() {
+  const ins = (t, back = 0) => { const v = editor.view, r = v.state.selection.main; v.dispatch({ changes: { from: r.from, to: r.to, insert: t }, selection: { anchor: r.from + t.length - back } }); v.focus(); };
+  const anchor = document.querySelector('[aria-label^="Insert: figure"]') || $('omniBtn');
+  menu(anchor, [
+    { label: 'Figure', onClick: () => ins('\\begin{figure}[htbp]\n  \\centering\n  \\includegraphics[width=0.8\\textwidth]{}\n  \\caption{}\n  \\label{fig:}\n\\end{figure}\n', 43) },
+    { label: 'Table', onClick: () => ins('\\begin{table}[htbp]\n  \\centering\n  \\caption{}\n  \\label{tab:}\n  \\begin{tabular}{lcc}\n    \\toprule\n     &  &  \\\\\n    \\midrule\n     &  &  \\\\\n    \\bottomrule\n  \\end{tabular}\n\\end{table}\n', 150) },
+    { label: 'Citation…', hint: 'from your .bib', onClick: () => quickSearch('citation ') },
+    { label: 'Cross-reference…', hint: 'to a label', onClick: () => quickSearch('label ') },
+    { label: 'Footnote', onClick: () => ins('\\footnote{}', 1) },
+  ]);
+}
+$('railEnd').append(
+  h('button', { class: 'rail-btn', title: 'Features', 'aria-label': 'Features', onClick: () => featuresDialog() }, icon('sliders', 18)),
+  h('button', { class: 'rail-btn', title: 'Keyboard shortcuts and all commands', 'aria-label': 'Keyboard shortcuts', onClick: () => palette() }, icon('keyboard', 18)),
+  h('button', { class: 'rail-btn', title: 'Help and about StochaTeX', 'aria-label': 'Help', onClick: () => { featuresDialog(); setTimeout(() => document.querySelector('.modal .about')?.scrollIntoView({ block: 'center' }), 50); } }, icon('help', 18)));
+setTimeout(drawQuick, 300);
 addRail('files', 'Files', 'files'); if (prefs.get('sideOff', false)) document.body.classList.add('side-off'); showPanel(prefs.get('sidePanel', 'files'));
 $('dockClose').onclick = closeDock;
 ui.addCommand({ id: 'packages.auto', get name() { return prefs.get('autoPkg', true) ? 'Stop adding missing packages automatically' : 'Add missing packages automatically (\\usepackage lines, with Undo)'; }, run: () => { const v = !prefs.get('autoPkg', true); prefs.set('autoPkg', v); toast(v ? 'Missing packages will be added automatically.' : 'Packages will no longer be added automatically.'); } });
+ui.addCommand({ id: 'packages.tidy', name: 'Tidy packages: remove ones loaded twice', run: tidyPackages });
 ui.addCommand({ id: 'side.toggle', name: `Show or hide the side bar (${MOD}+\\)`, run: () => setSide(document.body.classList.contains('side-off')) });
 splitter($('dockGrip'), { varName: '--dock-h', min: 140, max: () => innerHeight * 0.7, invert: true, axis: 'y', onEnd: v => { prefs.set('dockH', v); editor.view.requestMeasure(); } });
 applyPrefs();

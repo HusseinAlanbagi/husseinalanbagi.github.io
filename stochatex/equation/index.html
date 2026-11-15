@@ -217,6 +217,7 @@
   /* docked under the source in the LaTeX editor: only the visual box and the tools */
   .dock body { background:#fff; font-family:"Instrument Sans",system-ui,sans-serif; } .dock[data-theme=dark] body { background:#1a2029; }
   .dock main { max-width:none !important; padding:8px 12px 12px; }
+  .side .topbar, .side .banner, .side .embedbar { display: none !important; }
   .dock .topbar, .dock .banner, .dock .embedbar, .dock .panes > .pane:first-child, .dock #tipsBtn, .dock .tips, .dock #tools, .dock #keysPanel, .dock #clear { display:none !important; }
   .dock .clean { position:fixed; right:8px; bottom:8px; width:min(440px, calc(100% - 16px)); max-height:calc(100vh - 16px); overflow:auto; margin:0; padding:8px 10px; font-size:13px; z-index:30; box-shadow:0 6px 24px rgba(0,0,0,.18); } .dock .clean .row button { padding:3px 8px; } .dock .clean h3 { font-size:13px; } .dock .clean .sum { display:none; } .dock .clean .why { display:none; }
   .dock .toolbar { gap:6px; padding:0 0 6px; flex-wrap:wrap; } .dock .toolbar .lbl { display:none; } .dock .toolbar .status:empty, .dock .toolbar .note:empty { display:none; } .dock .toolbar.bottom { padding:6px 0 0; } .dock .tgroup { gap:4px; }
@@ -402,6 +403,8 @@ function start() {
   try { window.mathVirtualKeyboard && window.mathVirtualKeyboard.hide(); } catch (e) {}
   mf.smartMode = false;
   mf.smartFence = false;   // don't auto-pair brackets
+  // * as an asterisk, deleting brackets keeps their content, drag to move (brackets.js)
+  customElements.whenDefined('math-field').then(() => requestAnimationFrame(() => { try { window.StochaBrackets.setupField(mf, { note: (m) => flash(m) }); } catch (e) { console.warn(e); } }));
   mf.smartSuperscript = false;
 
   const MULTI = /^(align|flalign|alignat|eqnarray|gather|multline)$/;
@@ -1217,7 +1220,7 @@ function start() {
     ['\\to', 'to right arrow maps tends'], ['\\rightarrow', 'right arrow'], ['\\leftarrow', 'left arrow gets'], ['\\leftrightarrow', 'left right arrow both'],
     ['\\Rightarrow', 'double right arrow implies'], ['\\Leftarrow', 'double left arrow'], ['\\Leftrightarrow', 'double left right arrow iff'], ['\\mapsto', 'maps to'],
     ['\\uparrow', 'up arrow'], ['\\downarrow', 'down arrow'], ['\\longrightarrow', 'long right arrow'], ['\\rightleftharpoons', 'equilibrium reversible reaction harpoons'],
-    ['\\xrightarrow{#?}', 'arrow with text above extensible'],
+    ['\\xrightarrow{\\text{#?}}', 'arrow with text above extensible'],
     // calculus & big operators
     ['\\frac{#@}{#?}', 'fraction divide over'], ['\\dfrac{#@}{#?}', 'display fraction big'], ['\\sqrt{#@}', 'square root sqrt radical'], ['\\sqrt[#?]{#?}', 'nth root cube root'],
     ['\\sum_{#?}^{#?}', 'sum summation sigma'], ['\\prod_{#?}^{#?}', 'product pi'], ['\\int_{#?}^{#?}', 'integral int definite'], ['\\int', 'integral'],
@@ -1228,7 +1231,7 @@ function start() {
     // accents & decorations
     ['\\hat{#@}', 'hat caret unit vector estimate'], ['\\bar{#@}', 'bar mean average overline'], ['\\overline{#@}', 'overline long bar conjugate'], ['\\tilde{#@}', 'tilde'],
     ['\\vec{#@}', 'vector arrow'], ['\\dot{#@}', 'dot time derivative'], ['\\ddot{#@}', 'double dot second derivative'], ['\\underline{#@}', 'underline'],
-    ['\\overbrace{#@}^{#?}', 'overbrace brace above'], ['\\underbrace{#@}_{#?}', 'underbrace brace below'], ['\\widehat{#@}', 'wide hat caret accent'], ['\\widetilde{#@}', 'wide tilde accent'], ['\\check{#@}', 'check caron accent'], ['\\breve{#@}', 'breve accent'],
+    ['\\overbrace{#@}^{\\text{#?}}', 'overbrace brace above'], ['\\underbrace{#@}_{\\text{#?}}', 'underbrace brace below'], ['\\widehat{#@}', 'wide hat caret accent'], ['\\widetilde{#@}', 'wide tilde accent'], ['\\check{#@}', 'check caron accent'], ['\\breve{#@}', 'breve accent'],
     ['\\mathbf{#@}', 'bold vector matrix'], ['\\mathbb{#@}', 'blackboard bold double struck'], ['\\mathfrak{#@}', 'fraktur gothic'], ['\\operatorname{#?}', 'operator name function'],
     ['\\boldsymbol{#@}', 'bold symbol greek bold'], ['\\mathrm{#@}', 'upright roman text units'], ['\\mathcal{#@}', 'calligraphic script'], ['\\text{#?}', 'text words'],
     // brackets & structures
@@ -1282,6 +1285,8 @@ function start() {
     symGrid.querySelectorAll('.sym').forEach(b => {
       b.addEventListener('mousedown', (e) => e.preventDefault()); // keep the selection where it is
       b.onclick = () => applyTemplate(b.dataset.l);
+      // drag a symbol into the equation
+      b.draggable = true; b.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/x-latex', b.dataset.l.replace(/#@/g, '#?')); e.dataTransfer.setData('text/plain', b.dataset.l.replace(/#[@?0-9]/g, '')); e.dataTransfer.effectAllowed = 'copy'; });
     });
   }
   // the pane the user last worked in decides where symbols and accents go
@@ -2332,16 +2337,18 @@ function start() {
   const chan = linkId && 'BroadcastChannel' in window ? new BroadcastChannel('stochatex-eq-' + linkId) : null;
   if ((QS.has('embed') && window.parent !== window) || chan) {
     if (!chan) document.documentElement.classList.add('embed');
+    window.__eqEmbedded = true; // no sample equation: it would be sent to the paper as an edit
     const setAll = (latex) => {
       cards = [makeCard('')]; active = 0; renderCards();
       syncing = true; NV.set.call(input, ''); syncing = false;
       input.value = latex || ''; autosize(cur()); maybeSplit(cur());
       load(); clearHl();
     };
-    const dockMode = !chan && QS.get('embed') === 'dock', live = dockMode || !!chan;
+    const dockMode = !chan && QS.get('embed') === 'dock', live = dockMode || !!chan, sideMode = !!chan && QS.get('embed') === 'side';
     if (dockMode) document.documentElement.classList.add('dock');
+    if (sideMode) document.documentElement.classList.add('side');
     const bar = document.createElement('div');
-    bar.hidden = dockMode;
+    bar.hidden = dockMode || sideMode;
     bar.className = 'embedbar';
     bar.innerHTML = chan
       ? '<span id="linkInfo">🔗 Linked to your document: changes here go straight into the paper.</span><span style="flex:1"></span><button class="primary" id="embedApply" title="Close this tab">Done</button>'
@@ -2351,7 +2358,8 @@ function start() {
     if (chan) {
       document.title = 'Equation — linked · StochaTeX';
       document.getElementById('embedApply').onclick = () => { send('change', { latex: allText() }); send('closed'); window.close(); };
-      addEventListener('pagehide', () => send('closed'));
+      if (sideMode) window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.querySelector('.modal, .ML__popover[style*="visible"]')) { send('change', { latex: allText() }); send('close-panel'); } }, true);
+      else addEventListener('pagehide', () => send('closed'));
     } else {
       document.getElementById('embedApply').onclick = () => send('apply', { latex: allText() });
       document.getElementById('embedCancel').onclick = () => send('cancel');
@@ -2359,11 +2367,12 @@ function start() {
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); e.stopImmediatePropagation(); send('apply', { latex: allText() }); }
       }, true);
     }
+    let gotSet = false;
     const onMsg = (data) => {
       if (!data || data.target !== 'equation-editor') return;
       if (data.type === 'gone') { const li = document.getElementById('linkInfo'); if (li) li.textContent = '⚠ The document was closed — this tab is no longer linked. Copy your equation before closing.'; return; }
       const e = { data };
-      if (e.data.type === 'set') { if (e.data.theme) setTheme(e.data.theme); setAll(e.data.latex); dockBase = allText(); if (e.data.focus !== false) setTimeout(() => { try { mf.focus(); } catch (err) {} }, 50); }
+      if (e.data.type === 'set') { gotSet = true; window.__eqGotSet = true; if (e.data.theme) setTheme(e.data.theme); setAll(e.data.latex); dockBase = allText(); if (e.data.focus !== false) setTimeout(() => { try { mf.focus(); } catch (err) {} }, 50); }
       if (e.data.type === 'theme' && e.data.theme) setTheme(e.data.theme);
       if (e.data.type === 'focus') { try { mf.focus(); } catch (err) {} }
     };
@@ -2371,8 +2380,10 @@ function start() {
     else window.addEventListener('message', (e) => { if (e.origin === location.origin) onMsg(e.data); });
     // docked: every change goes to the editor straight away (no Apply step)
     let dockBase = allText();
-    if (live) setInterval(() => { const t = allText(); if (t !== dockBase) { dockBase = t; send('change', { latex: t }); } }, 120);
+    if (live) setInterval(() => { if (chan && !gotSet) return; const t = allText(); if (t !== dockBase) { dockBase = t; send('change', { latex: t }); } }, 120);
     send('ready');
+    // linked: say "ready" again until the document answers (it may still be starting)
+    if (chan) { let tries = 0; const again = setInterval(() => { if (gotSet || ++tries > 20) return clearInterval(again); send('ready'); }, 400); }
   }
 
   // =================== Easier selection in the visual box ===================
@@ -2509,8 +2520,8 @@ function start() {
     ['#?^{#@}', 'Make it an exponent', '\\square^{a}'],
     ['#?_{#@}', 'Make it a subscript', '\\square_{a}'],
     null,
-    ['\\overbrace{#@}^{#?}', 'Brace above, with a label', '\\overbrace{a}^{\\square}'],
-    ['\\underbrace{#@}_{#?}', 'Brace below, with a label', '\\underbrace{a}_{\\square}'],
+    ['\\overbrace{#@}^{\\text{#?}}', 'Brace above, with a label (words)', '\\overbrace{a}^{\\square}'],
+    ['\\underbrace{#@}_{\\text{#?}}', 'Brace below, with a label (words)', '\\underbrace{a}_{\\square}'],
     ['\\boxed{#@}', 'Box it', '\\boxed{a}'],
     ['\\text{#@}', 'Plain text (words)', '\\text{ab}'],
   ];
@@ -2565,8 +2576,8 @@ function start() {
   document.addEventListener('pointerdown', (e) => { if (!selbar.contains(e.target)) hideSelbar(); }, true);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideSelbar(); });
 
-  input.value = '\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}';
-  load();
+  // the sample equation, unless the document has already sent one (embedded and linked editors)
+  if (!window.__eqGotSet && !window.__eqEmbedded) { input.value = '\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}'; load(); }
 })();
 }
 </script>

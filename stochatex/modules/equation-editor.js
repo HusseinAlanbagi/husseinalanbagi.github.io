@@ -17,16 +17,36 @@ export default {
     let chan = null, linkRange = null, linkText = null, linkTimer = 0;
     const linkPost = (m) => chan?.postMessage({ target: 'equation-editor', ...m });
     function unlink() { try { chan?.close(); } catch (e) {} chan = null; linkRange = null; linkText = null; }
-    function openFull() {
+    // the full editor in a panel on the right (where the PDF is), linked live; "Pop out" moves it to its own tab
+    let side = null;
+    function closeSide() { if (!side) return; side.el.remove(); side = null; document.body.classList.remove('eq-side'); if (chan) { linkPost({ type: 'gone' }); unlink(); } ctx.editor.focus(); }
+    function openSide() {
+      const wrap = document.getElementById('pdfwrap'); if (!wrap) return openFull(true);
+      if (side) closeSide();
+      const id = link(); if (!id) return;
+      const frameEl = h('iframe', { class: 'eqside-frame', title: 'Full equation editor', src: new URL('./equation/index.html?link=' + id + '&embed=side', document.baseURI).href });
+      const el = h('div', { class: 'eqside', role: 'complementary', 'aria-label': 'Full equation editor' },
+        h('div', { class: 'eqside-head' }, h('strong', {}, 'Equation editor'), h('span', { class: 'muted' }, '· linked to the paper'), h('span', { class: 'spacer' }),
+          h('button', { class: 'small ghost', title: 'Move it to its own browser tab (a second screen)', onClick: () => { const lid = side?.id; side.el.remove(); side = null; document.body.classList.remove('eq-side'); window.open(new URL('./equation/index.html?link=' + lid, document.baseURI).href, '_blank'); } }, 'Pop out'),
+          h('button', { class: 'small ghost', title: 'Close (Esc)', 'aria-label': 'Close', onClick: closeSide }, '×')),
+        frameEl);
+      wrap.append(el); document.body.classList.add('eq-side');
+      side = { el, id };
+    }
+    // start a live link to the equation at the cursor (or in the strip); returns the channel id
+    function link() {
       const text = ctx.editor.getText();
       const r = range || findMath(text, ctx.editor.getCursor().pos);
-      if (!r && !dockText.trim()) return ctx.ui.toast('Put the cursor in an equation first, or type one in the strip.');
-      if (!r) { insertNew(); if (!range) return; }
+      if (!r && !dockText.trim()) { ctx.ui.toast('Put the cursor in an equation first, or type one in the strip.'); return null; }
+      if (!r) { insertNew(); if (!range) return null; }
       if (chan) { linkPost({ type: 'gone' }); unlink(); }
       const id = Math.random().toString(36).slice(2, 10);
       chan = new BroadcastChannel('stochatex-eq-' + id);
       linkRange = { ...(r || range) }; linkText = null;
-      chan.onmessage = (e) => {
+      chan.onmessage = onLinkMsg;
+      return id;
+    }
+    function onLinkMsg(e) {
         const d = e.data; if (!d || d.source !== 'equation-editor') return;
         if (d.type === 'ready') { linkText = ctx.editor.view.state.sliceDoc(linkRange.from, linkRange.to); linkPost({ type: 'set', latex: linkText, theme: document.documentElement.dataset.theme, focus: true }); }
         else if (d.type === 'change' && linkRange) {
@@ -36,8 +56,22 @@ export default {
           ctx.editor.view.dispatch({ changes: { from: linkRange.from, to: linkRange.to, insert: latex }, userEvent: 'input' });
           linkRange = { from: at, to: at + latex.length };
           if (range && range.from === at) { range = { ...linkRange }; lastText = dockText = latex; post({ type: 'set', latex, focus: false }); }
-        } else if (d.type === 'closed') unlink();
-      };
+        } else if (d.type === 'close-panel') closeSide();
+        else if (d.type === 'closed' && !side) unlink();
+    }
+    // the side panel follows the cursor to another equation
+    ctx.on('cursor', () => {
+      if (!side || !chan) return;
+      const r = findMath(ctx.editor.getText(), ctx.editor.getCursor().pos);
+      if (r && linkRange && r.from !== linkRange.from) { linkRange = { ...r }; linkText = ctx.editor.view.state.sliceDoc(r.from, r.to); linkPost({ type: 'set', latex: linkText, focus: false }); }
+    });
+    function openFull(tab) {
+      if (!tab) return openSide();
+      const text = ctx.editor.getText();
+      const r = range || findMath(text, ctx.editor.getCursor().pos);
+      if (!r && !dockText.trim()) return ctx.ui.toast('Put the cursor in an equation first, or type one in the strip.');
+      if (!r) { insertNew(); if (!range) return; }
+      const id = link(); if (!id) return;
       const w = window.open(new URL('./equation/index.html?link=' + id, document.baseURI).href, '_blank');
       if (!w) { unlink(); ctx.ui.toast('Your browser blocked the new tab. Allow pop-ups for this site and try again.'); }
     }
@@ -121,14 +155,15 @@ export default {
     const themeWatch = new MutationObserver(() => post({ type: 'theme', theme: document.documentElement.dataset.theme }));
     themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     ctx.ui.addCommand({ id: 'equation.edit', name: 'Equation editor: open, or move into it', key: 'Mod+E', run: open });
-    ctx.ui.addCommand({ id: 'equation.full', name: 'Equation editor: open the full editor in a new tab (linked)', run: openFull });
+    ctx.ui.addCommand({ id: 'equation.full', name: 'Equation editor: open the full editor beside the paper (linked)', run: () => openFull() });
+    ctx.ui.addCommand({ id: 'equation.fullTab', name: 'Equation editor: open the full editor in a new tab (linked)', run: () => openFull(true) });
     ctx.ui.addCommand({ id: 'equation.close', name: 'Equation editor: close', run: () => dock?.close() });
     ctx.editor.addKeymap([{ key: 'Mod-e', run: () => (open(), true) }]);
     btn = ctx.ui.addToolbarButton({ label: 'Equation', icon: 'sigma', title: 'Show or hide the visual equation editor under the source (Ctrl+E)', onClick: toggle }).el;
     if (ctx.settings.get('open', false)) setTimeout(() => open(false), 0);
     ctx.on('modules', () => {});
     const bye = () => { linkPost({ type: 'gone' }); }; addEventListener('pagehide', bye);
-    ctx.onDispose(() => { bye(); unlink(); removeEventListener('pagehide', bye); removeEventListener('message', onMsg); clearTimeout(timer); themeWatch.disconnect(); dock?.close(); });
+    ctx.onDispose(() => { bye(); closeSide(); unlink(); removeEventListener('pagehide', bye); removeEventListener('message', onMsg); clearTimeout(timer); themeWatch.disconnect(); dock?.close(); });
     // remember whether the dock was open
     const remember = setInterval(() => ctx.settings.set('open', !!dock?.open), 2000); ctx.onDispose(() => clearInterval(remember));
   },

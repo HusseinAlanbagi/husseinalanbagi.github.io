@@ -12,6 +12,13 @@ export function h(tag, attrs, ...kids) {
 }
 // Line icons, drawn for this app. icon('name') returns an <svg>; unknown names give a text glyph.
 const ICONS = {
+  search: 'M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14 M20 20l-4-4',
+  insert: 'M12 5v14 M5 12h14 M4 4h4 M16 20h4',
+  keyboard: 'M3 7h18v10H3z M7 11h0.01 M11 11h0.01 M15 11h0.01 M8 14h8',
+  help: 'M12 21a9 9 0 1 0 0-18a9 9 0 1 0 0 18 M9.5 9.5a2.500 2.500 0 1 1 3.500 2.300c-.8.4-1 1-1 1.700 M12 17h.01',
+  findall: 'M10 4a6 6 0 1 0 0 12a6 6 0 1 0 0-12 M18 18l-3.500-3.500 M3 21h18',
+  symbols: 'M6 4h12 M6 4l6 8-6 8h12',
+  panel: 'M4 5h16v14H4z M14 5v14 M16.500 9h1.500 M16.500 12h1.500',
   folder: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
   files: 'M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z M14 3v5h5',
   outline: 'M4 6h16 M9 12h11 M9 18h11 M4 12h1 M4 18h1',

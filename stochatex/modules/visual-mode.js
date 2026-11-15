@@ -83,6 +83,7 @@ export function tidyTeX(v) {
 }
 
 import { loadMathJax } from './lib/mathjax.js';
+import * as VP from './lib/viewplace.js';
 import { modelState } from './lib/model-state.js';
 import { MODEL_COMMENT } from './lib/latex-math.js';
 const LONE_LINE = /^\s*(?:\\(textbf|textit|emph|underline|textsc)\s*\{.*\}|(\$)[^$]+\$|(\\\()[\s\S]*?\\\))\s*[.:,;]?\s*$/;
@@ -647,6 +648,9 @@ export default {
         btn('Done', 'Done (Esc)', () => finishEdit(true), 'primary'));
       const el = h(display ? 'div' : 'span', { class: display ? 'vz-edit' : 'vz-edit vz-edit-i' }, mf, tag, bar);
       const sess = session = { el, mf, model, view, base: null, orig: model.body };
+      // a long equation shrinks a little to fit the field (MathLive cannot wrap a line); the caret stays in view
+      const fitField = () => { try { mf.style.fontSize = ''; const box = mf.getBoundingClientRect().width - 24, cont = mf.shadowRoot?.querySelector('.ML__content, .ML__latex'); const w = cont ? cont.scrollWidth : 0; if (w > box && box > 0) mf.style.fontSize = Math.max(0.7, box / w) * (display ? 1.15 : 1) + 'em'; } catch {} };
+      mf.addEventListener('input', () => requestAnimationFrame(fitField)); setTimeout(fitField, 120);
       sess.widget = new EditWidget(sess);
       mf.addEventListener('input', () => {
         if (session !== sess) return;
@@ -671,6 +675,26 @@ export default {
         const r = mf.selection?.ranges?.[0] || [0, 0];
         const t = r[0] === r[1] ? tidyTeX(mf.getValue('latex')) : mf.getValue(Math.min(...r), Math.max(...r), 'latex');
         e.clipboardData.setData('text/plain', t); e.preventDefault(); e.stopPropagation();
+      }, true);
+      el.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'd') { e.preventDefault(); e.stopPropagation(); const x = itemNow(); if (x) duplicate(x, false); }
+      }, true);
+      // cutting everything cuts the whole equation (environment and label too)
+      el.addEventListener('cut', (e) => {
+        const r = mf.selection?.ranges?.[0] || [0, 0];
+        if (Math.min(...r) > 0 || Math.max(...r) < mf.lastOffset) return;
+        const x = itemNow(); if (!x) return;
+        e.preventDefault(); e.stopPropagation();
+        e.clipboardData.setData('text/plain', view.state.sliceDoc(x.from, x.to));
+        setTimeout(() => cutEquation(x));
+      }, true);
+      // pasting a whole equation (with \begin … \end, \[ \] or $ $) into a field takes only the maths
+      el.addEventListener('paste', (e) => {
+        const t = e.clipboardData?.getData('text/plain') || '';
+        const m = /^\s*(?:\\begin\{(?:equation|align|gather|multline|displaymath)\*?\}([\s\S]*)\\end\{(?:equation|align|gather|multline|displaymath)\*?\}|\\\[([\s\S]*)\\\]|\$\$([\s\S]*)\$\$|\$([^$]*)\$)\s*$/.exec(t);
+        if (!m) return;
+        e.preventDefault(); e.stopPropagation();
+        mf.insert((m[1] ?? m[2] ?? m[3] ?? m[4]).replace(EXTRA, '').trim(), { format: 'latex' });
       }, true);
       // Ctrl+B / Ctrl+I / Ctrl+U inside the equation: bold, italic, underlined maths
       el.addEventListener('keydown', (e) => {
@@ -706,6 +730,65 @@ export default {
           await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); ctx.ui.toast('Copied the equation as an image.');
         } catch (e) { ctx.ui.toast('The browser did not allow copying the image.', 'warn'); } finally { URL.revokeObjectURL(url); }
       }
+      // the whole equation in the source: from its \begin line to its \end line (and one blank line after it)
+      const wholeRange = (x) => { const d = view.state.doc; if (x.kind !== 'dmath' || !x.block) return { from: x.from, to: x.to }; const a = d.lineAt(x.from).from; let b2 = d.lineAt(x.to).to; if (b2 < d.length) b2++; return { from: a, to: b2 }; };
+      const usedLabels = () => { const all = [view.state.doc.toString(), ...ctx.project.files().filter(f => /\.tex$/i.test(f) && f !== ctx.editor.path).map(f => ctx.project.read(f) || '')].join('\n'); return new Set([...all.matchAll(/\\label\{([^}]*)\}/g)].map(m => m[1])); };
+      const nextLabel = (l, used) => { const base = l.replace(/-\d+$/, ''); let k = 2; while (used.has(`${base}-${k}`)) k++; return `${base}-${k}`; };
+      function duplicate(x, rowOnly) {
+        const st = view.state, used = usedLabels(), mode = ctx.settings.get('dupLabel', 'suffix');
+        const fixLabels = (t) => t.replace(/\\label\{([^}]*)\}/g, (m, l) => { if (mode === 'none') return ''; const n = nextLabel(l, used); used.add(n); return `\\label{${n}}`; });
+        if (rowOnly) {
+          const rows = splitRows(x.body); const r = currentRow(x); const ri = Math.max(0, Math.min(rows.length - 1, r));
+          let at = x.inner, k = 0; for (; k < ri; k++) at += rows[k].length + 2;
+          const row = rows[ri], end = at + row.trimEnd().length, copy = fixLabels(row).trim();
+          const indent = (/\n([ \t]*)\S/.exec(row) || [, '  '])[1];
+          finishEdit(false);
+          view.dispatch({ changes: { from: end, insert: ' \\\\\n' + indent + copy }, userEvent: 'input' });
+          return;
+        }
+        const w = wholeRange(x), src = st.sliceDoc(x.from, x.to), copy = fixLabels(src);
+        finishEdit(false);
+        const at = x.kind === 'dmath' && x.block ? w.to : x.to;
+        const ins = x.kind === 'dmath' && x.block ? (st.sliceDoc(w.to - 1, w.to) === '\n' ? '' : '\n') + copy + '\n' : ' ' + copy;
+        view.dispatch({ changes: { from: at, insert: ins }, userEvent: 'input' });
+        // open the copy for editing
+        setTimeout(() => { const p = view.state.field(field, false)?.p; const it2 = p && p.items.find(y => (y.kind === 'dmath' || y.kind === 'imath') && y.from >= at && y.from <= at + 2); if (it2 && editModel(it2)) startEdit(view, it2); }, 30);
+        ctx.ui.toast('Duplicated' + (/\\label/.test(src) ? (mode === 'none' ? ' (the copy has no label)' : ' (the copy’s label got a number)') : '') + '. Ctrl+Z removes it.');
+      }
+      // which row of an aligned field the caret is in (counted with a hidden field)
+      function currentRow(x) {
+        const rows = (sess.model.rows || 1); if (rows <= 1) return 0;
+        const pos = mf.position, clean = splitRows(x.body).map(r => r.replace(EXTRA, '').trim());
+        try {
+          const probe = document.createElement('math-field'); probe.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0'; document.body.append(probe);
+          let row = 0;
+          for (let r = 0; r < clean.length - 1; r++) { probe.value = `\\begin{aligned}${clean.slice(0, r + 1).join('\\\\')}\\end{aligned}`; if (pos >= probe.lastOffset - 1) row = r + 1; }
+          probe.remove(); return row;
+        } catch { return 0; }
+      }
+      function cutEquation(x) {
+        const w = wholeRange(x), src = view.state.sliceDoc(x.from, x.to);
+        finishEdit(false);
+        try { navigator.clipboard.writeText(src); } catch {}
+        view.dispatch({ changes: { from: w.from, to: w.to, insert: x.kind === 'imath' ? '' : '' }, userEvent: 'delete.cut' });
+        ctx.ui.toast('Cut the equation (with its environment). Paste it anywhere in the text; Ctrl+Z puts it back.');
+      }
+      // rewrite an equation so it fits the printed page: equation + split, broken at + − =
+      function fitPage(x) {
+        const rows = splitRows(x.body.trim()); if (rows.length !== 1 || x.kind !== 'dmath') return ctx.ui.toast('Only single-line equations can be rewritten this way.', 'warn');
+        const ex = (rows[0].match(EXTRA) || []).join(' '), body = rows[0].replace(EXTRA, '').trim();
+        const macros = view.state.field(field).p.info.macros;
+        const avail = 62; // about the text width of a 12pt article, in ex
+        let parts = breakRow(unwrapBig(body, avail, macros), avail, macros) || breakRow(body, avail, macros);
+        if (!parts || parts.length < 2) return ctx.ui.toast('This equation has no good place to break (or it already fits).', 'warn');
+        const numbered = !x.env || !/\*$/.test(view.state.sliceDoc(x.from, x.from + 40).match(/^\\begin\{([^}]*)\}/)?.[1] || '') ? (x.env ? true : false) : false;
+        const env = x.env ? (numbered ? 'equation' : 'equation*') : 'equation*';
+        const next = `\\begin{${env}}${ex ? ex : ''}\n  \\begin{split}\n    ${parts.join(' \\\\\n    ')}\n  \\end{split}\n\\end{${env}}`;
+        const html = renderMath(`\\begin{split}${parts.join('\\\\')}\\end{split}`, true, macros, 0).html || '';
+        const pv = h('div', { class: 'vz-fitpv' }); pv.innerHTML = html;
+        ctx.ui.modal({ title: 'Make it fit the page', body: h('div', {}, h('p', { class: 'muted' }, 'The equation is broken over several lines in the source, so it also fits in the PDF:'), pv, h('pre', { class: 'vz-fitsrc' }, next)),
+          buttons: [{ label: 'Cancel' }, { label: 'Apply', primary: true, onClick: (m) => { m.close(); finishEdit(false); const it2 = view.state.field(field).p.items.find(y => y.from === x.from); if (it2) view.dispatch({ changes: { from: it2.from, to: it2.to, insert: next }, userEvent: 'input' }); } }] });
+      }
       function moreMenu(anchor) {
         const x = itemNow(); if (!x) return;
         const numbered = x.kind === 'dmath' && STAR_FOR[x.env] !== undefined && x.env !== 'displaymath' && x.env !== 'math';
@@ -717,11 +800,19 @@ export default {
           ...(x.kind === 'dmath' ? [{ label: !x.env || starred ? 'Give it a number' : 'Remove its number', onClick: () => toggleNumber(x, starred) }] : []),
           ...(x.kind === 'dmath' ? [{ label: label ? `Rename the label (${label})…` : 'Add a label…', onClick: () => editLabel(x, label) }] : []),
           '-',
+          { label: 'Duplicate this equation', hint: 'Ctrl+Shift+D', onClick: () => duplicate(x, false) },
+          ...(sess.model.rows > 1 ? [{ label: 'Duplicate this row', onClick: () => duplicate(x, true) }] : []),
+          { label: 'Cut the equation', hint: 'with its \\begin … \\end', onClick: () => cutEquation(x) },
+          ...(x.kind === 'dmath' && !(sess.model.rows > 1) ? [{ label: 'Make it fit the page (PDF)…', title: 'Break it over lines in the source, so it fits the printed page too', onClick: () => fitPage(x) }] : []),
+          '-',
           { label: 'Box it', hint: 'selection or all', onClick: () => box(x) },
+          ...(window.StochaBrackets?.structureAt(mf) ? [
+            { label: 'Remove the brace/box, keep what is under it', onClick: () => window.StochaBrackets.removeStructure(mf, true) },
+            { label: 'Delete the brace/box with everything under it', onClick: () => window.StochaBrackets.removeStructure(mf, false) }] : []),
           { label: 'Flip the fraction at the cursor', hint: 'Alt+/', onClick: () => { mf.focus(); window.StochaBrackets?.flipInField(mf); } },
           { label: (auto ? '✓ ' : '') + 'Auto-size brackets', title: '( ) [ ] { } grow with tall content (\\left … \\right) as you edit', onClick: () => { try { localStorage.setItem('olve-autosize', JSON.stringify(!auto)); } catch {} ctx.ui.toast(auto ? 'Auto-size off.' : 'Brackets you edit now grow with tall content.'); } },
           '-',
-          { label: 'Open in the full editor', hint: 'new tab, linked', onClick: () => { const pos = view.state.field(editField)?.bodyFrom; finishEdit(true, pos); ctx.ui.runCommand('equation.full'); } },
+          { label: 'Open in the full editor', hint: 'beside the paper', onClick: () => { const pos = view.state.field(editField)?.bodyFrom; finishEdit(true, pos); ctx.ui.runCommand('equation.full'); } },
           ...(mc ? [{ label: mc.status === 'in' ? 'Leave it out of the model check' : 'Put it in the model check', onClick: () => { finishEdit(false); setModel(view, x, mc); } }] : []),
           '-',
           { label: 'Delete this equation', onClick: () => { finishEdit(false); const it2 = view.state.field(field).p.items.find(y => y.from === x.from); if (!it2) return; const a = it2.kind === 'dmath' && it2.block ? view.state.doc.lineAt(it2.from).from : it2.from; let b2 = it2.kind === 'dmath' && it2.block ? view.state.doc.lineAt(it2.to).to : it2.to; if (b2 < view.state.doc.length && it2.block) b2++; view.dispatch({ changes: { from: a, to: b2, insert: '' }, userEvent: 'delete' }); ctx.ui.toast('Equation deleted (Ctrl+Z brings it back).'); } },
@@ -778,14 +869,24 @@ export default {
       }
       view.dispatch({ effects: setEdit.of({ from: it.from, bodyFrom, bodyTo }) });
       // the paper's own \newcommand macros (MathLive takes them only once the field is on the page)
-      requestAnimationFrame(() => { try { if (Object.keys(macros).length) { mf.macros = { ...mf.macros, ...macros }; mf.value = model.field; } sess.base = tidyTeX(mf.getValue('latex')); mf.focus(); mf.position = mf.lastOffset; } catch {} });
+      requestAnimationFrame(() => { try { window.StochaBrackets?.setupField(mf, { note: (m) => ctx.ui.toast(m) }); } catch {} try { if (Object.keys(macros).length) { mf.macros = { ...mf.macros, ...macros }; mf.value = model.field; } sess.base = tidyTeX(mf.getValue('latex')); mf.focus(); mf.position = mf.lastOffset; } catch {} });
     }
     function finishEdit(focus, pos) {
       const sess = session; if (!sess) return;
       session = null;
       if (sess.away) document.removeEventListener('mousedown', sess.away, true);
       const view = sess.view, ed = view.state.field(editField, false);
+      let empty = false; try { empty = !sess.mf.getValue('latex').trim(); } catch {}
       try { view.dispatch({ effects: setEdit.of(null), ...(pos != null ? { selection: { anchor: pos } } : {}) }); } catch {}
+      // an equation left empty goes away (with Undo)
+      if (empty && ed) {
+        const it = view.state.field(field, false)?.p.items.find(y => y.from === ed.from && (y.kind === 'dmath' || y.kind === 'imath'));
+        if (it && !(it.body ?? it.tex ?? '').replace(EXTRA, '').trim()) {
+          const d = view.state.doc, a = it.kind === 'dmath' && it.block ? d.lineAt(it.from).from : it.from; let b2 = it.kind === 'dmath' && it.block ? d.lineAt(it.to).to : it.to; if (it.block && b2 < d.length) b2++;
+          view.dispatch({ changes: { from: a, to: b2 }, userEvent: 'delete' });
+          ctx.ui.toast(h('span', {}, 'Empty equation removed. ', h('button', { class: 'small', onClick: (ev) => { ev.target.closest('.toast')?.remove(); ctx.cm.undo ? ctx.cm.undo(view) : document.execCommand('undo'); } }, 'Undo')), '', 6000);
+        }
+      }
       if (focus) view.focus();
     }
     // ---- model check: is this equation part of the model? (a chip on each candidate equation; click to change)
@@ -819,7 +920,7 @@ export default {
     // cannot be broken (a wide matrix, one long fraction), it is scaled down to fit
     function fitMath(el, wd, view) {
       const avail = el.clientWidth - 4; if (avail < 80) return;
-      const draw = (tex) => { const r = renderMath(tex, true, wd.macros, Math.round(avail / 20) * 20); if (r.html) el.innerHTML = r.html; return el.querySelector('svg'); };
+      const draw = (tex) => { const r = renderMath(tex, true, wd.macros, Math.round(avail / 20) * 20); if (r.html) { const chip = el.querySelector(':scope > .vz-mc'); el.innerHTML = r.html; if (chip) el.append(chip); } return el.querySelector('svg'); };
       let svg = draw(wd.tex); if (!svg) return;
       const W = svg.getBoundingClientRect().width;
       if (W > avail + 1) {
@@ -972,7 +1073,7 @@ export default {
     // ---- decorations
     function build(state, P) {
       const { items, blocks, info } = P;
-      const fitOn = layers.page && layout === 'web';
+      const fitOn = layers.page && (layout === 'web' || (layout === 'page' && ctx.settings.get('wrapPage', true)));
       const ranges = [], sel = state.selection.ranges, L = layers, doc = state.doc, editing = state.field(editField, false);
       const zones = blocks.filter(b => FLOATS.test(b.env) || TABULAR.test(b.env)).map(b => ({ from: b.from, to: b.to }));
       const hid = state.field(hiddenField, false);
@@ -1106,13 +1207,27 @@ export default {
     const upOn = () => { if (!pointerDown) return; pointerDown = false; if (held) { held = false; setTimeout(() => { try { ctx.editor.view.dispatch({ effects: refresh.of(null) }); } catch {} }, 0); } };
     ctx.editor.view.contentDOM.addEventListener('mousedown', downOn, true); addEventListener('mouseup', upOn, true);
     ctx.onDispose(() => { ctx.editor.view.contentDOM.removeEventListener('mousedown', downOn, true); removeEventListener('mouseup', upOn, true); });
+    // Typing ordinary text (no \ $ { } % & …) cannot change the structure: keep the drawing, move it with the text,
+    // and re-read the whole document once typing pauses. This keeps keystrokes fast in long papers.
+    const PLAIN = /^[^\\$%{}&\[\]~^_\n#]*$/;
+    function plainEdit(tr) {
+      let ok = true;
+      tr.changes.iterChanges((fa, ta, fb, tb, ins) => { if (ok && (ta - fa > 40 || ins.length > 40 || !PLAIN.test(tr.startState.doc.sliceString(fa, ta)) || !PLAIN.test(ins.toString()))) ok = false; });
+      return ok;
+    }
+    const POSKEYS = ['from', 'to', 'inner', 'pos', 'start', 'end', 'at'];
+    const mapItems = (p, ch) => ({ ...p, items: p.items.map(it => { const o = { ...it }; for (const k of POSKEYS) if (typeof o[k] === 'number') o[k] = ch.mapPos(o[k], k === 'to' || k === 'end' ? 1 : -1); return o; }) });
+    let idleT = 0;
+    const settleLater = () => { clearTimeout(idleT); idleT = setTimeout(() => { try { view().dispatch({ effects: refresh.of(null) }); } catch {} }, 350); };
     const field = StateField.define({
       create(state) { const p = read(state); return { p, deco: build(state, p) }; },
       update(v, tr) {
         const again = tr.effects.some(e => e.is(refresh) || e.is(setEdit) || e.is(hideEff));
         if (!tr.docChanged && !tr.selection && !again) return v;
         if (!tr.docChanged && !again && pointerDown) { held = true; return v; }
-        const p = tr.docChanged ? read(tr.state) : v.p;
+        if (tr.docChanged && !again && plainEdit(tr)) { settleLater(); return { p: mapItems(v.p, tr.changes), deco: v.deco.map(tr.changes), stale: true }; }
+        if (!tr.docChanged && !again && v.stale) return { ...v, p: v.p, deco: v.deco };
+        const p = tr.docChanged || v.stale ? read(tr.state) : v.p;
         return { p, deco: build(tr.state, p) };
       },
       provide: f => EditorView.decorations.from(f, v => v.deco),
@@ -1201,12 +1316,15 @@ export default {
         // small edits keep the measured breaks (moved with the text) until the next compile; a wholesale replacement estimates again
         let changed = 0; tr.changes.iterChangedRanges((a, b) => { changed += b - a; });
         if (v.measured && changed < tr.startState.doc.length / 2) { const list = v.list.map(b => ({ ...b, pos: tr.changes.mapPos(b.pos, 1) })); return { ...v, list, deco: v.deco.map(tr.changes) }; }
+        if (plainEdit(tr)) { settleBreaks(); const list = v.list.map(b => ({ ...b, pos: tr.changes.mapPos(b.pos, 1) })); return { ...v, list, deco: v.deco.map(tr.changes) }; }
         const list = estimate(tr.state); return { list, measured: false, deco: breakDeco(tr.state, list) };
       },
       provide: f => EditorView.decorations.from(f, v => v.deco),
     });
+    let breaksT = 0;
+    const settleBreaks = () => { clearTimeout(breaksT); breaksT = setTimeout(() => { try { if (!view().state.field(breaksField, false)?.measured) view().dispatch({ effects: setBreaks.of({ measured: false }) }); } catch {} }, 600); };
     const measure = () => {
-      const path = ctx.editor.path; if (!path || !breaksOn) return;
+      const path = ctx.editor.path; if (!path || !breaksEff()) return;
       const r = ctx.compile.pageStarts(path), len = view().state.doc.length;
       const fresh = r && r.size != null && Math.abs(r.size - len) <= Math.max(200, len * 0.03);     // compiled from (nearly) this text
       try { view().dispatch({ effects: setBreaks.of(fresh ? { measured: true, lines: r.lines } : { measured: false }) }); } catch {}
@@ -1219,17 +1337,23 @@ export default {
     let sw, panel = null;
     const apply = () => {
       const active = on && Object.values(layers).some(Boolean);
-      const key = (active ? 'v' + layout + JSON.stringify(layers) : '') + (breaksOn ? 'b' : '');
+      const brk = breaksEff();
+      const key = (active ? 'v' + layout + JSON.stringify(layers) : '') + (brk ? 'b' : '') + (ctx.settings.get('wrapPage', true) ? 'w' : '');
       if (key !== extKey) {
+        // keep the same text at the same height when the view changes (heights differ a lot between views)
+        let keep = null; try { if (extKey !== null && view().scrollDOM.scrollTop > 0) keep = VP.capture(view()); } catch {}
         extKey = key; offExt && offExt();
-        offExt = ctx.editor.addExtension([active ? [editField, hiddenField, field, previewField, ctx.cm.Prec.high(ctx.cm.keymap.of([{ key: 'Escape', run: (v) => !v.state.field(editField, false) && backToVisual(v) }])), EditorView.editorAttributes.of({ class: 'cm-typeset' + (layers.page ? ' cm-page' + (layout === 'web' ? ' cm-web' : '') : '') })] : [], breaksOn ? breaksField : []]);
+        offExt = ctx.editor.addExtension([active ? [editField, hiddenField, field, previewField, ctx.cm.Prec.high(ctx.cm.keymap.of([{ key: 'Escape', run: (v) => !v.state.field(editField, false) && backToVisual(v) }])), EditorView.editorAttributes.of({ class: 'cm-typeset' + (layers.page ? ' cm-page' + (layout === 'web' ? ' cm-web' : '') : '') })] : [], brk ? breaksField : []]);
+        if (keep) requestAnimationFrame(() => VP.restore(view(), keep, { cursor: false, scrollIntoView: EditorView.scrollIntoView }));
       } else poke();
-      if (breaksOn) measure();
+      if (brk) measure();
       sw.setAttribute('aria-checked', String(on)); sw.classList.toggle('on', on);
       if (panel) renderPanel();
       if (active && layers.math && !ready) loadMathJax().then(() => { ready = true; poke(); }).catch((e) => ctx.ui.toast('Equations cannot be drawn: ' + e.message, 'err'));
     };
     const poke = () => { try { view().dispatch({ effects: refresh.of(null) }); } catch {} };
+    // page breaks make no sense in Web (no pages)
+    const breaksEff = () => breaksOn && !(on && Object.values(layers).some(Boolean) && layers.page && layout === 'web');
     const save = () => { ctx.settings.set('layout', layout); ctx.settings.set('on', on); ctx.settings.set('layers2', layers); ctx.settings.set('breaks', breaksOn); };
     const setOn = (v) => { on = v; if (on && !Object.values(layers).some(Boolean)) layers = ALL(); save(); apply(); };
     const setLayout = (k) => { if (k === 'inline') layers = { ...layers, page: false }; else { layers = { ...layers, page: true }; layout = k; } on = true; save(); apply(); };
@@ -1239,19 +1363,25 @@ export default {
       return b;
     };
     function renderPanel() {
+      const act = on && Object.values(layers).some(Boolean), cur = !act ? 'off' : !layers.page ? 'inline' : layout;
+      // a switch that does not apply to this layout is greyed out with the reason
+      const sw2 = (checked, label, hint, onChange, off) => { const el = swEl(checked, label, off || hint, onChange); if (off) { el.classList.add('vz-dis'); el.setAttribute('aria-disabled', 'true'); el.onclick = null; } return el; };
+      const ceMode = ctx.settings.get('clickEdit', 'auto');
       panel.replaceChildren(
         swEl(on, 'Visual view', 'Draw the document the way it will print', setOn),
         h('div', { class: 'vz-sep' }, 'Layout'),
-        h('div', { class: 'vz-seg', role: 'radiogroup', 'aria-label': 'Layout' }, ...[['page', 'Page', 'As printed, page by page'], ['web', 'Web', 'Fits the window, no pages; long equations wrap'], ['inline', 'In the code', 'Drawn inside the source, with line numbers']].map(([k, label, hint]) => {
-          const cur = !layers.page ? 'inline' : layout;
-          return h('button', { role: 'radio', 'aria-checked': String(cur === k), class: cur === k ? 'on' : '', title: hint, onClick: () => setLayout(k) }, h('span', {}, label), h('small', {}, hint));
-        })),
+        h('div', { class: 'vz-seg', role: 'radiogroup', 'aria-label': 'Layout' }, ...[['page', 'Page', 'As printed, page by page'], ['web', 'Web', 'Fits the window, no pages; long equations wrap'], ['inline', 'In the code', 'Drawn inside the source, with line breaks kept']].map(([k, label, hint]) =>
+          h('button', { role: 'radio', 'aria-checked': String(cur === k), class: cur === k ? 'on' : '', title: hint, onClick: () => setLayout(k) }, h('span', {}, label), h('small', {}, hint)))),
         h('div', { class: 'vz-sep' }, 'What is drawn'),
-        ...LAYERS.filter(([k]) => k !== 'page').map(([k, label, hint]) => swEl(!!layers[k], label, hint, (v) => setLayer(k, v))),
-        swEl(previewOn(), 'Preview while editing LaTeX', 'A floating picture of the equation while you edit its LaTeX, with a “Visual” button (or Esc) to go back', (v) => { ctx.settings.set('preview', v); renderPanel(); poke(); }),
-        swEl(clickEdits(), 'Edit equations in place', 'Click an equation to edit it as drawn; Alt+click shows its LaTeX. Off: clicking shows the LaTeX', (v) => { ctx.settings.set('clickEdit', v ? 'visual' : 'latex'); svgCache.clear(); renderPanel(); poke(); }),
-        h('div', { class: 'vz-sep' }, 'In both views'),
-        swEl(breaksOn, 'Page breaks', 'Mark where each page starts; exact after a compile, estimated before', (v) => { breaksOn = v; save(); apply(); }),
+        ...LAYERS.filter(([k]) => k !== 'page').map(([k, label, hint]) => sw2(!!layers[k], label, hint, (v) => setLayer(k, v), !on ? 'Turn on the visual view first' : null)),
+        h('div', { class: 'vz-sep' }, 'Editing'),
+        sw2(clickEdits(), 'Edit equations in place', ceMode === 'auto' ? 'Automatic: on in Page and Web, off In the code. Alt+click shows the LaTeX' : 'Your choice for every layout (Alt+click always shows the LaTeX)', (v) => { ctx.settings.set('clickEdit', v ? 'visual' : 'latex'); svgCache.clear(); renderPanel(); poke(); }, !act || !layers.math ? 'Needs the visual view with equations drawn' : null),
+        ceMode !== 'auto' ? h('button', { class: 'vz-link', onClick: () => { ctx.settings.set('clickEdit', 'auto'); renderPanel(); poke(); } }, 'Back to automatic') : null,
+        sw2(previewOn(), 'Preview while editing LaTeX', 'A floating picture of an equation while you edit its LaTeX, with “Visual” (or Esc) to go back', (v) => { ctx.settings.set('preview', v); renderPanel(); poke(); }, !act || !layers.math ? 'Needs the visual view with equations drawn' : null),
+        h('div', { class: 'vz-sep' }, 'Pages'),
+        sw2(breaksOn, 'Page breaks', 'Where each page starts; exact after a compile, estimated (≈) before', (v) => { breaksOn = v; save(); apply(); }, cur === 'web' ? 'Web has no pages' : null),
+        sw2(ctx.settings.get('wrapPage', true), 'Wrap long equations', 'Break long equations over lines on the page, as in Web (the PDF itself is unchanged; “Make it fit the page” in an equation’s ⋯ menu changes the PDF too)', (v) => { ctx.settings.set('wrapPage', v); svgCache.clear(); extKey = null; apply(); renderPanel(); }, cur === 'web' ? 'Web always wraps long equations' : cur !== 'page' ? 'Only in the Page layout' : null),
+        modelState.result ? h('p', { class: 'vz-note' }, 'Model check chips (“in the model”) show on equations in every layout.') : null,
       );
     }
     const panelOff = (e) => { if (panel && !panel.contains(e.target) && !wrap.contains(e.target)) closePanel(); };
@@ -1293,6 +1423,9 @@ export default {
 @media (prefers-reduced-motion: reduce) { .vz-track, .vz-knob { transition: none; } }
 .vz-panel { position: fixed; z-index: 60; width: 340px; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 36px rgba(15,23,32,.18); padding: 6px; }
 .vz-row { white-space: normal; display: flex; align-items: center; justify-content: space-between; gap: 14px; width: 100%; text-align: left; border: 0; background: none; padding: 8px 10px; border-radius: 7px; color: var(--ink); }
+.vz-row.vz-dis { opacity: .5; cursor: default; } .vz-row.vz-dis:hover { background: none; }
+.vz-link { border: 0; background: none; color: var(--accent); font: 12px var(--ui); padding: 0 10px 6px; cursor: pointer; text-align: left; }
+.vz-note { margin: 4px 10px 6px; font: 12px var(--ui); color: var(--muted); }
 .vz-row:hover { background: var(--panel-2); } .vz-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .vz-row-l { display: flex; flex-direction: column; gap: 1px; font: 500 13px var(--ui); min-width: 0; flex: 1; } .vz-row-l small { font: 12px var(--ui); color: var(--muted); }
 .vz-panel > .vz-row:first-child { padding: 10px; } .vz-panel > .vz-row:first-child .vz-row-l > span { font-weight: 600; }
@@ -1355,6 +1488,8 @@ export default {
 .vz-mc-in { color: var(--ok, #177245); border-color: color-mix(in srgb, var(--ok, #177245) 40%, var(--line)); }
 .vz-mc-out { text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent); }
 .vz-mc-set { border-style: dashed; }
+.vz-fitpv { overflow-x: auto; padding: 8px; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; margin: 6px 0; }
+.vz-fitsrc { font: 12px var(--mono, monospace); background: var(--panel); padding: 8px; border-radius: 6px; max-height: 180px; overflow: auto; white-space: pre-wrap; }
 .vz-edit { position: relative; display: flex; align-items: center; gap: 10px; padding: 6px 0 6px; }
 .vz-edit math-field { flex: 1; min-width: 0; font-size: 1.15em; border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line)); border-radius: 8px; padding: 6px 10px; background: var(--paper); color: var(--ink); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent); --caret-color: var(--accent); --selection-background-color: var(--sel, #c3d9f5); }
 .vz-edit math-field::part(menu-toggle), .vz-edit math-field::part(virtual-keyboard-toggle) { display: none; }

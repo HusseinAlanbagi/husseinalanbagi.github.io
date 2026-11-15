@@ -1,0 +1,24 @@
+import { open } from './t_app.mjs';
+const { b, p, errs } = await open();
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+await p.waitForSelector('body.ready', { timeout: 30000 }); await sleep(1500);
+const V = (f) => p.evaluate(f);
+console.log('sample paper bracket problems:', await V(() => [...document.querySelectorAll('.problem .msg')].map(x => x.textContent).filter(t => /never closed|closes nothing|has no/.test(t))));
+await p.evaluate(() => window.texbench.app.project.write('t.tex', 'Text here.\n\nend\n', { open: true })); await sleep(300);
+if ((await p.$eval('.vz-switch', e => e.getAttribute('aria-checked'))) === 'true') await p.click('.vz-switch');
+const put = (pos) => V(`(() => { const v = window.texbench.app.editor.view; v.focus(); v.dispatch({ selection: { anchor: ${pos} } }); })()`);
+const txt = () => V(() => window.texbench.app.editor.getText());
+await put(11); await p.keyboard.type('\\['); await sleep(100); console.log('block:', JSON.stringify(await txt()));
+await p.keyboard.type('x = \\left('); await sleep(100); console.log('left:', JSON.stringify(await txt()));
+await p.keyboard.type('a'); 
+await V(() => { const v = window.texbench.app.editor.view; v.dispatch({ selection: { anchor: 4 } }); }); await p.keyboard.type(' $'); await sleep(100); console.log('dollar:', JSON.stringify((await txt()).split('\n')[0]));
+await p.keyboard.press('Backspace'); await sleep(100); console.log('backspace pair:', JSON.stringify((await txt()).split('\n')[0]));
+// checker
+await p.evaluate(() => window.texbench.app.project.write('t.tex', 'A \\textbf{bold text here.\n\n\\begin{equation}\n  y = \\frac{a}{b + c\n\\end{equation}\n', { open: true })); await sleep(1200);
+console.log('marks:', await V(() => [...document.querySelectorAll('.bk-bad')].map(x => x.textContent)));
+console.log('problems:', await V(() => [...document.querySelectorAll('.problem .msg')].map(x => x.textContent).filter(t => /never|nothing|has no/.test(t))));
+const m = await p.$$('.bk-bad'); const bb = await m[1].boundingBox(); await p.mouse.move(bb.x + 2, bb.y + 5); await sleep(700);
+console.log('tip:', await V(() => document.querySelector('.bk-tip')?.innerText));
+await V(() => [...document.querySelectorAll('.bk-tip button')].find(x => x.textContent === 'Close it here')?.click()); await sleep(200);
+console.log('fixed:', JSON.stringify(await txt()));
+console.log(errs.slice(0, 3)); await b.close();

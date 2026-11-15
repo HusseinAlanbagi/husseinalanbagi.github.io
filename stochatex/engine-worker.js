@@ -690,7 +690,10 @@ function configureTexEnvironment(ENV) {
     // /CreationDate, /ModDate and /ID so identical input yields byte-identical output.
     // This enables safe output caching and stable hashing. We deliberately do NOT set
     // FORCE_SOURCE_DATE, so \today / \year still reflect the real date in the document.
-    ENV['SOURCE_DATE_EPOCH'] = '1577836800'; // 2020-01-01T00:00:00Z — fixed reference
+    // StochaTeX: datetime2 and others take "today" from this creation date, so it must be now — in local time
+    // (the offset is added so the date written in UTC is the user's local date; otherwise late-night compiles
+    // east of Greenwich show yesterday).
+    ENV['SOURCE_DATE_EPOCH'] = String(Math.floor(Date.now() / 1000) - new Date().getTimezoneOffset() * 60);
 }
 
 // fontconfig config written into the VFS. <dir> entries point at the texmf font
@@ -2175,6 +2178,30 @@ async function handleCompile(request) {
                     compileError = e.message;
                     texLog += '\n! ' + e.message;
                     workerLog('Compilation failed: ' + e.message);
+                }
+            }
+
+            // StochaTeX: datetime2 looks for its language modules with \IfFileExists, which only warns
+            // ("Date-Time Language Module `british' not installed") and falls back to ISO dates. Fetch the
+            // module (datetime2-english, datetime2-french, …) and compile again.
+            if (compileSuccess && options.enableCtan && retryCount < maxRetries - 1) {
+                let lg = '';
+                try { lg = new TextDecoder().decode(FS.readFile(docBase + '.log')); } catch (e) {}
+                const ENGLISH = /^(english|british|UKenglish|USenglish|american|australian|canadian|newzealand|irish|scottish|en)$/i;
+                const want = [...new Set([...lg.matchAll(/Date-Time Language Module [`'\u2018]([A-Za-z-]+)['\u2019] not installed/g)]
+                    .map(m => 'datetime2-' + (ENGLISH.test(m[1]) ? 'english' : m[1].toLowerCase())))].filter(pkg => !fetchedPackages.has(pkg));
+                if (want.length) {
+                    const got = await Promise.all(want.map(async (pkg) => {
+                        fetchedPackages.add(pkg);
+                        try { const d = await requestCtanFetch(pkg, pkg + '.ldf', null); return d.success ? d : null; } catch (e) { return null; }
+                    }));
+                    let any = false;
+                    for (const d of got) {
+                        if (!d) continue; any = true;
+                        const files = d.files instanceof Map ? d.files : new Map(Object.entries(d.files));
+                        for (const [path, content] of files) accumulatedCtanFiles.set(path, content);
+                    }
+                    if (any) { workerLog('[RETRY] fetched ' + want.join(', ') + ' for datetime2'); compileSuccess = false; retryCount++; continue; }
                 }
             }
 
