@@ -9,7 +9,7 @@ import { createPdfView } from './pdfview.js';
 import { initEngine, compileProject, onEngineLog, engineLog, clearEngineCache } from './engine.js';
 import { parseLog } from './logparse.js';
 import { explain } from './explain.js';
-import { parseSyncTeX, forward, inverse, pageStarts } from './synctex.js';
+import { parseSyncTeX, forward, inverse, pageStarts, tagOf } from './synctex.js';
 import { createModuleHost } from './modules.js';
 import { SAMPLE_MAIN, SAMPLE_BIB, BLANK_MAIN } from './template.js';
 
@@ -801,7 +801,10 @@ function showInPdf() {
   const at = editor.getCursor().line;
   let hit = null;
   for (let d = 0; d <= 40 && !hit; d++) hit = forward(sync, active, at - d) || (d ? forward(sync, active, at + d) : null);
-  if (!hit) return note('Compile to see this part in the PDF.');
+  if (!hit) {
+    if (tagOf(sync, active) == null && active !== mainFile()) return note(`This file is not in the PDF: ${mainFile()} does not \\input it.`);
+    return note('Compile to see this part in the PDF.');
+  }
   if (pdfMode === 'tab') return pdfCh.postMessage({ type: 'show', page: hit.page, rect: { x: hit.x, y: hit.y, w: hit.w, h: hit.h } });
   if (pdfMode === 'hidden') { setPdfMode('side'); return setTimeout(() => pdf.reveal(hit.page, hit), 250); }
   pdf.reveal(hit.page, hit);

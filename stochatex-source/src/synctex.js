@@ -1,6 +1,17 @@
 // A small SyncTeX reader: maps between source lines and places on PDF pages.
 // Coordinates in the file are scaled points measured from the top-left corner of the page.
 const SP_PER_BP = 65781.76;
+// The engine writes names as /main.tex, //./chapters/ch2.tex or ./x.tex: keep the project path (chapters/ch2.tex).
+function cleanName(n) {
+  n = n.replace(/\\/g, '/').replace(/\/(\.\/)+/g, '/').replace(/^(\.?\/)+/, '');
+  const out = []; for (const seg of n.split('/')) { if (seg === '' || seg === '.') continue; if (seg === '..') out.pop(); else out.push(seg); }
+  return out.join('/');
+}
+export function tagOf(data, file) {
+  const low = file.toLowerCase(); let loose = null;
+  for (const [t, name] of data.inputs) { if (name === file) return t; if (loose == null && name.toLowerCase() === low) loose = t; }
+  return loose;
+}
 export function parseSyncTeX(text) {
   const inputs = new Map(), pages = [];
   let page = null;
@@ -9,7 +20,7 @@ export function parseSyncTeX(text) {
     const c = line[0];
     if (c === 'I' && line.startsWith('Input:')) {
       const m = /^Input:(\d+):(.*)$/.exec(line);
-      if (m) inputs.set(+m[1], m[2].replace(/^\.?\//, ''));
+      if (m) inputs.set(+m[1], cleanName(m[2]));
     } else if (c === '{') { page = { n: +line.slice(1), boxes: [], pts: [] }; pages.push(page); hboxes.length = 0; }
     else if (!page) continue;
     else if (c === '(' || c === '[') {
@@ -28,7 +39,7 @@ export function parseSyncTeX(text) {
 // Source -> PDF. Returns { page, x, y, w, h } in PDF points from the top-left, or null.
 export function forward(data, file, line) {
   let tag = null;
-  for (const [t, name] of data.inputs) if (name === file) { tag = t; break; }
+  const tag0 = tagOf(data, file); if (tag0 != null) tag = tag0;
   if (tag == null) return null;
   let best = null;
   for (const pg of data.pages) {
@@ -76,7 +87,7 @@ export function inverse(data, pageNo, x, y) {
 // from that file. The first piece of the file's text at the top of a page (in reading order) marks the start.
 export function pageStarts(data, file) {
   let tag = null;
-  for (const [t, name] of data.inputs) if (name === file) { tag = t; break; }
+  const tag0 = tagOf(data, file); if (tag0 != null) tag = tag0;
   if (tag == null) return [];
   const out = []; let prev = 0;
   for (const pg of data.pages) {
