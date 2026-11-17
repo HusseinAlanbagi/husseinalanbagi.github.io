@@ -177,7 +177,8 @@ pre.code { background: var(--panel); border: 1px solid var(--line); border-radiu
 .menu, .ap-pop { z-index: 1000 !important; } .modal-back { z-index: 900; } .toasts { z-index: 1100; }
 
 /* the PDF switch beside the Visual switch */
-.pdf-wrap { display: inline-flex; align-items: center; margin-left: 6px; }
+.pdf-wrap { display: inline-flex; align-items: center; margin-left: 2px; }
+#featBtn[hidden] { display: none !important; }
 .pdf-sw { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--paper); border-radius: 999px 0 0 999px; padding: 3px 10px 3px 6px; font: 500 13px var(--ui); color: var(--muted); height: 28px; }
 .pdf-sw:hover { color: var(--ink); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
 .pdf-sw.on, .pdf-sw.tab { color: var(--accent); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }

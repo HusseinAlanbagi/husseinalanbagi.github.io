@@ -7,7 +7,7 @@
 <meta name="description" content="A free LaTeX editor that runs in your browser: compiles on your own machine, works offline, and every feature is a module you can switch on or off.">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="app.css?v=20261117">
 </head>
 <body>
 <header id="top">
@@ -20,11 +20,12 @@
   <div class="compile">
     <button id="compileBtn" class="primary"><span class="ic-slot" data-icon="play"></span>Compile</button>
     <label class="check" title="Compile again shortly after you stop typing"><input type="checkbox" id="auto"> Auto</label>
+    <span class="pdf-wrap"><button id="pdfSw" class="pdf-sw on" role="switch" aria-checked="true" title="PDF beside the editor, on or off (Ctrl+Shift+H)"><span class="pdf-track"><span class="pdf-knob"></span></span><span class="lbl">PDF</span></button><button id="pdfModeBtn" class="pdf-more" title="More: open the PDF in its own tab, download it" aria-haspopup="menu" aria-label="PDF options"></button></span>
   </div>
   <span class="vr" aria-hidden="true"></span>
   <div id="topTools" class="grp"></div>
   <button id="paletteBtn" class="ghost icon-only" aria-label="All commands"><span class="ic-slot" data-icon="command"></span></button>
-  <button id="featBtn" class="ghost" title="Switch features on or off, and other settings"><span class="ic-slot" data-icon="sliders"></span>Features</button>
+  <button id="featBtn" class="ghost" hidden title="Switch features on or off, and other settings"><span class="ic-slot" data-icon="sliders"></span>Features</button>
 </header>
 <main id="work">
   <nav id="rail" aria-label="Side panels"><div id="railPanels" class="rail-grp"></div><div id="railQuick" class="rail-grp quick" aria-label="Quick access"></div><span class="rail-fill"></span><div id="railEnd" class="rail-grp"></div></nav>
@@ -35,7 +36,7 @@
   <div class="split" id="split1" role="separator" aria-orientation="vertical"></div>
   <section id="edwrap" aria-label="Source">
     <div class="bar edbar"><span id="fileName" class="fname"></span><div id="toolbar" class="grp" role="toolbar" aria-label="Tools"></div><span class="spacer"></span>
-      <span id="edButtons" class="grp"></span><span class="pdf-wrap"><button id="pdfSw" class="pdf-sw on" role="switch" aria-checked="true" title="PDF beside the editor, on or off (Ctrl+Shift+H)"><span class="pdf-track"><span class="pdf-knob"></span></span><span class="lbl">PDF</span></button><button id="pdfModeBtn" class="pdf-more" title="More: open the PDF in its own tab, download it" aria-haspopup="menu" aria-label="PDF options"></button></span><button id="syncBtn" class="ghost icon-only" aria-label="Show this line in the PDF"><span class="ic-slot" data-icon="locate"></span></button></div>
+      <span id="edButtons" class="grp"></span><button id="syncBtn" class="ghost icon-only" aria-label="Show this line in the PDF"><span class="ic-slot" data-icon="locate"></span></button></div>
     <div id="ed"></div>
     <div id="binview" hidden></div>
     <div id="dock" hidden><div id="dockGrip" role="separator" aria-orientation="horizontal" title="Drag to resize"></div><div class="bar dockbar"><span id="dockTitle" class="dock-title"></span><span id="dockInfo" class="muted"></span><span class="spacer"></span><span id="dockActions" class="grp"></span><button id="dockClose" class="ghost icon-only" title="Close" aria-label="Close"><span class="ic-slot" data-icon="close"></span></button></div><div id="dockBody"></div></div>
