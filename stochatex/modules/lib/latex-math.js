@@ -43,12 +43,12 @@ export function scan(eq, offset = 0, out = { symbols: [], operators: [] }, multi
   const n = s.length;
   while (i < n) {
     const c = s[i];
-    let base = null, accent = null, isE = false;
+    let base = null, accent = null, accents = [], inner = '', innerAt = 0, isE = false;
     const pos = i;
     if (c === '\\') {
       const m = /^\\([a-zA-Z]+|.)/.exec(s.slice(i)), name = m[1];
       i += m[0].length;
-      if (ACCENTS.has(name)) { const a = readArg(s, i); i = a.end; accent = name; base = plain(a.content).replace(/^\\imath$/, 'i').replace(/^\\jmath$/, 'j'); if (!base) continue; }
+      if (ACCENTS.has(name)) { const a = readArg(s, i); i = a.end; const r = accented(a.content); accent = name; accents = [name, ...r.accents]; base = r.base; inner = r.scripts; innerAt = a.start + r.at; if (!base) continue; }
       else if (FONTS.has(name)) { const a = readArg(s, i); i = a.end; const inner = plain(a.content); if (!inner || name.startsWith('text')) continue; isE = inner === 'E' && E_FONTS.has(name); base = /^(mathrm|mathit|operatorname)$/.test(name) ? inner : `\\${name}{${inner}}`; }
       else if (GREEK_SET.has(name)) base = '\\' + name;
       else if (BIGOPS.has(name)) { i = skipScripts(s, i); continue; }
@@ -58,13 +58,14 @@ export function scan(eq, offset = 0, out = { symbols: [], operators: [] }, multi
     else { i++; continue; }
 
     // scripts
-    let subs = [], label = '', time = null, steady = accent === 'bar' || accent === 'overline' ? 'bar' : null, primes = '';
-    for (;;) {
-      let j = i; while (s[j] === ' ') j++;
-      if (s[j] === "'") { primes += "'"; i = j + 1; continue; }
-      if (s[j] !== '_' && s[j] !== '^') break;
-      const a = readArg(s, j + 1), raw = a.content.trim();
-      if (s[j] === '_') {
+    let subs = [], label = '', time = null, steady = accents.some(x => x === 'bar' || x === 'overline') ? 'bar' : null, primes = '';
+    // scripts after the symbol; inside an accent first (\tilde{p_t}), then after it
+    const scripts = (str, k, shift) => { for (;;) {
+      let j = k; while (str[j] === ' ') j++;
+      if (str[j] === "'") { primes += "'"; k = j + 1; continue; }
+      if (str[j] !== '_' && str[j] !== '^') break;
+      const a = readArg(str, j + 1), raw = a.content.trim();
+      if (str[j] === '_') {
         for (const part of splitTop(raw)) {
           const p = plain(part), tm = TIME.exec(p);
           if (tm) time = tm[1] ? (tm[1] === '-' ? -1 : 1) * (/\d/.test(tm[2]) ? +tm[2] : 1) : 0;
@@ -76,16 +77,30 @@ export function scan(eq, offset = 0, out = { symbols: [], operators: [] }, multi
         else if (p === 'ss') steady = 'ss';
         else if (p === '\\prime') primes += "'";
         else if (/^[A-Za-z]{1,3}$/.test(p)) label = p;               // R^k_t, \pi^w_t: a label, not a power
-        else scan(' '.repeat(offset + a.start) + raw, 1, out, multi).symbols;   // a power: look inside it
+        else scan(' '.repeat(offset + shift + a.start) + raw, 1, out, multi).symbols;   // a power: look inside it
       }
-      i = a.end;
-    }
+      k = a.end;
+    } return k; };
+    if (inner) scripts(inner, 0, innerAt);
+    i = scripts(s, i, 0);
     if (isE || (base === 'E' && !accent && time !== null && !subs.length && !label)) { out.operators.push({ pos: offset ? pos : pos, ...scope(s, i) }); continue; }
-    const tex = (accent ? `\\${accent}{${base}}` : base) + (label ? `^{${label}}` : '') + (subs.length ? `_{${subs.join(',')}}` : '') + primes;
-    out.symbols.push({ key: tex, base, accent, subs, label, tex, time, steady, pos, end: i });
+    const tex = accents.reduceRight((t, x) => `\\${x}{${t}}`, base) + (label ? `^{${label}}` : '') + (subs.length ? `_{${subs.join(',')}}` : '') + primes;
+    out.symbols.push({ key: tex, base, accent, accents, subs, label, tex, time, steady, pos, end: i });
   }
   if (!offset) for (const sym of out.symbols) sym.expected = out.operators.some(o => sym.pos >= o.from && sym.pos < o.to);
   return out;
+}
+// what is under an accent: more accents (\hat{\tilde{p}}), a base, and scripts written inside it (\tilde{p_t})
+function accented(c) {
+  let k = 0; while (c[k] === ' ') k++;
+  const m = /^\\([a-zA-Z]+)/.exec(c.slice(k));
+  if (m && ACCENTS.has(m[1])) {
+    const a = readArg(c, k + m[0].length), r = accented(a.content), rest = c.slice(a.end);
+    return { accents: [m[1], ...r.accents], base: r.base, scripts: r.scripts + rest, at: r.scripts ? a.start + r.at : a.end };
+  }
+  let depth = 0, j = k;
+  for (; j < c.length; j++) { if (c[j] === '\\') { j++; continue; } if (c[j] === '{') depth++; else if (c[j] === '}') depth--; else if (depth === 0 && (c[j] === '_' || c[j] === '^' || c[j] === "'")) break; }
+  return { accents: [], base: plain(c.slice(0, j)).replace(/^\\imath$/, 'i').replace(/^\\jmath$/, 'j'), scripts: c.slice(j), at: j };
 }
 // the longest listed multi-letter name starting at i (not inside a longer word)
 function multiAt(s, i, multi) {
@@ -182,7 +197,8 @@ function splitRows(body) {
 export function symName(sym, dropAccents = true) {
   let b = sym.base.replace(/^\\(?:mathbb|mathcal|mathbf|bm|boldsymbol|mathsf)\{(.*)\}$/, '$1').replace(/^\\/, '').replace(/^var(epsilon|phi|theta|rho|sigma|pi)$/, '$1').replace(/^epsilon$/, 'eps').replace(/^ell$/, 'l');
   let name = b + (sym.label ? '_' + sym.label : '') + sym.subs.map(x => '_' + x.replace(/^\\/, '').replace(/[^A-Za-z0-9]/g, '')).join('');
-  if (sym.accent && !(dropAccents && /^(hat|widehat|tilde|widetilde)$/.test(sym.accent))) name += '_' + sym.accent.replace('overline', 'bar').replace(/^wide/, '');
+  // the outer hat or tilde is dropped (a log deviation); inner accents and the others are kept: \hat{\tilde{p}} -> p_tilde
+  (sym.accents || (sym.accent ? [sym.accent] : [])).forEach((acc, k) => { if (!(k === 0 && dropAccents && /^(hat|widehat|tilde|widetilde)$/.test(acc))) name += '_' + acc.replace('overline', 'bar').replace(/^wide/, ''); });
   if (sym.steady === 'ss' || sym.steady === 'star') name += '_ss';
   return name.replace(/'/g, '_p');
 }

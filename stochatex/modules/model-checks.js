@@ -210,15 +210,19 @@ export default {
     async function visualise() {
       try { await loadMathJax(); } catch (e) { ctx.ui.toast(e.message, 'err'); }
       let tab = 'table';
-      const content = h('div', { class: 'mc-viz' });
+      const content = h('div', { class: 'mc-viz-body' });
       const tabs = h('div', { class: 'mc-tabs', role: 'tablist' });
+      const summary = h('div', { class: 'mc-viz-sum' });
       const render = () => {
         const r = last; if (!r) return;
-        tabs.replaceChildren(...[['table', 'Variables'], ['map', 'Where each one appears']].map(([k, l]) => h('button', { role: 'tab', 'aria-selected': String(tab === k), class: 'small' + (tab === k ? ' primary' : ''), onClick: () => { tab = k; render(); } }, l)));
-        content.replaceChildren(tab === 'table' ? table(r) : map(r));
+        const n = (t) => r.vars.filter(v => v.type === t).length;
+        summary.replaceChildren(...[[r.model.length, 'equations'], [n('endo'), 'endogenous'], [n('shock'), 'shocks'], [n('param'), 'parameters']].map(([k, l]) => h('span', { class: 'mc-stat' }, h('b', {}, String(k)), ' ' + l)),
+          ...(r.model.length !== n('endo') ? [h('span', { class: 'mc-stat mc-bad' }, r.model.length > n('endo') ? `${r.model.length - n('endo')} more equation${r.model.length - n('endo') > 1 ? 's' : ''} than variables` : `${n('endo') - r.model.length} more variable${n('endo') - r.model.length > 1 ? 's' : ''} than equations`)] : [h('span', { class: 'mc-stat mc-ok' }, '✓ as many equations as variables')]));
+        tabs.replaceChildren(...[['table', 'Variables'], ['map', 'Where each one appears']].map(([k, l]) => h('button', { role: 'tab', 'aria-selected': String(tab === k), class: tab === k ? 'on' : '', onClick: () => { tab = k; render(); } }, l)));
+        const keep = content.scrollTop; content.replaceChildren(tab === 'table' ? table(r) : map(r)); content.scrollTop = tab === openViz?.lastTab ? keep : 0; if (openViz) openViz.lastTab = tab;
       };
-      const m = ctx.ui.modal({ title: 'Variables of the model', wide: 'full', body: h('div', {}, tabs, content), buttons: [{ label: 'Close' }], onClose: () => { openViz = null; } });
-      openViz = { refresh: render, m };
+      const m = ctx.ui.modal({ title: 'Variables of the model', wide: 'full', body: h('div', { class: 'mc-viz' }, h('div', { class: 'mc-viz-top' }, tabs, summary), content), buttons: [{ label: 'Close' }], onClose: () => { openViz = null; } });
+      openViz = { refresh: render, m, lastTab: tab };
       render();
     }
     const sym = (tex) => { const svg = mathSvg(tex); const el = h('span', { class: 'mc-sym', title: tex }); if (svg) el.innerHTML = svg; else el.textContent = tex; return el; };
@@ -226,14 +230,17 @@ export default {
     function table(r) {
       const order = ['endo', 'shock', 'param', 'ignore'];
       const vars = [...r.vars].sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type) || a.name.localeCompare(b.name));
+      const GROUP = { endo: 'Endogenous variables', shock: 'Shocks', param: 'Parameters', ignore: 'Ignored' };
+      const rows = []; let prev = null;
+      for (const v of vars) { if (v.type !== prev) { prev = v.type; rows.push(h('tr', { class: 'mc-grp' }, h('th', { colspan: 5 }, GROUP[v.type] || v.type, h('span', { class: 'muted' }, ' · ' + vars.filter(x => x.type === v.type).length)))); } rows.push(v); }
       return h('table', { class: 'mc-table' },
-        h('thead', {}, h('tr', {}, h('th', {}, 'Symbol'), h('th', {}, 'Type'), h('th', {}, 'Dynare name'), h('th', {}, 'Dates'), h('th', {}, 'Equations'))),
-        h('tbody', {}, ...vars.map(v => h('tr', { class: 'mc-row-' + v.type },
-          h('td', {}, sym(v.tex)),
+        h('thead', {}, h('tr', {}, h('th', { class: 'mc-c-sym' }, 'Symbol'), h('th', {}, 'Type'), h('th', {}, 'Dynare name'), h('th', {}, 'Dates'), h('th', { class: 'mc-c-num' }, 'Equations'))),
+        h('tbody', {}, ...rows.map(v => v instanceof Element ? v : h('tr', { class: 'mc-row-' + v.type },
+          h('td', { class: 'mc-c-sym' }, sym(v.tex)),
           h('td', {}, h('span', { class: 'mc-seg' }, ...TYPES.map(([k, label, short]) => h('button', { class: v.type === k ? 'on' : '', title: label + (v.autoType === k ? ' (guessed)' : ''), 'aria-pressed': String(v.type === k), onClick: () => setVar(v.key, { type: k === v.autoType ? null : k }) }, short)))),
           h('td', {}, h('input', { class: 'mc-name', value: v.name, spellcheck: false, title: v.name === v.autoName ? 'Written from the symbol; type to change it' : 'Your name (empty it to go back to ' + v.autoName + ')', onChange: (e) => setVar(v.key, { name: e.target.value.trim() === v.autoName ? null : e.target.value.trim().replace(/[^A-Za-z0-9_]/g, '_') }) })),
-          h('td', { class: 'muted' }, dates(v)),
-          h('td', { class: 'muted' }, String(v.eqs.size))))));
+          h('td', {}, v.times.size ? [...v.times].sort((x, y) => x - y).map(t => h('span', { class: 'mc-t ' + (t < 0 ? 'lag' : t > 0 ? 'lead' : 'now') }, t === 0 ? 't' : t > 0 ? 't+' + t : 't−' + -t)) : h('span', { class: 'muted' }, '—')),
+          h('td', { class: 'mc-c-num' }, String(v.eqs.size))))));
     }
     function map(r) {
       const cols = r.vars.filter(v => v.type === 'endo' || v.type === 'shock').sort((a, b) => (a.type === b.type ? a.name.localeCompare(b.name) : a.type === 'endo' ? -1 : 1));
@@ -242,12 +249,16 @@ export default {
         if (!ts.length) return h('td', {});
         return h('td', { class: 'mc-hit', title: `${v.tex} in line ${e.line}: ` + ts.map(t => t === 0 ? 't' : t > 0 ? 't+' + t : 't−' + -t).join(', ') }, ...ts.map(t => h('span', { class: 'mc-t ' + (t < 0 ? 'lag' : t > 0 ? 'lead' : 'now') }, t === 0 ? 't' : t > 0 ? '+' + t : '−' + -t)));
       };
-      return h('div', { class: 'mc-mapwrap' }, h('table', { class: 'mc-map' },
-        h('thead', {}, h('tr', {}, h('th', {}, 'Equation'), ...cols.map(v => h('th', { class: v.type === 'shock' ? 'mc-shockcol' : '' }, sym(v.tex))))),
+      const nE = cols.filter(v => v.type === 'endo').length, nS = cols.length - nE;
+      const legend = h('p', { class: 'mc-legend muted' }, h('span', { class: 'mc-t lag' }, '−1'), ' dated t−1', h('span', { class: 'mc-t now' }, 't'), ' dated t', h('span', { class: 'mc-t lead' }, '+1'), ' dated t+1', h('span', { class: 'mc-legend-note' }, 'A column with no t, or a variable that appears only lagged, is worth a second look. Click an equation to go to it.'));
+      const hover = (e) => { const td = e.target.closest('td, th'); const tb = e.currentTarget; tb.querySelectorAll('.mc-hl').forEach(x => x.classList.remove('mc-hl')); if (!td || !td.parentElement) return; const ci = [...td.parentElement.children].indexOf(td); if (ci > 0) tb.querySelectorAll(`tr > :nth-child(${ci + 1})`).forEach(x => { if (x.closest('tbody') || x.closest('tr.mc-hrow')) x.classList.add('mc-hl'); }); };
+      return h('div', { class: 'mc-mapbox' }, legend, h('div', { class: 'mc-mapwrap' }, h('table', { class: 'mc-map', onMouseover: hover, onMouseleave: (e) => e.currentTarget.querySelectorAll('.mc-hl').forEach(x => x.classList.remove('mc-hl')) },
+        h('thead', {},
+          h('tr', { class: 'mc-grow' }, h('th', { class: 'mc-eq' }), ...(nE ? [h('th', { colspan: nE }, 'Endogenous')] : []), ...(nS ? [h('th', { colspan: nS, class: 'mc-shockcol' }, 'Shocks')] : [])),
+          h('tr', { class: 'mc-hrow' }, h('th', { class: 'mc-eq' }, 'Equation'), ...cols.map(v => h('th', { class: v.type === 'shock' ? 'mc-shockcol' : '' }, sym(v.tex))))),
         h('tbody', {}, ...r.model.map((e, i) => h('tr', {},
-          h('th', { class: 'mc-eq', title: e.tex.replace(/%.*$/gm, '').trim() }, h('button', { class: 'linklike', onClick: () => { openViz?.m.close(); ctx.goto(e.file, e.line); } }, `${i + 1} · line ${e.line}`)),
-          ...cols.map(v => cell(e, v)))))),
-        h('p', { class: 'muted' }, h('span', { class: 'mc-t lag' }, '−1'), ' dated t−1 · ', h('span', { class: 'mc-t now' }, 't'), ' dated t · ', h('span', { class: 'mc-t lead' }, '+1'), ' dated t+1. A column with no t entry, or a variable that appears only lagged, is worth a second look.'));
+          h('th', { class: 'mc-eq', title: e.tex.replace(/%.*$/gm, '').trim() }, h('button', { class: 'linklike', onClick: () => { openViz?.m.close(); ctx.goto(e.file, e.line); } }, h('span', { class: 'mc-eqn' }, String(i + 1)), h('span', { class: 'muted' }, ` line ${e.line}`))),
+          ...cols.map(v => cell(e, v))))))));
     }
 
     const later = () => { clearTimeout(timer); timer = setTimeout(run, 700); };
@@ -262,9 +273,26 @@ export default {
 .mc-chip:hover { border-color: var(--accent); } .mc-chip.mc-typeset { font-size: 13px; padding: 1px 6px 0; } .mc-chip svg { vertical-align: middle; }
 .mc-chip.mc-manual { border-style: dashed; border-color: color-mix(in srgb, var(--accent) 60%, var(--line)); }
 .mc-sugg { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin: 4px 0; } .mc-sugg > .muted { width: 100%; font-size: 12px; }
-.mc-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
-.mc-table { border-collapse: collapse; width: 100%; } .mc-table th, .mc-table td { text-align: left; padding: 5px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
-.mc-table th { font-weight: 600; font-size: 12px; color: var(--muted); }
+.mc-viz { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.mc-viz-top { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 18px; padding: 12px 20px; border-bottom: 1px solid var(--line); }
+.mc-viz-body { flex: 1; min-height: 0; overflow: auto; padding: 14px 20px 18px; scrollbar-gutter: stable; }
+.mc-tabs { display: inline-flex; padding: 3px; gap: 2px; border-radius: 9px; background: var(--panel); border: 1px solid var(--line); }
+.mc-tabs button { border: 0; border-radius: 6px; padding: 4px 14px; font: 500 12.5px var(--ui); color: var(--muted); background: transparent; cursor: pointer; }
+.mc-tabs button.on { background: var(--paper); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / 12%); }
+.mc-viz-sum { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 12.5px var(--ui); color: var(--muted); }
+.mc-stat b { color: var(--ink); font-weight: 600; }
+.mc-table { border-collapse: collapse; width: 100%; max-width: 820px; margin: 0 auto; } .mc-table th, .mc-table td { text-align: left; padding: 5px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.mc-table thead th { font-weight: 600; font-size: 12px; color: var(--muted); position: sticky; top: -14px; background: var(--paper); z-index: 1; }
+.mc-table tr.mc-grp th { padding: 14px 12px 4px; font: 600 12px var(--ui); color: var(--ink); text-transform: uppercase; letter-spacing: .03em; border-bottom: 1px solid color-mix(in srgb, var(--ink) 25%, var(--line)); }
+.mc-table tbody tr:not(.mc-grp):hover td { background: color-mix(in srgb, var(--accent-soft, #e8eefc) 55%, transparent); }
+.mc-c-sym { width: 90px; } .mc-c-num { text-align: right !important; width: 80px; color: var(--muted); }
+.mc-mapbox { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.mc-legend { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; margin: 0; font-size: 12px; max-width: 900px; } .mc-legend .mc-t { margin-left: 8px; } .mc-legend .mc-t:first-child { margin-left: 0; }
+.mc-legend-note { flex-basis: 100%; text-align: center; }
+.mc-map tr.mc-grow th { font: 600 11px var(--ui); color: var(--muted); text-transform: uppercase; letter-spacing: .03em; padding: 4px 6px; }
+.mc-map tr.mc-grow th.mc-eq { border: 0; background: transparent; }
+.mc-map tbody tr:hover th, .mc-map tbody tr:hover td, .mc-map .mc-hl { background: color-mix(in srgb, var(--accent-soft, #e8eefc) 70%, var(--paper)); }
+.mc-eqn { display: inline-block; min-width: 1.6em; font-weight: 600; color: var(--ink); }
 .mc-row-ignore td { opacity: .55; }
 .mc-sym { display: inline-block; font-size: 15px; } .mc-sym svg { vertical-align: middle; }
 .mc-seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
@@ -272,10 +300,11 @@ export default {
 .mc-seg button + button { border-left: 1px solid var(--line); }
 .mc-seg button.on { background: var(--accent); color: #fff; }
 .mc-name { font: 12.5px var(--mono, monospace); width: 12em; padding: 2px 6px; }
-.mc-mapwrap { overflow: auto; max-height: 64vh; }
-.mc-map { border-collapse: collapse; } .mc-map th, .mc-map td { border: 1px solid var(--line); padding: 3px 6px; text-align: center; min-width: 34px; }
-.mc-map thead th { position: sticky; top: 0; background: var(--panel); z-index: 1; }
-.mc-map .mc-eq { text-align: left; white-space: nowrap; position: sticky; left: 0; background: var(--panel); font-weight: 500; font-size: 12px; }
+.mc-mapwrap { max-width: 100%; overflow-x: auto; }
+.mc-map { border-collapse: separate; border-spacing: 0; } .mc-map th, .mc-map td { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 4px 7px; text-align: center; min-width: 38px; height: 28px; }
+.mc-map tr > :first-child { border-left: 1px solid var(--line); } .mc-map tr.mc-hrow > * { border-top: 1px solid var(--line); }
+.mc-map thead th { background: var(--panel); }
+.mc-map .mc-eq { text-align: left; white-space: nowrap; position: sticky; left: 0; background: var(--panel); font-weight: 500; font-size: 12px; z-index: 1; padding-right: 12px; }
 .mc-map .mc-shockcol { background: color-mix(in srgb, var(--warn, #9a6700) 10%, var(--panel)); }
 .mc-t { display: inline-block; font: 600 11px var(--mono, monospace); padding: 0 4px; border-radius: 4px; margin: 1px; }
 .mc-t.lag { background: #e3ecfb; color: #234e9a; } .mc-t.now { background: #e5f2ea; color: #1c6b3c; } .mc-t.lead { background: #fbeedd; color: #8a4b08; }
