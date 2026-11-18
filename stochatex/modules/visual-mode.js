@@ -702,7 +702,7 @@ export default {
           btn(ico('hash'), 'Number: give it an equation number, or remove it', () => { const n = numbered0(); if (n) toggleNumber(n.x, !n.has); }),
           btn(ico('tag'), 'Label: add a \\label so you can refer to it with \\eqref (or rename it)', () => { const x = itemNow(); if (x) editLabel(x, ((x.body || '').match(/\\label\{([^}]*)\}/) || [])[1]); }),
         ] : []),
-        btn(ico('expand'), 'Open in the full equation editor, beside the paper', () => { const pos = view.state.field(editField)?.bodyFrom; finishEdit(true, pos); ctx.ui.runCommand('equation.full'); }),
+        btn(ico('expand'), 'Open in the full equation editor, beside the paper', () => { const pos = view.state.field(editField)?.bodyFrom; finishEdit(true, pos); ctx.ui.runCommand('equation.side'); }),
         btn(ico('trash'), 'Delete this equation (Ctrl+Z brings it back)', () => { const x = itemNow(); if (x) deleteEq(x); }, 'vz-danger'),
         btn(ico('more'), 'More: duplicate, cut, make it fit the page, box, flip a fraction, auto-size brackets, model check', (b) => moreMenu(b)),
         btn(ico('check'), 'Done (Esc)', () => finishEdit(true), 'primary'));
@@ -1663,8 +1663,8 @@ export default {
 .vz-ib { display: inline-flex; align-items: center; gap: 1px; } .vz-om { font: 600 14px var(--serif, serif); }
 .vz-fmt-bar { position: absolute; left: 0; top: calc(100% - 4px); z-index: 4; display: inline-flex; flex-wrap: wrap; align-items: center; max-width: 100%; box-sizing: border-box; }
 .vz-fmt-bar > span:not(.vz-bsep):not(.vz-hint) { display: contents; }
-.vz-acc { position: relative; display: inline-block; font-style: italic; padding: 0 1px; } .vz-acc::after { content: attr(data-acc); position: absolute; left: 50%; top: 0.02em; transform: translateX(-38%); font-style: normal; font-size: 0.95em; line-height: 1; } .vz-acc sup { font-size: 0.7em; font-style: normal; }
-.vz-vec { position: relative; display: inline-block; font-style: italic; } .vz-vec::after { content: ''; position: absolute; left: 1px; right: -1px; top: 1px; height: 4px; background: no-repeat center/100% 100% url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 4'%3E%3Cpath d='M0 2h9M7 0.300l2 1.700-2 1.700' fill='none' stroke='%23888' stroke-width='0.900'/%3E%3C/svg%3E"); }
+.vz-acc { position: relative; display: inline-block; font-style: italic; padding: 0 1px; } .vz-acc::after { content: attr(data-acc); position: absolute; left: 50%; top: -0.16em; transform: translateX(-38%); font-style: normal; font-size: 0.95em; line-height: 1; } .vz-acc sup { font-size: 0.7em; font-style: normal; }
+.vz-vec { position: relative; display: inline-block; font-style: italic; } .vz-vec::after { content: ''; position: absolute; left: 1px; right: -1px; top: -1px; height: 4px; background: no-repeat center/100% 100% url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 4'%3E%3Cpath d='M0 2h9M7 0.300l2 1.700-2 1.700' fill='none' stroke='%23888' stroke-width='0.900'/%3E%3C/svg%3E"); }
 .vz-fb { font: 15px/1 var(--serif, 'STIX Two Text', serif); color: var(--ink); white-space: nowrap; }
 .vz-fb.b { font-weight: 700; } .vz-fb.i { font-style: italic; } .vz-fb.u { text-decoration: underline; } .vz-fb.tt { font: 600 11px var(--ui); }
 .vz-bsep { display: inline-block; width: 1px; height: 16px; min-width: 0; padding: 0; margin: 0 3px; background: var(--line); flex: none; }

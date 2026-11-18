@@ -1,171 +1,103 @@
-// Visual equation editor, docked under the source. Put the cursor in an equation and it appears in the
-// dock, drawn and editable; what you change there goes straight into the source, and what you type in
-// the source shows in the dock. With the cursor outside any equation, build a new one and insert it.
+// The full equation editor, in a panel beside the paper (where the PDF is) and linked live to the source: put the
+// cursor in an equation and press Σ (Ctrl+E); what you change there goes straight into the paper, and what you
+// type in the source shows there. Press Σ again to close it. With the cursor outside any equation, what you
+// build becomes a new equation at the cursor. "Pop out" moves it to its own browser tab.
 export default {
   id: 'equation-editor',
-  name: 'Visual equation editor',
-  description: 'Edit the equation under the cursor visually, in a strip under the source (Ctrl+E). Changes go both ways as you type. Also symbols, matrices, alignment, units and Word paste.',
+  name: 'Equation editor',
+  description: 'The full visual equation editor beside the paper (Σ or Ctrl+E opens and closes it). Changes go both ways as you type. Also symbols, matrices, alignment, units and Word paste.',
   category: 'Writing',
   activate(ctx) {
     const { EditorView } = ctx.cm, h = ctx.h;
-    let dock = null, frame = null, ready = false, range = null, lastText = null, dockText = '', btn = null;
-    const post = (m) => frame?.contentWindow?.postMessage({ target: 'equation-editor', ...m }, location.origin);
-    const lineOf = (pos) => ctx.editor.view.state.doc.lineAt(Math.min(pos, ctx.editor.view.state.doc.length)).number;
-    const insertBtn = h('button', { class: 'small primary', hidden: true, onClick: () => insertNew() }, 'Insert at the cursor');
-    const fullBtn = h('button', { class: 'small', title: 'Open this equation in the full editor in a new tab. Changes there come straight back to the paper.', onClick: () => openFull() }, 'Open full editor');
-    // ---- the full editor in its own tab, linked live over a BroadcastChannel ----
-    let chan = null, linkRange = null, linkText = null, linkTimer = 0;
+    let btn = null;
+    // ---- the live link to the editor (side panel or tab) over a BroadcastChannel ----
+    let chan = null, linkRange = null, linkText = null, linkTimer = 0, newAt = null;
     const linkPost = (m) => chan?.postMessage({ target: 'equation-editor', ...m });
-    function unlink() { try { chan?.close(); } catch (e) {} chan = null; linkRange = null; linkText = null; }
-    // the full editor in a panel on the right (where the PDF is), linked live; "Pop out" moves it to its own tab
+    function unlink() { try { chan?.close(); } catch (e) {} chan = null; linkRange = null; linkText = null; newAt = null; }
     let side = null;
-    function closeSide() { if (!side) return; side.el.remove(); side = null; document.body.classList.remove('eq-side'); if (chan) { linkPost({ type: 'gone' }); unlink(); } ctx.editor.focus(); }
+    const syncBtn = () => { btn?.classList.toggle('on', !!side); btn?.setAttribute('aria-pressed', String(!!side)); };
+    function closeSide() { if (!side) return; side.el.remove(); side = null; document.body.classList.remove('eq-side'); if (chan) { linkPost({ type: 'gone' }); unlink(); } syncBtn(); ctx.editor.focus(); }
     function openSide() {
       const wrap = document.getElementById('pdfwrap'); if (!wrap) return openFull(true);
       if (side) closeSide();
       const id = link(); if (!id) return;
       const frameEl = h('iframe', { class: 'eqside-frame', title: 'Full equation editor', src: new URL('./equation/index.html?link=' + id + '&embed=side', document.baseURI).href });
       const el = h('div', { class: 'eqside', role: 'complementary', 'aria-label': 'Full equation editor' },
-        h('div', { class: 'eqside-head' }, h('strong', {}, 'Equation editor'), h('span', { class: 'muted' }, '· linked to the paper'), h('span', { class: 'spacer' }),
-          h('button', { class: 'small ghost', title: 'Move it to its own browser tab (a second screen)', onClick: () => { const lid = side?.id; side.el.remove(); side = null; document.body.classList.remove('eq-side'); window.open(new URL('./equation/index.html?link=' + lid, document.baseURI).href, '_blank'); } }, 'Pop out'),
-          h('button', { class: 'small ghost', title: 'Close (Esc)', 'aria-label': 'Close', onClick: closeSide }, '×')),
+        h('div', { class: 'eqside-head' }, h('strong', {}, 'Equation editor'), h('span', { class: 'muted eqside-where' }), h('span', { class: 'spacer' }),
+          h('button', { class: 'small ghost icon-only', title: 'Pop out: move it to its own browser tab (a second screen)', 'aria-label': 'Pop out', onClick: () => { const lid = side?.id; side.el.remove(); side = null; document.body.classList.remove('eq-side'); syncBtn(); window.open(new URL('./equation/index.html?link=' + lid, document.baseURI).href, '_blank'); } }, ctx.ui.icon('external')),
+          h('button', { class: 'small ghost icon-only', title: 'Close (Esc, or Σ again)', 'aria-label': 'Close', onClick: closeSide }, ctx.ui.icon('close'))),
         frameEl);
       wrap.append(el); document.body.classList.add('eq-side');
-      side = { el, id };
+      side = { el, id }; syncBtn(); where();
     }
-    // start a live link to the equation at the cursor (or in the strip); returns the channel id
+    const where = () => { const w = side?.el.querySelector('.eqside-where'); if (!w) return; w.textContent = linkRange ? `· line ${ctx.editor.view.state.doc.lineAt(Math.min(linkRange.from, ctx.editor.view.state.doc.length)).number}, linked to the paper` : '· a new equation, inserted at the cursor as you type'; };
+    // start a live link to the equation at the cursor (or to a new one); returns the channel id
     function link() {
-      const text = ctx.editor.getText();
-      const r = range || findMath(text, ctx.editor.getCursor().pos);
-      if (!r && !dockText.trim()) { ctx.ui.toast('Put the cursor in an equation first, or type one in the strip.'); return null; }
-      if (!r) { insertNew(); if (!range) return null; }
+      if (!/\.(tex|ltx)$/i.test(ctx.project.activeFile || '')) { ctx.ui.toast('Open a .tex file first.'); return null; }
+      const r = findMath(ctx.editor.getText(), ctx.editor.getCursor().pos);
       if (chan) { linkPost({ type: 'gone' }); unlink(); }
       const id = Math.random().toString(36).slice(2, 10);
       chan = new BroadcastChannel('stochatex-eq-' + id);
-      linkRange = { ...(r || range) }; linkText = null;
+      linkRange = r ? { ...r } : null; newAt = r ? null : ctx.editor.getSelection(); linkText = null;
       chan.onmessage = onLinkMsg;
       return id;
     }
+    function insertNew(latex) {
+      if (!/^\s*(\\begin\{|\\\[|\$|\\\()/.test(latex)) latex = `\\begin{equation}\n  ${latex}\n\\end{equation}`;
+      const sel = newAt || ctx.editor.getSelection(), text = ctx.editor.getText();
+      const pre = sel.from > 0 && text[sel.from - 1] !== '\n' ? '\n' : '', post = text[sel.to] && text[sel.to] !== '\n' ? '\n' : '';
+      ctx.editor.view.dispatch({ changes: { from: sel.from, to: sel.to, insert: pre + latex + post }, userEvent: 'input' });
+      linkRange = { from: sel.from + pre.length, to: sel.from + pre.length + latex.length }; newAt = null; where();
+      return latex;
+    }
     function onLinkMsg(e) {
-        const d = e.data; if (!d || d.source !== 'equation-editor') return;
-        if (d.type === 'ready') { linkText = ctx.editor.view.state.sliceDoc(linkRange.from, linkRange.to); linkPost({ type: 'set', latex: linkText, theme: document.documentElement.dataset.theme, focus: true }); }
-        else if (d.type === 'change' && linkRange) {
-          const latex = d.latex || '', cur = ctx.editor.view.state.sliceDoc(linkRange.from, linkRange.to);
-          linkText = latex; if (cur === latex) return;
-          const at = linkRange.from;
-          ctx.editor.view.dispatch({ changes: { from: linkRange.from, to: linkRange.to, insert: latex }, userEvent: 'input' });
-          linkRange = { from: at, to: at + latex.length };
-          if (range && range.from === at) { range = { ...linkRange }; lastText = dockText = latex; post({ type: 'set', latex, focus: false }); }
-        } else if (d.type === 'close-panel') closeSide();
-        else if (d.type === 'closed' && !side) unlink();
+      const d = e.data; if (!d || d.source !== 'equation-editor') return;
+      if (d.type === 'ready') { linkText = linkRange ? ctx.editor.view.state.sliceDoc(linkRange.from, linkRange.to) : ''; linkPost({ type: 'set', latex: linkText, theme: document.documentElement.dataset.theme, focus: true }); }
+      else if (d.type === 'change') {
+        const latex = d.latex || '';
+        if (!linkRange) { if (!latex.trim()) return; linkText = insertNew(latex); if (linkText !== latex) linkPost({ type: 'set', latex: linkText, focus: false }); return; }
+        const cur = ctx.editor.view.state.sliceDoc(linkRange.from, linkRange.to);
+        linkText = latex; if (cur === latex) return;
+        const at = linkRange.from;
+        ctx.editor.view.dispatch({ changes: { from: linkRange.from, to: linkRange.to, insert: latex }, userEvent: 'input' });
+        linkRange = { from: at, to: at + latex.length };
+      } else if (d.type === 'close-panel') closeSide();
+      else if (d.type === 'closed' && !side) unlink();
     }
     // the side panel follows the cursor to another equation
     ctx.on('cursor', () => {
       if (!side || !chan) return;
       const r = findMath(ctx.editor.getText(), ctx.editor.getCursor().pos);
-      if (r && linkRange && r.from !== linkRange.from) { linkRange = { ...r }; linkText = ctx.editor.view.state.sliceDoc(r.from, r.to); linkPost({ type: 'set', latex: linkText, focus: false }); }
+      if (r && (!linkRange || r.from !== linkRange.from)) { linkRange = { ...r }; newAt = null; linkText = ctx.editor.view.state.sliceDoc(r.from, r.to); linkPost({ type: 'set', latex: linkText, focus: false }); where(); }
     });
+    ctx.on('open', () => { if (side) closeSide(); });
     function openFull(tab) {
       if (!tab) return openSide();
-      const text = ctx.editor.getText();
-      const r = range || findMath(text, ctx.editor.getCursor().pos);
-      if (!r && !dockText.trim()) return ctx.ui.toast('Put the cursor in an equation first, or type one in the strip.');
-      if (!r) { insertNew(); if (!range) return; }
       const id = link(); if (!id) return;
       const w = window.open(new URL('./equation/index.html?link=' + id, document.baseURI).href, '_blank');
       if (!w) { unlink(); ctx.ui.toast('Your browser blocked the new tab. Allow pop-ups for this site and try again.'); }
     }
-    // keep the tracked equation in place while the text around it changes
+    const toggle = () => { if (side) closeSide(); else openSide(); };
+    // keep the linked equation in place while the text around it changes, and show source edits in the editor
     ctx.editor.addExtension(EditorView.updateListener.of((u) => {
-      if (!u.docChanged) return;
-      if (range) range = { from: u.changes.mapPos(range.from, -1), to: u.changes.mapPos(range.to, 1) };
-      if (linkRange) {
-        linkRange = { from: u.changes.mapPos(linkRange.from, -1), to: u.changes.mapPos(linkRange.to, 1) };
-        // edited from the strip or the source: show it in the linked tab too
-        clearTimeout(linkTimer);
-        linkTimer = setTimeout(() => { if (!chan || !linkRange) return; const t = u.view.state.sliceDoc(linkRange.from, linkRange.to); if (t !== linkText) { linkText = t; linkPost({ type: 'set', latex: t, focus: false }); } }, 150);
-      }
+      if (!u.docChanged || !linkRange) return;
+      linkRange = { from: u.changes.mapPos(linkRange.from, -1), to: u.changes.mapPos(linkRange.to, 1) };
+      clearTimeout(linkTimer);
+      linkTimer = setTimeout(() => { if (!chan || !linkRange) return; const t = u.view.state.sliceDoc(linkRange.from, linkRange.to); if (t !== linkText) { linkText = t; linkPost({ type: 'set', latex: t, focus: false }); } }, 150);
     }));
-
-    function follow(focus = false) {
-      if (!dock || !ready) return;
-      if (!/\.(tex|ltx|sty|cls)$/i.test(ctx.project.activeFile || '')) { range = null; insertBtn.hidden = true; return dock.setInfo('Open a .tex file to edit its equations here.'); }
-      const text = ctx.editor.getText(), pos = ctx.editor.getCursor().pos;
-      const here = findMath(text, pos);
-      range = here;
-      if (!range) {
-        insertBtn.hidden = false;
-        dock.setInfo('New equation: build it here, then insert it. Or put the cursor in an equation to edit that one.');
-        if (lastText !== null) { lastText = null; dockText = ''; post({ type: 'set', latex: '', focus }); }
-        return;
-      }
-      insertBtn.hidden = true;
-      const src = text.slice(range.from, range.to);
-      dock.setInfo(`Line ${lineOf(range.from)}. Changes here go straight into the source.`);
-      if (src !== lastText) { lastText = dockText = src; post({ type: 'set', latex: src, focus }); }
-      else if (focus) post({ type: 'focus' });
-    }
-    function insertNew() {
-      let latex = dockText.trim(); if (!latex) return ctx.ui.toast('The equation is empty.');
-      if (!/^\s*(\\begin\{|\\\[|\$|\\\()/.test(latex)) latex = `\\begin{equation}\n  ${latex}\n\\end{equation}`;
-      const sel = ctx.editor.getSelection(), text = ctx.editor.getText();
-      const pre = sel.from > 0 && text[sel.from - 1] !== '\n' && /^\\begin|^\\\[/.test(latex) ? '\n' : '';
-      ctx.editor.replaceRange(sel.from, sel.to, pre + latex + (pre ? '\n' : ''));
-      range = { from: sel.from + pre.length, to: sel.from + pre.length + latex.length };
-      lastText = dockText = latex; post({ type: 'set', latex, focus: true }); follow();
-    }
-    const onMsg = (e) => {
-      if (!frame || e.origin !== location.origin || e.source !== frame.contentWindow || e.data?.source !== 'equation-editor') return;
-      if (e.data.type === 'ready') { ready = true; lastText = null; post({ type: 'theme', theme: document.documentElement.dataset.theme }); follow(openFocus); if (!range && openFocus) post({ type: 'focus' }); }
-      else if (e.data.type === 'change') {
-        const latex = e.data.latex || ''; dockText = latex;
-        if (!range) return;
-        const cur = ctx.editor.view.state.sliceDoc(range.from, range.to);
-        if (cur === latex) { lastText = latex; return; }
-        lastText = latex;
-        ctx.editor.view.dispatch({ changes: { from: range.from, to: range.to, insert: latex }, userEvent: 'input' });
-      }
-    };
-    let openFocus = true, autoOpened = false, closingAuto = false, dismissedAt = null;
-    function open(focus = true) {
-      if (dock?.open) { if (focus) { autoOpened = false; post({ type: 'focus' }); } return; }
-      openFocus = focus !== false; autoOpened = !openFocus;
-      ready = false; range = null; lastText = null; dockText = '';
-      frame = h('iframe', { src: new URL('./equation/index.html?embed=dock', document.baseURI).href, title: 'Equation editor' });
-      dock = ctx.ui.openDock({ title: 'Equation', body: frame, actions: [insertBtn, fullBtn], height: 270, onClose: () => { if (!closingAuto && range) dismissedAt = range.from; closingAuto = false; autoOpened = false; dock = null; frame = null; ready = false; btn?.classList.remove('on'); ctx.editor.focus(); } });
-      btn?.classList.add('on');
-    }
-    const toggle = () => { if (dock?.open) dock.close(); else open(); };
-    addEventListener('message', onMsg);
-    let timer; const later = () => { clearTimeout(timer); timer = setTimeout(() => follow(false), 120); };
-    // open by itself when the cursor goes into an equation in the source, close when it leaves (if it opened by itself).
-    // Not in the Page and Web layouts of the visual view, where a click edits the equation in place.
-    const autoOn = () => ctx.settings.get('auto', true);
-    let autoTimer;
-    function autoCheck() {
-      if (!autoOn() || !/\.(tex|ltx)$/i.test(ctx.project.activeFile || '')) return;
-      if (ctx.editor.view.dom.classList.contains('cm-page')) return;
-      const here = findMath(ctx.editor.getText(), ctx.editor.getCursor().pos);
-      if (here) { if (dismissedAt != null && Math.abs(dismissedAt - here.from) < 2) return; if (!dock?.open) open(false); }
-      else { dismissedAt = null; if (dock?.open && autoOpened) { closingAuto = true; dock.close(); } }
-    }
-    ctx.on('cursor', () => { later(); clearTimeout(autoTimer); autoTimer = setTimeout(autoCheck, 250); });
-    ctx.on('open', () => { range = null; later(); });
-    ctx.ui.addCommand({ id: 'equation.auto', get name() { return autoOn() ? 'Equation editor: stop opening by itself in equations' : 'Equation editor: open by itself when the cursor is in an equation'; }, run: () => { ctx.settings.set('auto', !autoOn()); ctx.ui.toast(autoOn() ? 'The equation editor opens when the cursor goes into an equation.' : 'The equation editor opens only with Ctrl+E.'); } });
-    const themeWatch = new MutationObserver(() => post({ type: 'theme', theme: document.documentElement.dataset.theme }));
+    const themeWatch = new MutationObserver(() => linkPost({ type: 'theme', theme: document.documentElement.dataset.theme }));
     themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    ctx.ui.addCommand({ id: 'equation.edit', name: 'Equation editor: open, or move into it', key: 'Mod+E', run: open });
-    ctx.ui.addCommand({ id: 'equation.full', name: 'Equation editor: open the full editor beside the paper (linked)', run: () => openFull() });
-    ctx.ui.addCommand({ id: 'equation.fullTab', name: 'Equation editor: open the full editor in a new tab (linked)', run: () => openFull(true) });
-    ctx.ui.addCommand({ id: 'equation.close', name: 'Equation editor: close', run: () => dock?.close() });
-    ctx.editor.addKeymap([{ key: 'Mod-e', run: () => (open(), true) }]);
-    btn = ctx.ui.addToolbarButton({ label: 'Equation', icon: 'sigma', title: 'Show or hide the visual equation editor under the source (Ctrl+E)', onClick: toggle }).el;
-    if (ctx.settings.get('open', false)) setTimeout(() => open(false), 0);
-    ctx.on('modules', () => {});
+    ctx.ui.addCommand({ id: 'equation.edit', name: 'Equation editor: open or close (beside the paper)', key: 'Mod+E', run: toggle });
+    ctx.ui.addCommand({ id: 'equation.side', name: 'Equation editor: open the equation at the cursor', run: () => openSide() });
+    ctx.ui.addCommand({ id: 'equation.fullTab', name: 'Equation editor: open in a new tab (linked)', run: () => openFull(true) });
+    ctx.ui.addCommand({ id: 'equation.close', name: 'Equation editor: close', run: () => closeSide() });
+    ctx.editor.addKeymap([{ key: 'Mod-e', run: () => (toggle(), true) }]);
+    const onKey = (e) => { if (e.key === 'Escape' && side && !e.defaultPrevented && !document.querySelector('.modal-back, .menu')) closeSide(); };
+    addEventListener('keydown', onKey);
+    btn = ctx.ui.addToolbarButton({ label: 'Equation', icon: 'sigma', title: 'Equation editor beside the paper: open or close (Ctrl+E)', onClick: toggle }).el;
+    syncBtn();
     const bye = () => { linkPost({ type: 'gone' }); }; addEventListener('pagehide', bye);
-    ctx.onDispose(() => { bye(); closeSide(); unlink(); removeEventListener('pagehide', bye); removeEventListener('message', onMsg); clearTimeout(timer); themeWatch.disconnect(); dock?.close(); });
-    // remember whether the dock was open
-    const remember = setInterval(() => ctx.settings.set('open', !!dock?.open), 2000); ctx.onDispose(() => clearInterval(remember));
+    ctx.onDispose(() => { bye(); closeSide(); unlink(); removeEventListener('pagehide', bye); removeEventListener('keydown', onKey); themeWatch.disconnect(); });
   },
 };
 

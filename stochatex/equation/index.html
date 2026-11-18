@@ -2358,7 +2358,10 @@ function start() {
     if (chan) {
       document.title = 'Equation — linked · StochaTeX';
       document.getElementById('embedApply').onclick = () => { send('change', { latex: allText() }); send('closed'); window.close(); };
-      if (sideMode) window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.querySelector('.modal, .ML__popover[style*="visible"]')) { send('change', { latex: allText() }); send('close-panel'); } }, true);
+      if (sideMode) window.addEventListener('keydown', (e) => {
+        const ctrlE = (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'e';     // Ctrl+E (and Σ) open and close this panel
+        if (ctrlE || (e.key === 'Escape' && !document.querySelector('.modal, .ML__popover[style*="visible"]'))) { if (ctrlE) { e.preventDefault(); e.stopPropagation(); } send('change', { latex: allText() }); send('close-panel'); }
+      }, true);
       else addEventListener('pagehide', () => send('closed'));
     } else {
       document.getElementById('embedApply').onclick = () => send('apply', { latex: allText() });
