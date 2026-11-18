@@ -53,9 +53,30 @@ export function modal({ title, body, buttons = [], wide = false, onClose }) {
   const foot = h('div', { class: 'modal-foot' });
   const box = h('div', { class: 'modal' + (wide === 'full' ? ' full' : wide ? ' wide' : ''), role: 'dialog', 'aria-modal': 'true', 'aria-label': title },
     h('div', { class: 'modal-head' }, h('h2', {}, title), h('button', { class: 'ghost icon-only', title: 'Close (Esc)', 'aria-label': 'Close', onClick: () => api.close() }, icon('close'))), content, foot);
-  const api = { el: box, content, close() { back.remove(); document.removeEventListener('keydown', key, true); onClose && onClose(); },
+  // keyboard focus stays in the dialog: Tab cycles inside it, the page behind is inert, and focus returns on close
+  const opener = document.activeElement;
+  const behind = [...document.body.children].filter(el => el !== back && !el.classList.contains('modal-back') && !el.classList.contains('toasts') && !el.inert);
+  behind.forEach(el => { el.inert = true; el.dataset.inertBy = (el.dataset.inertBy || '') + '1'; });
+  let closed = false;
+  const api = { el: box, content, close() {
+      if (closed) return; closed = true;
+      back.remove(); document.removeEventListener('keydown', key, true);
+      behind.forEach(el => { el.dataset.inertBy = (el.dataset.inertBy || '').slice(1); if (!el.dataset.inertBy) { el.inert = false; delete el.dataset.inertBy; } });
+      onClose && onClose();
+      if (opener && opener.isConnected && typeof opener.focus === 'function' && !document.querySelector('.modal-back')) setTimeout(() => { try { opener.focus(); } catch {} }, 0);
+    },
     setButtons(list) { foot.replaceChildren(...list.map(b => h('button', { class: b.primary ? 'primary' : b.danger ? 'danger' : '', onClick: () => b.onClick ? b.onClick(api) : api.close() }, b.label))); foot.style.display = list.length ? '' : 'none'; } };
-  const key = (e) => { if (e.key === 'Escape' && document.querySelector('.modal-back:last-of-type') === back) { e.stopPropagation(); api.close(); } };
+  const key = (e) => {
+    const top = [...document.querySelectorAll('.modal-back')].pop() === back;
+    if (e.key === 'Escape' && top) { e.stopPropagation(); api.close(); }
+    else if (e.key === 'Tab' && top) {
+      const f = [...box.querySelectorAll('button, [href], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])')].filter(x => !x.disabled && x.offsetParent !== null);
+      if (!f.length) return;
+      const i = f.indexOf(document.activeElement);
+      if (e.shiftKey && (i <= 0)) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && (i === -1 || i === f.length - 1)) { e.preventDefault(); f[0].focus(); }
+    }
+  };
   document.addEventListener('keydown', key, true);
   back.addEventListener('mousedown', (e) => { if (e.target === back) api.close(); });
   if (typeof body === 'function') body(content, api); else if (body) content.append(body);

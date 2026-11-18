@@ -20,8 +20,14 @@ export default {
     const words = new Set(ctx.settings.get('words', []));
     const keyOf = (l) => `${l.kind}|${l.text.toLowerCase()}|${l.message}`;
 
+    // the proofreading engine is 20 MB: let the TeX engine and the first compile have the connection first
+    // (wait for the first compile, at most 15 s), unless proofreading is asked for (panel opened)
+    let firstCompile = null; const afterCompile = new Promise((res) => { firstCompile = res; setTimeout(res, 15000); });
+    ctx.on('compile', () => firstCompile && firstCompile());
+    let asked = false;
     async function load() {
       if (linter) return linter;
+      if (!asked && !loading) await afterCompile;
       return loading ||= (async () => {
         const base = new URL('./harper/', document.baseURI).href;
         const [H, B] = await Promise.all([import(/* @vite-ignore */ base + 'index.js'), import(/* @vite-ignore */ base + 'slimBinary.js')]);
@@ -132,7 +138,7 @@ export default {
           ignored.size || words.size ? h('button', { class: 'small ghost', onClick: () => { ignored.clear(); ctx.settings.set('ignored', []); schedule(50); } }, `Show ignored again (${ignored.size})`) : null));
       box.scrollTop = keep;
     }
-    ctx.ui.addPanel({ id: 'proofread', title: 'Proofreading', icon: 'proof', render(el) { box = el; draw(); } });
+    ctx.ui.addPanel({ id: 'proofread', title: 'Proofreading', icon: 'proof', render(el) { box = el; if (!asked) { asked = true; schedule(50); } draw(); } });
     statusEl = h('button', { class: 'status-item', title: 'Open the proofreading panel', onClick: () => document.querySelector('.rail-btn[aria-label="Proofreading"]:not(.on)')?.click() });
     ctx.ui.addStatusItem((el) => { el.replaceWith(statusEl); });
     ctx.onDispose(() => statusEl.remove());

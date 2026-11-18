@@ -66,13 +66,18 @@ export function findBar(app) {
       if (!q.valid) { count.textContent = 'Not a valid pattern'; input.classList.add('bad'); return; }
       const { total, at } = countMatches(view);
       input.classList.toggle('bad', !total);
-      count.textContent = !total ? 'No matches' : at > 0 ? `${at} of ${total}` : `${total} match${total === 1 ? '' : 'es'}`;
+      count.textContent = (!total ? 'No matches' : at > 0 ? `${at} of ${total}` : `${total} match${total === 1 ? '' : 'es'}`) + (allFiles ? ' in this file' : '');
     }
     function listAll() {
       results.hidden = !allFiles || !input.value;
       if (results.hidden) return;
-      const q = makeQuery(view, input.value); if (!q.valid) return;
-      const re = new RegExp(q.regexp ? q.search : esc(q.search), q.caseSensitive ? 'g' : 'gi'), out = [];
+      const q = makeQuery(view, input.value);
+      if (!q.valid) { results.replaceChildren(h('div', { class: 'fb-file' }, 'Not a valid pattern')); return; }
+      // the same options as in this file: case, whole word, regular expression (Ignore LaTeX is already in the pattern)
+      const body = q.regexp ? q.search : esc(q.search);
+      let re; try { re = new RegExp(q.wholeWord ? `(?<![\\p{L}\\p{N}_])(?:${body})(?![\\p{L}\\p{N}_])` : body, (q.caseSensitive ? 'g' : 'gi') + (q.wholeWord ? 'u' : '')); }
+      catch { results.replaceChildren(h('div', { class: 'fb-file' }, 'Not a valid pattern')); return; }
+      const out = [];
       let n = 0;
       for (const path of app.files().filter(p => /\.(tex|bib|ltx|sty|cls|mod|txt|md)$/i.test(p))) {
         const t = path === app.activePath() ? view.state.doc.toString() : app.read(path); if (t == null) continue;

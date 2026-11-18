@@ -8,5 +8,14 @@ The built app is in `../stochatex/`. This folder holds what is needed to rebuild
 - `tools/build_packages.py` — builds the on-demand TeX package archives from a TeX Live install.
 - `t_*.mjs` — browser tests (need Chrome and `node serve.mjs`).
 
-Rebuild: `npm install`, copy `../stochatex` (without `core.js`, `runtime/`, `vendor/`) to `static/`, then `node build.mjs`.
+Rebuild: `npm install`, copy `../stochatex` (without `core.js`, `runtime/`, `vendor/`) to `static/`, then `node build.mjs dist`,
+and copy `dist/core.js`, `dist/pdfwin.js` and `dist/engine-worker.js` into `../stochatex/`.
 The TeX runtime in `../stochatex/runtime/` is not rebuilt by this script.
+
+- The engine worker is `engine-patches/worker.js` (our patches on the worker of @siglum/engine 0.2.2). The build stops if the
+  installed engine is another version: port the patches first, then change `ENGINE` in `build.mjs`.
+- **After any change in `../stochatex/`** (a module, `app.css`, the equation editor, a new `core.js`), run
+  `node tools/stamp.mjs ../stochatex`. It gives every file a version from its content (`app.css?v=…`, an import map for the
+  modules) and writes `version.json`, so browsers never mix old and new files and open pages offer "Reload to update".
+- `npm test`: logic tests (maths reader, model check, model list, versions, engine patches) and a browser smoke test
+  (load, compile the sample, no page errors). Set `CHROME=` to the browser to use.

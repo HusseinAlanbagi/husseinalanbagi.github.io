@@ -9,7 +9,7 @@ export let engineLog = [];
 export function initEngine(onProgress) {
   if (ready) return ready;
   compiler = new SiglumCompiler({
-    workerUrl: new URL('./engine-worker.js', document.baseURI).href,
+    workerUrl: new URL('./engine-worker.js' + (document.querySelector('meta[name="stx-version"]')?.content ? '?v=' + document.querySelector('meta[name="stx-version"]').content : ''), document.baseURI).href,
     wasmUrl: R + '/wasm/busytex.wasm', bundlesUrl: R + '/bundles', ctanProxyUrl: R, xzwasmUrl: R + '/xzwasm.js',
     onLog: (m) => { engineLog.push(m); if (engineLog.length > 4000) engineLog = engineLog.slice(-3000); listeners.forEach(f => f(m)); },
     onProgress: (stage, detail) => onProgress && onProgress(stage, detail),

@@ -33,10 +33,45 @@ const problems = new Map();      // source -> [{ severity, file, line, message }
 let quickT = 0;
 const commands = new Map();      // id -> { id, name, run, key }
 
-const persist = () => { clearTimeout(saveTimer); saveTimer = setTimeout(flush, 400); };
+const persist = () => { clearTimeout(saveTimer); if (saveState !== 'unsaved') { const el = document.getElementById('saveState'); if (el) { el.className = 'save-state saving'; el.textContent = 'Saving…'; } } saveTimer = setTimeout(flush, 400); };
 const save = () => { persist(); scheduleFolderSync(); };
-const flush = async () => { clearTimeout(saveTimer); if (project) { project.updated = Date.now(); try { await store.put(project); } catch (e) { toast('Could not save the project in this browser: ' + e.message, 'err'); } } };
+// Saved / Saving / Not saved, beside the project name. "Saved" only once the browser has committed the save.
+let saveState = 'saved', saveErr = null, saveWarned = false;
+function setSaveState(st, err) {
+  saveState = st; saveErr = err || null;
+  let el = document.getElementById('saveState');
+  if (!el) { el = h('button', { id: 'saveState', class: 'save-state', onClick: () => saveMenu(el) }); $('projBtn').after(el); }
+  el.className = 'save-state ' + st;
+  el.textContent = st === 'saving' ? 'Saving…' : st === 'saved' ? 'Saved' : 'Not saved';
+  el.title = st === 'unsaved' ? 'This browser did not save your latest changes: ' + (err?.message || 'storage not available') + '. Download a .zip to keep a copy.' : st === 'saved' ? 'Saved in this browser (Ctrl+S saves now). Download a .zip for a copy elsewhere.' : 'Saving in this browser…';
+  if (st === 'unsaved' && !saveWarned) { saveWarned = true; toast(h('span', {}, 'This browser could not save your changes (' + (err?.message || 'storage not available') + '). ', h('button', { class: 'small', onClick: () => exportZip() }, 'Download a .zip'), ' ', h('button', { class: 'small', onClick: () => flush() }, 'Try again')), 'err', 0); }
+  if (st === 'saved') saveWarned = false;
+}
+function saveMenu(anchor) {
+  menu(anchor, [
+    { heading: saveState === 'unsaved' ? 'Not saved: ' + (saveErr?.message || 'storage not available') : saveState === 'saved' ? 'Saved in this browser' : 'Saving…' },
+    { label: 'Save now', hint: MOD + '+S', onClick: () => flush() },
+    { label: 'Download the project as a .zip', onClick: () => exportZip() },
+  ]);
+}
+const flush = async () => {
+  clearTimeout(saveTimer); if (!project) return;
+  project.updated = Date.now(); setSaveState('saving');
+  try { await store.put(project); setSaveState('saved'); } catch (e) { setSaveState('unsaved', e); }
+};
 addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
+// a newer version of the app was published: offer to reload (the page's files are versioned, so it never mixes old and new)
+const APP_V = document.querySelector('meta[name="stx-version"]')?.content || '';
+let updateOffered = false, lastCheck = 0;
+async function checkUpdate() {
+  if (!APP_V || updateOffered || Date.now() - lastCheck < 60000) return; lastCheck = Date.now();
+  try {
+    const r = await fetch(new URL('./version.json?t=' + Date.now(), document.baseURI), { cache: 'no-store' }); if (!r.ok) return;
+    const { v } = await r.json();
+    if (v && v !== APP_V) { updateOffered = true; await flush(); toast(h('span', {}, 'A new version of StochaTeX is ready. ', h('button', { class: 'small primary', onClick: async () => { await flush(); location.reload(); } }, 'Reload to update')), '', 0); }
+  } catch {}
+}
+addEventListener('focus', checkUpdate); setInterval(checkUpdate, 15 * 60000); setTimeout(checkUpdate, 20000);
 addEventListener('pagehide', () => { flush(); folderSync(); });
 
 // ---------------------------------------------------------------- editor + pdf
@@ -47,7 +82,7 @@ const editor = createEditor($('ed'), {
   },
   onChange(path, text) {
     if (!project || !path || !project.files[path]) return;
-    project.files[path] = { t: text }; save(); events.emit('change', path, text); scheduleCompile(); checkPackagesSoon();
+    project.files[path] = { t: text }; save(); events.emit('change', path, text); scheduleCompile(); checkPackagesSoon(); clearTimeout(mainUiT); mainUiT = setTimeout(refreshMainUI, 600);
   },
   onCursor(state) { const pos = state.selection.main.head, ln = state.doc.lineAt(pos); if (!$('cursorInfo').dataset.note) $('cursorInfo').textContent = `Ln ${ln.number}, Col ${pos - ln.from + 1}`; events.emit('cursor', { line: ln.number, column: pos - ln.from, pos }); crumbsSoon(); },
 });
@@ -77,7 +112,7 @@ const projectApi = {
   remove(p) { if (!project.files[p]) return; delete project.files[p]; editor.forget(p); if (project.main === p) project.main = null; if (active === p) { active = null; openFile(mainFile() || projectApi.files()[0]); } save(); renderTree(); events.emit('files'); scheduleCompile(); },
   rename(from, to) { to = cleanPath(to); if (!to || !project.files[from] || project.files[to]) return false; project.files[to] = project.files[from]; delete project.files[from]; editor.rename(from, to); if (project.main === from) project.main = to; if (active === from) { active = to; $('fileName').textContent = to; } save(); renderTree(); events.emit('files'); scheduleCompile(); return true; },
   open: (p) => openFile(p),
-  setMain(p) { project.main = p; save(); renderTree(); scheduleCompile(0); },
+  setMain(p) { project.main = p; save(); renderTree(); refreshMainUI(); scheduleCompile(0); toast(`The PDF is now made from ${p}.`); },
 };
 const cleanPath = (p) => (p || '').replace(/\\/g, '/').split('/').filter(s => s && s !== '.' && s !== '..').join('/');
 const pathSort = (a, b) => { const da = a.includes('/'), dbb = b.includes('/'); return da === dbb ? a.localeCompare(b) : da ? 1 : -1; };
@@ -85,7 +120,73 @@ function mainFile() {
   if (!project) return null;
   if (project.main && project.files[project.main]) return project.main;
   const tex = projectApi.files().filter(p => /\.tex$/i.test(p) && project.files[p].t != null);
-  return tex.find(p => /\\documentclass/.test(project.files[p].t)) || tex[0] || null;
+  // not chosen yet: main.tex if it has \documentclass, else the \documentclass file that pulls in the most others
+  const roots = tex.filter(p => /\\documentclass/.test(project.files[p].t));
+  if (roots.length > 1) return roots.find(p => /(^|\/)main\.tex$/i.test(p)) || roots.map(p => [p, partOfMain(p).size]).sort((a, b) => b[1] - a[1])[0][0];
+  return roots[0] || tex[0] || null;
+}
+
+// ---------------------------------------------------------------- which file makes the PDF
+// The files the main file pulls in (\input, \include, \subfile, \import), followed recursively.
+function partOfMain(main) {
+  const out = new Set(); if (!main) return out;
+  const tex = projectApi.files().filter(p => project.files[p]?.t != null);
+  const find = (name, from) => {
+    const n = name.trim().replace(/^\.\//, ''), dir = from.includes('/') ? from.slice(0, from.lastIndexOf('/') + 1) : '';
+    const cands = [n, n + '.tex', dir + n, dir + n + '.tex'].map(x => x.toLowerCase());
+    return tex.find(p => cands.includes(p.toLowerCase())) || null;
+  };
+  const visit = (p) => {
+    if (!p || out.has(p)) return; out.add(p);
+    const t = (project.files[p].t || '').replace(/(^|[^\\])%.*$/gm, '$1');
+    for (const m of t.matchAll(/\\(?:input|include|subfile|subfileinclude)\s*\{([^}]*)\}|\\(?:sub)?import\*?\s*\{([^}]*)\}\s*\{([^}]*)\}/g)) visit(m[1] != null ? find(m[1], p) : find((m[2] || '') + (m[3] || ''), p));
+  };
+  visit(main); return out;
+}
+const hasClass = (p) => /\\documentclass/.test((project?.files[p]?.t || '').replace(/(^|[^\\])%.*$/gm, '$1'));
+let mainChip = null, mainBar = null, mainBarHidden = new Set();
+function refreshMainUI() {
+  if (!project) return;
+  const main = mainFile();
+  if (!mainChip) { mainChip = h('button', { id: 'mainChip', class: 'main-chip', onClick: () => mainMenu(mainChip) }); $('compileBtn').parentNode.prepend(mainChip); }
+  mainChip.replaceChildren(h('span', { class: 'mc-l' }, 'PDF from '), h('b', {}, main ? main.split('/').pop() : '—'), icon('chevron', 12));
+  mainChip.title = main ? `The PDF is made from ${main}${project.main ? '' : ' (chosen automatically)'}. Click to change the main file.` : 'No .tex file to compile';
+  // the open file is not in that PDF: say so where you are working, with the fix
+  const notIn = active && /\.tex$/i.test(active) && main && active !== main && !partOfMain(main).has(active) && !mainBarHidden.has(active);
+  if (!notIn) { mainBar?.remove(); mainBar = null; return; }
+  const own = hasClass(active), name = active.split('/').pop(), mname = main.split('/').pop();
+  const bar = h('div', { class: 'main-bar', role: 'status' },
+    h('span', {}, h('b', {}, name), ` is not in the PDF: ${mname} does not \\input it.`),
+    h('span', { class: 'spacer' }),
+    ...(own ? [h('button', { class: 'small primary', onClick: () => projectApi.setMain(active) }, 'Make this the main file'),
+      h('button', { class: 'small', title: `Compile ${name} now, keeping ${mname} as the main file`, onClick: () => { onceMain = active; runCompile(); } }, 'Compile this file once')] : []),
+    h('button', { class: 'small', onClick: () => openFile(main) }, 'Open ' + mname),
+    h('button', { class: 'small ghost icon-only', title: 'Hide this note for this file', 'aria-label': 'Hide', onClick: () => { mainBarHidden.add(active); refreshMainUI(); } }, icon('close')));
+  if (mainBar) mainBar.replaceWith(bar); else $('ed').before(bar);
+  mainBar = bar;
+}
+function mainMenu(anchor) {
+  const main = mainFile(), tex = projectApi.files().filter(p => /\.tex$/i.test(p) && project.files[p]?.t != null);
+  const roots = tex.filter(hasClass), others = tex.filter(p => !hasClass(p));
+  menu(anchor, [
+    { heading: 'Main file (the PDF is made from it)' },
+    ...roots.map(p => ({ label: (p === main ? '✓ ' : ' ') + p, hint: p === main && !project.main ? 'automatic' : '', onClick: () => projectApi.setMain(p) })),
+    ...(others.length ? ['-', { heading: 'Files without \\documentclass' }, ...others.slice(0, 12).map(p => ({ label: (p === main ? '✓ ' : ' ') + p, onClick: () => projectApi.setMain(p) }))] : []),
+    '-',
+    ...(active && active !== main && hasClass(active) ? [{ label: `Compile ${active.split('/').pop()} once`, title: 'Keeps the main file as it is', onClick: () => { onceMain = active; runCompile(); } }] : []),
+    { label: 'Open the main file', onClick: () => main && openFile(main) },
+  ]);
+}
+// several files with \documentclass and no choice yet: ask once which one makes the PDF
+async function askMainOnce() {
+  if (!project || project.main || project.askedMain) return;
+  const roots = projectApi.files().filter(p => /\.tex$/i.test(p) && hasClass(p));
+  if (roots.length < 2) return;
+  project.askedMain = true; save();
+  const pick = roots.find(p => /(^|\/)main\.tex$/i.test(p)) || roots.find(p => partOfMain(p).size > 1) || roots[0];
+  const sel = h('select', { class: 'grow' }, ...roots.map(p => h('option', { value: p, selected: p === pick }, p)));
+  modal({ title: 'Which file makes the PDF?', body: h('div', {}, h('p', {}, `${roots.length} files in this project start with \\documentclass. Choose the main file: the PDF is made from it, and the files it \\inputs.`), h('label', { class: 'field' }, 'Main file', sel), h('p', { class: 'muted' }, 'You can change it any time with “PDF from …” beside Compile.')),
+    buttons: [{ label: 'Later' }, { label: 'Use this file', primary: true, onClick: (m) => { m.close(); projectApi.setMain(sel.value); } }] });
 }
 
 // ---------------------------------------------------------------- ui api (also used by modules)
@@ -173,7 +274,7 @@ function openFile(path) {
   $('ed').hidden = !text; $('binview').hidden = text;
   if (text) { editor.open(path, f.t); applyDiagnostics(); }
   else showBinary(path, f.b);
-  renderTree(); events.emit('open', path); checkPackagesSoon(); crumbsSoon();
+  renderTree(); events.emit('open', path); checkPackagesSoon(); crumbsSoon(); refreshMainUI();
 }
 let binUrl = null;
 function showBinary(path, bytes) {
@@ -229,11 +330,12 @@ function scheduleCompile(delay) {
   clearTimeout(compileTimer);
   compileTimer = setTimeout(runCompile, delay ?? prefs.get('delay', 900));
 }
+let onceMain = null, mainUiT = 0;      // "Compile this file once": the next compile uses this file as main
 async function runCompile() {
   clearTimeout(compileTimer);
   if (!project) return;
   if (compiling) { dirty = true; return; }
-  const main = mainFile();
+  const main = onceMain && project.files[onceMain] ? onceMain : mainFile(); onceMain = null;
   if (!main) { setStatus('No .tex file to compile', 'warn'); return; }
   compiling = true; dirty = false;
   setStatus('Compiling…', 'busy');
@@ -413,7 +515,7 @@ async function loadProject(p) {
   prefs.set('lastProject', p.id);
   renderTree(); renderProblems();
   openFile(p.lastOpen && p.files[p.lastOpen] ? p.lastOpen : mainFile() || projectApi.files()[0]);
-  events.emit('project'); events.emit('files');
+  events.emit('project'); events.emit('files'); refreshMainUI(); setTimeout(askMainOnce, 800);
   scheduleCompile(0);
   await folderConnect();
 }
@@ -443,7 +545,8 @@ async function duplicateProject() {
 }
 async function createProject(name, files, extra = {}) {
   const p = { id: uid(), name, main: null, engine: 'pdflatex', files, created: Date.now(), updated: Date.now(), ...extra };
-  await store.put(p); await loadProject(p); return p;
+  try { await store.put(p); } catch (e) { setSaveState('unsaved', e); }      // still open it: the work is in memory and can be downloaded
+  await loadProject(p); return p;
 }
 const sampleFiles = () => ({ 'main.tex': { t: SAMPLE_MAIN }, 'references.bib': { t: SAMPLE_BIB } });
 async function projectMenu() {
@@ -879,7 +982,7 @@ $('pdfModeBtn').onclick = pdfModeMenu; $('pdfSw').onclick = () => setPdfMode(pdf
 $('pdfDownload').onclick = downloadPdf; $('syncBtn').onclick = showInPdf; $('syncBtn').title = `Show this line in the PDF (${MOD}+J). Double-click the PDF to jump to the source.`;
 addEventListener('keydown', (e) => {
   const mod = e.ctrlKey || e.metaKey;
-  if (mod && (e.key === 'Enter' || (e.key.toLowerCase() === 's' && !e.shiftKey))) { e.preventDefault(); runCompile(); }
+  if (mod && (e.key === 'Enter' || (e.key.toLowerCase() === 's' && !e.shiftKey))) { e.preventDefault(); if (e.key.toLowerCase() === 's') flush(); runCompile(); }
   else if (mod && e.shiftKey && e.key.toLowerCase() === 'p') { e.preventDefault(); palette(); }
   else if (mod && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'k') { e.preventDefault(); quickSearch(); }
   else if (mod && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'j') { e.preventDefault(); showInPdf(); }

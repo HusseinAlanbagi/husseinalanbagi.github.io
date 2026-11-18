@@ -10,7 +10,10 @@
 import { scan, findEquations, symName, multiLetterCandidates } from './lib/latex-math.js';
 import { parseMod } from './lib/dynare.js';
 import { modelState } from './lib/model-state.js';
-import { loadMathJax, mathSvg } from './lib/mathjax.js';
+import { loadMathJax, mathSvg as mathSvgRaw } from './lib/mathjax.js';
+// drawing a formula is slow (MathJax): keep each drawing, so redrawing the panel after an edit costs nothing
+const svgCache = new Map();
+const mathSvg = (tex) => { let v = svgCache.get(tex); if (v === undefined) { v = mathSvgRaw(tex); if (v) { if (svgCache.size > 3000) svgCache.delete(svgCache.keys().next().value); svgCache.set(tex, v); } } return v; };
 
 const SHOCK = /^\\(varepsilon|epsilon|eta|nu|xi|zeta|upsilon)$|^[ue]$/;
 const STYLE = { bar: 'a bar (\\bar{x})', ss: 'the subscript ss (x_{ss})', star: 'a star (x^{*})' };
@@ -234,7 +237,11 @@ export default {
         ...TYPES.map(([k, label]) => ({ label: (v.type === k ? '✓ ' : '') + label + (v.autoType === k ? ' (guessed)' : ''), onClick: () => setVar(v.key, { type: k === v.autoType ? null : k }) })),
         '-', { label: `Dynare name: ${v.name}…`, onClick: async () => { const n = prompt(`Dynare name for ${v.tex}`, v.name); if (n != null) setVar(v.key, { name: n.trim() === v.autoName ? null : n.trim().replace(/[^A-Za-z0-9_]/g, '_') }); } }]);
     }
+    let needDraw = false;
+    const visible = () => box && box.isConnected && box.offsetParent !== null;
     function draw() {
+      if (!visible()) { needDraw = true; return; }
+      needDraw = false;
       if (!mjAsked && !window.MathJax?.tex2svg) { mjAsked = true; loadMathJax().then(() => box && last && draw()).catch(() => {}); }
       const r = last, s = r.summary;
       const pad = { padding: '0 10px' };
@@ -365,7 +372,9 @@ export default {
       const d = h('details', { class: 'mc-eqs', open: eqOpen || null, onToggle: (ev) => { eqOpen = ev.currentTarget.open; } },
         h('summary', {}, `Equations: ${r.model.length} of ${all.length} in the model`),
         h('div', { class: 'mc-eqhead' }, seg, h('span', { class: 'muted' }, 'Tick to put one in')),
-        h('div', { class: 'mc-eqlist' }, ...(shown.length ? shown.map(row) : [h('p', { class: 'muted' }, 'None.')])));
+        h('div', { class: 'mc-eqlist' }, ...(!eqOpen ? [] : shown.length ? shown.map(row) : [h('p', { class: 'muted' }, 'None.')])));
+      // drawn only while open (each row is a formula)
+      d.addEventListener('toggle', () => { if (d.open && !d.querySelector('.mc-eqrow, p')) { eqOpen = true; draw(); } });
       return d;
     }
 
@@ -449,8 +458,11 @@ export default {
           ...cols.map(v => cell(e, v))))))));
     }
 
-    const later = () => { clearTimeout(timer); timer = setTimeout(run, 700); };
-    ctx.ui.addPanel({ id: 'model-checks', title: 'Model check', icon: 'scale', render(el) { box = el; if (last) draw(); else run(); } });
+    const idle = window.requestIdleCallback ? (fn) => requestIdleCallback(fn, { timeout: 2000 }) : (fn) => setTimeout(fn, 0);
+    const later = () => { clearTimeout(timer); timer = setTimeout(() => idle(run), 700); };
+    ctx.ui.addPanel({ id: 'model-checks', title: 'Model check', icon: 'scale', render(el) { box = el; if (last) setTimeout(draw, 0); else run(); } });
+    // the panel shown again after being hidden: draw what changed meanwhile
+    const showWatch = setInterval(() => { if (needDraw && visible() && last) draw(); }, 500); ctx.onDispose(() => clearInterval(showWatch));
     ['change', 'files', 'project'].forEach(n => ctx.on(n, later));
     run();
     ctx.onDispose(() => { clearTimeout(timer); ctx.problems.clear(); modelState.set(null); openViz?.m.close(); css.remove(); });
