@@ -55,6 +55,14 @@ await test('table cells typed as drawn: text, bold, maths and other LaTeX surviv
   for (const x of ['{\\bf old}', '$$x$$']) assert.ok(!T.visualOk(x), x);
   assert.equal(T.partsTex([{ t: 'text', s: 'R&D 50% x_1 ' }, { t: 'text', s: 'big', b: true }, { t: 'math', tex: 'c_t' }]), 'R\\&D 50\\% x\\_1 \\textbf{big}$c_t$');
 });
+await test('copying a block of cells: LaTeX grid, text for Excel, HTML', async () => {
+  const T = await import(path.join(app, 'modules/lib/table-edit.js'));
+  const t = T.parseTable('lcc', '\n A & \\textbf{B} & $c_t$ \\\\\n \\multicolumn{2}{c}{Total} & R\\&D \\\\\n');
+  const g = T.copyGrid(t, { r0: 0, r1: 1, c0: 0, c1: 2 });
+  assert.deepEqual(g, [['A', '\\textbf{B}', '$c_t$'], ['Total', '', 'R\\&D']]);
+  assert.equal(T.gridText(g), 'A\tB\tc_t\nTotal\t\tR&D');
+  assert.match(T.gridHtml(g), /<b>B<\/b>/);
+});
 await test('published files carry versions (stamp)', () => {
   const ix = fs.readFileSync(path.join(app, 'index.html'), 'utf8');
   assert.match(ix, /app\.css\?v=[0-9a-f]{10}/); assert.match(ix, /core\.js\?v=[0-9a-f]{10}/); assert.match(ix, /<script type="importmap">/);

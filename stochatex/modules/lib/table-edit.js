@@ -222,3 +222,25 @@ export function partsTex(parts) {
 }
 // the cell can be edited visually without changing what it means
 export const visualOk = (tex) => { const p = cellParts(tex); return !!p && partsTex(p).replace(/\s+/g, ' ').trim() === tex.replace(/\s+/g, ' ').trim(); };
+
+// ---- copying a block of cells: the LaTeX of each (merged cells at their first column), and readable text for Excel / Word
+export function copyGrid(t, sel) {
+  const out = [];
+  for (let r = sel.r0; r <= sel.r1; r++) {
+    const row = t.rows[r], line = [];
+    for (let c = sel.c0; c <= sel.c1; c++) { const i = cellAt(row, c); line.push(colOf(row, i) === c || c === sel.c0 ? row.cells[i].tex : ''); }
+    out.push(line);
+  }
+  return out;
+}
+export function cellPlain(tex) {
+  const p = cellParts(tex);
+  if (!p) return tex.replace(/\\(?:textbf|textit|emph)\{([^{}]*)\}/g, '$1').replace(/\$/g, '');
+  return p.map(x => x.t === 'text' ? x.s : x.t === 'math' ? x.tex : x.tex === '~' ? ' ' : x.tex).join('').replace(/ /g, ' ').trim();
+}
+const escHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+export function gridText(grid) { return grid.map(r => r.map(t => cellPlain(t).replace(/[\t\n]/g, ' ')).join('\t')).join('\n'); }
+export function gridHtml(grid) {
+  const cell = (tex) => { const p = cellParts(tex); if (!p) return escHtml(cellPlain(tex)); return p.map(x => { const s = escHtml(x.t === 'text' ? x.s : x.tex); return x.t === 'text' ? (x.b ? `<b>${x.i ? `<i>${s}</i>` : s}</b>` : x.i ? `<i>${s}</i>` : s) : x.t === 'math' ? `<i>${s}</i>` : s; }).join(''); };
+  return '<table>' + grid.map(r => '<tr>' + r.map(t => `<td>${cell(t)}</td>`).join('') + '</tr>').join('') + '</table>';
+}

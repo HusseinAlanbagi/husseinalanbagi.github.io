@@ -1316,8 +1316,59 @@ export default {
       markSel(); syncBar();
     }
     function markSel() {
-      const S = tableSess; S.el.querySelectorAll('td.sel').forEach(x => x.classList.remove('sel'));
-      if (S.sel) for (let c = S.sel.c0; c <= S.sel.c1; c++) cellTd(S.sel.r, c)?.classList.add('sel');
+      const S = tableSess; const q = S.sel;
+      S.el.querySelectorAll('td[data-r]').forEach(x => { const r = +x.dataset.r, c = +x.dataset.c, w = x.colSpan || 1; x.classList.toggle('sel', !!q && r >= q.r0 && r <= q.r1 && c <= q.c1 && c + w - 1 >= q.c0); });
+      S.el.classList.toggle('has-cells', !!q);
+    }
+    // a block of cells (rows r0..r1, columns c0..c1), widened to cover merged cells it cuts through
+    function rect(a, b) {
+      const t = tableSess.t; let q = { r0: Math.min(a.r, b.r), r1: Math.max(a.r, b.r), c0: Math.min(a.c, b.c), c1: Math.max(a.c, b.c) };
+      for (let again = true; again; ) { again = false; for (let r = q.r0; r <= q.r1; r++) { const row = t.rows[r]; for (const [i, cell] of row.cells.entries()) { const x = TE.colOf(row, i), y = x + cell.span - 1; if (y >= q.c0 && x <= q.c1 && (x < q.c0 || y > q.c1)) { q.c0 = Math.min(q.c0, x); q.c1 = Math.max(q.c1, y); again = true; } } } }
+      return q;
+    }
+    function selectCells(q) {
+      const S = tableSess; if (!S) return;
+      const td = S.el.querySelector('td.editing'); if (td) { syncCell(); drawCell(td, S.t.rows[+td.dataset.r].cells[+td.dataset.i]); }
+      S.sel = q; S.el.tabIndex = -1; S.el.focus({ preventScroll: true }); getSelection().removeAllRanges();
+      markSel(); syncBar();
+    }
+    const selList = () => { const S = tableSess, q = S.sel, out = new Set(); if (!q) return [S.t.rows[S.r].cells[TE.cellAt(S.t.rows[S.r], S.c)]]; for (let r = q.r0; r <= q.r1; r++) for (let c = q.c0; c <= q.c1; c++) out.add(S.t.rows[r].cells[TE.cellAt(S.t.rows[r], c)]); return [...out]; };
+    // copy: plain text with tabs (Excel, Word), a small HTML table, and the cells' LaTeX for pasting back here
+    function copyCells(cut, whole) {
+      const S = tableSess; if (!S) return; syncCell();
+      const q = whole || !S.sel ? (whole ? { r0: 0, r1: S.t.rows.length - 1, c0: 0, c1: S.t.cols.length - 1 } : { r0: S.r, r1: S.r, c0: S.c, c1: S.c }) : S.sel;
+      const grid = TE.copyGrid(S.t, q);
+      const put = (e) => { e.clipboardData.setData('text/plain', TE.gridText(grid)); e.clipboardData.setData('text/html', TE.gridHtml(grid)); try { e.clipboardData.setData('text/x-stochatex-cells', JSON.stringify(grid)); } catch {} e.preventDefault(); };
+      document.addEventListener('copy', put, { once: true, capture: true });
+      let ok = false; try { ok = document.execCommand('copy'); } catch {}
+      document.removeEventListener('copy', put, { capture: true });
+      if (!ok) { try { navigator.clipboard.writeText(TE.gridText(grid)); ok = true; } catch {} }
+      const n = `${q.r1 - q.r0 + 1} × ${q.c1 - q.c0 + 1}`;
+      if (cut) { for (const cell of selList()) cell.tex = ''; S.dirty = true; const keep = S.sel; buildTableUI(); writeTable(); selectCells(keep); }
+      ctx.ui.toast(ok ? `${cut ? 'Cut' : 'Copied'} ${whole ? 'the table' : n + ' cell' + (n === '1 × 1' ? '' : 's')}: paste here, in Excel or in Word.` : 'The browser did not allow copying.');
+    }
+    function clearCells() { const S = tableSess; for (const cell of selList()) cell.tex = ''; S.dirty = true; const keep = S.sel; buildTableUI(); writeTable(); selectCells(keep); }
+    // keys while a block of cells is selected
+    function selKey(e) {
+      const S = tableSess; if (!S || !S.sel || e.target !== S.el || document.activeElement !== S.el) return;
+      const mod = e.ctrlKey || e.metaKey, k = e.key.toLowerCase(), q = S.sel, t = S.t;
+      const anchor = S.anchor || { r: q.r0, c: q.c0 };
+      if (mod && k === 'c') { e.preventDefault(); return copyCells(false); }
+      if (mod && k === 'x') { e.preventDefault(); return copyCells(true); }
+      if (mod && k === 'a') { e.preventDefault(); return selectCells({ r0: 0, r1: t.rows.length - 1, c0: 0, c1: t.cols.length - 1 }); }
+      if (mod && (k === 'b' || k === 'i')) { e.preventDefault(); return wrapCell(k === 'b' ? 'bold' : 'italic'); }
+      if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); return clearCells(); }
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); S.sel = null; markSel(); return focusCell(anchor.r, anchor.c, false); }
+      if (e.key.startsWith('Arrow')) {
+        e.preventDefault();
+        const far = { r: q.r0 === anchor.r ? q.r1 : q.r0, c: q.c0 === anchor.c ? q.c1 : q.c0 };
+        const d = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] }[e.key];
+        const to = { r: Math.max(0, Math.min(t.rows.length - 1, far.r + d[0])), c: Math.max(0, Math.min(t.cols.length - 1, far.c + d[1])) };
+        if (e.shiftKey) return selectCells(rect(anchor, to));
+        S.sel = null; markSel(); return focusCell(to.r, to.c);
+      }
+      if (e.key === 'Tab' || e.key === 'Enter') { e.preventDefault(); S.sel = null; markSel(); return focusCell(anchor.r, anchor.c); }
+      if (!mod && e.key.length === 1) { e.preventDefault(); S.sel = null; markSel(); focusCell(anchor.r, anchor.c, true); document.execCommand('insertText', false, e.key); }   // typing replaces the first cell, as in Excel
     }
     function renderGrid() {
       const S = tableSess, t = S.t;
@@ -1334,10 +1385,16 @@ export default {
           if (style === 'grid') td.classList.add('grid');
           drawCell(td, cell);
           td.addEventListener('mousedown', (e) => {
-            if (td.classList.contains('editing')) return;
+            if (e.button !== 0) return;
+            if (e.shiftKey) { e.preventDefault(); const a = S.anchor || { r: S.r, c: S.c }; S.anchor = a; return selectCells(rect(a, { r, c: c + cell.span - 1 })); }
+            S.drag = { r, c }; S.anchor = { r, c };
+            if (td.classList.contains('editing') && !S.sel) return;
             e.preventDefault();
-            if (e.shiftKey && S.r === r) { const a = Math.min(S.c, c), b = Math.max(S.c, c + cell.span - 1); S.sel = { r, c0: a, c1: b }; markSel(); syncBar(); return; }
-            S.sel = null; focusCell(r, c);
+            S.sel = null; markSel(); focusCell(r, c);
+          });
+          td.addEventListener('mouseover', (e) => {
+            if (!S.drag || !(e.buttons & 1) || (S.drag.r === r && S.drag.c === c && !S.sel)) return;
+            S.anchor = S.drag; selectCells(rect(S.drag, { r, c: c + cell.span - 1 }));
           });
           td.addEventListener('input', (e) => { if (e.target !== td) return; const cl = S.t.rows[r].cells[i]; cl.tex = cellText(td); changed(); });
           td.addEventListener('click', (e) => { const chip = e.target.closest?.('.vz-cm'); if (chip && td.classList.contains('visual')) { e.preventDefault(); editMath(td, chip); } });
@@ -1357,13 +1414,15 @@ export default {
     // paste from a spreadsheet or Word: tab-separated rows fill the cells from here, adding rows and columns as needed
     function pasteCells(e, r0, c0) {
       const text = e.clipboardData?.getData('text/plain') || '';
-      if (!/\t|\n./.test(text.trim())) { if (e.target.closest?.('td.visual')) { e.preventDefault(); document.execCommand('insertText', false, text.replace(/\s*\n\s*/g, ' ')); } return; }
+      const ownCells = (e.clipboardData?.types || []).includes('text/x-stochatex-cells');
+      if (!ownCells && !/\t|\n./.test(text.trim())) { if (e.target.closest?.('td.visual')) { e.preventDefault(); document.execCommand('insertText', false, text.replace(/\s*\n\s*/g, ' ')); } return; }
       e.preventDefault(); const S = tableSess, t = S.t;
-      const grid = text.replace(/\r/g, '').replace(/\n$/, '').split('\n').map(l => l.split('\t'));
+      let own = null; try { own = JSON.parse(e.clipboardData.getData('text/x-stochatex-cells') || 'null'); } catch {}
+      const grid = own || text.replace(/\r/g, '').replace(/\n$/, '').split('\n').map(l => l.split('\t'));
       while (t.rows.length < r0 + grid.length) TE.addRow(t, t.rows.length - 1);
       const w = Math.max(...grid.map(g => g.length)); while (t.cols.length < c0 + w) TE.addCol(t, t.cols.length - 1);
       const escTeX = (x) => x.replace(/([&%#_])/g, '\\$1');
-      grid.forEach((g, dr) => g.forEach((v, dc) => { const row = t.rows[r0 + dr]; row.cells[TE.cellAt(row, c0 + dc)].tex = escTeX(v.trim()); }));
+      grid.forEach((g, dr) => g.forEach((v, dc) => { const row = t.rows[r0 + dr]; row.cells[TE.cellAt(row, c0 + dc)].tex = own ? v : escTeX(v.trim()); }));
       S.dirty = true; buildTableUI(); writeTable(); focusCell(r0, c0);
       ctx.ui.toast(`Pasted ${grid.length} × ${w} cells.`);
     }
@@ -1387,7 +1446,12 @@ export default {
       if (e.key === 'ArrowDown' && !e.shiftKey && r + 1 < t.rows.length) return go(r + 1, c, false);
       if (e.key === 'ArrowLeft' && !e.shiftKey && atStart() && (c > 0 || r > 0)) return c > 0 ? go(r, c - 1, false) : go(r - 1, t.cols.length - 1, false);
       if (e.key === 'ArrowRight' && !e.shiftKey && atEnd() && (c + span < t.cols.length || r + 1 < t.rows.length)) { e.preventDefault(); S.sel = null; focusCell(c + span < t.cols.length ? r : r + 1, c + span < t.cols.length ? c + span : 0, false); const sl = getSelection(); sl.collapse(cellTd(S.r, S.c), 0); return; }
-      if (e.key === 'ArrowRight' && e.shiftKey && atEnd() && c + span < t.cols.length) { e.preventDefault(); const a = S.sel?.r === r ? S.sel.c0 : c; S.sel = { r, c0: a, c1: Math.max(S.sel?.c1 ?? c, c + span) }; markSel(); syncBar(); return; }
+      if (e.shiftKey && !mod && ((e.key === 'ArrowRight' && atEnd() && c + span < t.cols.length) || (e.key === 'ArrowLeft' && atStart() && c > 0) || (e.key === 'ArrowDown' && r + 1 < t.rows.length) || (e.key === 'ArrowUp' && r > 0))) {
+        e.preventDefault(); S.anchor = { r, c };
+        const d = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, span] }[e.key];
+        return selectCells(rect({ r, c }, { r: r + d[0], c: c + d[1] }));
+      }
+      if (mod && e.key.toLowerCase() === 'a') { const sl = getSelection(); if (sl.toString().length >= td.textContent.length) { e.preventDefault(); S.anchor = { r, c }; return selectCells({ r0: 0, r1: t.rows.length - 1, c0: 0, c1: t.cols.length - 1 }); } }
       if (mod && !e.shiftKey && (e.key.toLowerCase() === 'b' || e.key.toLowerCase() === 'i')) { e.preventDefault(); return styleSel(e.key.toLowerCase() === 'b' ? 'bold' : 'italic'); }
       if (mod && e.key.toLowerCase() === 'm') { e.preventDefault(); return td.classList.contains('visual') ? insertMath(td) : wrapCell('math'); }
       if (mod && e.key === 'Enter') { e.preventDefault(); return op('rowBelow'); }
@@ -1400,9 +1464,10 @@ export default {
     }
     function wrapCell(kind) {
       const S = tableSess; syncCell();
-      const cells = S.sel ? Array.from({ length: S.sel.c1 - S.sel.c0 + 1 }, (_, k) => S.t.rows[S.sel.r].cells[TE.cellAt(S.t.rows[S.sel.r], S.sel.c0 + k)]) : [S.t.rows[S.r].cells[TE.cellAt(S.t.rows[S.r], S.c)]];
-      for (const cell of new Set(cells)) cell.tex = TE.toggleWrap(cell.tex, kind);
-      S.dirty = true; changed(); const { r, c } = S; buildTableUI(); focusCell(r, c, true);
+      const cells = selList(), keep = S.sel;
+      for (const cell of cells) cell.tex = TE.toggleWrap(cell.tex, kind);
+      S.dirty = true; changed(); const { r, c } = S; buildTableUI();
+      if (keep) selectCells(keep); else focusCell(r, c, true);
     }
     function op(name) {
       const S = tableSess; if (!S) return; syncCell();
@@ -1415,7 +1480,7 @@ export default {
         case 'delRow': r = TE.deleteRow(t, r); break;
         case 'delCol': c = TE.deleteCol(t, c); break;
         case 'alL': case 'alC': case 'alR': TE.setAlign(t, c, name === 'alL' ? 'l' : name === 'alC' ? 'c' : 'r'); break;
-        case 'merge': if (S.sel) { TE.merge(t, S.sel.r, S.sel.c0, S.sel.c1); r = S.sel.r; c = S.sel.c0; S.sel = null; } break;
+        case 'merge': if (S.sel && S.sel.r0 === S.sel.r1) { TE.merge(t, S.sel.r0, S.sel.c0, S.sel.c1); r = S.sel.r0; c = S.sel.c0; S.sel = null; } break;
         case 'split': TE.split(t, r, c); break;
         case 'book': case 'grid': case 'none': TE.setRules(t, name); break;
       }
@@ -1424,13 +1489,13 @@ export default {
     function syncBar() {
       const S = tableSess; if (!S?.bar) return;
       const row = S.t.rows[S.r], cell = row?.cells[TE.cellAt(row, S.c)];
-      S.bar.querySelector('[data-op="merge"]').disabled = !(S.sel && S.sel.c1 > S.sel.c0);
+      S.bar.querySelector('[data-op="merge"]').disabled = !(S.sel && S.sel.r0 === S.sel.r1 && S.sel.c1 > S.sel.c0);
       S.bar.querySelector('[data-op="split"]').disabled = !(cell && (cell.span > 1 || cell.malign));
       const al = S.t.cols[S.c]?.align;
       for (const k of ['alL', 'alC', 'alR']) S.bar.querySelector(`[data-op="${k}"]`).classList.toggle('on', al === k.slice(2).toLowerCase());
       const st = TE.ruleStyle(S.t);
       S.bar.querySelectorAll('[data-rules]').forEach(b => b.classList.toggle('on', b.dataset.rules === st));
-      S.where.textContent = `Row ${S.r + 1} of ${S.t.rows.length} · column ${S.c + 1} of ${S.t.cols.length}`;
+      S.where.textContent = S.sel ? `${S.sel.r1 - S.sel.r0 + 1} × ${S.sel.c1 - S.sel.c0 + 1} cells selected · Ctrl+C copies` : `Row ${S.r + 1} of ${S.t.rows.length} · column ${S.c + 1} of ${S.t.cols.length}`;
     }
     function buildTableUI() {
       const S = tableSess;
@@ -1445,12 +1510,32 @@ export default {
         h('button', { title: 'Bold (Ctrl+B): the selected words, or the whole cell', onMousedown: (e) => { e.preventDefault(); styleSel('bold'); } }, h('b', {}, 'B')),
         h('button', { title: 'Italic (Ctrl+I): the selected words, or the whole cell', onMousedown: (e) => { e.preventDefault(); styleSel('italic'); } }, h('i', { style: { fontFamily: 'var(--serif, serif)' } }, 'I')),
         h('button', { title: 'Insert maths at the cursor, edited like an equation (Ctrl+M, or type $)', onMousedown: (e) => { e.preventDefault(); const td = S.el.querySelector('td.editing'); if (td?.classList.contains('visual')) insertMath(td); else wrapCell('math'); } }, h('span', { class: 'vz-om' }, '∑')), sep(),
-        b('merge', 'Merge the selected cells (Shift+click or Shift+→ to select cells in a row)'), b('split', 'Split a merged cell'), sep(),
+        b('merge', 'Merge the selected cells of a row (drag across them, or Shift+click)'), b('split', 'Split a merged cell'), sep(),
+        h('button', { title: 'Copy the selected cells (Ctrl+C; Ctrl+X cuts), or the whole table when none are selected: paste here, in Excel or in Word', onMousedown: (e) => { e.preventDefault(); copyCells(false, !S.sel); } }, ico('copy', 15)), sep(),
         rules, h('span', { class: 'spacer' }), S.where,
         h('button', { class: 'vz-latexsw' + (S.latex ? ' on' : ''), title: S.latex ? 'Cells show their LaTeX: click to type in them as drawn' : 'Show the LaTeX of the cells while you edit (click again to go back)', 'aria-pressed': String(S.latex), onMousedown: (e) => { e.preventDefault(); syncCell(); S.latex = !S.latex; ctx.settings.set('table-latex', S.latex); const { r, c } = S; buildTableUI(); focusCell(r, c, false); } }, 'LaTeX'),
         h('button', { title: 'Open the whole table as LaTeX in the source', onMousedown: (e) => { e.preventDefault(); const from = S.from; finishTable(true); S.view.dispatch({ selection: { anchor: from + 1 }, scrollIntoView: false }); S.view.focus(); } }, ico('code', 15)),
         h('button', { class: 'primary', title: 'Done (Esc)', onMousedown: (e) => { e.preventDefault(); finishTable(true); } }, ico('check', 15)));
-      S.el.replaceChildren(S.bar, h('div', { class: 'vz-tabgridwrap' }, renderGrid()), h('div', { class: 'vz-tabhint muted' }, S.latex ? 'Cells show LaTeX · Tab: next cell (adds a row at the end) · Enter: cell below · “LaTeX” goes back to typing as drawn · Esc: done' : 'Type as in Word · $ or Ctrl+M: maths, edited like an equation · Tab: next cell (adds a row at the end) · Enter: cell below · Shift+click: select cells to merge · paste from Excel fills several cells · Esc: done'));
+      if (!S.listening) {
+        S.listening = true;
+        S.el.addEventListener('keydown', selKey);
+        S.el.addEventListener('paste', (e) => { if (S.sel && document.activeElement === S.el) pasteCells(e, S.sel.r0, S.sel.c0); });
+        const up = () => { if (tableSess === S) S.drag = null; }; document.addEventListener('mouseup', up, true);
+        // dragging from inside a cell's text sends no mouseover to other cells: follow the pointer instead
+        const move = (e) => {
+          if (tableSess !== S) return document.removeEventListener('mousemove', move, true);
+          if (!S.drag || !(e.buttons & 1)) return;
+          const td = document.elementFromPoint(e.clientX, e.clientY)?.closest?.('td[data-r]'); if (!td || !S.el.contains(td)) return;
+          const r = +td.dataset.r, c = +td.dataset.c + (td.colSpan || 1) - 1;
+          if (r === S.drag.r && +td.dataset.c === S.drag.c && !S.sel) return;
+          S.anchor = S.drag; const q = rect(S.drag, { r, c });
+          if (!S.sel || q.r0 !== S.sel.r0 || q.r1 !== S.sel.r1 || q.c0 !== S.sel.c0 || q.c1 !== S.sel.c1) selectCells(q);
+        };
+        document.addEventListener('mousemove', move, true);
+        // pressing on selected text would start the browser's drag-and-drop of that text: select cells instead
+        S.el.addEventListener('dragstart', (e) => { if (e.target.closest?.('math-field')) return; e.preventDefault(); });
+      }
+      S.el.replaceChildren(S.bar, h('div', { class: 'vz-tabgridwrap' }, renderGrid()), h('div', { class: 'vz-tabhint muted' }, S.latex ? 'Cells show LaTeX · Tab: next cell (adds a row at the end) · Enter: cell below · “LaTeX” goes back to typing as drawn · Esc: done' : 'Type as in Word · $ or Ctrl+M: maths · Tab: next cell (adds a row at the end) · Enter: cell below · drag across cells (or Shift+arrows) to select them: Ctrl+C, Ctrl+X, Delete, Ctrl+V · Esc: done'));
       syncBar();
     }
     // insert a new table: a grid to pick rows × columns, like Word's
@@ -2173,7 +2258,8 @@ export default {
 .vz-table-edit td.grid { border: 1px solid var(--ink) !important; }
 .vz-table-edit td:hover { background: color-mix(in srgb, var(--accent-soft, #e8eefc) 50%, transparent); }
 .vz-table-edit td.editing { background: var(--paper); box-shadow: inset 0 0 0 2px var(--accent); font: 13px var(--mono, monospace); white-space: pre; }
-.vz-table-edit td.sel { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+.vz-table-edit td.sel { background: color-mix(in srgb, var(--accent) 22%, transparent) !important; }
+.vz-tabedit.has-cells .vz-table-edit { user-select: none; } .vz-tabedit:focus { outline: none; }
 .vz-empty { display: inline-block; min-width: 2em; }
 .vz-table-edit td.editing.visual { font: inherit; white-space: nowrap; box-shadow: inset 0 0 0 2px var(--accent); }
 .vz-cm { display: inline-block; padding: 0 1px; border-radius: 3px; cursor: pointer; } .vz-cm:hover { background: color-mix(in srgb, var(--accent) 14%, transparent); }
