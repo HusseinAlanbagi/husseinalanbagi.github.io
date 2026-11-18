@@ -1023,7 +1023,7 @@ export default {
       return { status, auto, override: st.override };
     }
     function mcChip(view, it, mc) {
-      const b = h('button', { class: 'vz-mc vz-mc-' + mc.status + (mc.override ? ' vz-mc-set' : ''), title: (mc.override ? 'Set by the comment % ' + (mc.override === 'in' ? 'model' : 'not model') + ' on its \\begin line. ' : 'Chosen automatically. ') + 'Click to ' + (mc.status === 'in' ? 'leave it out of' : 'put it in') + ' the model check.' }, MC_LABEL[mc.status]);
+      const b = h('button', { class: 'vz-mc vz-mc-' + mc.status + (mc.override ? ' vz-mc-set' : ''), title: (mc.override ? 'Set by the comment % ' + (mc.override === 'in' ? 'model' : 'not model') + ' on its \\begin line. ' : 'Chosen automatically. ') + (mc.status === 'in' ? 'Untick to leave it out of' : 'Tick to put it in') + ' the model.', role: 'checkbox', 'aria-checked': mc.status === 'in' ? 'true' : mc.status === 'part' ? 'mixed' : 'false' }, h('span', { class: 'vz-mcbox', 'aria-hidden': 'true' }), mc.status === 'part' ? 'partly in the model' : 'in the model');
       b.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); setModel(view, it, mc); });
       return b;
     }
@@ -1636,7 +1636,10 @@ export default {
 .vz-mc { position: absolute; left: 0; top: 2px; font: 500 10.5px var(--ui); padding: 0 6px; height: 17px; line-height: 15px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); opacity: 0; transition: opacity .12s; cursor: pointer; z-index: 1; }
 .vz-dmath:hover .vz-mc, .vz-mc.vz-mc-set, .vz-mc:focus-visible { opacity: 1; }
 .vz-mc-in { color: var(--ok, #177245); border-color: color-mix(in srgb, var(--ok, #177245) 40%, var(--line)); }
-.vz-mc-out { text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent); }
+.vz-mc { display: inline-flex; align-items: center; gap: 5px; }
+.vz-mcbox { width: 10px; height: 10px; border: 1.4px solid currentColor; border-radius: 2.5px; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.vz-mc-in .vz-mcbox { background: var(--ok, #177245); border-color: var(--ok, #177245); } .vz-mc-in .vz-mcbox::after { content: ''; width: 5px; height: 2.6px; border: solid #fff; border-width: 0 0 1.5px 1.5px; transform: translateY(-0.6px) rotate(-45deg); }
+.vz-mc-part .vz-mcbox::after { content: ''; width: 6px; height: 1.5px; background: currentColor; }
 .vz-mc-set { border-style: dashed; }
 .vz-fitpv { overflow-x: auto; padding: 8px; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; margin: 6px 0; }
 .vz-fitsrc { font: 12px var(--mono, monospace); background: var(--panel); padding: 8px; border-radius: 6px; max-height: 180px; overflow: auto; white-space: pre-wrap; }

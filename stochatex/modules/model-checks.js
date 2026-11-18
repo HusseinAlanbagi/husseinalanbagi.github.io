@@ -37,7 +37,7 @@ export function checkProject(files, opts = {}) {
       const row = { ...e, file: path, ...r, auto, inModel, candidate };
       eqs.push(row);
       // per environment, for the chips in the visual view
-      if (candidate || e.override) {
+      {        // every display equation can be ticked into the model, not only the candidates
         const st = envMap.get(e.envLine) || { in: 0, out: 0, auto: 0, rows: 0, override: null };
         st.rows++; st[inModel ? 'in' : 'out']++; if (auto) st.auto++; st.override = e.envOverride;
         envMap.set(e.envLine, st);
@@ -106,7 +106,7 @@ export function checkProject(files, opts = {}) {
   for (const e of model.length ? model : eqs) for (const w of multiLetterCandidates(e.tex)) if (!known.has(w)) suggestions.add(w);
 
   const summary = { equations: model.length, endo: of('endo'), shocks: of('shock'), params: of('param'), ignored: of('ignore'), marked, mode, candidates: eqs.filter(e => e.candidate).length, first: model[0] || null };
-  return { problems, summary, model, vars: list, suggestions: [...suggestions], envs };
+  return { problems, summary, model, all: eqs, vars: list, suggestions: [...suggestions], envs };
 }
 
 // Compare the model of the paper with a Dynare .mod file
@@ -255,10 +255,11 @@ export default {
           h('button', { class: 'small', title: 'Compare these equations and variables with a Dynare .mod file', onClick: (e) => compareMenu(e.currentTarget) }, 'Compare with .mod'),
           h('button', { class: 'small', title: 'Write the equations that are in the model into the paper, as a section (at the cursor)', onClick: () => listDialog() }, 'List as a section…')),
         ...(r.lists || []).filter(l => l.stale).map(l => h('div', { class: 'mc-stale', style: pad }, h('span', {}, `The list of model equations (${l.file}, line ${l.line}) is out of date.`), h('span', { class: 'mc-stale-btns' }, h('button', { class: 'small primary', onClick: () => updateLists() }, 'Update the list'), h('button', { class: 'small', onClick: () => ctx.goto(l.file, l.line) }, 'Show it')))),
+        eqList(r),
         group('endogenous variables', s.endo, true), group('shocks', s.shocks), group('parameters', s.params), s.ignored.length ? group('ignored', s.ignored) : null,
         r.suggestions.length ? h('div', { class: 'mc-sugg', style: pad }, h('div', { class: 'muted' }, 'Read as one name?'), ...r.suggestions.slice(0, 8).map(w => h('button', { class: 'small', title: `${w}_t is now read as ${w.split('').join('·')}_t. Click to read ${w} as one variable.`, onClick: () => setMulti([...multi, w]) }, w))) : null,
         multi.length ? h('div', { class: 'mc-sugg', style: pad }, h('div', { class: 'muted' }, 'Read as one name:'), ...multi.map(w => h('button', { class: 'small', title: 'Click to read it as separate letters again', onClick: () => setMulti(multi.filter(x => x !== w)) }, w + ' ×'))) : null,
-        h('p', { class: 'muted', style: { ...pad, margin: '6px 0 0', fontSize: '12px' } }, s.marked ? 'Counting only between % model-begin and % model-end.' : (mode() === 'numbered' ? 'Counting numbered equations. ' : 'Counting every display equation with time indices. ') + 'Put % model or % not model on an equation’s \\begin line to include or leave it out (or use the chip on the equation in the visual view).'),
+        h('p', { class: 'muted', style: { ...pad, margin: '6px 0 0', fontSize: '12px' } }, s.marked ? 'Counting only between % model-begin and % model-end.' : (mode() === 'numbered' ? 'Counting numbered equations. ' : 'Counting every display equation with time indices. ') + 'Put % model or % not model on an equation’s \\begin line to include or leave it out (or tick the box on the equation in the visual view, or in the Equations list above).'),
         r.problems.length ? h('p', { style: { ...pad, margin: '6px 0 0' } }, `${r.problems.length} note${r.problems.length === 1 ? '' : 's'} in the Problems list below the editor.`) : null].filter(Boolean));
     }
 
@@ -331,6 +332,42 @@ export default {
     }
     ctx.ui.addCommand({ id: 'model.list', name: 'Model equations: insert them as a section…', run: () => listDialog() });
     ctx.ui.addCommand({ id: 'model.listUpdate', name: 'Model equations: update the list', run: () => updateLists() });
+
+    // ---- every display equation with a tick: in the model or not (writes % model / % not model)
+    let eqFilter = 'all', eqOpen = false;
+    function tick(e, want) {
+      const text = ctx.project.read(e.file) || ''; const lines = text.split('\n');
+      const single = (r) => r.all.filter(x => x.file === e.file && x.envLine === e.envLine).length === 1;
+      // one row: its own last line (or, for a one-row environment, the \begin line)
+      const lastLine = text.slice(0, e.index + e.tex.trimEnd().length).split('\n').length;
+      const n = single(last) ? e.envLine : (lastLine === e.envLine ? e.line : lastLine);
+      const L = lines[n - 1] ?? '';
+      const MC = /[ \t]*%[ \t]*(not[ \t-]*)?model\b(?!-)[ \t]*$/i;
+      const base = L.replace(MC, '');
+      const envOther = !single(last) && !!e.envOverride;          // the environment's own comment still applies to this row
+      const next = want === (e.auto ? 'in' : 'out') && !envOther ? base : base + (want === 'in' ? ' % model' : ' % not model');
+      if (next === L) return;
+      const from = lines.slice(0, n - 1).reduce((a, l) => a + l.length + 1, 0);
+      if (e.file === ctx.project.activeFile && ctx.editor.view) ctx.editor.view.dispatch({ changes: { from, to: from + L.length, insert: next }, userEvent: 'input.model' });
+      else { lines[n - 1] = next; ctx.project.write(e.file, lines.join('\n')); }
+      setTimeout(run, 30);
+    }
+    function eqList(r) {
+      const all = r.all || []; if (!all.length) return null;
+      const shown = all.filter(e => eqFilter === 'all' || (eqFilter === 'in') === e.inModel);
+      const seg = h('span', { class: 'mc-tabs mc-tabs-s' }, ...[['all', 'All'], ['in', 'In'], ['out', 'Out']].map(([k, l]) => h('button', { class: eqFilter === k ? 'on' : '', onClick: () => { eqFilter = k; eqOpen = true; draw(); } }, l)));
+      const row = (e) => {
+        const cb = h('input', { type: 'checkbox', checked: e.inModel, title: e.inModel ? 'In the model: untick to leave it out' : 'Not in the model: tick to put it in', onChange: (ev) => tick(e, ev.target.checked ? 'in' : 'out') });
+        const m = h('span', { class: 'mc-eqpic' }); const svgTxt = window.MathJax?.tex2svg ? mathSvg(e.tex.replace(/%.*$/gm, '').replace(/\\(label|tag)\*?\{[^}]*\}|\\(nonumber|notag)\b|&/g, '').trim()) : null; if (svgTxt) m.innerHTML = svgTxt; else m.textContent = e.tex.trim().slice(0, 60);
+        return h('label', { class: 'mc-eqrow' + (e.inModel ? ' in' : '') + (e.override ? ' set' : ''), title: (e.override ? 'Set by hand (% ' + (e.override === 'in' ? 'model' : 'not model') + '). ' : 'Chosen automatically. ') + e.file + ', line ' + e.line }, cb, m,
+          h('button', { class: 'linklike mc-eqline', title: 'Go to it', onClick: (ev) => { ev.preventDefault(); ctx.goto(e.file, e.line); } }, 'line ' + e.line));
+      };
+      const d = h('details', { class: 'mc-eqs', open: eqOpen || null, onToggle: (ev) => { eqOpen = ev.currentTarget.open; } },
+        h('summary', {}, `Equations: ${r.model.length} of ${all.length} in the model`),
+        h('div', { class: 'mc-eqhead' }, seg, h('span', { class: 'muted' }, 'Tick to put one in')),
+        h('div', { class: 'mc-eqlist' }, ...(shown.length ? shown.map(row) : [h('p', { class: 'muted' }, 'None.')])));
+      return d;
+    }
 
     // ---- compare with a .mod file
     function compareMenu(anchor) {
@@ -463,6 +500,15 @@ export default {
 .mc-cmp table { border-collapse: collapse; margin-bottom: 10px; } .mc-cmp td, .mc-cmp th { padding: 4px 12px; border-bottom: 1px solid var(--line); text-align: left; }
 .mc-ok { color: var(--ok, #177245); } .mc-bad { color: var(--warn, #9a6700); font-weight: 600; }
 .mc-cmp code { font-size: 12px; word-break: break-word; }
+.mc-eqs { padding: 0 10px 6px; } .mc-eqs > summary { cursor: pointer; }
+.mc-eqhead { display: flex; align-items: center; gap: 8px; margin: 6px 0 4px; font-size: 12px; }
+.mc-tabs.mc-tabs-s button { padding: 2px 9px; font-size: 11.5px; }
+.mc-eqlist { display: flex; flex-direction: column; gap: 1px; max-height: 320px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); }
+.mc-eqrow { display: grid; grid-template-columns: 18px 1fr auto; align-items: center; gap: 6px; padding: 3px 6px; cursor: pointer; border-bottom: 1px solid color-mix(in srgb, var(--line) 50%, transparent); }
+.mc-eqrow:hover { background: color-mix(in srgb, var(--accent-soft, #e8eefc) 60%, transparent); } .mc-eqrow:not(.in) .mc-eqpic { opacity: .55; }
+.mc-eqrow.set input { outline: 1px dashed color-mix(in srgb, var(--accent) 60%, transparent); outline-offset: 1px; }
+.mc-eqpic { overflow: hidden; font-size: 11px; white-space: nowrap; min-width: 0; } .mc-eqpic svg { max-width: 100%; height: auto; vertical-align: middle; }
+.mc-eqline { font-size: 11px !important; white-space: nowrap; }
 .mc-stale { display: flex; flex-direction: column; gap: 6px; margin: 0 10px 8px; padding: 8px 10px !important; border: 1px solid color-mix(in srgb, var(--warn, #9a6700) 40%, var(--line)); background: color-mix(in srgb, var(--warn, #9a6700) 8%, var(--paper)); border-radius: 8px; font-size: 12.5px; }
 .mc-stale-btns { display: flex; gap: 6px; }
 .mc-listdlg { display: flex; flex-direction: column; gap: 10px; }
