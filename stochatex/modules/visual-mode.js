@@ -726,12 +726,12 @@ export default {
         fb('Tt', 'Words inside the equation (\\text)', wrap('\\text{#0}'), 'tt'),
         sep(),
         h('span', { class: 'vz-only-sel' },
-          fb('x̄', 'Bar over the selection (\\bar, or \\overline for more than one letter)', wrap('\\bar{#0}', '\\overline{#0}')),
-          fb('x̂', 'Hat (\\hat, or \\widehat)', wrap('\\hat{#0}', '\\widehat{#0}')),
-          fb('x̃', 'Tilde (\\tilde, or \\widetilde)', wrap('\\tilde{#0}', '\\widetilde{#0}')),
-          fb('ẋ', 'Dot: time derivative (\\dot)', wrap('\\dot{#0}')),
+          fb(h('span', { class: 'vz-acc', 'data-acc': '¯' }, 'x'), 'Bar over the selection (\\bar, or \\overline for more than one letter)', wrap('\\bar{#0}', '\\overline{#0}')),
+          fb(h('span', { class: 'vz-acc', 'data-acc': 'ˆ' }, 'x'), 'Hat (\\hat, or \\widehat)', wrap('\\hat{#0}', '\\widehat{#0}')),
+          fb(h('span', { class: 'vz-acc', 'data-acc': '˜' }, 'x'), 'Tilde (\\tilde, or \\widetilde)', wrap('\\tilde{#0}', '\\widetilde{#0}')),
+          fb(h('span', { class: 'vz-acc', 'data-acc': '˙' }, 'x'), 'Dot: time derivative (\\dot)', wrap('\\dot{#0}')),
           fb(h('span', { class: 'vz-vec' }, 'x'), 'Vector arrow (\\vec, or \\overrightarrow)', wrap('\\vec{#0}', '\\overrightarrow{#0}')),
-          fb('x*', 'Star: steady state or optimum (^*)', wrap('{#0}^{*}')),
+          fb(h('span', { class: 'vz-acc' }, 'x', h('sup', {}, '*')), 'Star: steady state or optimum (^*)', wrap('{#0}^{*}')),
           sep(),
           fb('(x)', 'Round brackets around the selection (they grow with it)', wrap('\\left(#0\\right)')),
           fb('[x]', 'Square brackets', wrap('\\left[#0\\right]')),
@@ -1663,6 +1663,7 @@ export default {
 .vz-ib { display: inline-flex; align-items: center; gap: 1px; } .vz-om { font: 600 14px var(--serif, serif); }
 .vz-fmt-bar { position: absolute; left: 0; top: calc(100% - 4px); z-index: 4; display: inline-flex; flex-wrap: wrap; align-items: center; max-width: 100%; box-sizing: border-box; }
 .vz-fmt-bar > span:not(.vz-bsep):not(.vz-hint) { display: contents; }
+.vz-acc { position: relative; display: inline-block; font-style: italic; padding: 0 1px; } .vz-acc::after { content: attr(data-acc); position: absolute; left: 50%; top: -0.42em; transform: translateX(-40%); font-style: normal; font-size: 0.95em; line-height: 1; } .vz-acc sup { font-size: 0.7em; font-style: normal; }
 .vz-vec { position: relative; display: inline-block; font-style: italic; } .vz-vec::after { content: ''; position: absolute; left: 1px; right: -1px; top: -3px; height: 4px; background: no-repeat center/100% 100% url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 4'%3E%3Cpath d='M0 2h9M7 0.300l2 1.700-2 1.700' fill='none' stroke='%23888' stroke-width='0.900'/%3E%3C/svg%3E"); }
 .vz-fb { font: 15px/1 var(--serif, 'STIX Two Text', serif); color: var(--ink); white-space: nowrap; }
 .vz-fb.b { font-weight: 700; } .vz-fb.i { font-style: italic; } .vz-fb.u { text-decoration: underline; } .vz-fb.tt { font: 600 11px var(--ui); }
