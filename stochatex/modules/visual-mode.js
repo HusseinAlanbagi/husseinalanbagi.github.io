@@ -25,7 +25,7 @@ function loadScript(src) { return new Promise((res, rej) => { const s = document
 function loadMathLive() {
   if (ml) return ml;
   ml = (async () => {
-    if (!window.StochaBrackets) await loadScript('./equation/brackets.js');
+    if (!window.StochaBrackets) await loadScript('./equation/brackets.js' + (document.querySelector('meta[name="stx-version"]') ? '?v=' + document.querySelector('meta[name="stx-version"]').content : ''));
     if (!window.customElements.get('math-field')) await loadScript('./equation/mathlive.min.js');
     const MF = window.MathfieldElement || window.customElements.get('math-field');
     if (MF) { MF.fontsDirectory = new URL('./equation/fonts/', document.baseURI).href; MF.soundsDirectory = null; }

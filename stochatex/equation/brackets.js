@@ -183,56 +183,103 @@
     // drag a selection to move it
     enableDrag(mf, opts);
   }
+  // leftover signs after a move: "+ -" -> "-", "- -" -> "+", no "+" at the start of a side, none dangling before "=" or at the end
+  function tidySigns(t) {
+    let o = t, prev;
+    do {
+      prev = o;
+      o = o.replace(/\+\s*-/g, '-').replace(/-\s*\+/g, '-').replace(/-\s*-(?![>-])/g, '+').replace(/\+\s*\+/g, '+')
+        .replace(/(^|=|&|\\left\(|\\left\[|\(|\[|\\\\)\s*\+\s*/g, '$1')
+        .replace(/\s*[+-]\s*(?==|&=|\\\\|\\right[)\]|]|$)/g, '')
+        .replace(/=\s*(?=&|\\\\|$)/g, (m) => m);
+    } while (o !== prev);
+    return o.replace(/\s{2,}/g, ' ').trim();
+  }
   function enableDrag(mf, opts) {
     let drag = null;
     const line = document.createElement('div');
-    line.style.cssText = 'position:fixed;width:2px;background:var(--accent,#0e6168);pointer-events:none;z-index:2000;display:none;border-radius:1px';
-    document.body.append(line);
+    line.style.cssText = 'position:fixed;width:2px;background:var(--accent,#0e6168);pointer-events:none;z-index:2000;display:none;border-radius:1px;box-shadow:0 0 0 2px color-mix(in srgb, var(--accent,#0e6168) 25%, transparent)';
+    // a ghost of what is dragged, next to the pointer, with what will happen (Move / Copy / Move, sign flips)
+    const ghost = document.createElement('div');
+    ghost.style.cssText = 'position:fixed;z-index:2001;pointer-events:none;display:none;padding:3px 8px;border-radius:8px;background:var(--card,#fff);border:1px solid var(--line,#ccd);box-shadow:0 6px 18px rgba(0,0,0,.18);font:12px system-ui,sans-serif;color:var(--ink,#222);max-width:320px;white-space:nowrap;overflow:hidden';
+    document.body.append(line, ghost);
     const sel = () => { const r = mf.selection?.ranges?.[0]; return r && r[0] !== r[1] ? [Math.min(...r), Math.max(...r)] : null; };
     const pointAt = (k) => { try { const info = mf.getElementInfo?.(k); return info && info.bounds ? info.bounds : null; } catch (e) { return null; } };
+    const overSel = (s, x, y) => { for (let k = s[0] + 1; k <= s[1]; k++) { const bx = pointAt(k); if (bx && x >= bx.left - 2 && x <= bx.right + 2 && y >= bx.top - 4 && y <= bx.bottom + 4) return true; } return false; };
+    const eqCount = (k) => (mf.getValue(0, k, 'latex').match(/=|\\le(?![a-z])|\\ge(?![a-z])|\\leq|\\geq/g) || []).length;
+    const stop = () => { drag = null; line.style.display = 'none'; ghost.style.display = 'none'; mf.style.cursor = ''; removeEventListener('keydown', onKey, true); };
+    const onKey = (e) => { if (e.key === 'Escape' && drag) { e.preventDefault(); e.stopPropagation(); stop(); opts.note?.('Drag cancelled'); } };
+    const label = (e, d) => { const copy = e.ctrlKey || e.metaKey; const flip = !copy && e.altKey && d.off != null && eqCount(d.s[0]) !== eqCount(d.off); return copy ? 'Copy' : flip ? 'Move · sign flips' : 'Move'; };
+    const drawGhost = (e, d) => {
+      let pic = '';
+      try { pic = window.MathLive?.convertLatexToMarkup ? window.MathLive.convertLatexToMarkup(d.latex) : ''; } catch (err) {}
+      ghost.innerHTML = '';
+      const t = document.createElement('span'); t.style.cssText = 'color:var(--muted,#667);margin-right:6px'; t.textContent = label(e, d); ghost.append(t);
+      const m = document.createElement('span'); if (pic) m.innerHTML = pic; else m.textContent = d.latex.slice(0, 40); ghost.append(m);
+      ghost.style.display = 'block'; ghost.style.left = (e.clientX + 14) + 'px'; ghost.style.top = (e.clientY + 16) + 'px';
+    };
     mf.addEventListener('pointerdown', (e) => {
-      const s = sel(); if (!s || e.button !== 0) return;
-      // on the selected part? (its atoms' boxes; a click elsewhere is MathLive's)
-      let on = false;
-      for (let k = s[0] + 1; k <= s[1] && !on; k++) { const bx = pointAt(k); if (bx && e.clientX >= bx.left - 2 && e.clientX <= bx.right + 2 && e.clientY >= bx.top - 4 && e.clientY <= bx.bottom + 4) on = true; }
-      if (!on) return;
+      const s = sel(); if (!s || e.button !== 0 || !overSel(s, e.clientX, e.clientY)) return;
       e.preventDefault(); e.stopPropagation();
       drag = { s, x: e.clientX, y: e.clientY, moved: false, latex: mf.getValue(s[0], s[1], 'latex') };
       mf.setPointerCapture?.(e.pointerId);
+      addEventListener('keydown', onKey, true);
     }, true);
     mf.addEventListener('pointermove', (e) => {
-      if (!drag) return;
+      if (!drag) { const s = sel(); mf.style.cursor = s && overSel(s, e.clientX, e.clientY) ? 'grab' : ''; return; }
       e.preventDefault(); e.stopPropagation();
       if (!drag.moved && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 4) return;
       drag.moved = true; mf.style.cursor = e.ctrlKey || e.metaKey ? 'copy' : 'grabbing';
       const off = mf.getOffsetFromPoint(e.clientX, e.clientY); drag.off = off;
+      const own = off >= drag.s[0] && off <= drag.s[1];
       const b = pointAt(Math.max(0, off - 1)) || pointAt(off), r = mf.getBoundingClientRect();
-      if (b) { line.style.display = 'block'; line.style.left = (off > 0 ? b.right : b.left) + 'px'; line.style.top = Math.max(r.top + 2, b.top - 2) + 'px'; line.style.height = Math.max(16, b.height + 4) + 'px'; }
+      if (b && !own) { line.style.display = 'block'; line.style.left = (off > 0 ? b.right : b.left) + 'px'; line.style.top = Math.max(r.top + 2, b.top - 2) + 'px'; line.style.height = Math.max(16, b.height + 4) + 'px'; }
+      else line.style.display = 'none';
+      drawGhost(e, drag);
     }, true);
     const end = (e) => {
       if (!drag) return;
-      const d = drag; drag = null; line.style.display = 'none'; mf.style.cursor = '';
+      const d = drag; stop();
       e.preventDefault(); e.stopPropagation();
-      if (!d.moved || d.off == null || (d.off > d.s[0] && d.off < d.s[1])) { mf.position = mf.getOffsetFromPoint(e.clientX, e.clientY); return; }
+      if (!d.moved || d.off == null || (d.off >= d.s[0] && d.off <= d.s[1])) { if (!d.moved) mf.position = mf.getOffsetFromPoint(e.clientX, e.clientY); return; }
       const copy = e.ctrlKey || e.metaKey;
       let latex = d.latex;
       // Alt: moving a term across "=" changes its sign
-      if (e.altKey && !copy) {
-        const eqBefore = (k) => (mf.getValue(0, k, 'latex').match(/=|\\le(?![a-z])|\\ge(?![a-z])/g) || []).length;
-        if (eqBefore(d.s[0]) !== eqBefore(d.off)) {
-          const t = latex.trim();
-          latex = /^-/.test(t) ? '+' + t.slice(1) : /^\+/.test(t) ? '-' + t.slice(1) : '-' + t;
-          opts.note?.('Moved across “=”: its sign changed');
-        }
+      if (e.altKey && !copy && eqCount(d.s[0]) !== eqCount(d.off)) {
+        const t = latex.trim();
+        latex = /^-/.test(t) ? '+' + t.slice(1) : /^\+/.test(t) ? '-' + t.slice(1) : '-' + t;
+        opts.note?.('Moved across “=”: its sign changed');
       }
-      let to = d.off;
-      if (!copy) { mf.selection = { ranges: [d.s] }; mf.insert('', { insertionMode: 'replaceSelection' }); if (to > d.s[1]) to -= d.s[1] - d.s[0]; }
-      mf.position = Math.max(0, Math.min(to, mf.lastOffset));
-      mf.insert(latex, { format: 'latex', selectionMode: 'item' });
+      // one step, so one Ctrl+Z undoes it: rebuild the whole equation when the pieces add up to it (top level), else two steps
+      const L = mf.lastOffset, all = mf.getValue('latex'), squash = (x) => x.replace(/\s+/g, '');
+      const [a, b] = d.s, to = d.off;
+      const parts = to < a ? [mf.getValue(0, to, 'latex'), mf.getValue(to, a, 'latex'), mf.getValue(b, L, 'latex')] : [mf.getValue(0, a, 'latex'), mf.getValue(b, to, 'latex'), mf.getValue(to, L, 'latex')];
+      const whole = to < a ? parts[0] + parts[1] + d.latex + parts[2] : parts[0] + d.latex + parts[1] + parts[2];
+      let before, next;
+      if (squash(whole) === squash(all)) {
+        if (copy) { before = mf.getValue(0, to, 'latex'); next = before + ' ' + latex + ' ' + mf.getValue(to, L, 'latex'); }
+        else if (to < a) { before = parts[0]; next = parts[0] + ' ' + latex + ' ' + parts[1] + ' ' + parts[2]; }
+        else { before = parts[0] + ' ' + parts[1]; next = parts[0] + ' ' + parts[1] + ' ' + latex + ' ' + parts[2]; }
+        const tidy = tidySigns(next);
+        mf.selection = { ranges: [[0, L]] };
+        mf.insert(tidy, { format: 'latex', insertionMode: 'replaceSelection', selectionMode: 'after' });
+        // select the moved piece: count where it starts in the new equation
+        try {
+          const probe = document.createElement('math-field'); probe.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0'; document.body.append(probe);
+          const tb = tidySigns(before + ' ' + latex + ' \\placeholder{}').replace(/\\placeholder\{\}$/, '').trim(), start0 = tidySigns(before + ' \\placeholder{}').replace(/\\placeholder\{\}$/, '').trim();
+          probe.value = start0; const s0 = probe.lastOffset; probe.value = tb; const s1 = probe.lastOffset; probe.remove();
+          if (s1 > s0) mf.selection = { ranges: [[s0, s1]] };
+        } catch (err) {}
+      } else {
+        let at = to;
+        if (!copy) { mf.selection = { ranges: [d.s] }; mf.insert('', { insertionMode: 'replaceSelection' }); if (at > d.s[1]) at -= d.s[1] - d.s[0]; }
+        mf.position = Math.max(0, Math.min(at, mf.lastOffset));
+        mf.insert(latex, { format: 'latex', selectionMode: 'item' });
+      }
       mf.dispatchEvent(new Event('input', { bubbles: true }));
     };
     mf.addEventListener('pointerup', end, true);
-    mf.addEventListener('pointercancel', () => { drag = null; line.style.display = 'none'; mf.style.cursor = ''; }, true);
+    mf.addEventListener('pointercancel', () => stop(), true);
     // drop symbols from the Symbols panel (they carry their LaTeX as text)
     mf.addEventListener('dragover', (e) => { if (e.dataTransfer?.types?.includes('text/x-latex')) { e.preventDefault(); const off = mf.getOffsetFromPoint(e.clientX, e.clientY); const b = pointAt(Math.max(0, off - 1)); if (b) { line.style.display = 'block'; line.style.left = b.right + 'px'; line.style.top = b.top - 2 + 'px'; line.style.height = Math.max(16, b.height + 4) + 'px'; } } });
     mf.addEventListener('dragleave', () => { line.style.display = 'none'; });
@@ -242,5 +289,5 @@
       mf.insert(t, { format: 'latex', selectionMode: 'placeholder' }); mf.dispatchEvent(new Event('input', { bubbles: true }));
     });
   }
-  window.StochaBrackets = { autoSize: autoSizeBrackets, flipInText, flipInField, BIG, setupField, removeStructure, structureAt, wholeStructure, balancedGroup };
+  window.StochaBrackets = { tidySigns, autoSize: autoSizeBrackets, flipInText, flipInField, BIG, setupField, removeStructure, structureAt, wholeStructure, balancedGroup };
 })();
