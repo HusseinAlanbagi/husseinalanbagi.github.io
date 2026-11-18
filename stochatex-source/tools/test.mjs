@@ -49,6 +49,12 @@ await test('tables: read and write back unchanged, rows, columns, merge, lines',
   T.setRules(t, 'grid'); assert.match(T.serializeTable(t).spec, /^\|l\|@\{\\quad\}c\|c\|r\|$/); T.setRules(t, 'book'); assert.equal(T.ruleStyle(t), 'book');
   T.deleteCol(t, 3); T.deleteRow(t, 1); assert.equal(T.serializeTable(t).spec, 'l@{\\quad}cc');
 });
+await test('table cells typed as drawn: text, bold, maths and other LaTeX survive', async () => {
+  const T = await import(path.join(app, 'modules/lib/table-edit.js'));
+  for (const x of ['\\textbf{GDP} growth $g_t$ \\cite{x}', 'R\\&D (\\%)', '$\\hat{c}_t$', 'a~b', '0.75\\textsuperscript{***}', '\\multirow{2}{*}{A}']) assert.ok(T.visualOk(x), x);
+  for (const x of ['{\\bf old}', '$$x$$']) assert.ok(!T.visualOk(x), x);
+  assert.equal(T.partsTex([{ t: 'text', s: 'R&D 50% x_1 ' }, { t: 'text', s: 'big', b: true }, { t: 'math', tex: 'c_t' }]), 'R\\&D 50\\% x\\_1 \\textbf{big}$c_t$');
+});
 await test('published files carry versions (stamp)', () => {
   const ix = fs.readFileSync(path.join(app, 'index.html'), 'utf8');
   assert.match(ix, /app\.css\?v=[0-9a-f]{10}/); assert.match(ix, /core\.js\?v=[0-9a-f]{10}/); assert.match(ix, /<script type="importmap">/);

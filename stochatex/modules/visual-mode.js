@@ -1192,7 +1192,8 @@ export default {
       if (at) ({ r, c } = at);
       r = Math.max(0, Math.min(r, t.rows.length - 1)); c = Math.max(0, Math.min(c, t.cols.length - 1));
       const el = h('div', { class: 'vz-tabedit' });
-      tableSess = { view, from: it.from, t, el, r, c, sel: null, timer: 0, macros: view.state.field(field).p.info.macros, dirty: false };
+      tableSess = { view, from: it.from, t, el, r, c, sel: null, timer: 0, macros: view.state.field(field).p.info.macros, dirty: false, latex: !!ctx.settings.get('table-latex', false) };
+      loadMathLive().catch(() => {});
       buildTableUI();
       poke();
       setTimeout(() => focusCell(r, c, true), 30);
@@ -1200,7 +1201,7 @@ export default {
     }
     const tableAway = (e) => {
       if (!tableSess) return document.removeEventListener('mousedown', tableAway, true);
-      if (tableSess.el.contains(e.target) || e.target.closest?.('.menu, .ui-menu-container, .modal, .toasts, .vz-tabgrid')) return;
+      if (tableSess.el.contains(e.target) || e.target.closest?.('.menu, .ui-menu-container, .modal, .toasts, .vz-tabgrid, .ML__popover, #mathlive-suggestion-popover, .ML__keyboard, .vz-sym')) return;
       finishTable(true);
     };
     function writeTable() {
@@ -1221,8 +1222,76 @@ export default {
       tableSess = null; poke();
     }
     const cellTd = (r, c) => tableSess?.el.querySelector(`td[data-r="${r}"][data-c="${c}"]`);
-    function syncCell() { const S = tableSess; if (!S) return; const td = S.el.querySelector('td.editing'); if (!td) return; const cell = S.t.rows[+td.dataset.r]?.cells[+td.dataset.i]; if (cell && cell.tex !== td.textContent.replace(/\n/g, ' ')) { cell.tex = td.textContent.replace(/\n/g, ' '); S.dirty = true; } }
-    function drawCell(td, cell) { td.classList.remove('editing'); td.contentEditable = 'false'; td.innerHTML = cell.tex.trim() ? inlineHtml(cell.tex, tableSess.macros) : '<span class="vz-empty">&nbsp;</span>'; }
+    // a cell typed in visually: its text (bold / italic), maths chips and locked chips back to LaTeX
+    function domParts(node, style = {}, out = []) {
+      for (const n of node.childNodes) {
+        if (n.nodeType === 3) { if (n.data) out.push({ t: 'text', s: n.data.replace(/[\u200b]/g, '').replace(/\u00a0/g, ' '), ...(style.b ? { b: true } : {}), ...(style.i ? { i: true } : {}) }); continue; }
+        if (n.nodeType !== 1) continue;
+        if (n.classList.contains('vz-cm')) { out.push({ t: 'math', tex: n.dataset.tex }); continue; }
+        if (n.classList.contains('vz-craw')) { out.push({ t: 'raw', tex: n.dataset.tex }); continue; }
+        if (n.tagName === 'MATH-FIELD') { out.push({ t: 'math', tex: tidyTeX(n.getValue('latex')) }); continue; }
+        if (n.tagName === 'BR') { out.push({ t: 'text', s: ' ' }); continue; }
+        const fw = n.style?.fontWeight, fs = n.style?.fontStyle;
+        domParts(n, { b: style.b || /^(B|STRONG)$/.test(n.tagName) || fw === 'bold' || +fw >= 600, i: style.i || /^(I|EM)$/.test(n.tagName) || fs === 'italic' }, out);
+      }
+      return out;
+    }
+    const cellText = (td) => td.classList.contains('visual') ? TE.partsTex(domParts(td)).replace(/\s+$/, '') : td.textContent.replace(/\n/g, ' ');
+    function syncCell() { const S = tableSess; if (!S) return; const td = S.el.querySelector('td.editing'); if (!td) return; const cell = S.t.rows[+td.dataset.r]?.cells[+td.dataset.i]; const v = cellText(td); if (cell && cell.tex !== v) { cell.tex = v; S.dirty = true; } }
+    function drawCell(td, cell) { td.classList.remove('editing', 'visual'); td.contentEditable = 'false'; td.innerHTML = cell.tex.trim() ? inlineHtml(cell.tex, tableSess.macros) : '<span class="vz-empty">&nbsp;</span>'; }
+    const mathChip = (tex) => { const sp = h('span', { class: 'vz-cm', contenteditable: 'false', 'data-tex': tex, title: 'Click to edit this maths' }); const r = ready ? renderMath(tex, false, tableSess?.macros) : null; if (r && r.html) sp.innerHTML = r.html; else sp.textContent = tex; return sp; };
+    const rawChip = (tex) => h('span', { class: 'vz-craw', contenteditable: 'false', 'data-tex': tex, title: 'LaTeX kept as it is (switch the table to LaTeX to change it)' }, tex);
+    function fillVisual(td, tex) {
+      td.textContent = '';
+      for (const p of TE.cellParts(tex) || []) {
+        if (p.t === 'math') td.append(mathChip(p.tex));
+        else if (p.t === 'raw') td.append(rawChip(p.tex));
+        else { let n = document.createTextNode(p.s); if (p.i) { const x = document.createElement('i'); x.append(n); n = x; } if (p.b) { const x = document.createElement('b'); x.append(n); n = x; } td.append(n); }
+      }
+    }
+    // maths in a cell is edited like an equation: a live field where the chip was
+    async function editMath(td, chip) {
+      const S = tableSess; if (!S) return;
+      let MFc; try { MFc = await loadMathLive(); } catch (e) { return ctx.ui.toast('The equation editor could not be loaded: ' + e.message, 'err'); }
+      if (!MFc || !chip.isConnected) return;
+      const mf = document.createElement('math-field');
+      mf.smartFence = false; mf.smartSuperscript = false; mf.mathVirtualKeyboardPolicy = 'manual';
+      mf.value = chip.dataset.tex || ''; mf.className = 'vz-cellmath';
+      td.contentEditable = 'false';
+      chip.replaceWith(mf);
+      let done = false;
+      const finish = (move) => {
+        if (done) return; done = true;
+        const tex = tidyTeX(mf.getValue('latex')).trim();
+        const next = tex ? mathChip(tex) : document.createTextNode('');
+        mf.replaceWith(next);
+        td.contentEditable = 'true';
+        const cell = S.t.rows[+td.dataset.r].cells[+td.dataset.i]; cell.tex = cellText(td); changed();
+        if (move === 'tab') return focusCell(...nextCell(+td.dataset.r, +td.dataset.c));
+        td.focus(); const rg = document.createRange(); rg.setStartAfter(next); rg.collapse(true); const sl = getSelection(); sl.removeAllRanges(); sl.addRange(rg);
+      };
+      mf.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && mf.mode === 'latex') return;             // finishing a typed \command: MathLive accepts it
+        if (e.key === 'Escape' && mf.mode === 'latex') return;
+        if (e.key === 'Escape' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); finish(); }
+        else if (e.key === 'Tab' && !mf.querySelector?.('[part="placeholder"]') && !/\\placeholder/.test(mf.getValue('latex'))) { e.preventDefault(); e.stopPropagation(); finish('tab'); }
+        else if (e.key === 'ArrowRight' && mf.position === mf.lastOffset) { e.preventDefault(); finish(); }
+      }, true);
+      mf.addEventListener('input', () => { const cell = S.t.rows[+td.dataset.r].cells[+td.dataset.i]; cell.tex = TE.partsTex(domParts(td)); changed(); });
+      mf.addEventListener('focusout', () => setTimeout(() => { if (!mf.isConnected || document.activeElement === mf || mf.contains(document.activeElement)) return; if (document.querySelector('.ML__popover[style*="visible"]')) return; finish(); }, 120));
+      requestAnimationFrame(() => {
+        try { window.StochaBrackets?.setupField(mf, { note: (m) => ctx.ui.toast(m) }); } catch {}
+        try { const mm = mlMacros(S.macros); if (Object.keys(mm).length) { mf.macros = { ...mf.macros, ...mm }; mf.value = chip.dataset.tex || ''; } } catch {}
+        mf.focus(); if (mf.value) mf.executeCommand('moveToMathfieldEnd');
+      });
+    }
+    function insertMath(td) {
+      const chip = mathChip('');
+      const sl = getSelection();
+      if (sl.rangeCount && td.contains(sl.anchorNode)) { const rg = sl.getRangeAt(0); rg.deleteContents(); rg.insertNode(chip); } else td.append(chip);
+      editMath(td, chip);
+    }
+    const nextCell = (r, c) => { const t = tableSess.t, row = t.rows[r], span = row.cells[TE.cellAt(row, c)].span; return c + span < t.cols.length ? [r, c + span, true] : r + 1 < t.rows.length ? [r + 1, 0, true] : [r, c, false]; };
     function focusCell(r, c, selectAll) {
       const S = tableSess; if (!S) return;
       r = Math.max(0, Math.min(r, S.t.rows.length - 1)); c = Math.max(0, Math.min(c, S.t.cols.length - 1));
@@ -1232,9 +1301,15 @@ export default {
       S.r = r; S.c = c;
       const td = cellTd(r, c); if (!td) return;
       const cell = S.t.rows[r].cells[i];
-      td.classList.add('editing'); td.textContent = cell.tex;
-      try { td.contentEditable = 'plaintext-only'; } catch { td.contentEditable = 'true'; }
-      if (td.contentEditable !== 'plaintext-only') td.contentEditable = 'true';
+      td.classList.add('editing');
+      if (!S.latex && TE.visualOk(cell.tex)) {             // like the equation editor: type into the drawn cell
+        td.classList.add('visual'); fillVisual(td, cell.tex); td.contentEditable = 'true';
+      } else {
+        td.textContent = cell.tex;
+        try { td.contentEditable = 'plaintext-only'; } catch { td.contentEditable = 'true'; }
+        if (td.contentEditable !== 'plaintext-only') td.contentEditable = 'true';
+        if (!S.latex) td.title = 'This cell has LaTeX that cannot be shown as you type, so it shows its code';
+      }
       td.focus();
       const rg = document.createRange(); rg.selectNodeContents(td); if (!selectAll) rg.collapse(false);
       const sl = getSelection(); sl.removeAllRanges(); sl.addRange(rg);
@@ -1264,7 +1339,13 @@ export default {
             if (e.shiftKey && S.r === r) { const a = Math.min(S.c, c), b = Math.max(S.c, c + cell.span - 1); S.sel = { r, c0: a, c1: b }; markSel(); syncBar(); return; }
             S.sel = null; focusCell(r, c);
           });
-          td.addEventListener('input', () => { const cl = S.t.rows[r].cells[i]; cl.tex = td.textContent.replace(/\n/g, ' '); changed(); });
+          td.addEventListener('input', (e) => { if (e.target !== td) return; const cl = S.t.rows[r].cells[i]; cl.tex = cellText(td); changed(); });
+          td.addEventListener('click', (e) => { const chip = e.target.closest?.('.vz-cm'); if (chip && td.classList.contains('visual')) { e.preventDefault(); editMath(td, chip); } });
+          td.addEventListener('beforeinput', (e) => {
+            if (!td.classList.contains('visual') || e.target !== td && e.target.closest?.('math-field')) return;
+            if (e.inputType === 'insertText' && e.data === '$') { e.preventDefault(); insertMath(td); }        // $ starts maths, as in LaTeX
+            else if (e.inputType === 'insertParagraph' || e.inputType === 'insertLineBreak') e.preventDefault();
+          });
           td.addEventListener('keydown', (e) => tableKey(e, r, c, td));
           td.addEventListener('paste', (e) => pasteCells(e, r, c));
           tr.append(td);
@@ -1275,7 +1356,8 @@ export default {
     }
     // paste from a spreadsheet or Word: tab-separated rows fill the cells from here, adding rows and columns as needed
     function pasteCells(e, r0, c0) {
-      const text = e.clipboardData?.getData('text/plain') || ''; if (!/\t|\n./.test(text.trim())) return;
+      const text = e.clipboardData?.getData('text/plain') || '';
+      if (!/\t|\n./.test(text.trim())) { if (e.target.closest?.('td.visual')) { e.preventDefault(); document.execCommand('insertText', false, text.replace(/\s*\n\s*/g, ' ')); } return; }
       e.preventDefault(); const S = tableSess, t = S.t;
       const grid = text.replace(/\r/g, '').replace(/\n$/, '').split('\n').map(l => l.split('\t'));
       while (t.rows.length < r0 + grid.length) TE.addRow(t, t.rows.length - 1);
@@ -1286,6 +1368,7 @@ export default {
       ctx.ui.toast(`Pasted ${grid.length} × ${w} cells.`);
     }
     function tableKey(e, r, c, td) {
+      if (e.target !== td && (e.target.tagName === 'MATH-FIELD' || e.target.closest?.('math-field'))) return;      // keys in a maths field are its own
       const S = tableSess, t = S.t, row = t.rows[r], span = row.cells[TE.cellAt(row, c)].span;
       const atStart = () => { const sl = getSelection(); if (!sl.rangeCount || !sl.isCollapsed) return false; const rg = sl.getRangeAt(0).cloneRange(); rg.selectNodeContents(td); rg.setEnd(sl.anchorNode, sl.anchorOffset); return rg.toString().length === 0; };
       const atEnd = () => { const sl = getSelection(); if (!sl.rangeCount || !sl.isCollapsed) return false; const rg = sl.getRangeAt(0).cloneRange(); rg.selectNodeContents(td); rg.setStart(sl.anchorNode, sl.anchorOffset); return rg.toString().length === 0; };
@@ -1305,9 +1388,15 @@ export default {
       if (e.key === 'ArrowLeft' && !e.shiftKey && atStart() && (c > 0 || r > 0)) return c > 0 ? go(r, c - 1, false) : go(r - 1, t.cols.length - 1, false);
       if (e.key === 'ArrowRight' && !e.shiftKey && atEnd() && (c + span < t.cols.length || r + 1 < t.rows.length)) { e.preventDefault(); S.sel = null; focusCell(c + span < t.cols.length ? r : r + 1, c + span < t.cols.length ? c + span : 0, false); const sl = getSelection(); sl.collapse(cellTd(S.r, S.c), 0); return; }
       if (e.key === 'ArrowRight' && e.shiftKey && atEnd() && c + span < t.cols.length) { e.preventDefault(); const a = S.sel?.r === r ? S.sel.c0 : c; S.sel = { r, c0: a, c1: Math.max(S.sel?.c1 ?? c, c + span) }; markSel(); syncBar(); return; }
-      if (mod && !e.shiftKey && 'biu'.includes(e.key.toLowerCase())) { e.preventDefault(); return wrapCell(e.key.toLowerCase() === 'b' ? 'bold' : e.key.toLowerCase() === 'i' ? 'italic' : 'math'); }
-      if (mod && e.key.toLowerCase() === 'm') { e.preventDefault(); return wrapCell('math'); }
+      if (mod && !e.shiftKey && (e.key.toLowerCase() === 'b' || e.key.toLowerCase() === 'i')) { e.preventDefault(); return styleSel(e.key.toLowerCase() === 'b' ? 'bold' : 'italic'); }
+      if (mod && e.key.toLowerCase() === 'm') { e.preventDefault(); return td.classList.contains('visual') ? insertMath(td) : wrapCell('math'); }
       if (mod && e.key === 'Enter') { e.preventDefault(); return op('rowBelow'); }
+    }
+    // bold / italic: the selected words when typing visually, else the whole cell
+    function styleSel(kind) {
+      const S = tableSess, td = S?.el.querySelector('td.editing.visual'), sl = getSelection();
+      if (td && sl.rangeCount && !sl.isCollapsed && td.contains(sl.anchorNode)) { document.execCommand('styleWithCSS', false, false); document.execCommand(kind); const cell = S.t.rows[+td.dataset.r].cells[+td.dataset.i]; cell.tex = cellText(td); changed(); return; }
+      wrapCell(kind);
     }
     function wrapCell(kind) {
       const S = tableSess; syncCell();
@@ -1353,14 +1442,15 @@ export default {
         b('rowAbove', 'Insert a row above'), b('rowBelow', 'Insert a row below (Ctrl+Enter; Tab in the last cell also adds one)'), b('colLeft', 'Insert a column to the left'), b('colRight', 'Insert a column to the right'),
         b('delRow', 'Delete this row'), b('delCol', 'Delete this column'), sep(),
         b('alL', 'Align the column left'), b('alC', 'Centre the column'), b('alR', 'Align the column right (numbers)'), sep(),
-        h('button', { title: 'Bold (Ctrl+B)', onMousedown: (e) => { e.preventDefault(); wrapCell('bold'); } }, h('b', {}, 'B')),
-        h('button', { title: 'Italic (Ctrl+I)', onMousedown: (e) => { e.preventDefault(); wrapCell('italic'); } }, h('i', { style: { fontFamily: 'var(--serif, serif)' } }, 'I')),
-        h('button', { title: 'Maths: put the cell between $ … $ (Ctrl+M)', onMousedown: (e) => { e.preventDefault(); wrapCell('math'); } }, h('span', { class: 'vz-om' }, '∑')), sep(),
+        h('button', { title: 'Bold (Ctrl+B): the selected words, or the whole cell', onMousedown: (e) => { e.preventDefault(); styleSel('bold'); } }, h('b', {}, 'B')),
+        h('button', { title: 'Italic (Ctrl+I): the selected words, or the whole cell', onMousedown: (e) => { e.preventDefault(); styleSel('italic'); } }, h('i', { style: { fontFamily: 'var(--serif, serif)' } }, 'I')),
+        h('button', { title: 'Insert maths at the cursor, edited like an equation (Ctrl+M, or type $)', onMousedown: (e) => { e.preventDefault(); const td = S.el.querySelector('td.editing'); if (td?.classList.contains('visual')) insertMath(td); else wrapCell('math'); } }, h('span', { class: 'vz-om' }, '∑')), sep(),
         b('merge', 'Merge the selected cells (Shift+click or Shift+→ to select cells in a row)'), b('split', 'Split a merged cell'), sep(),
         rules, h('span', { class: 'spacer' }), S.where,
-        h('button', { title: 'Show the LaTeX of the table', onMousedown: (e) => { e.preventDefault(); const from = S.from; finishTable(true); S.view.dispatch({ selection: { anchor: from + 1 }, scrollIntoView: false }); S.view.focus(); } }, ico('code', 15)),
+        h('button', { class: 'vz-latexsw' + (S.latex ? ' on' : ''), title: S.latex ? 'Cells show their LaTeX: click to type in them as drawn' : 'Show the LaTeX of the cells while you edit (click again to go back)', 'aria-pressed': String(S.latex), onMousedown: (e) => { e.preventDefault(); syncCell(); S.latex = !S.latex; ctx.settings.set('table-latex', S.latex); const { r, c } = S; buildTableUI(); focusCell(r, c, false); } }, 'LaTeX'),
+        h('button', { title: 'Open the whole table as LaTeX in the source', onMousedown: (e) => { e.preventDefault(); const from = S.from; finishTable(true); S.view.dispatch({ selection: { anchor: from + 1 }, scrollIntoView: false }); S.view.focus(); } }, ico('code', 15)),
         h('button', { class: 'primary', title: 'Done (Esc)', onMousedown: (e) => { e.preventDefault(); finishTable(true); } }, ico('check', 15)));
-      S.el.replaceChildren(S.bar, h('div', { class: 'vz-tabgridwrap' }, renderGrid()), h('div', { class: 'vz-tabhint muted' }, 'Tab: next cell (adds a row at the end) · Enter: cell below · Shift+click: select cells to merge · paste from Excel or Word fills several cells · Esc: done'));
+      S.el.replaceChildren(S.bar, h('div', { class: 'vz-tabgridwrap' }, renderGrid()), h('div', { class: 'vz-tabhint muted' }, S.latex ? 'Cells show LaTeX · Tab: next cell (adds a row at the end) · Enter: cell below · “LaTeX” goes back to typing as drawn · Esc: done' : 'Type as in Word · $ or Ctrl+M: maths, edited like an equation · Tab: next cell (adds a row at the end) · Enter: cell below · Shift+click: select cells to merge · paste from Excel fills several cells · Esc: done'));
       syncBar();
     }
     // insert a new table: a grid to pick rows × columns, like Word's
@@ -2085,6 +2175,13 @@ export default {
 .vz-table-edit td.editing { background: var(--paper); box-shadow: inset 0 0 0 2px var(--accent); font: 13px var(--mono, monospace); white-space: pre; }
 .vz-table-edit td.sel { background: color-mix(in srgb, var(--accent) 18%, transparent); }
 .vz-empty { display: inline-block; min-width: 2em; }
+.vz-table-edit td.editing.visual { font: inherit; white-space: nowrap; box-shadow: inset 0 0 0 2px var(--accent); }
+.vz-cm { display: inline-block; padding: 0 1px; border-radius: 3px; cursor: pointer; } .vz-cm:hover { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.vz-cm:empty::before { content: '□'; color: var(--muted); }
+.vz-craw { font: 11.5px var(--mono, monospace); color: var(--muted); background: color-mix(in srgb, var(--line) 45%, transparent); border-radius: 3px; padding: 0 3px; }
+math-field.vz-cellmath { display: inline-block; min-width: 2.5em; font-size: 1em; padding: 0 4px; border: 1px solid color-mix(in srgb, var(--accent) 50%, var(--line)); border-radius: 5px; background: var(--paper); vertical-align: middle; }
+math-field.vz-cellmath::part(menu-toggle), math-field.vz-cellmath::part(virtual-keyboard-toggle) { display: none; }
+.vz-tabbar button.vz-latexsw { font: 600 11px var(--ui); border: 1px solid var(--line); height: 24px; padding: 0 7px; } .vz-tabbar button.vz-latexsw.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 .vz-tabhint { font: 11px var(--ui); padding: 0 10px 6px; text-align: center; }
 .vz-tabgrid { position: fixed; z-index: 1000; padding: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 8px 26px rgb(0 0 0 / 16%); }
 .vz-tabgrid-l { font: 600 12px var(--ui); margin-bottom: 6px; } .vz-tabgrid-f { font: 11px var(--ui); margin-top: 6px; }

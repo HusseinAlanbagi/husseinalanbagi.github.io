@@ -166,3 +166,59 @@ export function toggleWrap(tex, kind) {
   if (m) return m[1];
   return kind === 'bold' ? `\\textbf{${t}}` : kind === 'italic' ? `\\textit{${t}}` : `$${t}$`;
 }
+
+// ---- a cell as editable parts, and back: text (bold / italic), maths, and anything else kept as it is
+// cellParts('\\textbf{GDP} growth $g_t$ \\cite{x}') ->
+//   [{t:'text', s:'GDP', b:true}, {t:'text', s:' growth '}, {t:'math', tex:'g_t'}, {t:'text', s:' '}, {t:'raw', tex:'\\cite{x}'}]
+const SPECIAL = { '&': '\\&', '%': '\\%', '#': '\\#', '_': '\\_', '$': '\\$', '{': '\\{', '}': '\\}' };
+export function escapeText(s) {
+  return s.replace(/\\/g, '\u0000').replace(/[&%#_${}]/g, c => SPECIAL[c]).replace(/~/g, '\\textasciitilde{}').replace(/\^/g, '\\textasciicircum{}')
+    .replace(/\u0000/g, '\\textbackslash{}').replace(/ /g, '~');
+}
+function braceEnd(s, i) { let d = 0; for (let k = i; k < s.length; k++) { if (s[k] === '\\') { k++; continue; } if (s[k] === '{') d++; else if (s[k] === '}' && --d === 0) return k; } return -1; }
+export function cellParts(tex, style = {}) {
+  const out = []; let txt = '';
+  const flush = () => { if (txt) { out.push({ t: 'text', s: txt, ...(style.b ? { b: true } : {}), ...(style.i ? { i: true } : {}) }); txt = ''; } };
+  for (let i = 0; i < tex.length; ) {
+    const c = tex[i];
+    if (c === '$' && tex[i + 1] !== '$') { let j = i + 1; while (j < tex.length && !(tex[j] === '$' && tex[j - 1] !== '\\')) j++; if (j >= tex.length) return null; flush(); out.push({ t: 'math', tex: tex.slice(i + 1, j) }); i = j + 1; continue; }
+    if (c === '$') return null;                                                 // $$ … $$ in a cell: leave it to the LaTeX view
+    if (c === '\\') {
+      const two = tex.slice(i, i + 2);
+      if (two === '\\(') { const j = tex.indexOf('\\)', i); if (j < 0) return null; flush(); out.push({ t: 'math', tex: tex.slice(i + 2, j) }); i = j + 2; continue; }
+      if (/^\\[&%#_${}]$/.test(two)) { txt += two[1]; i += 2; continue; }
+      const m = /^\\([A-Za-z]+)\s*/.exec(tex.slice(i));
+      if (!m) { flush(); out.push({ t: 'raw', tex: two }); i += 2; continue; }   // \, \; \\ and the like
+      const name = m[1];
+      if (name === 'textbackslash' || name === 'textasciitilde' || name === 'textasciicircum') { let j = i + m[0].length; if (tex.slice(j, j + 2) === '{}') j += 2; txt += name === 'textbackslash' ? '\\' : name === 'textasciitilde' ? '~' : '^'; i = j; continue; }
+      if ((name === 'textbf' || name === 'textit' || name === 'emph') && tex[i + m[0].length] === '{') {
+        const a = i + m[0].length, e = braceEnd(tex, a); if (e < 0) return null;
+        const inner = cellParts(tex.slice(a + 1, e), { ...style, ...(name === 'textbf' ? { b: true } : { i: true }) }); if (!inner) return null;
+        flush(); out.push(...inner); i = e + 1; continue;
+      }
+      // any other command: kept whole (with its [..] and {..} arguments) as a locked chip
+      let j = i + 1 + name.length;
+      for (;;) { let k = j; while (tex[k] === ' ') k++; if (tex[k] === '{') { const e = braceEnd(tex, k); if (e < 0) return null; j = e + 1; } else if (tex[k] === '[') { const e = tex.indexOf(']', k); if (e < 0) return null; j = e + 1; } else break; }
+      flush(); out.push({ t: 'raw', tex: tex.slice(i, j) }); i = j; continue;
+    }
+    if (c === '~') { txt += ' '; i++; continue; }
+    if (c === '{' || c === '}') return null;                                       // loose braces: the LaTeX view is safer
+    txt += c; i++;
+  }
+  flush(); return out;
+}
+export function partsTex(parts) {
+  // merge neighbouring text of the same style, then wrap bold and italic runs
+  const runs = [];
+  for (const p of parts) { const last = runs[runs.length - 1]; if (p.t === 'text' && last?.t === 'text' && !!last.b === !!p.b && !!last.i === !!p.i) last.s += p.s; else runs.push({ ...p }); }
+  return runs.map(p => {
+    if (p.t === 'math') return '$' + p.tex + '$';
+    if (p.t === 'raw') return p.tex;
+    let s = escapeText(p.s); if (!s.trim()) return s;
+    const lead = /^\s*/.exec(s)[0], tail = /\s*$/.exec(s)[0]; s = s.trim();
+    if (p.i) s = `\\textit{${s}}`; if (p.b) s = `\\textbf{${s}}`;
+    return lead + s + tail;
+  }).join('');
+}
+// the cell can be edited visually without changing what it means
+export const visualOk = (tex) => { const p = cellParts(tex); return !!p && partsTex(p).replace(/\s+/g, ' ').trim() === tex.replace(/\s+/g, ' ').trim(); };

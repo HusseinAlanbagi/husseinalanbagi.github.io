@@ -1,5 +1,5 @@
 {
- "v": "0be10560b4",
+ "v": "97ee2e6a68",
  "files": {
   "app.css": "a06ed449b6",
   "core.js": "006432d5d2",
@@ -19,14 +19,14 @@
   "modules/lib/latex-text.js": "f26c6e5cb3",
   "modules/lib/mathjax.js": "8f7e3a49fc",
   "modules/lib/model-state.js": "2bbb0677db",
-  "modules/lib/table-edit.js": "356cfddce3",
+  "modules/lib/table-edit.js": "820df099b1",
   "modules/lib/viewplace.js": "7cb3c2d4a1",
   "modules/model-checks.js": "bb81c12ac6",
   "modules/navigation.js": "ad42b8a0d0",
   "modules/outline.js": "4923030bfc",
   "modules/proofread.js": "b0c01daa8a",
   "modules/snippets.js": "9b01f7efc8",
-  "modules/visual-mode.js": "c476503d28",
+  "modules/visual-mode.js": "c4397d7dce",
   "modules/word-count.js": "d8d5dff0a0"
  }
 }
