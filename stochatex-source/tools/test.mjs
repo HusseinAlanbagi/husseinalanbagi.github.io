@@ -38,6 +38,17 @@ await test('model equations list: paper order through \\input, never counted aga
   const b = MC.listBlocks(files[0].text)[0];
   assert.equal(MC.modelListTeX(r2.model, files, b.opts).replace(/\s+/g, ''), files[0].text.slice(b.from, b.to).replace(/\s+/g, ''));
 });
+await test('tables: read and write back unchanged, rows, columns, merge, lines', async () => {
+  const T = await import(path.join(app, 'modules/lib/table-edit.js'));
+  const body = '\n    \\toprule\n    A & B & C \\\\\n    \\midrule\n    $c_t$ & 0.75 & 0.02 \\\\\n    \\multicolumn{2}{c}{Total} & 1 \\\\[2pt]\n    \\bottomrule\n  ';
+  const t = T.parseTable('l@{\\quad}cc', body);
+  assert.equal(T.serializeTable(t).body, body); assert.equal(T.serializeTable(t).spec, 'l@{\\quad}cc'); assert.equal(T.ruleStyle(t), 'book');
+  T.addRow(t, 0); T.addCol(t, 2); T.setAlign(t, 3, 'r'); assert.equal(T.serializeTable(t).spec, 'l@{\\quad}ccr');
+  assert.equal(t.rows.length, 4); assert.ok(t.rows.every(r => r.cells.reduce((a, c) => a + c.span, 0) === 4));
+  T.merge(t, 0, 0, 1); assert.equal(t.rows[0].cells[0].span, 2); T.split(t, 0, 0); assert.equal(t.rows[0].cells.length, 4);
+  T.setRules(t, 'grid'); assert.match(T.serializeTable(t).spec, /^\|l\|@\{\\quad\}c\|c\|r\|$/); T.setRules(t, 'book'); assert.equal(T.ruleStyle(t), 'book');
+  T.deleteCol(t, 3); T.deleteRow(t, 1); assert.equal(T.serializeTable(t).spec, 'l@{\\quad}cc');
+});
 await test('published files carry versions (stamp)', () => {
   const ix = fs.readFileSync(path.join(app, 'index.html'), 'utf8');
   assert.match(ix, /app\.css\?v=[0-9a-f]{10}/); assert.match(ix, /core\.js\?v=[0-9a-f]{10}/); assert.match(ix, /<script type="importmap">/);

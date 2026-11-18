@@ -1,3 +1,4 @@
+import * as TE from './lib/table-edit.js';
 // Visual view. The source stays one document; with the Visual switch on, it is drawn the way it will print:
 // numbered sections and equations, citations as author–year or numbers, tables, captions, theorem headings,
 // footnotes, a table of contents and a reference list, on a serif page sheet. The LaTeX shows wherever the
@@ -629,7 +630,11 @@ export default {
       tag: 'M3 11.500V4h7.500L21 14.500 13.500 22z M7.500 7.500h.010', expand: 'M14 4h6v6 M20 4l-7 7 M10 20H4v-6 M4 20l7-7', trash: 'M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13 M10 11v6 M14 11v6',
       more: 'M5 12h.010 M12 12h.010 M19 12h.010', check: 'M5 12.500l4.500 4.500L19 7',
       ubrace: 'M3 7c0 3 2 4.500 4.500 4.500h2.500c1.300 0 2 1 2 3 0-2 .700-3 2-3h2.500C19 11.500 21 10 21 7', obrace: 'M3 17c0-3 2-4.500 4.500-4.500h2.500c1.300 0 2-1 2-3 0 2 .700 3 2 3h2.500c2.500 0 4.500 1.500 4.500 4.500',
-      frac: 'M9 3h6v5H9z M5 12h14 M9 16h6v5H9z', sqrt: 'M3 13h3l3 7 4-16h8', box: 'M4 6h16v12H4z', slot: 'M7 6h10v12H7z' };
+      frac: 'M9 3h6v5H9z M5 12h14 M9 16h6v5H9z', sqrt: 'M3 13h3l3 7 4-16h8', box: 'M4 6h16v12H4z', slot: 'M7 6h10v12H7z',
+      rowAbove: 'M4 13h16v7H4z M12 3v7 M9 6l3-3 3 3', rowBelow: 'M4 4h16v7H4z M12 21v-7 M9 18l3 3 3-3', colLeft: 'M13 4h7v16h-7z M3 12h7 M6 9l-3 3 3 3', colRight: 'M4 4h7v16H4z M21 12h-7 M18 9l3 3-3 3',
+      delRow: 'M4 9h16v6H4z M9 4l6 0 M8 19l8 0', delCol: 'M9 4h6v16H9z M4 9v6 M20 9v6',
+      alL: 'M4 6h16 M4 10h10 M4 14h16 M4 18h10', alC: 'M4 6h16 M7 10h10 M4 14h16 M7 18h10', alR: 'M4 6h16 M10 10h10 M4 14h16 M10 18h10',
+      merge: 'M3 6h18v12H3z M8 12h8 M10 10l-2 2 2 2 M14 10l2 2-2 2', split: 'M3 6h18v12H3z M12 6v12', table: 'M3 5h18v14H3z M3 10h18 M3 15h18 M9 5v14 M15 5v14' };
     const ico = (n, size = 14) => { const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('width', size); svg.setAttribute('height', size); svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', n === 'more' ? '3' : '1.8'); svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round'); svg.setAttribute('aria-hidden', 'true'); const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', ICO[n]); svg.append(p); return svg; };
     // the symbol picker: [LaTeX, what it looks like, words to find it by]
     const SYM_GROUPS = [
@@ -1154,6 +1159,239 @@ export default {
       card.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + 'px';
       const below = r.bottom + 6; card.style.top = (below + card.offsetHeight < innerHeight - 8 ? below : Math.max(8, r.top - card.offsetHeight - 6)) + 'px';
     }
+    // ---- tables you fill in like a word processor: click a cell, type, Tab to the next one
+    let tableSess = null;
+    class TableEditW extends WidgetType {
+      constructor(from) { super(); this.from = from; }
+      eq(o) { return o.from === this.from; }
+      toDOM() { return tableSess?.el || h('div'); }
+      ignoreEvent() { return true; }
+    }
+    // where the parts of the tabular starting at `from` are in the document now
+    function locateTable(doc, from) {
+      const m = /^\\begin\{(tabular\*?|tabularx|tabulary|longtable|array)\}/.exec(doc.slice(from, from + 40)); if (!m) return null;
+      let j = from + m[0].length; while (/\s/.test(doc[j])) j++;
+      if (doc[j] === '[') { j = doc.indexOf(']', j) + 1; while (/\s/.test(doc[j])) j++; }
+      if (/tabular\*|tabularx|tabulary/.test(m[1]) && doc[j] === '{') { j = closeBrace(doc, j) + 1; while (/\s/.test(doc[j])) j++; }
+      if (doc[j] !== '{') return null;
+      const sc = closeBrace(doc, j); if (sc < 0) return null;
+      const endRe = new RegExp('\\\\end\\{' + m[1].replace('*', '\\*') + '\\}', 'g'); endRe.lastIndex = sc;
+      const e = endRe.exec(doc); if (!e) return null;
+      return { env: m[1], specFrom: j + 1, specTo: sc, bodyFrom: sc + 1, bodyTo: e.index };
+    }
+    function startTable(view, it, e, at) {
+      if (tableSess) finishTable(true);
+      if (session) finishEdit(true);
+      const doc = view.state.doc.toString(), loc = locateTable(doc, it.from); if (!loc) return reveal(view, it.from + 1)(e || { button: 0, preventDefault() {} });
+      const t = TE.parseTable(doc.slice(loc.specFrom, loc.specTo), doc.slice(loc.bodyFrom, loc.bodyTo));
+      if (!t.rows.length) TE.addRow(t, -1);
+      // which cell was clicked: the drawn rows are the table's rows, the drawn cells follow colspan
+      let r = 0, c = 0;
+      const td = e?.target?.closest?.('td');
+      if (td) { const tr = td.parentElement; r = [...tr.parentElement.children].indexOf(tr); c = [...tr.children].slice(0, [...tr.children].indexOf(td)).reduce((a, x) => a + (x.colSpan || 1), 0); }
+      if (at) ({ r, c } = at);
+      r = Math.max(0, Math.min(r, t.rows.length - 1)); c = Math.max(0, Math.min(c, t.cols.length - 1));
+      const el = h('div', { class: 'vz-tabedit' });
+      tableSess = { view, from: it.from, t, el, r, c, sel: null, timer: 0, macros: view.state.field(field).p.info.macros, dirty: false };
+      buildTableUI();
+      poke();
+      setTimeout(() => focusCell(r, c, true), 30);
+      document.addEventListener('mousedown', tableAway, true);
+    }
+    const tableAway = (e) => {
+      if (!tableSess) return document.removeEventListener('mousedown', tableAway, true);
+      if (tableSess.el.contains(e.target) || e.target.closest?.('.menu, .ui-menu-container, .modal, .toasts, .vz-tabgrid')) return;
+      finishTable(true);
+    };
+    function writeTable() {
+      const S = tableSess; if (!S) return;
+      clearTimeout(S.timer); if (!S.dirty) return; S.dirty = false;
+      const v = S.view, doc = v.state.doc.toString(), loc = locateTable(doc, S.from); if (!loc) return;
+      const { spec, body } = TE.serializeTable(S.t);
+      const changes = [];
+      if (doc.slice(loc.specFrom, loc.specTo) !== spec) changes.push({ from: loc.specFrom, to: loc.specTo, insert: spec });
+      if (doc.slice(loc.bodyFrom, loc.bodyTo) !== body) changes.push({ from: loc.bodyFrom, to: loc.bodyTo, insert: body });
+      if (changes.length) v.dispatch({ changes, userEvent: 'input.table' });
+    }
+    const changed = () => { const S = tableSess; if (!S) return; S.dirty = true; clearTimeout(S.timer); S.timer = setTimeout(writeTable, 350); };
+    function finishTable(save) {
+      const S = tableSess; if (!S) return;
+      if (save) { syncCell(); writeTable(); }
+      document.removeEventListener('mousedown', tableAway, true);
+      tableSess = null; poke();
+    }
+    const cellTd = (r, c) => tableSess?.el.querySelector(`td[data-r="${r}"][data-c="${c}"]`);
+    function syncCell() { const S = tableSess; if (!S) return; const td = S.el.querySelector('td.editing'); if (!td) return; const cell = S.t.rows[+td.dataset.r]?.cells[+td.dataset.i]; if (cell && cell.tex !== td.textContent.replace(/\n/g, ' ')) { cell.tex = td.textContent.replace(/\n/g, ' '); S.dirty = true; } }
+    function drawCell(td, cell) { td.classList.remove('editing'); td.contentEditable = 'false'; td.innerHTML = cell.tex.trim() ? inlineHtml(cell.tex, tableSess.macros) : '<span class="vz-empty">&nbsp;</span>'; }
+    function focusCell(r, c, selectAll) {
+      const S = tableSess; if (!S) return;
+      r = Math.max(0, Math.min(r, S.t.rows.length - 1)); c = Math.max(0, Math.min(c, S.t.cols.length - 1));
+      const i = TE.cellAt(S.t.rows[r], c); c = TE.colOf(S.t.rows[r], i);
+      const old = S.el.querySelector('td.editing');
+      if (old) { syncCell(); drawCell(old, S.t.rows[+old.dataset.r].cells[+old.dataset.i]); }
+      S.r = r; S.c = c;
+      const td = cellTd(r, c); if (!td) return;
+      const cell = S.t.rows[r].cells[i];
+      td.classList.add('editing'); td.textContent = cell.tex;
+      try { td.contentEditable = 'plaintext-only'; } catch { td.contentEditable = 'true'; }
+      if (td.contentEditable !== 'plaintext-only') td.contentEditable = 'true';
+      td.focus();
+      const rg = document.createRange(); rg.selectNodeContents(td); if (!selectAll) rg.collapse(false);
+      const sl = getSelection(); sl.removeAllRanges(); sl.addRange(rg);
+      markSel(); syncBar();
+    }
+    function markSel() {
+      const S = tableSess; S.el.querySelectorAll('td.sel').forEach(x => x.classList.remove('sel'));
+      if (S.sel) for (let c = S.sel.c0; c <= S.sel.c1; c++) cellTd(S.sel.r, c)?.classList.add('sel');
+    }
+    function renderGrid() {
+      const S = tableSess, t = S.t;
+      const table = h('table', { class: 'vz-table vz-table-edit' });
+      const style = TE.ruleStyle(t);
+      t.rows.forEach((row, r) => {
+        const cls = (row.pre || '').match(/\\(toprule|midrule|hline|cmidrule|cline|addlinespace)/g)?.map(x => 'r-' + x.slice(1).replace('cline', 'cmid').replace('cmidrule', 'cmid').replace('addlinespace', 'space')).join(' ') || '';
+        const tr = h('tr', { class: cls + (r === t.rows.length - 1 && /\\(bottomrule|hline)/.test(t.trail) ? ' after-' + (/bottomrule/.test(t.trail) ? 'bottomrule' : 'hline') : '') });
+        row.cells.forEach((cell, i) => {
+          const c = TE.colOf(row, i), col = t.cols[c];
+          const al = cell.malign ? (/r/.test(cell.malign) ? 'right' : /c/.test(cell.malign) ? 'center' : 'left') : col.align === 'r' ? 'right' : col.align === 'c' ? 'center' : 'left';
+          const td = h('td', { 'data-r': r, 'data-c': c, 'data-i': i, style: { textAlign: al }, spellcheck: 'false' });
+          if (cell.span > 1) td.colSpan = cell.span;
+          if (style === 'grid') td.classList.add('grid');
+          drawCell(td, cell);
+          td.addEventListener('mousedown', (e) => {
+            if (td.classList.contains('editing')) return;
+            e.preventDefault();
+            if (e.shiftKey && S.r === r) { const a = Math.min(S.c, c), b = Math.max(S.c, c + cell.span - 1); S.sel = { r, c0: a, c1: b }; markSel(); syncBar(); return; }
+            S.sel = null; focusCell(r, c);
+          });
+          td.addEventListener('input', () => { const cl = S.t.rows[r].cells[i]; cl.tex = td.textContent.replace(/\n/g, ' '); changed(); });
+          td.addEventListener('keydown', (e) => tableKey(e, r, c, td));
+          td.addEventListener('paste', (e) => pasteCells(e, r, c));
+          tr.append(td);
+        });
+        table.append(tr);
+      });
+      return table;
+    }
+    // paste from a spreadsheet or Word: tab-separated rows fill the cells from here, adding rows and columns as needed
+    function pasteCells(e, r0, c0) {
+      const text = e.clipboardData?.getData('text/plain') || ''; if (!/\t|\n./.test(text.trim())) return;
+      e.preventDefault(); const S = tableSess, t = S.t;
+      const grid = text.replace(/\r/g, '').replace(/\n$/, '').split('\n').map(l => l.split('\t'));
+      while (t.rows.length < r0 + grid.length) TE.addRow(t, t.rows.length - 1);
+      const w = Math.max(...grid.map(g => g.length)); while (t.cols.length < c0 + w) TE.addCol(t, t.cols.length - 1);
+      const escTeX = (x) => x.replace(/([&%#_])/g, '\\$1');
+      grid.forEach((g, dr) => g.forEach((v, dc) => { const row = t.rows[r0 + dr]; row.cells[TE.cellAt(row, c0 + dc)].tex = escTeX(v.trim()); }));
+      S.dirty = true; buildTableUI(); writeTable(); focusCell(r0, c0);
+      ctx.ui.toast(`Pasted ${grid.length} × ${w} cells.`);
+    }
+    function tableKey(e, r, c, td) {
+      const S = tableSess, t = S.t, row = t.rows[r], span = row.cells[TE.cellAt(row, c)].span;
+      const atStart = () => { const sl = getSelection(); if (!sl.rangeCount || !sl.isCollapsed) return false; const rg = sl.getRangeAt(0).cloneRange(); rg.selectNodeContents(td); rg.setEnd(sl.anchorNode, sl.anchorOffset); return rg.toString().length === 0; };
+      const atEnd = () => { const sl = getSelection(); if (!sl.rangeCount || !sl.isCollapsed) return false; const rg = sl.getRangeAt(0).cloneRange(); rg.selectNodeContents(td); rg.setStart(sl.anchorNode, sl.anchorOffset); return rg.toString().length === 0; };
+      const mod = e.ctrlKey || e.metaKey;
+      const go = (r2, c2, all = true) => { e.preventDefault(); S.sel = null; focusCell(r2, c2, all); };
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        if (e.shiftKey) { if (c > 0) go(r, c - 1); else if (r > 0) go(r - 1, t.cols.length - 1); return; }
+        if (c + span < t.cols.length) return go(r, c + span);
+        if (r + 1 < t.rows.length) return go(r + 1, 0);
+        syncCell(); TE.addRow(t, r); S.dirty = true; buildTableUI(); changed(); return go(r + 1, 0);       // Tab in the last cell adds a row, as in Word
+      }
+      if (e.key === 'Enter') { e.preventDefault(); if (e.shiftKey) return go(Math.max(0, r - 1), c); if (r + 1 < t.rows.length) return go(r + 1, c); syncCell(); TE.addRow(t, r); S.dirty = true; buildTableUI(); changed(); return go(r + 1, c); }
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); finishTable(true); S.view.focus(); return; }
+      if (e.key === 'ArrowUp' && !e.shiftKey && r > 0) return go(r - 1, c, false);
+      if (e.key === 'ArrowDown' && !e.shiftKey && r + 1 < t.rows.length) return go(r + 1, c, false);
+      if (e.key === 'ArrowLeft' && !e.shiftKey && atStart() && (c > 0 || r > 0)) return c > 0 ? go(r, c - 1, false) : go(r - 1, t.cols.length - 1, false);
+      if (e.key === 'ArrowRight' && !e.shiftKey && atEnd() && (c + span < t.cols.length || r + 1 < t.rows.length)) { e.preventDefault(); S.sel = null; focusCell(c + span < t.cols.length ? r : r + 1, c + span < t.cols.length ? c + span : 0, false); const sl = getSelection(); sl.collapse(cellTd(S.r, S.c), 0); return; }
+      if (e.key === 'ArrowRight' && e.shiftKey && atEnd() && c + span < t.cols.length) { e.preventDefault(); const a = S.sel?.r === r ? S.sel.c0 : c; S.sel = { r, c0: a, c1: Math.max(S.sel?.c1 ?? c, c + span) }; markSel(); syncBar(); return; }
+      if (mod && !e.shiftKey && 'biu'.includes(e.key.toLowerCase())) { e.preventDefault(); return wrapCell(e.key.toLowerCase() === 'b' ? 'bold' : e.key.toLowerCase() === 'i' ? 'italic' : 'math'); }
+      if (mod && e.key.toLowerCase() === 'm') { e.preventDefault(); return wrapCell('math'); }
+      if (mod && e.key === 'Enter') { e.preventDefault(); return op('rowBelow'); }
+    }
+    function wrapCell(kind) {
+      const S = tableSess; syncCell();
+      const cells = S.sel ? Array.from({ length: S.sel.c1 - S.sel.c0 + 1 }, (_, k) => S.t.rows[S.sel.r].cells[TE.cellAt(S.t.rows[S.sel.r], S.sel.c0 + k)]) : [S.t.rows[S.r].cells[TE.cellAt(S.t.rows[S.r], S.c)]];
+      for (const cell of new Set(cells)) cell.tex = TE.toggleWrap(cell.tex, kind);
+      S.dirty = true; changed(); const { r, c } = S; buildTableUI(); focusCell(r, c, true);
+    }
+    function op(name) {
+      const S = tableSess; if (!S) return; syncCell();
+      const t = S.t; let { r, c } = S;
+      switch (name) {
+        case 'rowAbove': r = TE.addRow(t, r, false); break;
+        case 'rowBelow': r = TE.addRow(t, r, true); break;
+        case 'colLeft': c = TE.addCol(t, c, false); break;
+        case 'colRight': { const rw = t.rows[r]; c = TE.addCol(t, c + rw.cells[TE.cellAt(rw, c)].span - 1, true); break; }
+        case 'delRow': r = TE.deleteRow(t, r); break;
+        case 'delCol': c = TE.deleteCol(t, c); break;
+        case 'alL': case 'alC': case 'alR': TE.setAlign(t, c, name === 'alL' ? 'l' : name === 'alC' ? 'c' : 'r'); break;
+        case 'merge': if (S.sel) { TE.merge(t, S.sel.r, S.sel.c0, S.sel.c1); r = S.sel.r; c = S.sel.c0; S.sel = null; } break;
+        case 'split': TE.split(t, r, c); break;
+        case 'book': case 'grid': case 'none': TE.setRules(t, name); break;
+      }
+      S.dirty = true; buildTableUI(); writeTable(); focusCell(r, c);
+    }
+    function syncBar() {
+      const S = tableSess; if (!S?.bar) return;
+      const row = S.t.rows[S.r], cell = row?.cells[TE.cellAt(row, S.c)];
+      S.bar.querySelector('[data-op="merge"]').disabled = !(S.sel && S.sel.c1 > S.sel.c0);
+      S.bar.querySelector('[data-op="split"]').disabled = !(cell && (cell.span > 1 || cell.malign));
+      const al = S.t.cols[S.c]?.align;
+      for (const k of ['alL', 'alC', 'alR']) S.bar.querySelector(`[data-op="${k}"]`).classList.toggle('on', al === k.slice(2).toLowerCase());
+      const st = TE.ruleStyle(S.t);
+      S.bar.querySelectorAll('[data-rules]').forEach(b => b.classList.toggle('on', b.dataset.rules === st));
+      S.where.textContent = `Row ${S.r + 1} of ${S.t.rows.length} · column ${S.c + 1} of ${S.t.cols.length}`;
+    }
+    function buildTableUI() {
+      const S = tableSess;
+      const b = (k, title, label) => h('button', { 'data-op': k, title, 'aria-label': title.split(/[(:]/)[0].trim(), onMousedown: (e) => { e.preventDefault(); if (!e.currentTarget.disabled) op(k); } }, label || ico(k, 15));
+      const sep = () => h('span', { class: 'vz-bsep' });
+      const rules = h('span', { class: 'vz-seg' }, ...[['book', 'Book style: lines at the top, under the header and at the bottom (booktabs)', 'Book'], ['grid', 'Grid: a line around every cell', 'Grid'], ['none', 'No lines', 'None']].map(([k, title, l]) => h('button', { 'data-rules': k, title, onMousedown: (e) => { e.preventDefault(); op(k); } }, l)));
+      S.where = h('span', { class: 'vz-tabwhere' });
+      S.bar = h('div', { class: 'vz-tabbar', role: 'toolbar', 'aria-label': 'Table' },
+        b('rowAbove', 'Insert a row above'), b('rowBelow', 'Insert a row below (Ctrl+Enter; Tab in the last cell also adds one)'), b('colLeft', 'Insert a column to the left'), b('colRight', 'Insert a column to the right'),
+        b('delRow', 'Delete this row'), b('delCol', 'Delete this column'), sep(),
+        b('alL', 'Align the column left'), b('alC', 'Centre the column'), b('alR', 'Align the column right (numbers)'), sep(),
+        h('button', { title: 'Bold (Ctrl+B)', onMousedown: (e) => { e.preventDefault(); wrapCell('bold'); } }, h('b', {}, 'B')),
+        h('button', { title: 'Italic (Ctrl+I)', onMousedown: (e) => { e.preventDefault(); wrapCell('italic'); } }, h('i', { style: { fontFamily: 'var(--serif, serif)' } }, 'I')),
+        h('button', { title: 'Maths: put the cell between $ … $ (Ctrl+M)', onMousedown: (e) => { e.preventDefault(); wrapCell('math'); } }, h('span', { class: 'vz-om' }, '∑')), sep(),
+        b('merge', 'Merge the selected cells (Shift+click or Shift+→ to select cells in a row)'), b('split', 'Split a merged cell'), sep(),
+        rules, h('span', { class: 'spacer' }), S.where,
+        h('button', { title: 'Show the LaTeX of the table', onMousedown: (e) => { e.preventDefault(); const from = S.from; finishTable(true); S.view.dispatch({ selection: { anchor: from + 1 }, scrollIntoView: false }); S.view.focus(); } }, ico('code', 15)),
+        h('button', { class: 'primary', title: 'Done (Esc)', onMousedown: (e) => { e.preventDefault(); finishTable(true); } }, ico('check', 15)));
+      S.el.replaceChildren(S.bar, h('div', { class: 'vz-tabgridwrap' }, renderGrid()), h('div', { class: 'vz-tabhint muted' }, 'Tab: next cell (adds a row at the end) · Enter: cell below · Shift+click: select cells to merge · paste from Excel or Word fills several cells · Esc: done'));
+      syncBar();
+    }
+    // insert a new table: a grid to pick rows × columns, like Word's
+    function insertTablePicker(anchor) {
+      document.querySelector('.vz-tabgrid')?.remove();
+      const N = 8, M = 10, pop = h('div', { class: 'vz-tabgrid', role: 'dialog', 'aria-label': 'Insert a table' }), label = h('div', { class: 'vz-tabgrid-l' }, 'Insert a table');
+      const grid = h('div', { class: 'vz-tabgrid-g', style: { gridTemplateColumns: `repeat(${N}, 18px)` } });
+      for (let r = 0; r < M; r++) for (let c = 0; c < N; c++) grid.append(h('span', { 'data-r': r, 'data-c': c }));
+      const over = (r, c) => { grid.querySelectorAll('span').forEach(x => x.classList.toggle('on', +x.dataset.r <= r && +x.dataset.c <= c)); label.textContent = `${r + 1} × ${c + 1} table (rows × columns)`; };
+      grid.addEventListener('mouseover', (e) => { const x = e.target.closest('span'); if (x) over(+x.dataset.r, +x.dataset.c); });
+      grid.addEventListener('mousedown', (e) => { const x = e.target.closest('span'); if (!x) return; e.preventDefault(); pop.remove(); insertTable(+x.dataset.r + 1, +x.dataset.c + 1); });
+      pop.append(label, grid, h('div', { class: 'muted vz-tabgrid-f' }, 'With a caption and a label; book-style lines'));
+      document.body.append(pop);
+      const rr = anchor.getBoundingClientRect(); pop.style.left = Math.max(8, Math.min(innerWidth - 240, rr.left)) + 'px'; pop.style.top = (rr.bottom + 6) + 'px';
+      const off = (e) => { if (!pop.contains(e.target) && !anchor.contains(e.target)) { pop.remove(); document.removeEventListener('mousedown', off, true); } };
+      setTimeout(() => document.addEventListener('mousedown', off, true), 0);
+    }
+    function insertTable(rows, cols) {
+      const v = view(); if (!v) return;
+      const t = TE.newTable(rows, cols); t.rows[0].cells.forEach((c, i) => { c.tex = i ? `Column ${i + 1}` : 'Variable'; });
+      const { spec, body } = TE.serializeTable(t);
+      const sel = v.state.selection.main, line = v.state.doc.lineAt(sel.head), blank = !line.text.trim();
+      const head = (blank ? '' : '\n') + '\\begin{table}[htbp]\n  \\centering\n  \\caption{}\n  \\label{tab:}\n  ';
+      const text = head + `\\begin{tabular}{${spec}}${body}\\end{tabular}\n\\end{table}\n`;
+      const at = blank ? line.from : line.to;
+      v.dispatch({ changes: { from: at, to: blank ? line.to : at, insert: text }, userEvent: 'input.table' });
+      const tabFrom = at + head.length;
+      if (on && layers.format) setTimeout(() => { const it = v.state.field(field, false)?.p.items.find(y => y.kind === 'table' && y.from === tabFrom); if (it) startTable(v, it, null, { r: 1, c: 0 }); }, 120);
+      else v.dispatch({ selection: { anchor: tabFrom + `\\begin{tabular}{${spec}}`.length + body.indexOf('\\\\', body.indexOf('\\midrule')) - 0 }, scrollIntoView: true });
+      ctx.ui.toast('Table inserted: fill it in, Tab moves to the next cell. Write the caption in \\caption{…}.', '', 5000);
+    }
     class Html extends WidgetType {
       constructor(key, build, pos, click) { super(); this.key = key; this.build = build; this.pos = pos; this.click = click; }
       eq(o) { return o.key === this.key && o.pos === this.pos; }
@@ -1201,7 +1439,7 @@ export default {
         table.append(tr);
       }
       if (pending.trim() && table.lastChild) table.lastChild.classList.add(...pending.trim().split(/\s+/).map(r => 'after-' + r));
-      const wrapEl = h('div', { class: 'vz-tablewrap', title: 'Click to edit the table' }, table);
+      const wrapEl = h('div', { class: 'vz-tablewrap', title: 'Click a cell to fill in the table (Alt+click shows the LaTeX)' }, table);
       if (layers.page && layout === 'web') watchFit(wrapEl, () => { table.style.zoom = ''; const a = wrapEl.clientWidth - 4, w = table.getBoundingClientRect().width; if (w > a) table.style.zoom = Math.max(0.5, a / w); });
       return wrapEl;
     }
@@ -1353,7 +1591,9 @@ export default {
           }
           case 'table': {
             const from = it.block ? doc.lineAt(it.from).from : it.from, to = it.block ? doc.lineAt(it.to).to : it.to;
-            ranges.push(Decoration.replace({ block: it.block, widget: new Html('tab' + it.spec + it.body + ready + fitOn, () => tableEl(it, info.macros), it.from + 1) }).range(from, to)); covered.push({ from: it.from, to: it.to }); break;
+            const w = tableSess && tableSess.from === it.from ? new TableEditW(it.from)
+              : new Html('tab' + it.spec + it.body + ready + fitOn, () => tableEl(it, info.macros), it.from + 1, (v, el, e) => { if (e.altKey || !clickEdits()) return reveal(v, it.from + 1)(e); startTable(v, it, e); });
+            ranges.push(Decoration.replace({ block: it.block, widget: w }).range(from, to)); covered.push({ from: it.from, to: it.to }); break;
           }
         }
       }
@@ -1558,6 +1798,8 @@ export default {
     } }));
     const goDef = () => { const v = view(); const r = v && refAt(v, v.state.selection.main.head); if (!r) { ctx.ui.toast('Put the cursor on a \\ref, \\eqref or \\cite first.'); return false; } jumpTo(v, r.kind, r.key); return true; };
     ctx.editor.addKeymap([{ key: 'F12', run: () => { const v = view(); if (!v || !refAt(v, v.state.selection.main.head)) return false; return goDef(); } }]);
+    ctx.ui.addCommand({ id: 'table.insert', name: 'Insert a table…', run: () => insertTablePicker(document.querySelector('[data-tb="table"]') || document.querySelector('.vz-switch') || document.body) });
+    { const tb = ctx.ui.addToolbarButton({ label: 'Table', icon: 'insert', title: 'Insert a table: pick rows × columns, then fill it in like Word', onClick: (e) => insertTablePicker(e?.currentTarget || document.querySelector('[data-tb="table"]')) }); tb.el.dataset.tb = 'table'; tb.el.replaceChildren(ico('table', 16), h('span', { class: 'lbl' }, 'Table')); tb.el.setAttribute('aria-label', 'Insert a table'); ctx.onDispose(() => tb()); }
     ctx.ui.addCommand({ id: 'nav.definition', name: 'Go to the label or reference under the cursor', key: 'F12', run: goDef });
     let offExt = null, extKey = '';
     const view = () => ctx.editor.view;
@@ -1826,6 +2068,28 @@ export default {
 .vz-table tr.r-midrule td, .vz-table tr.r-cmid td { border-top: 1px solid var(--ink); }
 .vz-table tr.after-bottomrule td, .vz-table tr.after-hline td { border-bottom: 1.5px solid var(--ink); }
 .vz-table tr.r-space td { padding-top: 9px; }
+.vz-tabedit { margin: 4px 0 8px; border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line)); border-radius: 10px; background: var(--paper); box-shadow: 0 2px 10px rgb(0 0 0 / 6%); }
+.vz-tabbar { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 4px 6px; border-bottom: 1px solid var(--line); background: var(--panel); border-radius: 10px 10px 0 0; position: sticky; top: 0; z-index: 2; }
+.vz-tabbar button { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; padding: 0 5px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; font: 14px var(--ui); }
+.vz-tabbar button:hover:not(:disabled) { background: var(--accent-soft, #e8eefc); color: var(--ink); }
+.vz-tabbar button:disabled { opacity: .35; cursor: default; }
+.vz-tabbar button.on { background: var(--accent-soft, #e8eefc); color: var(--ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent); }
+.vz-tabbar button.primary { background: var(--accent); color: #fff; } .vz-tabbar .spacer { flex: 1; }
+.vz-tabbar .vz-seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; padding: 1px; gap: 1px; } .vz-tabbar .vz-seg button { height: 22px; font-size: 11.5px; padding: 0 7px; }
+.vz-tabwhere { font: 11px var(--ui); color: var(--muted); margin-right: 6px; white-space: nowrap; }
+.vz-tabgridwrap { display: flex; justify-content: center; padding: 10px 8px 6px; overflow-x: auto; }
+.vz-table-edit td { min-width: 3.5em; cursor: text; outline: none; position: relative; border-left: 1px dashed color-mix(in srgb, var(--line) 80%, transparent); border-right: 1px dashed color-mix(in srgb, var(--line) 80%, transparent); }
+.vz-table-edit tr:not([class*="r-"]) td { border-top: 1px dashed color-mix(in srgb, var(--line) 60%, transparent); }
+.vz-table-edit td.grid { border: 1px solid var(--ink) !important; }
+.vz-table-edit td:hover { background: color-mix(in srgb, var(--accent-soft, #e8eefc) 50%, transparent); }
+.vz-table-edit td.editing { background: var(--paper); box-shadow: inset 0 0 0 2px var(--accent); font: 13px var(--mono, monospace); white-space: pre; }
+.vz-table-edit td.sel { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+.vz-empty { display: inline-block; min-width: 2em; }
+.vz-tabhint { font: 11px var(--ui); padding: 0 10px 6px; text-align: center; }
+.vz-tabgrid { position: fixed; z-index: 1000; padding: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 8px 26px rgb(0 0 0 / 16%); }
+.vz-tabgrid-l { font: 600 12px var(--ui); margin-bottom: 6px; } .vz-tabgrid-f { font: 11px var(--ui); margin-top: 6px; }
+.vz-tabgrid-g { display: grid; gap: 3px; } .vz-tabgrid-g span { width: 18px; height: 18px; border: 1px solid var(--line); border-radius: 3px; background: var(--paper); cursor: pointer; }
+.vz-tabgrid-g span.on { background: color-mix(in srgb, var(--accent) 30%, var(--paper)); border-color: var(--accent); }
 .vz-toc, .vz-bib { display: flex; flex-direction: column; gap: .15em; padding: 6px 0 10px; cursor: text; }
 .vz-toc-h, .vz-bib-h { font-weight: 700; font-size: 1.38em; margin-bottom: .3em; }
 .vz-toc-l.l1 { padding-left: 1.5em; } .vz-toc-l.l2 { padding-left: 3em; } .vz-toc-l.l0 { font-weight: 700; }
