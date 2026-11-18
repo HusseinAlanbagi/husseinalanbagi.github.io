@@ -246,6 +246,9 @@ export default {
     }));
     let typed = 0;
     document.getElementById('pdf')?.addEventListener('pointerdown', () => setTimeout(() => pdf.worked(), 50));
+    // another module is about to jump (a click on a reference): this is where you were, so Back comes here
+    const onJump = () => { try { ed.setWork(); } catch {} };
+    addEventListener('stochatex:jump', onJump); ctx.onDispose?.(() => removeEventListener('stochatex:jump', onJump));
     ctx.on('compile', () => { pdfSecs = pdfSections(); later(); setTimeout(offerPdfLeftOff, 300); });
     ctx.on('leave', (path) => { try { if (path && ed.work) ctx.settings.set(lastKey(path), { ...EA.capture(), file: path, at: Date.now() }); } catch {} });
     ctx.on('open', () => { ed.attach(); later(); setTimeout(offerLeftOff, 60); });

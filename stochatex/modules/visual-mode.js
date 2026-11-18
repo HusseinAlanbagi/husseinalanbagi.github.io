@@ -1079,6 +1079,81 @@ export default {
       toDOM(view) { const el = h('span', { class: this.cls, title: this.title }, this.text); if (this.pos != null) el.addEventListener('mousedown', reveal(view, this.pos)); return el; }
       ignoreEvent() { return true; }
     }
+    // a drawn \ref / \eqref / \cite: a click goes to what it points at (Alt+click shows its LaTeX); hovering shows a card
+    class RefTag extends Tag {
+      constructor(text, cls, pos, title, kind, keys) { super(text, cls, pos, title); this.kind = kind; this.keys = keys; }
+      eq(o) { return super.eq(o) && o.kind === this.kind && o.keys === this.keys; }
+      toDOM(view) {
+        const el = h('span', { class: this.cls + ' vz-jump', title: '' }, this.text);
+        el.addEventListener('mousedown', (e) => {
+          if (e.button !== 0) return;
+          if (e.altKey || !clickEdits()) return reveal(view, this.pos)(e);
+          e.preventDefault(); hideCard(); jumpTo(view, this.kind, this.keys.split(',')[0].trim());
+        });
+        el.addEventListener('mouseenter', () => showCard(view, el, this.kind, this.keys.split(',')[0].trim(), this.title));
+        el.addEventListener('mouseleave', () => hideCard(250));
+        return el;
+      }
+    }
+    // where a label or a citation is: this file first, then the other .tex files (and .bib files for citations)
+    const lineOfIdx = (t, i) => t.slice(0, i).split('\n').length;
+    function findLabel(view, key) {
+      const esc = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), re = new RegExp('\\\\label\\s*\\{' + esc + '\\}');
+      const here = view.state.doc.toString(), m = re.exec(here);
+      if (m) return { file: ctx.editor.path, pos: m.index, line: lineOfIdx(here, m.index), text: here };
+      for (const f of ctx.project.files().filter(f => /\.tex$/i.test(f) && f !== ctx.editor.path)) { const t = ctx.project.read(f) || ''; const mm = re.exec(t); if (mm) return { file: f, pos: mm.index, line: lineOfIdx(t, mm.index), text: t }; }
+      return null;
+    }
+    function findCite(view, key) {
+      const esc = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const here = view.state.doc.toString();
+      const item = new RegExp('\\\\bibitem\\s*(?:\\[[^\\]]*\\])?\\s*\\{' + esc + '\\}').exec(here);
+      if (item) return { file: ctx.editor.path, pos: item.index, line: lineOfIdx(here, item.index) };
+      const list = /\\(?:bibliography\s*\{|printbibliography)/.exec(here);
+      if (list) return { file: ctx.editor.path, pos: list.index, line: lineOfIdx(here, list.index), list: true };
+      for (const f of ctx.project.files().filter(f => /\.bib$/i.test(f))) { const t = ctx.project.read(f) || ''; const m = new RegExp('@\\w+\\s*[{(]\\s*' + esc + '\\s*,').exec(t); if (m) return { file: f, pos: m.index, line: lineOfIdx(t, m.index) }; }
+      return null;
+    }
+    function jumpTo(view, kind, key) {
+      const at = kind === 'cite' ? findCite(view, key) : findLabel(view, key);
+      if (!at) return ctx.ui.toast(kind === 'cite' ? `No entry ${key} in the project’s .bib files.` : `No \\label{${key}} in the project.`, 'warn');
+      dispatchEvent(new CustomEvent('stochatex:jump'));
+      if (at.file !== ctx.editor.path) return ctx.goto(at.file, at.line);
+      // the label sits inside the equation (or heading): land on the start of its line, so the drawn object shows
+      const line = view.state.doc.lineAt(at.pos);
+      const it = view.state.field(field, false)?.p.items.find(y => (y.kind === 'dmath' || y.kind === 'table' || y.kind === 'image') && at.pos >= y.from && at.pos <= y.to);
+      const pos = it ? it.from : line.from;
+      view.dispatch({ effects: EditorView.scrollIntoView(pos, { y: 'center' }) });
+      setTimeout(() => { try { view.dispatch({ effects: flashEff.of(pos) }); setTimeout(() => { try { view.dispatch({ effects: flashEff.of(null) }); } catch {} }, 1300); } catch {} }, 60);
+    }
+    let card = null, cardT = 0;
+    function hideCard(ms) { clearTimeout(cardT); const go = () => { card?.remove(); card = null; }; if (ms) cardT = setTimeout(go, ms); else go(); }
+    function showCard(view, anchor, kind, key, title) {
+      clearTimeout(cardT); card?.remove();
+      const body = h('div', { class: 'vz-card-body' });
+      let foot = '';
+      if (kind === 'cite') {
+        const e = bib().get(key);
+        if (e) body.append(h('div', { class: 'vz-card-cite' }, h('strong', {}, deTeX(e.author || '').replace(/\s+and\s+/g, ', ')), ' (' + (e.year || 'n.d.') + '). ', h('em', {}, deTeX(e.title || '')), e.journal ? '. ' + deTeX(e.journal) : ''));
+        else body.append(h('div', { class: 'muted' }, title || key));
+        foot = 'Click to go to the reference · Alt+click shows the LaTeX';
+      } else {
+        const at = findLabel(view, key);
+        if (!at) body.append(h('div', { class: 'muted' }, `No \\label{${key}} in the project`));
+        else {
+          const it = at.file === ctx.editor.path ? view.state.field(field, false)?.p.items.find(y => y.kind === 'dmath' && at.pos >= y.from && at.pos <= y.to) : null;
+          if (it && ready) { const r = renderMath(mathTex(it), true, view.state.field(field).p.info.macros, 0); const d = h('div', { class: 'vz-card-math' }); d.innerHTML = r.html || ''; body.append(d); }
+          else { const ln = at.text.split('\n')[at.line - 1] || ''; body.append(h('div', { class: 'vz-card-line' }, deTeX(ln.replace(/\\label\{[^}]*\}/, '')).trim() || key)); }
+          foot = (at.file !== ctx.editor.path ? at.file + ', ' : '') + 'line ' + at.line + ' · click to go there · Alt+click shows the LaTeX';
+        }
+      }
+      card = h('div', { class: 'vz-card', role: 'tooltip' }, body, foot ? h('div', { class: 'vz-card-foot' }, foot) : null);
+      card.addEventListener('mouseenter', () => clearTimeout(cardT)); card.addEventListener('mouseleave', () => hideCard(150));
+      document.body.append(card);
+      const r = anchor.getBoundingClientRect(), w = Math.min(460, card.offsetWidth);
+      card.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + 'px';
+      const below = r.bottom + 6; card.style.top = (below + card.offsetHeight < innerHeight - 8 ? below : Math.max(8, r.top - card.offsetHeight - 6)) + 'px';
+    }
     class Html extends WidgetType {
       constructor(key, build, pos, click) { super(); this.key = key; this.build = build; this.pos = pos; this.click = click; }
       eq(o) { return o.key === this.key && o.pos === this.pos; }
@@ -1238,8 +1313,8 @@ export default {
           case 'format': hideRange(it.from, it.open + 1); if (it.cls) add(it.open + 1, it.close, Decoration.mark({ class: it.cls, attributes: it.url ? { title: it.url } : undefined })); hideRange(it.close, it.close + 1); break;
           case 'link': ranges.push(Decoration.replace({ widget: new Tag(it.text, 'vz-link', it.from + 1, it.url) }).range(it.from, it.to)); break;
           case 'footnote': ranges.push(Decoration.replace({ widget: new Tag(String(it.num), 'vz-fn', it.from + 1, 'Footnote ' + it.num + ': ' + deTeX(it.text)) }).range(it.from, it.to)); break;
-          case 'cite': { const c = citeText(it, info); ranges.push(Decoration.replace({ widget: new Tag(c.text, 'vz-cite' + (c.missing.length ? ' vz-missing' : ''), it.from + 1, c.missing.length ? 'Not found in your .bib files: ' + c.missing.join(', ') : '\\' + it.cmd + '{' + it.arg + '}') }).range(it.from, it.to)); break; }
-          case 'ref': { const r = refText(it, info); ranges.push(Decoration.replace({ widget: new Tag(r.text, 'vz-ref' + (r.ok ? '' : ' vz-missing'), it.from + 1, r.ok ? '\\' + it.cmd + '{' + it.arg + '}' : 'No \\label{' + it.arg + '} in this file') }).range(it.from, it.to)); break; }
+          case 'cite': { const c = citeText(it, info); ranges.push(Decoration.replace({ widget: new RefTag(c.text, 'vz-cite' + (c.missing.length ? ' vz-missing' : ''), it.from + 1, c.missing.length ? 'Not found in your .bib files: ' + c.missing.join(', ') : '\\' + it.cmd + '{' + it.arg + '}', 'cite', it.arg) }).range(it.from, it.to)); break; }
+          case 'ref': { const r = refText(it, info); ranges.push(Decoration.replace({ widget: new RefTag(r.text, 'vz-ref' + (r.ok ? '' : ' vz-missing'), it.from + 1, r.ok ? '\\' + it.cmd + '{' + it.arg + '}' : 'No \\label{' + it.arg + '} in this file', 'ref', it.arg) }).range(it.from, it.to)); break; }
           case 'label': if (L.page) hideRange(it.from, it.to); else ranges.push(Decoration.replace({ widget: new Tag(it.arg, 'vz-label', it.from + 1, '\\label{' + it.arg + '}') }).range(it.from, it.to)); break;
           case 'bullet': ranges.push(Decoration.replace({ widget: new Tag(it.mark, it.desc ? 'vz-desc' : 'vz-bullet', it.from + 1) }).range(it.from, it.to)); break;
           case 'env': {
@@ -1464,6 +1539,26 @@ export default {
       provide: (f) => EditorView.decorations.from(f),
     });
     ctx.editor.addExtension(flashField);
+    // in the source: Ctrl+click (⌘+click) on \ref{…}, \eqref{…} or \cite{…} goes to the label or the reference; F12 does the same at the cursor
+    const refAt = (view, pos) => {
+      const line = view.state.doc.lineAt(pos);
+      for (const m of line.text.matchAll(/\\(ref|eqref|cref|Cref|autoref|nameref|pageref|vref|[a-zA-Z]*cite[a-zA-Z]*)\*?\s*(?:\[[^\]]*\]\s*){0,2}\{([^}]*)\}/g)) {
+        const a = line.from + m.index, b = a + m[0].length; if (pos < a || pos > b) continue;
+        const start = b - 1 - m[2].length; let acc = start, key = m[2].split(',')[0];
+        for (const k of m[2].split(',')) { if (pos <= acc + k.length) { key = k; break; } acc += k.length + 1; }
+        return { kind: /cite/i.test(m[1]) ? 'cite' : 'ref', key: key.trim() };
+      }
+      return null;
+    };
+    ctx.editor.addExtension(EditorView.domEventHandlers({ mousedown(e, view) {
+      if (e.button !== 0 || !(e.ctrlKey || e.metaKey) || e.altKey) return false;
+      const pos = view.posAtCoords({ x: e.clientX, y: e.clientY }); if (pos == null) return false;
+      const r = refAt(view, pos); if (!r) return false;
+      e.preventDefault(); jumpTo(view, r.kind, r.key); return true;
+    } }));
+    const goDef = () => { const v = view(); const r = v && refAt(v, v.state.selection.main.head); if (!r) { ctx.ui.toast('Put the cursor on a \\ref, \\eqref or \\cite first.'); return false; } jumpTo(v, r.kind, r.key); return true; };
+    ctx.editor.addKeymap([{ key: 'F12', run: () => { const v = view(); if (!v || !refAt(v, v.state.selection.main.head)) return false; return goDef(); } }]);
+    ctx.ui.addCommand({ id: 'nav.definition', name: 'Go to the label or reference under the cursor', key: 'F12', run: goDef });
     let offExt = null, extKey = '';
     const view = () => ctx.editor.view;
     let sw, panel = null;
@@ -1692,6 +1787,11 @@ export default {
 .vz-err { outline: 1px dashed var(--err); outline-offset: 2px; border-radius: 3px; }
 .vz-src-math { background: color-mix(in srgb, var(--accent-soft) 60%, transparent); font-family: var(--mono); font-size: .92em; }
 .vz-cite, .vz-ref, .vz-label, .vz-link, .vz-fn, .vz-envtag { cursor: text; }
+.vz-jump { cursor: pointer; } .vz-jump:hover { text-decoration: underline; text-underline-offset: 2px; }
+.vz-card { position: fixed; z-index: 950; max-width: 460px; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 8px 26px rgb(0 0 0 / 16%); font: 13px var(--ui); overflow: hidden; }
+.vz-card-body { padding: 10px 12px; } .vz-card-math { overflow-x: auto; text-align: center; } .vz-card-math svg { max-width: 100%; height: auto; }
+.vz-card-cite { line-height: 1.45; } .vz-card-line { font-family: var(--serif, serif); }
+.vz-card-foot { font-size: 11px; color: var(--muted); padding: 5px 12px; border-top: 1px solid var(--line); background: color-mix(in srgb, var(--line) 25%, transparent); }
 .vz-cite { color: var(--ok); } .vz-ref { color: var(--accent); }
 .cm-typeset:not(.cm-page) .vz-cite, .cm-typeset:not(.cm-page) .vz-ref { background: color-mix(in srgb, currentColor 9%, transparent); border-radius: 4px; padding: 0 3px; }
 .vz-missing { color: var(--err) !important; text-decoration: underline wavy color-mix(in srgb, var(--err) 60%, transparent); text-underline-offset: 3px; }
