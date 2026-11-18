@@ -192,6 +192,23 @@
 
   .selbar { position:fixed; z-index:30; display:none; gap:2px; padding:3px; background:var(--card); border:1px solid var(--line); border-radius:9px; box-shadow:0 6px 18px rgba(0,0,0,.18); align-items:center; }
   .selbar.on { display:flex; }
+  .ribbon { margin: 2px 0 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); overflow: hidden; }
+  .rtabs { display: flex; gap: 2px; padding: 4px 4px 0; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--line) 25%, transparent); overflow-x: auto; scrollbar-width: none; }
+  .rtab { border: 0 !important; border-radius: 7px 7px 0 0 !important; background: transparent !important; padding: 4px 10px !important; font-size: 12px !important; color: var(--muted); box-shadow: none !important; white-space: nowrap; }
+  .rtab.on { background: var(--card) !important; color: var(--ink, inherit); font-weight: 600; box-shadow: 0 -1px 0 var(--line) inset, 1px 0 0 var(--line), -1px 0 0 var(--line) !important; }
+  .rbody { display: flex; flex-wrap: wrap; gap: 2px; padding: 5px; align-items: center; }
+  .rb { min-width: 32px; height: 32px; padding: 0 5px !important; display: inline-flex; align-items: center; justify-content: center; border-color: transparent !important; background: transparent !important; }
+  .rb:hover { border-color: var(--line) !important; background: color-mix(in srgb, var(--line) 35%, transparent) !important; }
+  .rb.rmore { font-size: 12px; color: var(--muted); }
+  .rsep { width: 1px; align-self: stretch; background: var(--line); margin: 4px 4px; }
+  button.ib { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: 34px; height: 32px; padding: 0 8px; }
+  button.ib svg { flex: none; }
+  .omega { font: 600 15px/1 'STIX Two Text', Georgia, serif; }
+  #numBtn { position: relative; } #numBtn .slash { position: absolute; left: 50%; top: 50%; width: 20px; height: 1.6px; background: currentColor; transform: translate(-50%, -50%) rotate(-45deg); border-radius: 1px; }
+  .selbar { flex-wrap: wrap; max-width: min(560px, calc(100vw - 16px)); }
+  .lblpop { position: fixed; z-index: 40; width: 290px; padding: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.18); font-size: 12px; }
+  .lblpop label { display: block; color: var(--muted); margin-bottom: 6px; } .lblpop .row { display: flex; gap: 6px; } .lblpop input { flex: 1; min-width: 0; font: 13px ui-monospace, monospace; padding: 4px 6px; }
+
   .selbar .sl { font-size:11px; color:var(--muted); padding:0 6px 0 4px; white-space:nowrap; }
   .selbar button { min-width:30px; height:30px; padding:0 5px; font-size:13px; display:inline-flex; align-items:center; justify-content:center; }
   .selbar .sep { width:1px; align-self:stretch; background:var(--line); margin:2px 3px; }
@@ -1400,6 +1417,166 @@ function start() {
     if (a) { e.preventDefault(); e.stopPropagation(); setTimeout(() => applyTemplate(a[0]), 40); } // let the editor finish the last keystroke first
   }, true);
 
+  // ---------- ribbon: style, accents, brackets, structures, DSGE helpers (applies to the selection, or the symbol before the cursor) ----------
+  const RIBBON = {
+    Style: [
+      ['\\boldsymbol{#@}', 'Bold (\\boldsymbol, works for Greek too)', '\\boldsymbol{x}'], ['\\mathbf{#@}', 'Bold upright (\\mathbf), for vectors and matrices', '\\mathbf{x}'],
+      ['\\mathit{#@}', 'Italic (\\mathit), for names of several letters', '\\mathit{ab}'], ['\\mathrm{#@}', 'Upright (\\mathrm), for d, e, max, labels', '\\mathrm{x}'],
+      ['\\mathsf{#@}', 'Sans serif (\\mathsf)', '\\mathsf{x}'], ['\\mathtt{#@}', 'Typewriter (\\mathtt)', '\\mathtt{x}'],
+      ['\\mathbb{#@}', 'Blackboard bold (\\mathbb): ℝ, 𝔼, ℕ', '\\mathbb{R}'], ['\\mathcal{#@}', 'Calligraphic (\\mathcal)', '\\mathcal{L}'],
+      ['\\mathfrak{#@}', 'Fraktur (\\mathfrak, needs amssymb)', '\\mathfrak{g}'], ['\\mathscr{#@}', 'Script (\\mathscr, needs the mathrsfs package)', '\\mathcal{F}'],
+      null, ['\\text{#@}', 'Words inside the equation (\\text)', '\\text{ab}'], ['\\underline{#@}', 'Underline', '\\underline{x}'],
+      ['\\textcolor{red}{#@}', 'Red (\\textcolor, needs the xcolor package)', '\\textcolor{red}{x}'], ['\\textcolor{blue}{#@}', 'Blue (\\textcolor, needs the xcolor package)', '\\textcolor{blue}{x}'],
+      ['\\displaystyle #@', 'Display size (\\displaystyle), e.g. for a fraction inside a line', '\\displaystyle\\frac{a}{b}'], ['\\tfrac{#@}{#?}', 'Small fraction (\\tfrac)', '\\tfrac{a}{b}'],
+    ],
+    Accents: [
+      ['\\hat{#@}', 'Hat (Alt+H)', '\\hat{x}'], ['\\widehat{#@}', 'Wide hat, over several symbols', '\\widehat{xy}'], ['\\tilde{#@}', 'Tilde (Alt+T)', '\\tilde{x}'], ['\\widetilde{#@}', 'Wide tilde', '\\widetilde{xy}'],
+      ['\\bar{#@}', 'Bar (Alt+B)', '\\bar{x}'], ['\\overline{#@}', 'Overline, a long bar (Alt+O)', '\\overline{xy}'], ['\\check{#@}', 'Check', '\\check{x}'], ['\\breve{#@}', 'Breve', '\\breve{x}'],
+      ['\\acute{#@}', 'Acute', '\\acute{x}'], ['\\grave{#@}', 'Grave', '\\grave{x}'], ['\\dot{#@}', 'Dot: time derivative', '\\dot{x}'], ['\\ddot{#@}', 'Double dot', '\\ddot{x}'],
+      ['\\vec{#@}', 'Vector arrow (Alt+V)', '\\vec{x}'], ['\\overrightarrow{#@}', 'Long arrow to the right', '\\overrightarrow{xy}'], ['\\overleftarrow{#@}', 'Long arrow to the left', '\\overleftarrow{xy}'],
+      null, ['#@^{\\prime}', 'Prime (Alt+P)', "x'"], ['#@^{\\prime\\prime}', 'Double prime', "x''"], ['#@^{*}', 'Star: steady state, optimum', 'x^{*}'],
+      ['#@^{-1}', 'Inverse', 'x^{-1}'], ['#@^{\\top}', 'Transpose', 'x^{\\top}'], ['#@_{ss}', 'Steady state as a subscript', 'x_{ss}'], ['\\cancel{#@}', 'Cross it out (\\cancel, needs the cancel package)', '\\cancel{x}'],
+    ],
+    Brackets: [
+      ['\\left(#@\\right)', 'Round brackets that grow with the content', '(x)'], ['\\left[#@\\right]', 'Square brackets', '[x]'], ['\\left\\{#@\\right\\}', 'Curly braces', '\\{x\\}'],
+      ['\\left|#@\\right|', 'Absolute value', '|x|'], ['\\left\\|#@\\right\\|', 'Norm', '\\|x\\|'], ['\\left\\langle #@\\right\\rangle', 'Angle brackets', '\\langle x\\rangle'],
+      ['\\left\\lfloor #@\\right\\rfloor', 'Floor', '\\lfloor x\\rfloor'], ['\\left\\lceil #@\\right\\rceil', 'Ceiling', '\\lceil x\\rceil'], ['\\left.#@\\right|_{#?}', 'Evaluated at (a bar with a subscript)', 'x\\big|_{a}'],
+      null, ['\\underbrace{#@}_{\\text{#?}}', 'Brace below, with a note', '\\underbrace{x}_{\\square}'], ['\\overbrace{#@}^{\\text{#?}}', 'Brace above, with a note', '\\overbrace{x}^{\\square}'],
+      ['\\underset{#?}{#@}', 'Something under it (\\underset)', '\\underset{\\square}{x}'], ['\\overset{#?}{#@}', 'Something over it (\\overset)', '\\overset{\\square}{x}'],
+      ['\\boxed{#@}', 'Box it (\\boxed)', '\\boxed{x}'], ['\\phantom{#@}', 'Invisible: keeps the space (\\phantom)', '[\\phantom{x}]'],
+    ],
+    Structures: [
+      ['\\frac{#@}{#?}', 'Fraction: this on top', '\\frac{x}{\\square}'], ['\\frac{#?}{#@}', 'Fraction: this underneath', '\\frac{\\square}{x}'], ['\\sqrt{#@}', 'Square root', '\\sqrt{x}'], ['\\sqrt[#?]{#@}', 'n-th root', '\\sqrt[n]{x}'],
+      ['\\left(#@\\right)^{#?}', 'Raise to a power', '(x)^{\\square}'], ['#?^{#@}', 'Make it an exponent', '\\square^{x}'], ['#?_{#@}', 'Make it a subscript', '\\square_{x}'],
+      null, ['\\exp\\left(#@\\right)', 'Exponential', '\\exp(x)'], ['\\ln\\left(#@\\right)', 'Natural log', '\\ln(x)'], ['\\log\\left(#@\\right)', 'Log', '\\log(x)'],
+      ['\\sum_{#?}^{#?} #@', 'Sum with limits', '\\sum x'], ['\\sum_{j=0}^{\\infty} \\beta^{j} #@', 'Discounted sum', '\\sum\\beta^j x'], ['\\prod_{#?}^{#?} #@', 'Product', '\\prod x'],
+      ['\\int_{#?}^{#?} #@ \\, d#?', 'Integral', '\\int x\\,dx'], ['\\lim_{#? \\to #?} #@', 'Limit', '\\lim x'], ['\\max_{#?} #@', 'Maximum over …', '\\max_{\\square} x'], ['\\min_{#?} #@', 'Minimum over …', '\\min_{\\square} x'],
+      null, ['\\frac{d #@}{d #?}', 'Derivative d/dx', '\\frac{dx}{d\\square}'], ['\\frac{\\partial #@}{\\partial #?}', 'Partial derivative', '\\frac{\\partial x}{\\partial\\square}'],
+      ['\\mathbb{E}_{t}\\left[#@\\right]', 'Expectation at t', '\\mathbb{E}_t[x]'], ['\\operatorname{Var}\\left(#@\\right)', 'Variance', '\\mathrm{Var}(x)'], ['\\operatorname{Cov}\\left(#@, #?\\right)', 'Covariance', '\\mathrm{Cov}(x,\\square)'],
+      ['\\begin{cases} #@ & \\text{if } #? \\\\ #? & \\text{otherwise} \\end{cases}', 'Cases', '\\begin{cases}a\\\\b\\end{cases}'],
+    ],
+    DSGE: [
+      ['#lead', 'Lead: move one period forward (x_t → x_{t+1}); the whole equation if nothing is selected', 'x_{t}\\to x_{t+1}'],
+      ['#lag', 'Lag: move one period back (x_t → x_{t-1}); the whole equation if nothing is selected', 'x_{t}\\to x_{t-1}'],
+      ['#ss', 'Steady state: drop the time index and put a bar (x_t → x̄); the whole equation if nothing is selected', 'x_{t}\\to\\bar{x}'],
+      ['#dev', 'Log deviation: x_t → x̂_t (a hat on each dated symbol)', 'x_{t}\\to\\hat{x}_{t}'],
+      null, ['\\mathbb{E}_{t}\\left[#@\\right]', 'Expectation at t', '\\mathbb{E}_t[x]'], ['\\ln #@', 'Log of it', '\\ln x'], ['\\hat{#@}_{t}', 'Log deviation of one symbol, dated t', '\\hat{x}_t'],
+      ['\\beta E_{t}\\left[#@\\right]', 'Discounted expectation', '\\beta\\mathbb{E}_t[x]'], ['\\left(1-#?\\right)', '(1 − …): e.g. (1 − ρ)', '(1-\\square)'], ['\\varepsilon_{t}^{#?}', 'A shock ε_t', '\\varepsilon^{\\square}_t'], ['\\rho_{#?} #@_{t-1}', 'AR(1) term: ρ x_{t−1}', '\\rho\\, x_{t-1}'],
+    ],
+  };
+  // DSGE helpers that rewrite what is selected (or the whole equation): dates and steady states
+  const shiftT = (tex, k) => tex.replace(/_(\{([^{}]*)\}|([A-Za-z0-9]))/g, (m, g, inner, one) => {
+    const parts = (inner ?? one).split(',');
+    let hit = false;
+    const out = parts.map(p => { const mm = /^\s*t\s*(?:([+-])\s*(\d+))?\s*$/.exec(p); if (!mm) return p; hit = true; const n = (mm[1] === '-' ? -1 : 1) * (+mm[2] || 0) + k; return n === 0 ? 't' : n > 0 ? 't+' + n : 't' + n; });
+    return hit ? '_{' + out.join(',') + '}' : m;
+  });
+  const SYMB = String.raw`(\\(?:hat|tilde|bar|widehat|widetilde|check|dot)\{[^{}]*\}|\\(?:mathbb|mathcal|boldsymbol|mathbf)\{[^{}]*\}|\\[a-zA-Z]+|[A-Za-z])`;
+  const dropE = (tex) => tex.replace(/(?:\\mathbb\{E\}|\\operatorname\{E\}|\\mathrm\{E\}|(?<![A-Za-z\\])E)\s*_\s*(?:\{\s*t\s*(?:[+-]\s*\d+)?\s*\}|t)\s*/g, '');
+  const steady = (tex) => dropE(tex).replace(new RegExp(SYMB + String.raw`\s*_(?:\{([^{}]*)\}|(t))`, 'g'), (m, sym, inner, one) => {
+    const parts = (inner ?? one).split(',').filter(p => !/^\s*t\s*(?:[+-]\s*\d+)?\s*$/.test(p));
+    if (parts.length === (inner ?? one).split(',').length) return m;
+    const base = /^\\(?:hat|tilde)\{/.test(sym) ? sym.replace(/^\\(?:hat|tilde)\{([^{}]*)\}$/, '$1') : sym;
+    return (/^\\bar\{/.test(base) ? base : '\\bar{' + base + '}') + (parts.length ? '_{' + parts.join(',') + '}' : '');
+  });
+  const logdev = (tex) => tex.replace(new RegExp(SYMB + String.raw`(\s*_(?:\{[^{}]*t[^{}]*\}|t))`, 'g'), (m, sym, sub) => sym === 'E' || /^\\(?:hat|mathbb|operatorname|mathrm)/.test(sym) || /^\\(beta|rho|sigma|alpha|delta|theta|phi|varepsilon|epsilon|eta)$/.test(sym) ? m : '\\hat{' + sym + '}' + sub);
+  function rewrite(fn, what) {
+    if (lastFocus === 'input') {
+      const s0 = input.selectionStart, e0 = input.selectionEnd, all = s0 === e0;
+      const a = all ? 0 : s0, b = all ? input.value.length : e0;
+      const t = fn(input.value.slice(a, b)); if (t === input.value.slice(a, b)) return showNote('Nothing to change: no time index t found.');
+      pushUndo(input.value); input.value = input.value.slice(0, a) + t + input.value.slice(b); input.focus(); input.setSelectionRange(a, a + t.length); load(); return;
+    }
+    mf.focus();
+    const r = mf.selection?.ranges?.[0], all = !r || r[0] === r[1];
+    const a = all ? 0 : Math.min(...r), b = all ? mf.lastOffset : Math.max(...r);
+    const src = mf.getValue(a, b, 'latex'), t = fn(src);
+    if (t === src) return showNote('Nothing to change: no time index t found' + (all ? ' in the equation.' : ' in the selection.'));
+    mf.selection = { ranges: [[a, b]] };
+    mf.insert(t, { format: 'latex', selectionMode: 'item' });
+    showNote(what + (all ? ' (the whole equation).' : '.'));
+  }
+  const DSGE_OPS = { '#lead': () => rewrite(x => shiftT(x, 1), 'Moved one period forward'), '#lag': () => rewrite(x => shiftT(x, -1), 'Moved one period back'), '#ss': () => rewrite(steady, 'Written as a steady state'), '#dev': () => rewrite(logdev, 'Written in log deviations') };
+  const ribbon = document.createElement('div'); ribbon.className = 'ribbon'; ribbon.setAttribute('role', 'toolbar'); ribbon.setAttribute('aria-label', 'Equation tools');
+  const rTabs = document.createElement('div'); rTabs.className = 'rtabs';
+  const rBody = document.createElement('div'); rBody.className = 'rbody';
+  let rTab = recall('olve-ribbon', 'Accents'); if (!RIBBON[rTab] && rTab !== 'Symbols') rTab = 'Accents';
+  const drawRibbon = () => {
+    rTabs.innerHTML = [...Object.keys(RIBBON), 'Symbols'].map(k => `<button class="rtab${k === rTab ? ' on' : ''}" data-k="${k}" title="${k === 'Symbols' ? 'Greek letters, operators, relations, arrows (Alt+F)' : k}">${k === 'Symbols' ? 'Ω Symbols' : k}</button>`).join('');
+    if (rTab === 'Symbols') { rBody.innerHTML = QUICK_SYMS.map(([l, t]) => `<button class="rb" data-l="${esc(l)}" title="${esc(t)} — ${esc(l)}">${renderStatic(l)}</button>`).join('') + '<button class="rb rmore" data-more="1" title="All symbols, with search (Alt+F)">All…</button>'; }
+    else rBody.innerHTML = RIBBON[rTab].map((a, i) => a ? `<button class="rb" data-i="${i}" title="${esc(a[1])}">${renderStatic(a[2])}</button>` : '<span class="rsep"></span>').join('');
+  };
+  const QUICK_SYMS = [['\\alpha', 'alpha'], ['\\beta', 'beta'], ['\\gamma', 'gamma'], ['\\delta', 'delta'], ['\\varepsilon', 'epsilon'], ['\\eta', 'eta'], ['\\theta', 'theta'], ['\\kappa', 'kappa'], ['\\lambda', 'lambda'], ['\\mu', 'mu'], ['\\pi', 'pi'], ['\\rho', 'rho'], ['\\sigma', 'sigma'], ['\\tau', 'tau'], ['\\phi', 'phi'], ['\\varphi', 'varphi'], ['\\chi', 'chi'], ['\\psi', 'psi'], ['\\omega', 'omega'], ['\\Gamma', 'Gamma'], ['\\Delta', 'Delta'], ['\\Lambda', 'Lambda'], ['\\Pi', 'Pi'], ['\\Phi', 'Phi'], ['\\Omega', 'Omega'],
+    ['\\leq', 'less or equal'], ['\\geq', 'greater or equal'], ['\\neq', 'not equal'], ['\\approx', 'approximately'], ['\\equiv', 'equivalent, defined as'], ['\\propto', 'proportional'], ['\\to', 'arrow'], ['\\Rightarrow', 'implies'], ['\\infty', 'infinity'], ['\\partial', 'partial'], ['\\nabla', 'nabla'], ['\\pm', 'plus or minus'], ['\\times', 'times'], ['\\cdot', 'dot'], ['\\forall', 'for all'], ['\\exists', 'exists'], ['\\in', 'in'], ['\\mathbb{R}', 'real numbers'], ['\\ldots', 'dots']];
+  rTabs.addEventListener('mousedown', e => e.preventDefault());
+  rBody.addEventListener('mousedown', e => e.preventDefault());
+  rTabs.addEventListener('click', (e) => { const b = e.target.closest('.rtab'); if (!b) return; rTab = b.dataset.k; store('olve-ribbon', rTab); drawRibbon(); });
+  rBody.addEventListener('click', (e) => {
+    const b = e.target.closest('.rb'); if (!b) return;
+    if (b.dataset.more) return document.getElementById('symBtn').click();
+    if (b.dataset.l) return applyTemplate(b.dataset.l + (/^\\[a-zA-Z]+$/.test(b.dataset.l) ? ' ' : ''));
+    const t = RIBBON[rTab][+b.dataset.i][0];
+    if (DSGE_OPS[t]) DSGE_OPS[t](); else applyTemplate(t);
+  });
+  ribbon.append(rTabs, rBody); drawRibbon();
+  accbar.hidden = true; accbar.style.display = 'none';
+  (accbar.closest('.plabel') || accbar.parentNode).after(ribbon);
+
+  // ---------- icons instead of words on the buttons (the words stay as tooltips and for screen readers) ----------
+  const IC = {
+    undo: 'M9 14 4 9l5-5 M4 9h10.5a5.5 5.5 0 0 1 0 11H11', eraser: 'M7 21h10 M5.5 13.5 13 6l5 5-7.5 7.5a2 2 0 0 1-2.8 0l-2.2-2.2a2 2 0 0 1 0-2.8z M10 9l5 5',
+    sparkle: 'M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z', hash: 'M5 9h14 M5 15h14 M10 4L8 20 M16 4l-2 16',
+    tag: 'M3 11.5V4h7.5L21 14.5 13.5 22z M7.5 7.5h.01', parens: 'M8 4c-3 3-3 13 0 16 M16 4c3 3 3 13 0 16', swap: 'M4 8h14l-3-3 M20 16H6l3 3', box: 'M4 6h16v12H4z',
+    plus: 'M12 5v14 M5 12h14', copy: 'M9 9h10v10H9z M5 15V5h10', grid: 'M4 4h16v16H4z M4 10h16 M4 15h16 M10 4v16 M15 4v16', align: 'M4 6h10 M4 12h16 M4 18h12 M18 4v4',
+    scale: 'M12 4v16 M7 20h10 M5 8h14 M5 8l-2.5 6a2.7 2.7 0 0 0 5 0z M19 8l-2.5 6a2.7 2.7 0 0 0 5 0z', image: 'M4 5h16v14H4z M4 16l5-5 4 4 3-3 4 4 M15.5 9.5h.01',
+    bulb: 'M9 18h6 M10 21h4 M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z', keyboard: 'M3 7h18v10H3z M7 11h.01 M11 11h.01 M15 11h.01 M8 14h8',
+  };
+  const svg = (k) => `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${IC[k]}"/></svg>`;
+  const iconBtn = (id, k, extra) => { const b = document.getElementById(id); if (!b) return; if (!b.getAttribute('aria-label')) b.setAttribute('aria-label', (b.title || b.textContent).split(/[(:]/)[0].trim()); b.innerHTML = svg(k) + (extra || ''); b.classList.add('ib'); };
+  [['undoBtn', 'undo'], ['clear', 'eraser'], ['cleanBtn', 'sparkle'], ['sizeBtn', 'parens'], ['flipBtn', 'swap'], ['boxBtn', 'box'], ['addEq', 'plus'], ['copy', 'copy'],
+   ['matBtn', 'grid'], ['alignBtn', 'align'], ['unitsBtn', 'scale'], ['expBtn', 'image'], ['tipsBtn', 'bulb'], ['keysBtn', 'keyboard']].forEach(([id, k]) => iconBtn(id, k));
+  iconBtn('symBtn', 'plus', ''); { const sb = document.getElementById('symBtn'); if (sb) sb.innerHTML = '<span class="omega">Ω</span>'; }
+  // the numbering button keeps its state as an icon: # (numbered) or # with a slash (not numbered)
+  const numBtnEl = document.getElementById('numBtn');
+  const drawNum = () => { const on = numBtnEl.classList.contains('sel'); numBtnEl.innerHTML = svg('hash') + (on ? '' : '<span class="slash"></span>'); numBtnEl.title = on ? 'Numbered: click to remove the number (Alt+N)' : 'Not numbered: click to give it a number (Alt+N)'; numBtnEl.setAttribute('aria-label', 'Numbering'); numBtnEl.setAttribute('aria-pressed', String(on)); numBtnEl.classList.add('ib'); };
+  new MutationObserver(() => { if (!numBtnEl.querySelector('svg')) drawNum(); }).observe(numBtnEl, { childList: true, characterData: true, subtree: true });
+  drawNum();
+  // a label button: \label{eq:…} named from the left side, and a copy of \eqref
+  const lblBtn = document.createElement('button'); lblBtn.id = 'labelBtn'; lblBtn.className = 'ib'; lblBtn.title = 'Label: add a \\label so the paper can refer to it with \\eqref'; lblBtn.setAttribute('aria-label', 'Label'); lblBtn.innerHTML = svg('tag');
+  numBtnEl.after(lblBtn);
+  lblBtn.addEventListener('mousedown', e => e.preventDefault());
+  // a small box under the button, instead of the browser's prompt (blocked in some frames)
+  const askLabel = (dflt) => new Promise((res) => {
+    document.querySelector('.lblpop')?.remove();
+    const pop = document.createElement('div'); pop.className = 'lblpop';
+    pop.innerHTML = '<label>Label (refer to it with \\eqref)</label><div class="row"><input type="text" spellcheck="false"><button class="primary">Add</button><button>Cancel</button></div>';
+    const inp = pop.querySelector('input'); inp.value = dflt;
+    const done = (v) => { pop.remove(); document.removeEventListener('pointerdown', off, true); res(v); };
+    const off = (e) => { if (!pop.contains(e.target)) done(null); };
+    pop.querySelector('.primary').onclick = () => done(inp.value.trim());
+    pop.querySelectorAll('button')[1].onclick = () => done(null);
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); done(inp.value.trim()); } else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); done(null); } });
+    document.body.append(pop);
+    const r = lblBtn.getBoundingClientRect(); pop.style.left = Math.max(6, Math.min(innerWidth - 300, r.left)) + 'px'; pop.style.top = (r.bottom + 6) + 'px';
+    setTimeout(() => { document.addEventListener('pointerdown', off, true); inp.focus(); inp.select(); }, 0);
+  });
+  lblBtn.onclick = async () => {
+    const v = input.value, old = (/\\label\{([^}]*)\}/.exec(v) || [])[1];
+    if (old) { try { await navigator.clipboard.writeText('\\eqref{' + old + '}'); showNote('This equation is labelled ' + old + '. Copied \\eqref{' + old + '}.'); } catch { showNote('This equation is labelled ' + old + '.'); } return; }
+    const body = v.replace(/\\begin\{[^}]*\}|\\end\{[^}]*\}|\\\[|\\\]/g, '');
+    const lhs = (body.split(/&?=/)[0] || '').replace(/\\(?:left|right|mathrm|mathbf|boldsymbol|hat|bar|tilde|widehat|widetilde|frac|ln|log|mathbb)\b/g, ' ').replace(/[_^](\{[^}]*\}|\\?[A-Za-z0-9]+)/g, '');
+    const words = (lhs.match(/\\?[A-Za-z]+/g) || []).map(w => w.replace(/^\\/, '')).filter(w => w !== 't').slice(0, 3);
+    const name = await askLabel('eq:' + (words.join('_') || ''));
+    if (!name || /[\s{}\\]/.test(name)) return;
+    pushUndo(v);
+    const m = /^\s*\\begin\{([^}]*)\}/.exec(v);
+    if (m) input.value = v.replace(m[0], m[0] + '\\label{' + name + '}');
+    else input.value = '\\begin{equation}\\label{' + name + '}\n  ' + v.replace(/^\s*\\\[|\\\]\s*$/g, '').trim() + '\n\\end{equation}';
+    load();
+    try { await navigator.clipboard.writeText('\\eqref{' + name + '}'); showNote('Labelled ' + name + '. Copied \\eqref{' + name + '} to paste where you mention it.'); } catch { showNote('Labelled ' + name + '.'); }
+  };
+
+
   // =================== 5. My macros ===================
   const DEFAULT_MACROS = { ...mf.macros };
   const macroTa = document.getElementById('macroTa'), macroStatus = document.getElementById('macroStatus');
@@ -2532,9 +2709,14 @@ function start() {
   selbar.innerHTML = '<span class="sl">Selection:</span>' + SEL_ACTIONS.map((a, i) => a ? `<button data-i="${i}" title="${a[1]}">${renderStatic(a[2])}</button>` : '<span class="sep"></span>').join('');
   selbar.addEventListener('mousedown', e => e.preventDefault());
   selbar.querySelectorAll('button').forEach(b => b.onclick = () => { hideSelbar(); const t = SEL_ACTIONS[+b.dataset.i][0]; if (t === '#flip') flipFraction(); else if (t === '#box') boxIt(); else applyTemplate(t); });
+  // the selection bar wraps inside the pane, and starts with the most used styles
+  SEL_ACTIONS.unshift(['\\boldsymbol{#@}', 'Bold', '\\boldsymbol{a}'], ['\\hat{#@}', 'Hat', '\\hat{a}'], ['\\tilde{#@}', 'Tilde', '\\tilde{a}'], ['\\bar{#@}', 'Bar', '\\bar{a}'], ['#@^{*}', 'Star', 'a^{*}'], null);
+  selbar.innerHTML = '<span class="sl">Selection:</span>' + SEL_ACTIONS.map((a, i) => a ? `<button data-i="${i}" title="${a[1]}">${renderStatic(a[2])}</button>` : '<span class="sep"></span>').join('');
+  selbar.querySelectorAll('button').forEach(b => b.onclick = () => { hideSelbar(); const t = SEL_ACTIONS[+b.dataset.i][0]; if (t === '#flip') flipFraction(); else if (t === '#box') boxIt(); else applyTemplate(t); });
   let selbarHideT = 0;
   function showSelbarAt(rect) {
     clearTimeout(selbarHideT);
+    selbar.style.maxWidth = Math.max(240, Math.min(560, mf.getBoundingClientRect().width)) + 'px';
     selbar.classList.add('on');
     const w = selbar.offsetWidth, h = selbar.offsetHeight;
     // stay inside the visual pane (never over the code pane or its Copy button), just below the selection
