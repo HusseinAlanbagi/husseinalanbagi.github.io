@@ -78,6 +78,7 @@ export function editModel(it) {
 }
 // MathLive writes x_{t}=y; put it back the way people type it: x_t = y
 export function tidyTeX(v) {
+  v = globalThis.StochaBrackets?.unstackAccents ? globalThis.StochaBrackets.unstackAccents(v) : v;     // stacked accents back to \hat{\tilde{p}}
   return v.replace(/([_^])\{([A-Za-z0-9])\}(?=(.?))/g, (m, op, c, nx) => op + c + (/[A-Za-z0-9]/.test(nx) ? ' ' : ''))
 .replace(/\\bm\{/g, '\\boldsymbol{')
     .replace(/\s*(&?)\s*=\s*/g, (m, amp) => (amp ? ' &= ' : ' = ')).replace(/^ +| +$/g, '').replace(/\\\\ +/g, '\\\\ ');
@@ -194,7 +195,7 @@ const authorsShort = (e) => !e ? '' : e.names.length > 2 ? e.names[0] + ' et al.
 // ---------------------------------------------------------------- one pass over the document
 // Returns { items, info }: items are {from, to, kind, ...} sorted by position; info has numbering and context.
 export function parse(doc) {
-  const s = blankComments(doc), items = [], taken = [];
+  let s = blankComments(doc); const items = [], taken = [];
   const inTaken = (i) => taken.some(r => i >= r.from && i < r.to);
   const lineStart = (i) => doc.lastIndexOf('\n', i - 1) + 1;
   const lineEnd = (i) => { const e = doc.indexOf('\n', i); return e < 0 ? doc.length : e; };
@@ -202,6 +203,37 @@ export function parse(doc) {
   const bd = /\\begin\{document\}/.exec(s), bodyStart = bd ? bd.index : 0;
   const pre = doc.slice(0, bodyStart);
   if (bd && bd.index > 0) { const end = Math.max(0, lineStart(bd.index) - 1); if (end > 0) items.push({ kind: 'preamble', from: 0, to: end, lines: doc.slice(0, end).split('\n').length }); }
+  // commented-out blocks: \begin{comment} … \end{comment} (comment package, and environments named in
+  // \excludecomment), and \iffalse … \fi. The PDF leaves them out, so the visual view folds them into one grey bar.
+  {
+    const blank = (a, b) => { s = s.slice(0, a) + s.slice(a, b).replace(/[^\n]/g, ' ') + s.slice(b); };
+    const fold = (a, b, label) => { const from = lineStart(a), to = lineEnd(b); items.push({ kind: 'cblock', from, to, lines: doc.slice(from, to).split('\n').length, label }); taken.push({ from, to }); blank(from, to); };
+    const names = new Set(['comment']);
+    for (const m of s.matchAll(/\\excludecomment\s*\{([^}]*)\}/g)) m[1].split(',').forEach(n => n.trim() && names.add(n.trim()));
+    for (const m of s.matchAll(/\\includecomment\s*\{([^}]*)\}/g)) m[1].split(',').forEach(n => names.delete(n.trim()));
+    if (names.size) {
+      const re = new RegExp(`\\\\begin\\{(${[...names].map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\}`, 'g');
+      for (let m; (m = re.exec(s)); ) {
+        if (m.index < bodyStart) continue;
+        const e = s.indexOf(`\\end{${m[1]}}`, m.index + m[0].length); const end = e < 0 ? s.length : e + `\\end{${m[1]}}`.length;
+        fold(m.index, end, m[1] === 'comment' ? 'Commented out' : `Left out (${m[1]})`); re.lastIndex = end;
+      }
+    }
+    const cond = /\\(iffalse|if[a-zA-Z@]*|fi|else|or)(?![a-zA-Z@])/g;
+    for (let m; (m = /\\iffalse(?![a-zA-Z@])/g.exec(s.slice(bodyStart))); ) {
+      const a = bodyStart + m.index; let depth = 0, end = -1, elseAt = -1; cond.lastIndex = a;
+      for (let k; (k = cond.exec(s)); ) {
+        const w = k[1];
+        if (w === 'fi') { if (--depth === 0) { end = k.index + 3; break; } }
+        else if (w === 'else' || w === 'or') { if (depth === 1 && elseAt < 0) elseAt = k.index; }
+        else if (!/^if(thenelse|boolexpr|toggle|bool|strequal|strempty|blank|defstring|csdef|csundef|def|undef|num|dimcomp)$/.test(w)) depth++;
+      }
+      if (end < 0) end = s.length;
+      // \iffalse … \else … \fi: only the part before \else is left out
+      fold(a, elseAt > 0 ? elseAt + 5 : end, '\\iffalse … ' + (elseAt > 0 ? '\\else' : '\\fi'));
+      if (elseAt > 0) { const f = s.lastIndexOf('\\fi', end); if (f > elseAt) { blank(f, f + 3); items.push({ kind: 'comment', from: f, to: f + 3 }); } }
+    }
+  }
   // comments in the body (hidden on the page sheet)
   for (const m of doc.slice(bodyStart).matchAll(/(^|[^\\])(%.*)$/gm)) { const from = bodyStart + m.index + m[1].length; items.push({ kind: 'comment', from, to: from + m[2].length }); }
   // display maths
@@ -694,7 +726,8 @@ export default {
       const mf = document.createElement('math-field');
       mf.smartFence = false; mf.smartSuperscript = false; mf.mathVirtualKeyboardPolicy = 'manual';
       const macros = (() => { try { return mlMacros(parse(doc.toString()).info.macros); } catch { return {}; } })();
-      mf.value = model.field;
+      const stack = (x) => (window.StochaBrackets?.stackAccents ? window.StochaBrackets.stackAccents(x) : x);
+      mf.value = stack(model.field);
       const nums = (it.rows || []).map(r => r.num).filter(Boolean);
       const tag = nums.length ? h('span', { class: 'vz-edit-num' }, nums.length > 1 ? `(${nums[0]})–(${nums[nums.length - 1]})` : `(${nums[0]})`) : null;
       const btn = (label, title, fn, cls = '') => h('button', { class: cls, title, 'aria-label': title.split(/[(:]/)[0].trim(), onMousedown: (e) => { e.preventDefault(); e.stopPropagation(); fn(e.currentTarget, e); } }, label);
@@ -788,7 +821,7 @@ export default {
       el.addEventListener('copy', (e) => {
         if (!mf.contains(e.target) && e.target !== mf && !e.composedPath().includes(mf)) return;
         const r = mf.selection?.ranges?.[0] || [0, 0];
-        const t = r[0] === r[1] ? tidyTeX(mf.getValue('latex')) : mf.getValue(Math.min(...r), Math.max(...r), 'latex');
+        const t = r[0] === r[1] ? tidyTeX(mf.getValue('latex')) : tidyTeX(mf.getValue(Math.min(...r), Math.max(...r), 'latex'));
         e.clipboardData.setData('text/plain', t); e.preventDefault(); e.stopPropagation();
       }, true);
       el.addEventListener('keydown', (e) => {
@@ -997,7 +1030,7 @@ export default {
       }
       view.dispatch({ effects: setEdit.of({ from: it.from, bodyFrom, bodyTo }) });
       // the paper's own \newcommand macros (MathLive takes them only once the field is on the page)
-      requestAnimationFrame(() => { try { window.StochaBrackets?.setupField(mf, { note: (m) => ctx.ui.toast(m) }); } catch {} try { if (Object.keys(macros).length) { mf.macros = { ...mf.macros, ...macros }; mf.value = model.field; } sess.base = tidyTeX(mf.getValue('latex')); mf.focus(); mf.position = mf.lastOffset; } catch {} });
+      requestAnimationFrame(() => { try { window.StochaBrackets?.setupField(mf, { note: (m) => ctx.ui.toast(m) }); } catch {} try { if (Object.keys(macros).length) { mf.macros = { ...mf.macros, ...macros }; mf.value = stack(model.field); } sess.base = tidyTeX(mf.getValue('latex')); mf.focus(); mf.position = mf.lastOffset; } catch {} });
     }
     function finishEdit(focus, pos) {
       const sess = session; if (!sess) return;
@@ -1204,6 +1237,30 @@ export default {
       if (tableSess.el.contains(e.target) || e.target.closest?.('.menu, .ui-menu-container, .modal, .toasts, .vz-tabgrid, .ML__popover, #mathlive-suggestion-popover, .ML__keyboard, .vz-sym')) return;
       finishTable(true);
     };
+    // keep the table where it is on screen while it changes (and while what is above it is re-measured):
+    // for a moment after each change, any shift of the table is scrolled back; scrolling yourself stops it
+    function pinTable(fn) {
+      const S = tableSess; if (!S) return fn && fn();
+      const sc = S.view.scrollDOM, y0 = S.el.getBoundingClientRect().top;
+      const r = fn ? fn() : undefined;
+      if (S.pinStop) S.pinStop();
+      let stop = false, t0 = performance.now();
+      const user = () => { stop = true; };
+      sc.addEventListener('wheel', user, { passive: true, once: true }); sc.addEventListener('touchmove', user, { passive: true, once: true });
+      // measured inside the editor's own layout pass, after its own scroll corrections, so the two never add up
+      const tick = () => {
+        if (stop || tableSess !== S || !S.el.isConnected) return done();
+        S.view.requestMeasure({ key: 'vz-pin-table', read: () => S.el.isConnected ? S.el.getBoundingClientRect().top : y0, write: (top) => {
+          if (stop) return done();
+          const dy = top - y0; if (Math.abs(dy) > 0.5) sc.scrollTop += dy;
+          if (performance.now() - t0 < 1200) requestAnimationFrame(tick); else done();
+        } });
+      };
+      const done = () => { sc.removeEventListener('wheel', user); sc.removeEventListener('touchmove', user); if (S.pinStop === halt) S.pinStop = null; };
+      const halt = () => { stop = true; }; S.pinStop = halt;
+      tick();
+      return r;
+    }
     function writeTable() {
       const S = tableSess; if (!S) return;
       clearTimeout(S.timer); if (!S.dirty) return; S.dirty = false;
@@ -1212,7 +1269,7 @@ export default {
       const changes = [];
       if (doc.slice(loc.specFrom, loc.specTo) !== spec) changes.push({ from: loc.specFrom, to: loc.specTo, insert: spec });
       if (doc.slice(loc.bodyFrom, loc.bodyTo) !== body) changes.push({ from: loc.bodyFrom, to: loc.bodyTo, insert: body });
-      if (changes.length) v.dispatch({ changes, userEvent: 'input.table' });
+      if (changes.length) pinTable(() => v.dispatch({ changes, userEvent: 'input.table' }));
     }
     const changed = () => { const S = tableSess; if (!S) return; S.dirty = true; clearTimeout(S.timer); S.timer = setTimeout(writeTable, 350); };
     function finishTable(save) {
@@ -1256,7 +1313,8 @@ export default {
       if (!MFc || !chip.isConnected) return;
       const mf = document.createElement('math-field');
       mf.smartFence = false; mf.smartSuperscript = false; mf.mathVirtualKeyboardPolicy = 'manual';
-      mf.value = chip.dataset.tex || ''; mf.className = 'vz-cellmath';
+      const stk = (x) => (window.StochaBrackets?.stackAccents ? window.StochaBrackets.stackAccents(x) : x);
+      mf.value = stk(chip.dataset.tex || ''); mf.className = 'vz-cellmath';
       td.contentEditable = 'false';
       chip.replaceWith(mf);
       let done = false;
@@ -1281,7 +1339,7 @@ export default {
       mf.addEventListener('focusout', () => setTimeout(() => { if (!mf.isConnected || document.activeElement === mf || mf.contains(document.activeElement)) return; if (document.querySelector('.ML__popover[style*="visible"]')) return; finish(); }, 120));
       requestAnimationFrame(() => {
         try { window.StochaBrackets?.setupField(mf, { note: (m) => ctx.ui.toast(m) }); } catch {}
-        try { const mm = mlMacros(S.macros); if (Object.keys(mm).length) { mf.macros = { ...mf.macros, ...mm }; mf.value = chip.dataset.tex || ''; } } catch {}
+        try { const mm = mlMacros(S.macros); if (Object.keys(mm).length) { mf.macros = { ...mf.macros, ...mm }; mf.value = stk(chip.dataset.tex || ''); } } catch {}
         mf.focus(); if (mf.value) mf.executeCommand('moveToMathfieldEnd');
       });
     }
@@ -1310,7 +1368,8 @@ export default {
         if (td.contentEditable !== 'plaintext-only') td.contentEditable = 'true';
         if (!S.latex) td.title = 'This cell has LaTeX that cannot be shown as you type, so it shows its code';
       }
-      td.focus();
+      td.focus({ preventScroll: true });
+      { const b = td.getBoundingClientRect(), v = S.view.scrollDOM.getBoundingClientRect(); if (b.top < v.top || b.bottom > v.bottom) td.scrollIntoView({ block: 'nearest' }); }
       const rg = document.createRange(); rg.selectNodeContents(td); if (!selectAll) rg.collapse(false);
       const sl = getSelection(); sl.removeAllRanges(); sl.addRange(rg);
       markSel(); syncBar();
@@ -1344,10 +1403,17 @@ export default {
       document.removeEventListener('copy', put, { capture: true });
       if (!ok) { try { navigator.clipboard.writeText(TE.gridText(grid)); ok = true; } catch {} }
       const n = `${q.r1 - q.r0 + 1} × ${q.c1 - q.c0 + 1}`;
-      if (cut) { for (const cell of selList()) cell.tex = ''; S.dirty = true; const keep = S.sel; buildTableUI(); writeTable(); selectCells(keep); }
+      if (cut) clearCells();
       ctx.ui.toast(ok ? `${cut ? 'Cut' : 'Copied'} ${whole ? 'the table' : n + ' cell' + (n === '1 × 1' ? '' : 's')}: paste here, in Excel or in Word.` : 'The browser did not allow copying.');
     }
-    function clearCells() { const S = tableSess; for (const cell of selList()) cell.tex = ''; S.dirty = true; const keep = S.sel; buildTableUI(); writeTable(); selectCells(keep); }
+    function clearCells() {
+      const S = tableSess, gone = new Set(selList());
+      pinTable(() => {
+        for (const cell of gone) cell.tex = '';
+        S.el.querySelectorAll('td[data-r]').forEach(td => { const cell = S.t.rows[+td.dataset.r]?.cells[+td.dataset.i]; if (gone.has(cell) && !td.classList.contains('editing')) drawCell(td, cell); });
+        S.dirty = true; writeTable();
+      });
+    }
     // keys while a block of cells is selected
     function selKey(e) {
       const S = tableSess; if (!S || !S.sel || e.target !== S.el || document.activeElement !== S.el) return;
@@ -1423,7 +1489,7 @@ export default {
       const w = Math.max(...grid.map(g => g.length)); while (t.cols.length < c0 + w) TE.addCol(t, t.cols.length - 1);
       const escTeX = (x) => x.replace(/([&%#_])/g, '\\$1');
       grid.forEach((g, dr) => g.forEach((v, dc) => { const row = t.rows[r0 + dr]; row.cells[TE.cellAt(row, c0 + dc)].tex = own ? v : escTeX(v.trim()); }));
-      S.dirty = true; buildTableUI(); writeTable(); focusCell(r0, c0);
+      S.dirty = true; pinTable(() => { buildTableUI(); writeTable(); focusCell(r0, c0); });
       ctx.ui.toast(`Pasted ${grid.length} × ${w} cells.`);
     }
     function tableKey(e, r, c, td) {
@@ -1466,8 +1532,8 @@ export default {
       const S = tableSess; syncCell();
       const cells = selList(), keep = S.sel;
       for (const cell of cells) cell.tex = TE.toggleWrap(cell.tex, kind);
-      S.dirty = true; changed(); const { r, c } = S; buildTableUI();
-      if (keep) selectCells(keep); else focusCell(r, c, true);
+      S.dirty = true; changed(); const { r, c } = S;
+      pinTable(() => { buildTableUI(); if (keep) selectCells(keep); else focusCell(r, c, true); });
     }
     function op(name) {
       const S = tableSess; if (!S) return; syncCell();
@@ -1484,7 +1550,7 @@ export default {
         case 'split': TE.split(t, r, c); break;
         case 'book': case 'grid': case 'none': TE.setRules(t, name); break;
       }
-      S.dirty = true; buildTableUI(); writeTable(); focusCell(r, c);
+      S.dirty = true; pinTable(() => { buildTableUI(); writeTable(); focusCell(r, c); });
     }
     function syncBar() {
       const S = tableSess; if (!S?.bar) return;
@@ -1706,6 +1772,7 @@ export default {
         }
         if (near(it) || inZone(it)) { if (it.kind === 'dmath' || it.kind === 'imath') add(it.from, it.to, Decoration.mark({ class: 'vz-src-math' })); continue; }
         switch (it.kind) {
+          case 'cblock': ranges.push(Decoration.replace({ block: true, widget: new Html('cb' + it.from + it.lines + it.label, () => h('div', { class: 'vz-cblock-w' }, h('div', { class: 'vz-cblock', title: 'Not in the PDF. Click to show the LaTeX.' }, `${it.label} · ${it.lines} line${it.lines === 1 ? '' : 's'} · not in the PDF`)), it.from + 1) }).range(it.from, it.to)); covered.push({ from: it.from, to: it.to }); break;
           case 'preamble': ranges.push(Decoration.replace({ block: true, widget: new Html('pre' + it.lines, () => h('div', { class: 'vz-preamble-w' }, h('div', { class: 'vz-preamble', title: 'Click to show the preamble' }, `Preamble · ${it.lines} lines of packages and settings`)), 1) }).range(it.from, it.to)); break;
           case 'comment': hideRange(it.from, it.to); break;
           case 'dmath': {
@@ -1836,6 +1903,8 @@ export default {
     const field = StateField.define({
       create(state) { const p = read(state); return { p, deco: build(state, p) }; },
       update(v, tr) {
+        // a table being edited follows changes above it (a \usepackage added after a compile, typing elsewhere)
+        if (tr.docChanged && tableSess) tableSess.from = tr.changes.mapPos(tableSess.from, 1);
         const again = tr.effects.some(e => e.is(refresh) || e.is(setEdit) || e.is(hideEff));
         if (!tr.docChanged && !tr.selection && !again) return v;
         if (!tr.docChanged && !again && pointerDown) { held = true; return v; }
@@ -2261,6 +2330,9 @@ export default {
 .vz-table-edit td.sel { background: color-mix(in srgb, var(--accent) 22%, transparent) !important; }
 .vz-tabedit.has-cells .vz-table-edit { user-select: none; } .vz-tabedit:focus { outline: none; }
 .vz-empty { display: inline-block; min-width: 2em; }
+.vz-cblock-w { display: flow-root; }
+.vz-cblock { margin: 4px 0; padding: 3px 10px; border: 1px dashed var(--line); border-radius: 6px; color: var(--muted); font: italic 12px var(--ui); text-align: center; cursor: pointer; background: color-mix(in srgb, var(--panel-2, var(--panel)) 60%, transparent); }
+.vz-cblock:hover { border-color: var(--accent); color: var(--accent); }
 .vz-table-edit td.editing.visual { font: inherit; white-space: nowrap; box-shadow: inset 0 0 0 2px var(--accent); }
 .vz-cm { display: inline-block; padding: 0 1px; border-radius: 3px; cursor: pointer; } .vz-cm:hover { background: color-mix(in srgb, var(--accent) 14%, transparent); }
 .vz-cm:empty::before { content: '□'; color: var(--muted); }

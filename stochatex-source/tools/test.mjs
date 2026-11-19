@@ -63,6 +63,20 @@ await test('copying a block of cells: LaTeX grid, text for Excel, HTML', async (
   assert.equal(T.gridText(g), 'A\tB\tc_t\nTotal\t\tR&D');
   assert.match(T.gridHtml(g), /<b>B<\/b>/);
 });
+await test('stacked accents: shown as \\overset while editing, written back unchanged', async () => {
+  const vm = await import('node:vm'); const ctx = { window: {}, document: { addEventListener() {} } }; vm.createContext(ctx);
+  vm.runInContext(fs.readFileSync(path.join(app, 'equation/brackets.js'), 'utf8'), ctx);
+  const B = ctx.window.StochaBrackets;
+  for (const x of ['\\hat{\\tilde{p}}_t = \\beta \\hat{\\tilde{p}}_{t+1}', '\\hat{\\tilde{\\bar{x}}}', '\\widehat{\\tilde{p}}^{*}', '\\hat{x}']) assert.equal(B.unstackAccents(B.stackAccents(x)), x);
+  assert.equal(B.stackAccents('\\hat{\\tilde{p}}'), '\\overset{\\hat{}}{\\tilde{p}}');
+});
+await test('visual view folds commented-out blocks (comment, \\excludecomment, \\iffalse)', async () => {
+  const VM = await import(path.join(app, 'modules/visual-mode.js'));
+  const d = '\\documentclass{article}\n\\excludecomment{draft}\n\\begin{document}\nA.\n\\begin{comment}\nx $y$\n\\end{comment}\nB.\n\\begin{draft}\nd\n\\end{draft}\n\\iffalse\nold \\ifx\\a\\b in \\fi still\n\\fi\nC.\n\\end{document}';
+  const it = VM.parse(d).items;
+  assert.deepEqual(it.filter(x => x.kind === 'cblock').map(x => x.label), ['Commented out', 'Left out (draft)', '\\iffalse … \\fi']);
+  assert.ok(!it.some(x => x.kind === 'imath'));
+});
 await test('published files carry versions (stamp)', () => {
   const ix = fs.readFileSync(path.join(app, 'index.html'), 'utf8');
   assert.match(ix, /app\.css\?v=[0-9a-f]{10}/); assert.match(ix, /core\.js\?v=[0-9a-f]{10}/); assert.match(ix, /<script type="importmap">/);

@@ -128,7 +128,40 @@
     mf.insert(keepContent ? firstArg(hit[2].trim().replace(/^\\(overset|underset|stackrel)\{[^{}]*\}/, '\\x')) : '', { format: 'latex', insertionMode: 'replaceSelection' });
     return true;
   }
+  // ---- stacked accents (\hat{\tilde{p}}): MathLive 0.111 draws the outer accent beside the letter, not above it.
+  // While editing, \hat{\tilde{p}} is shown as \overset{\hat{}}{\tilde{p}}, which it draws correctly; when the field is
+  // read, it is written back as \hat{\tilde{p}}, so the paper's source never changes.
+  const ACC = 'hat|widehat|tilde|widetilde|bar|overline|check|breve|acute|grave|dot|ddot|vec|mathring';
+  const groupEnd = (s, i) => { let d = 0; for (let k = i; k < s.length; k++) { if (s[k] === '\\') { k++; continue; } if (s[k] === '{') d++; else if (s[k] === '}' && --d === 0) return k; } return -1; };
+  function stackAccents(tex) {
+    if (!tex || !/\\(hat|widehat|tilde|widetilde|bar|overline|check|breve|acute|grave|dot|ddot|vec|mathring)\s*\{\s*\\(hat|widehat|tilde|widetilde|bar|overline|check|breve|acute|grave|dot|ddot|vec|mathring)\b/.test(tex)) return tex;
+    const re = new RegExp(`\\\\(${ACC})\\s*\\{(?=\\s*\\\\(?:${ACC})\\b)`, 'g');
+    let out = tex;
+    for (let guard = 0; guard < 20; guard++) {
+      re.lastIndex = 0; const m = re.exec(out); if (!m) break;
+      const open = m.index + m[0].length - 1, close = groupEnd(out, open); if (close < 0) break;
+      out = out.slice(0, m.index) + `\\overset{\\${m[1]}{}}{` + out.slice(open + 1, close) + '}' + out.slice(close + 1);
+    }
+    return out;
+  }
+  function unstackAccents(tex) {
+    if (!tex || tex.indexOf('\\overset') < 0) return tex;
+    const re = new RegExp(`\\\\overset\\s*\\{\\s*\\\\(${ACC})\\s*\\{\\s*\\}\\s*\\}\\s*\\{`, 'g');
+    let out = tex;
+    for (let guard = 0; guard < 40; guard++) {
+      re.lastIndex = 0; const m = re.exec(out); if (!m) break;
+      const open = m.index + m[0].length - 1, close = groupEnd(out, open); if (close < 0) break;
+      out = out.slice(0, m.index) + `\\${m[1]}{` + out.slice(open + 1, close) + '}' + out.slice(close + 1);
+    }
+    return out;
+  }
   function setupField(mf, opts = {}) {
+    mf.addEventListener('input', () => {
+      try {
+        const v = mf.getValue('latex'), st = stackAccents(v);
+        if (st !== v) { const pos = mf.position, n = mf.lastOffset; mf.setValue(st, { silenceNotifications: true }); mf.position = Math.min(mf.lastOffset, pos + (mf.lastOffset - n)); }
+      } catch (e) {}
+    });
     try { const sc = { ...mf.inlineShortcuts }; delete sc['*']; sc['**'] = '\\cdot'; if (opts.star !== 'dot') mf.inlineShortcuts = sc; } catch (e) {}
     // deleting one bracket of a \left … \right removes the pair and keeps what is inside
     // (MathLive would leave an invisible \left. or select the whole group, so the next key deletes it all)
@@ -289,5 +322,5 @@
       mf.insert(t, { format: 'latex', selectionMode: 'placeholder' }); mf.dispatchEvent(new Event('input', { bubbles: true }));
     });
   }
-  window.StochaBrackets = { tidySigns, autoSize: autoSizeBrackets, flipInText, flipInField, BIG, setupField, removeStructure, structureAt, wholeStructure, balancedGroup };
+  window.StochaBrackets = { stackAccents, unstackAccents, tidySigns, autoSize: autoSizeBrackets, flipInText, flipInField, BIG, setupField, removeStructure, structureAt, wholeStructure, balancedGroup };
 })();

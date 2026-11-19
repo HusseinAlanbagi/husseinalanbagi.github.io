@@ -384,7 +384,7 @@
   </div>
 </main>
 
-<script src="brackets.js?v=196c5a3567"></script>
+<script src="brackets.js?v=4fca815e1c"></script>
 <script>
 const SOURCES = [
   'mathlive.min.js',
@@ -443,7 +443,7 @@ function start() {
   }
 
   function buildOutput(edited) {
-    let body = mf.getValue('latex');
+    let body = window.StochaBrackets?.unstackAccents ? window.StochaBrackets.unstackAccents(mf.getValue('latex')) : mf.getValue('latex');   // stacked accents back to \hat{\tilde{p}}
     if (edited && autoSize) body = autoSizeBrackets(body);
     if (wrap.multi) {
       // unwrap the aligned block; anything typed after it joins the last row
@@ -576,7 +576,7 @@ function start() {
       let inner = out.slice(m[0].length).replace(new RegExp(`\\\\end\\{${m[1]}\\*?\\}\\s*$`), '');
       out = /^(align|flalign|alignat|eqnarray)$/.test(m[1]) ? `\\begin{aligned}${inner}\\end{aligned}` : /^(gather|multline)$/.test(m[1]) ? `\\begin{gathered}${inner}\\end{gathered}` : inner;
     }
-    return out;
+    return window.StochaBrackets?.stackAccents ? window.StochaBrackets.stackAccents(out) : out;     // MathLive draws \overset{\hat{}}{\tilde{p}} right
   }
   let ghost = null;
   function getGhost() {
@@ -731,7 +731,8 @@ function start() {
   }, true);
   mf.addEventListener('copy', (e) => {
     const r = mf.selection?.ranges?.[0] || [0, 0];
-    const t = r[0] === r[1] ? mf.getValue('latex') : mf.getValue(Math.min(...r), Math.max(...r), 'latex');
+    const un = (x) => (window.StochaBrackets?.unstackAccents ? window.StochaBrackets.unstackAccents(x) : x);
+    const t = un(r[0] === r[1] ? mf.getValue('latex') : mf.getValue(Math.min(...r), Math.max(...r), 'latex'));
     e.clipboardData.setData('text/plain', t); e.preventDefault(); e.stopPropagation();
   }, true);
   function flash(msg) { const st = document.getElementById('status'); if (!st) return; st.textContent = msg; setTimeout(() => { if (st.textContent === msg) st.textContent = ''; }, 2200); }
