@@ -666,7 +666,7 @@ export default {
       rowAbove: 'M4 13h16v7H4z M12 3v7 M9 6l3-3 3 3', rowBelow: 'M4 4h16v7H4z M12 21v-7 M9 18l3 3 3-3', colLeft: 'M13 4h7v16h-7z M3 12h7 M6 9l-3 3 3 3', colRight: 'M4 4h7v16H4z M21 12h-7 M18 9l3 3-3 3',
       delRow: 'M4 9h16v6H4z M9 4l6 0 M8 19l8 0', delCol: 'M9 4h6v16H9z M4 9v6 M20 9v6',
       alL: 'M4 6h16 M4 10h10 M4 14h16 M4 18h10', alC: 'M4 6h16 M7 10h10 M4 14h16 M7 18h10', alR: 'M4 6h16 M10 10h10 M4 14h16 M10 18h10',
-      merge: 'M3 6h18v12H3z M8 12h8 M10 10l-2 2 2 2 M14 10l2 2-2 2', split: 'M3 6h18v12H3z M12 6v12', table: 'M3 5h18v14H3z M3 10h18 M3 15h18 M9 5v14 M15 5v14' };
+      merge: 'M3 6h18v12H3z M8 12h8 M10 10l-2 2 2 2 M14 10l2 2-2 2', copyTable: 'M8 8h13v13H8z M8 12.5h13 M8 17h13 M12.5 8v13 M4 16V4h12', split: 'M3 6h18v12H3z M12 6v12', table: 'M3 5h18v14H3z M3 10h18 M3 15h18 M9 5v14 M15 5v14' };
     const ico = (n, size = 14) => { const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('width', size); svg.setAttribute('height', size); svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', n === 'more' ? '3' : '1.8'); svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round'); svg.setAttribute('aria-hidden', 'true'); const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', ICO[n]); svg.append(p); return svg; };
     // the symbol picker: [LaTeX, what it looks like, words to find it by]
     const SYM_GROUPS = [
@@ -1406,6 +1406,24 @@ export default {
       if (cut) clearCells();
       ctx.ui.toast(ok ? `${cut ? 'Cut' : 'Copied'} ${whole ? 'the table' : n + ' cell' + (n === '1 × 1' ? '' : 's')}: paste here, in Excel or in Word.` : 'The browser did not allow copying.');
     }
+    // the whole table: a real table for Word and Excel (HTML), its complete LaTeX for any text or LaTeX editor,
+    // and its cells for pasting into another StochaTeX table
+    function copyTable() {
+      const S = tableSess; if (!S) return; syncCell(); writeTable();
+      const doc = S.view.state.doc.toString(), loc = locateTable(doc, S.from); if (!loc) return;
+      let a = S.from, b = doc.indexOf('}', loc.bodyTo) + 1;
+      // inside a table float (or table*, threeparttable …)? take all of it, with the caption and label
+      const env = /\\begin\{(table\*?|threeparttable|sidewaystable|longtable)\}/g; let best = null;
+      for (let m; (m = env.exec(doc.slice(0, a))); ) { const end = doc.indexOf(`\\end{${m[1]}}`, b); if (end >= 0 && !doc.slice(m.index, a).includes(`\\end{${m[1]}}`)) best = [m.index, end + `\\end{${m[1]}}`.length]; }
+      if (best) [a, b] = best;
+      const latex = doc.slice(a, b), grid = TE.copyGrid(S.t, { r0: 0, r1: S.t.rows.length - 1, c0: 0, c1: S.t.cols.length - 1 });
+      const put = (e) => { e.clipboardData.setData('text/plain', latex); e.clipboardData.setData('text/html', TE.gridHtml(grid)); try { e.clipboardData.setData('text/x-stochatex-cells', JSON.stringify(grid)); } catch {} e.preventDefault(); };
+      document.addEventListener('copy', put, { once: true, capture: true });
+      let ok = false; try { ok = document.execCommand('copy'); } catch {}
+      document.removeEventListener('copy', put, { capture: true });
+      if (!ok) { try { navigator.clipboard.writeText(latex); ok = true; } catch {} }
+      ctx.ui.toast(ok ? `Copied the whole table${best ? ' (with its caption and label)' : ''}: it pastes as a table in Word and Excel, and as LaTeX in any LaTeX editor.` : 'The browser did not allow copying.');
+    }
     function clearCells() {
       const S = tableSess, gone = new Set(selList());
       pinTable(() => {
@@ -1577,8 +1595,9 @@ export default {
         h('button', { title: 'Italic (Ctrl+I): the selected words, or the whole cell', onMousedown: (e) => { e.preventDefault(); styleSel('italic'); } }, h('i', { style: { fontFamily: 'var(--serif, serif)' } }, 'I')),
         h('button', { title: 'Insert maths at the cursor, edited like an equation (Ctrl+M, or type $)', onMousedown: (e) => { e.preventDefault(); const td = S.el.querySelector('td.editing'); if (td?.classList.contains('visual')) insertMath(td); else wrapCell('math'); } }, h('span', { class: 'vz-om' }, '∑')), sep(),
         b('merge', 'Merge the selected cells of a row (drag across them, or Shift+click)'), b('split', 'Split a merged cell'), sep(),
-        h('button', { title: 'Copy the selected cells (Ctrl+C; Ctrl+X cuts), or the whole table when none are selected: paste here, in Excel or in Word', onMousedown: (e) => { e.preventDefault(); copyCells(false, !S.sel); } }, ico('copy', 15)), sep(),
-        rules, h('span', { class: 'spacer' }), S.where,
+        h('button', { title: 'Copy cells: the selected cells, or the cell you are in (Ctrl+C; Ctrl+X cuts). They paste into Excel, Word, or another table here', 'aria-label': 'Copy cells', onMousedown: (e) => { e.preventDefault(); copyCells(false); } }, ico('copy', 15)),
+        h('button', { title: 'Copy the whole table: a table in Word and Excel, the complete LaTeX (with caption and label) in any LaTeX editor', 'aria-label': 'Copy the whole table', onMousedown: (e) => { e.preventDefault(); copyTable(); } }, ico('copyTable', 16)), sep(),
+        rules, h('span', { class: 'spacer' }),
         h('button', { class: 'vz-latexsw' + (S.latex ? ' on' : ''), title: S.latex ? 'Cells show their LaTeX: click to type in them as drawn' : 'Show the LaTeX of the cells while you edit (click again to go back)', 'aria-pressed': String(S.latex), onMousedown: (e) => { e.preventDefault(); syncCell(); S.latex = !S.latex; ctx.settings.set('table-latex', S.latex); const { r, c } = S; buildTableUI(); focusCell(r, c, false); } }, 'LaTeX'),
         h('button', { title: 'Open the whole table as LaTeX in the source', onMousedown: (e) => { e.preventDefault(); const from = S.from; finishTable(true); S.view.dispatch({ selection: { anchor: from + 1 }, scrollIntoView: false }); S.view.focus(); } }, ico('code', 15)),
         h('button', { class: 'primary', title: 'Done (Esc)', onMousedown: (e) => { e.preventDefault(); finishTable(true); } }, ico('check', 15)));
@@ -1601,7 +1620,7 @@ export default {
         // pressing on selected text would start the browser's drag-and-drop of that text: select cells instead
         S.el.addEventListener('dragstart', (e) => { if (e.target.closest?.('math-field')) return; e.preventDefault(); });
       }
-      S.el.replaceChildren(S.bar, h('div', { class: 'vz-tabgridwrap' }, renderGrid()), h('div', { class: 'vz-tabhint muted' }, S.latex ? 'Cells show LaTeX · Tab: next cell (adds a row at the end) · Enter: cell below · “LaTeX” goes back to typing as drawn · Esc: done' : 'Type as in Word · $ or Ctrl+M: maths · Tab: next cell (adds a row at the end) · Enter: cell below · drag across cells (or Shift+arrows) to select them: Ctrl+C, Ctrl+X, Delete, Ctrl+V · Esc: done'));
+      S.el.replaceChildren(S.bar, h('div', { class: 'vz-tabgridwrap' }, renderGrid()), h('div', { class: 'vz-tabfoot' }, S.where), h('div', { class: 'vz-tabhint muted' }, S.latex ? 'Cells show LaTeX · Tab: next cell (adds a row at the end) · Enter: cell below · “LaTeX” goes back to typing as drawn · Esc: done' : 'Type as in Word · $ or Ctrl+M: maths · Tab: next cell (adds a row at the end) · Enter: cell below · drag across cells (or Shift+arrows) to select them: Ctrl+C, Ctrl+X, Delete, Ctrl+V · Esc: done'));
       syncBar();
     }
     // insert a new table: a grid to pick rows × columns, like Word's
@@ -2320,7 +2339,8 @@ export default {
 .vz-tabbar button.on { background: var(--accent-soft, #e8eefc); color: var(--ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent); }
 .vz-tabbar button.primary { background: var(--accent); color: #fff; } .vz-tabbar .spacer { flex: 1; }
 .vz-tabbar .vz-seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; padding: 1px; gap: 1px; } .vz-tabbar .vz-seg button { height: 22px; font-size: 11.5px; padding: 0 7px; }
-.vz-tabwhere { font: 11px var(--ui); color: var(--muted); margin-right: 6px; white-space: nowrap; }
+.vz-tabwhere { font: 600 11px var(--ui); color: var(--muted); white-space: nowrap; }
+.vz-tabfoot { text-align: center; padding: 0 10px 2px; min-height: 16px; }
 .vz-tabgridwrap { display: flex; justify-content: center; padding: 10px 8px 6px; overflow-x: auto; }
 .vz-table-edit td { min-width: 3.5em; cursor: text; outline: none; position: relative; border-left: 1px dashed color-mix(in srgb, var(--line) 80%, transparent); border-right: 1px dashed color-mix(in srgb, var(--line) 80%, transparent); }
 .vz-table-edit tr:not([class*="r-"]) td { border-top: 1px dashed color-mix(in srgb, var(--line) 60%, transparent); }
