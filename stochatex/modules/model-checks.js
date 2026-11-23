@@ -7,7 +7,7 @@
 // that, and the comment lines  % model-begin / % model-end  still limit the check to what is between them.
 // Variables come only from the chosen equations. Their type (endogenous, shock, parameter, ignore) and Dynare name
 // can be set by hand; that is kept per project and used by the Dynare export.
-import { scan, findEquations, symName, multiLetterCandidates } from './lib/latex-math.js';
+import { scan, findEquations, symName, multiLetterCandidates, steadyState } from './lib/latex-math.js';
 import { parseMod } from './lib/dynare.js';
 import { modelState } from './lib/model-state.js';
 import { loadMathJax, mathSvg as mathSvgRaw } from './lib/mathjax.js';
@@ -132,6 +132,8 @@ export function compareMod(result, src) {
 // A block from "% model-list-begin {options}" to "% model-list-end". Its equations are never counted, and
 // "Update the list" rewrites it from the options stored on its first line.
 export const LIST_DEFAULTS = { title: 'Model equations', level: 'section*', group: 'one', tags: true };
+// steady-state form of the list: form 'ss', the mark of steady-state variables, shocks set to 0 or kept, log deviations 0
+export const SS_DEFAULTS = { mark: 'bar', shocks: 'zero', devZero: false };
 export function listBlocks(text) {
   const out = [], re = /^[ \t]*%+[ \t]*model-list-begin\b([^\n]*)$/gm;
   for (const m of text.matchAll(re)) {
@@ -159,7 +161,8 @@ const topAmp = (t) => {          // put & before the first "=" that is not insid
   return '& ' + t;
 };
 // files: [{ path, text }] in paper order; model: checkProject(...).model
-export function modelListTeX(model, files, opts = {}) {
+const shockSet = (r) => new Set((r?.vars || []).filter(v => v.type === 'shock').map(v => v.key));
+export function modelListTeX(model, files, opts = {}, shockKeys = null) {
   const o = { ...LIST_DEFAULTS, ...opts };
   // where each file sits in the paper: the chain of \input positions from the main file (files[0])
   const by = new Map(files.map(f => [f.path, f])), place = new Map();
@@ -178,6 +181,7 @@ export function modelListTeX(model, files, opts = {}) {
     let t = e.tex.replace(/(^|[^\\])%.*$/gm, '$1').replace(/\\label\s*\{[^}]*\}/g, '').replace(/\\(?:nonumber|notag)(?![A-Za-z])/g, '').replace(/\\tag\*?\s*\{[^}]*\}/g, '')
       .replace(/\\(?:begin|end)\{split\}/g, '').replace(/\s+/g, ' ').trim();
     if (!/(^|[^\\])&/.test(t)) t = topAmp(t);
+    if (o.form === 'ss') t = steadyState(t, { mark: o.mark || 'bar', shocks: o.shocks || 'zero', devZero: !!o.devZero, isShock: shockKeys ? (sy) => shockKeys.has(sy.key) || (!shockKeys.size && /^(\\(varepsilon|epsilon|eta|nu|xi|zeta|upsilon)|[ue])$/.test(sy.base)) : undefined });
     return { t: t + (o.tags && label ? ` \\tag{\\ref{${label}}}` : ''), from: label || `${e.file} line ${e.line}` };
   };
   const groups = [];
@@ -219,7 +223,7 @@ export default {
       r.lists = [];
       const fl = files();
       for (const f of fl) for (const b of listBlocks(f.text)) {
-        const now = modelListTeX(r.model, fl, b.opts), stale = now.replace(/\s+/g, '') !== f.text.slice(b.from, b.to).replace(/\s+/g, '');
+        const now = modelListTeX(r.model, fl, b.opts, shockSet(r)), stale = now.replace(/\s+/g, '') !== f.text.slice(b.from, b.to).replace(/\s+/g, '');
         r.lists.push({ file: f.path, line: b.beginLine, stale, opts: b.opts });
         if (stale) r.problems.push({ file: f.path, line: b.beginLine, severity: 'info', message: 'The list of model equations here is out of date: the model has changed. Use “Update the list” in the Model check panel (or the command “Model equations: update the list”).' });
       }
@@ -260,7 +264,8 @@ export default {
         h('div', { style: { ...pad, display: 'flex', gap: '6px', flexWrap: 'wrap', margin: '0 0 8px' } },
           h('button', { class: 'small primary', title: 'A typeset table of the variables, and a map of which equation uses which variable at which date', onClick: () => visualise() }, 'Visualise variables'),
           h('button', { class: 'small', title: 'Compare these equations and variables with a Dynare .mod file', onClick: (e) => compareMenu(e.currentTarget) }, 'Compare with .mod'),
-          h('button', { class: 'small', title: 'Write the equations that are in the model into the paper, as a section (at the cursor)', onClick: () => listDialog() }, 'List as a section…')),
+          h('button', { class: 'small', title: 'Write the equations that are in the model into the paper, as a section (at the cursor)', onClick: () => listDialog() }, 'List as a section…'),
+          h('button', { class: 'small', title: 'Write the model in its steady state into the paper: time subscripts dropped, a bar (or hat, star …) on each variable, E_t gone, shocks 0', onClick: () => listDialog('ss') }, 'Steady state…')),
         ...(r.lists || []).filter(l => l.stale).map(l => h('div', { class: 'mc-stale', style: pad }, h('span', {}, `The list of model equations (${l.file}, line ${l.line}) is out of date.`), h('span', { class: 'mc-stale-btns' }, h('button', { class: 'small primary', onClick: () => updateLists() }, 'Update the list'), h('button', { class: 'small', onClick: () => ctx.goto(l.file, l.line) }, 'Show it')))),
         eqList(r),
         group('endogenous variables', s.endo, true), group('shocks', s.shocks), group('parameters', s.params), s.ignored.length ? group('ignored', s.ignored) : null,
@@ -279,19 +284,21 @@ export default {
     function updateLists() {
       run(); if (!last) return;
       const fl = files(); let n = 0;
-      for (const f of fl) { const blocks = listBlocks(f.text); for (let k = blocks.length - 1; k >= 0; k--) { const b = blocks[k], now = modelListTeX(last.model, fl, b.opts); if (now.replace(/\s+/g, '') !== f.text.slice(b.from, b.to).replace(/\s+/g, '')) { writeBlock(f.path, b.from, b.to, now); n++; } } }
+      for (const f of fl) { const blocks = listBlocks(f.text); for (let k = blocks.length - 1; k >= 0; k--) { const b = blocks[k], now = modelListTeX(last.model, fl, b.opts, shockSet(last)); if (now.replace(/\s+/g, '') !== f.text.slice(b.from, b.to).replace(/\s+/g, '')) { writeBlock(f.path, b.from, b.to, now); n++; } } }
       ctx.ui.toast(n ? `Updated ${n === 1 ? 'the list' : n + ' lists'} of model equations${n && fl.some(f => f.path === ctx.project.activeFile) ? ' (Ctrl+Z undoes it)' : ''}.` : 'The list of model equations is already up to date.');
       run();
     }
-    function listDialog() {
+    function listDialog(formArg) {
       run();
       if (!last || !last.model.length) return ctx.ui.toast('There are no model equations yet: number them, or mark them with % model.', 'warn');
-      const existing = (last.lists || [])[0];
-      const o = existing ? { ...existing.opts } : listOpts();
+      const want = formArg || 'paper';
+      let existing = (last.lists || []).find(l => (l.opts.form || 'paper') === want);
+      const o = existing ? { ...existing.opts } : { ...listOpts(), form: want, ...(want === 'ss' ? { ...SS_DEFAULTS, title: 'Steady state', ...(ctx.settings.get('ss:' + pid(), {})) } : { title: listOpts().form === 'ss' ? LIST_DEFAULTS.title : listOpts().title }) };
+      if (o.form === 'ss') for (const [k, v] of Object.entries(SS_DEFAULTS)) if (o[k] === undefined) o[k] = v;
       const fl = files();
       const pre = h('pre', { class: 'mc-listpre' }), info = h('p', { class: 'muted', style: { margin: '0 0 6px' } });
       const refresh = () => {
-        const tex = modelListTeX(last.model, fl, o);
+        const tex = modelListTeX(last.model, fl, o, shockSet(last));
         pre.textContent = tex;
         const groups = o.group === 'subsection' ? (tex.match(/\\sub(?:sub)?section\*?\{/g) || []).length : 1;
         const unlabelled = last.model.filter(e => !/\\label\s*\{/.test(e.tex)).length;
@@ -304,25 +311,46 @@ export default {
       const drawSeg = () => seg.replaceChildren(...[['one', 'One list'], ['subsection', 'By subsection']].map(([v, l]) => h('button', { type: 'button', class: o.group === v ? 'on' : '', title: v === 'subsection' ? 'One heading for each \\subsection the equations come from (Households, Firms …)' : 'All equations in one block', onClick: () => { o.group = v; drawSeg(); refresh(); } }, l)));
       drawSeg();
       const tags = h('input', { type: 'checkbox', checked: !!o.tags, onChange: (e) => { o.tags = e.target.checked; refresh(); } });
+      // the form: as in the paper, or the steady state (dated variables lose the time index and get a mark)
+      const formSeg = h('span', { class: 'mc-tabs' }), ssBox = h('div', { class: 'mc-ssopts' });
+      const drawForm = () => {
+        formSeg.replaceChildren(...[['paper', 'As in the paper'], ['ss', 'Steady state']].map(([v, l]) => h('button', { type: 'button', class: (o.form || 'paper') === v ? 'on' : '', title: v === 'ss' ? 'x_t, x_{t+1} and x_{t-1} all become the steady state (e.g. \\bar{x}); E_t goes; shocks can be 0' : 'The equations as they are written in the paper', onClick: () => {
+          if ((o.form || 'paper') === v) return;
+          const wasDefault = o.title === (o.form === 'ss' ? 'Steady state' : LIST_DEFAULTS.title);
+          o.form = v; if (v === 'ss') for (const [k, x] of Object.entries(SS_DEFAULTS)) if (o[k] === undefined) o[k] = x;
+          if (wasDefault) { o.title = v === 'ss' ? 'Steady state' : LIST_DEFAULTS.title; title.value = o.title; }
+          drawForm(); refresh();
+        } }, l)));
+        ssBox.hidden = o.form !== 'ss';
+      };
+      const MARKS = [['bar', 'Bar   \\bar{x}'], ['overline', 'Overline (long bar)   \\overline{x}'], ['hat', 'Hat   \\hat{x}'], ['tilde', 'Tilde   \\tilde{x}'], ['star', 'Star   x^{*}'], ['ss', 'Subscript   x_{ss}'], ['none', 'Nothing: only drop the t']];
+      const markSel = h('select', { onChange: (e) => { o.mark = e.target.value; refresh(); } }, ...MARKS.map(([v, l]) => h('option', { value: v, selected: (o.mark || 'bar') === v }, l)));
+      const shocksCb = h('input', { type: 'checkbox', checked: (o.shocks || 'zero') === 'zero', onChange: (e) => { o.shocks = e.target.checked ? 'zero' : 'keep'; refresh(); } });
+      const devCb = h('input', { type: 'checkbox', checked: !!o.devZero, onChange: (e) => { o.devZero = e.target.checked; refresh(); } });
+      ssBox.append(field('Mark', markSel),
+        h('label', { class: 'mc-check' }, shocksCb, ' Shocks are 0 in the steady state (variables typed as shocks in the Model check, or ε, η, u …)'),
+        h('label', { class: 'mc-check' }, devCb, ' Log deviations (\\hat{x}_t, \\tilde{x}_t) are 0 in the steady state'),
+        h('p', { class: 'muted', style: { margin: '2px 0 0', fontSize: '12px' } }, 'Parameters (symbols without a date) stay as they are. E_t is dropped. x_{1,t} keeps its other subscript: \\bar{x}_{1}.'));
+      drawForm();
       refresh();
       const body = h('div', { class: 'mc-listdlg' },
         h('p', { class: 'muted', style: { marginTop: 0 } }, 'Only the equations in the model are listed (as counted in the Model check). The block is a copy: its equations are not counted again, and when the model changes you are offered “Update the list”.'),
-        field('Title', title), field('Heading', level), field('Group', seg),
+        field('Form', formSeg), ssBox, field('Title', title), field('Heading', level), field('Group', seg),
         h('label', { class: 'mc-check' }, tags, ' Show each equation’s number from the paper (\\tag{\\ref{…}}, for equations with a \\label)'),
         info, h('details', {}, h('summary', {}, 'The LaTeX that will be written'), pre));
-      ctx.ui.modal({ title: existing ? 'Update the list of model equations' : 'List the model equations as a section', wide: true, body, buttons: [{ label: 'Cancel' },
+      ctx.ui.modal({ title: existing ? (want === 'ss' ? 'Update the steady state' : 'Update the list of model equations') : (want === 'ss' ? 'The model in its steady state, as a section' : 'List the model equations as a section'), wide: true, body, buttons: [{ label: 'Cancel' },
         ...(existing ? [{ label: 'Insert another copy here', onClick: (m) => { m.close(); insertList(o); } }, { label: 'Update the list', primary: true, onClick: (m) => { m.close(); replaceList(existing, o); } }]
           : [{ label: 'Insert at the cursor', primary: true, onClick: (m) => { m.close(); insertList(o); } }])] });
     }
     function replaceList(existing, o) {
-      ctx.settings.set('list:' + pid(), o);
+      if (o.form === 'ss') ctx.settings.set('ss:' + pid(), { mark: o.mark, shocks: o.shocks, devZero: o.devZero }); else ctx.settings.set('list:' + pid(), o);
       const f = files().find(x => x.path === existing.file); if (!f) return;
       const b = listBlocks(f.text).find(x => x.beginLine === existing.line); if (!b) return;
-      writeBlock(f.path, b.from, b.to, modelListTeX(last.model, files(), o));
+      writeBlock(f.path, b.from, b.to, modelListTeX(last.model, files(), o, shockSet(last)));
       ctx.ui.toast('Updated the list of model equations.'); run();
     }
     function insertList(o) {
-      ctx.settings.set('list:' + pid(), o);
+      if (o.form === 'ss') ctx.settings.set('ss:' + pid(), { mark: o.mark, shocks: o.shocks, devZero: o.devZero }); else ctx.settings.set('list:' + pid(), o);
       const v = ctx.editor.view, path = ctx.project.activeFile;
       if (!v || !/\.tex$/i.test(path || '')) return ctx.ui.toast('Open a .tex file and put the cursor where the section should go.', 'warn');
       const st = v.state, pos = st.selection.main.head, text = st.doc.toString();
@@ -330,7 +358,7 @@ export default {
       if ((docAt >= 0 && pos < docAt) || (endAt >= 0 && pos > endAt)) return ctx.ui.toast('Put the cursor inside the document (between \\begin{document} and \\end{document}).', 'warn');
       const line = st.doc.lineAt(pos), blankLine = !line.text.trim();
       const at = blankLine ? line.from : line.to;
-      const tex = modelListTeX(last.model, files(), o);
+      const tex = modelListTeX(last.model, files(), o, shockSet(last));
       const ins = (blankLine ? '' : '\n\n') + tex + '\n';
       v.dispatch({ changes: { from: at, to: blankLine ? line.to : at, insert: ins }, selection: { anchor: at + ins.length }, scrollIntoView: true, userEvent: 'input' });
       v.focus();
@@ -338,6 +366,7 @@ export default {
       setTimeout(run, 50);
     }
     ctx.ui.addCommand({ id: 'model.list', name: 'Model equations: insert them as a section…', run: () => listDialog() });
+    ctx.ui.addCommand({ id: 'model.steady', name: 'Model equations: write the steady state as a section…', run: () => listDialog('ss') });
     ctx.ui.addCommand({ id: 'model.listUpdate', name: 'Model equations: update the list', run: () => updateLists() });
 
     // ---- every display equation with a tick: in the model or not (writes % model / % not model)
@@ -528,6 +557,7 @@ export default {
 .mc-field input[type=text], .mc-field select { font: 13px var(--ui); padding: 4px 8px; max-width: 340px; }
 .mc-field .mc-tabs { justify-self: start; }
 .mc-check { display: flex; gap: 8px; align-items: center; font-size: 13px; }
+.mc-ssopts { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: color-mix(in srgb, var(--accent-soft, #e8eefc) 35%, transparent); } .mc-ssopts[hidden] { display: none; }
 .mc-listpre { max-height: 260px; overflow: auto; font: 11.5px/1.45 var(--mono, monospace); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; margin: 6px 0 0; white-space: pre; }
 button.linklike { border: 0; background: none; padding: 0; color: var(--accent); cursor: pointer; font: inherit; }
 `);

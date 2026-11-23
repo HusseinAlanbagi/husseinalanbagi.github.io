@@ -87,7 +87,7 @@ export function tidyTeX(v) {
 import { loadMathJax } from './lib/mathjax.js';
 import * as VP from './lib/viewplace.js';
 import { modelState } from './lib/model-state.js';
-import { MODEL_COMMENT } from './lib/latex-math.js';
+import { MODEL_COMMENT, steadyState } from './lib/latex-math.js';
 const LONE_LINE = /^\s*(?:\\(textbf|textit|emph|underline|textsc)\s*\{.*\}|(\$)[^$]+\$|(\\\()[\s\S]*?\\\))\s*[.:,;]?\s*$/;
 const svgCache = new Map();
 function renderMath(tex, display, macros, width = 0) {
@@ -677,6 +677,21 @@ export default {
       ['Arrows', 'to →|leftarrow ←|leftrightarrow ↔|Rightarrow ⇒|Leftarrow ⇐|Leftrightarrow ⇔|mapsto ↦|uparrow ↑|downarrow ↓|nearrow ↗|searrow ↘|longrightarrow ⟶'],
       ['Other', 'forall ∀|exists ∃|neg ¬|land ∧|lor ∨|emptyset ∅|ell ℓ|hbar ℏ|prime ′|ldots …|cdots ⋯|vdots ⋮|ddots ⋱|mathbb{R} ℝ|mathbb{N} ℕ|mathbb{Z} ℤ|mathbb{E} 𝔼|mathbb{P} ℙ|degree °|star ⋆|dagger †|top ⊤'],
     ].map(([name, list]) => [name, list.split('|').map(e => { const [cmd, glyph] = e.split(' '); return { tex: cmd === 'degree' ? '^{\\circ}' : '\\' + cmd, glyph, find: cmd.replace(/mathbb\{(\w)\}/, 'mathbb $1 blackboard') }; })]);
+    // the steady state of one display equation, inserted below it as an unnumbered copy (labels and model marks left out)
+    function steadyBelow(v, from, mark) {
+      const items = (v.state.field(field, false)?.p || parse(v.state.doc.toString())).items;       // also with Visual off
+      const it = items.find(y => y.kind === 'dmath' && y.from === from); if (!it) return;
+      const doc = v.state.doc, src = doc.sliceString(it.from, it.to);
+      let text = src.replace(/\\label\s*\{[^}]*\}\s*/g, '').replace(/[ \t]*%[ \t]*(not[ \t-]*)?model\b[^\n]*/gi, '');
+      const m = /^\\begin\{([^}]*)\}/.exec(text);
+      if (m && STAR_FOR[m[1]] !== undefined && STAR_FOR[m[1]]) text = text.replace(m[0], `\\begin{${STAR_FOR[m[1]]}}`).replace(new RegExp(`\\\\end\\{${m[1].replace('*', '\\*')}\\}\\s*$`), `\\end{${STAR_FOR[m[1]]}}`);
+      const body = /^(\\begin\{[^}]*\}(?:\{[^}]*\})?|\\\[|\$\$)([\s\S]*?)(\\end\{[^}]*\}|\\\]|\$\$)$/.exec(text);
+      const ss = body ? body[1] + steadyState(body[2], { mark, shocks: 'zero' }) + body[3] : steadyState(text, { mark, shocks: 'zero' });
+      if (ss === text) return ctx.ui.toast('Nothing to change: this equation has no dated variables (x_t).');
+      const end = doc.lineAt(it.to).to;
+      v.dispatch({ changes: { from: end, insert: '\n' + ss }, userEvent: 'input' });
+      ctx.ui.toast('Steady state written below the equation (unnumbered). Ctrl+Z removes it.', '', 5000);
+    }
     let symPopEl = null;
     const closeSym = () => { if (symPopEl) { symPopEl.remove(); symPopEl = null; } };
     // the floating format bar (in-place equations and maths in table cells): style what you type or what is selected;
@@ -951,6 +966,8 @@ export default {
         const auto = autoSizeOn();
         ctx.ui.menu(anchor, [
           { label: 'Duplicate this equation', hint: 'Ctrl+Shift+D', onClick: () => duplicate(x, false) },
+          ...(x.kind === 'dmath' ? [{ label: 'Write its steady state below (\\bar{x})', title: 'A copy below with the time subscripts dropped and a bar on each variable; E_t goes, shocks are 0', onClick: () => { finishEdit(true); steadyBelow(view, x.from, 'bar'); } },
+            { label: 'Steady state below, with another mark…', onClick: (ev) => { finishEdit(true); ctx.ui.menu(ev?.currentTarget || document.querySelector('.vz-edit-bar') || document.body, [['hat', 'Hat   \\hat{x}'], ['tilde', 'Tilde   \\tilde{x}'], ['star', 'Star   x^{*}'], ['overline', 'Overline   \\overline{x}'], ['ss', 'Subscript   x_{ss}'], ['none', 'Only drop the t']].map(([m, l]) => ({ label: l, onClick: () => steadyBelow(view, x.from, m) }))); } }] : []),
           ...(sess.model.rows > 1 ? [{ label: 'Duplicate this row', onClick: () => duplicate(x, true) }] : []),
           { label: 'Cut the equation', hint: 'with its \\begin … \\end', onClick: () => cutEquation(x) },
           ...(x.kind === 'dmath' && !(sess.model.rows > 1) ? [{ label: 'Make it fit the page (PDF)…', title: 'Break it over lines in the source, so it fits the printed page too', onClick: () => fitPage(x) }] : []),
@@ -2119,6 +2136,7 @@ export default {
     } }));
     const goDef = () => { const v = view(); const r = v && refAt(v, v.state.selection.main.head); if (!r) { ctx.ui.toast('Put the cursor on a \\ref, \\eqref or \\cite first.'); return false; } jumpTo(v, r.kind, r.key); return true; };
     ctx.editor.addKeymap([{ key: 'F12', run: () => { const v = view(); if (!v || !refAt(v, v.state.selection.main.head)) return false; return goDef(); } }]);
+    ctx.ui.addCommand({ id: 'equation.steady', name: 'Steady state of the equation at the cursor (written below it)', run: () => { const v = view(); const it = v && (v.state.field(field, false)?.p || parse(v.state.doc.toString())).items.find(y => y.kind === 'dmath' && v.state.selection.main.head >= y.from && v.state.selection.main.head <= y.to); if (!it) return ctx.ui.toast('Put the cursor in a display equation first. For the whole model: “Model equations: write the steady state as a section…”.'); steadyBelow(v, it.from, 'bar'); } });
     ctx.ui.addCommand({ id: 'table.insert', name: 'Insert a table…', run: () => insertTablePicker(document.querySelector('[data-tb="table"]') || document.querySelector('.vz-switch') || document.body) });
     { const tb = ctx.ui.addToolbarButton({ label: 'Table', icon: 'insert', title: 'Insert a table: pick rows × columns, then fill it in like Word', onClick: (e) => insertTablePicker(e?.currentTarget || document.querySelector('[data-tb="table"]')) }); tb.el.dataset.tb = 'table'; tb.el.replaceChildren(ico('table', 16), h('span', { class: 'lbl' }, 'Table')); tb.el.setAttribute('aria-label', 'Insert a table'); ctx.onDispose(() => tb()); }
     ctx.ui.addCommand({ id: 'nav.definition', name: 'Go to the label or reference under the cursor', key: 'F12', run: goDef });

@@ -275,3 +275,59 @@ export function toDynare(eq, { dropAccents = true, multi = null, rename = null }
     return null;
   }
 }
+
+// ---- the steady state of an equation: dated variables lose their time index and get a mark, E_t goes, shocks can be 0
+// steadyState('c_t^{-\\sigma} = \\beta E_t c_{t+1}^{-\\sigma} R_t / \\pi_{t+1}', { mark: 'bar' })
+//   -> '\\bar{c}^{-\\sigma} = \\beta \\bar{c}^{-\\sigma} \\bar{R} / \\bar{\\pi}'
+// mark: 'bar' (\bar{x}), 'overline', 'hat', 'tilde', 'star' (x^{*}), 'ss' (x_{ss}), 'none' (only the index goes)
+// shocks: 'zero' writes 0 for shocks (ε, η, ν, ξ, ζ, u, e dated, or the keys in isShock), 'keep' keeps them marked
+// devZero: log deviations (\hat{x}_t, \tilde{x}_t) are 0 in the steady state
+const SHOCK_GUESS = /^(\\(varepsilon|epsilon|eta|nu|xi|zeta|upsilon)|[ue])$/;
+export function steadyState(tex, opts = {}) {
+  const mark = opts.mark || 'bar', zero = opts.shocks === 'zero', isShock = opts.isShock || ((s) => SHOCK_GUESS.test(s.base));
+  const res = scan(tex), edits = [], taken = [];
+  const inTaken = (a) => taken.some(([x, y]) => a >= x && a < y);
+  // shocks first (they replace their whole span), then the other dated symbols
+  const syms = res.symbols.filter(s => s.time !== null).sort((a, b) => a.pos - b.pos);
+  for (const s of syms) {
+    if (zero && isShock(s)) { edits.push([s.pos, s.end, '0']); taken.push([s.pos, s.end]); continue; }
+    if (opts.devZero && s.accents?.length && /^(hat|widehat|tilde|widetilde)$/.test(s.accents[0])) { edits.push([s.pos, s.end, '0']); taken.push([s.pos, s.end]); }
+  }
+  for (const s of syms) {
+    if (inTaken(s.pos)) continue;
+    const text = tex.slice(s.pos, s.end);
+    // the symbol's name (with its accents) ends where its scripts begin
+    let d = 0, k = 0;
+    for (; k < text.length; k++) { const c = text[k]; if (c === '\\') { k++; while (/[A-Za-z]/.test(text[k + 1] || '')) k++; continue; } if (c === '{') d++; else if (c === '}') d--; else if (d === 0 && (c === '_' || c === '^' || c === "'")) break; }
+    const name = text.slice(0, k).trimEnd();
+    // the subscript that holds the date: drop the date, keep the rest (x_{1,t} -> x_{1})
+    const rest = text.slice(k);
+    let sub = null;
+    for (const m of rest.matchAll(/_\s*(\{([^{}]*)\}|([A-Za-z0-9]))/g)) {
+      const parts = (m[2] ?? m[3]).split(','), keep = parts.filter(p => !/^\s*t\s*(?:[+-]\s*(?:\d+|[a-z]))?\s*$/.test(p));
+      if (keep.length === parts.length) continue;
+      if (mark === 'ss') keep.push('ss');
+      sub = { from: s.pos + k + m.index, to: s.pos + k + m.index + m[0].length, text: keep.length ? `_{${keep.join(',')}}` : '' };
+      break;
+    }
+    if (!sub) continue;
+    const already = new RegExp(`^\\\\${mark === 'overline' ? 'overline' : mark}\\s*\\{`).test(name);
+    let named = name;
+    if (!already && mark !== 'none' && mark !== 'ss') named = mark === 'star' ? `{${name}^{*}}` : `\\${mark}{${name}}`;
+    edits.push([sub.from, sub.to, sub.text]);
+    if (named !== name) edits.push([s.pos, s.pos + name.length, named]);
+  }
+  // expectations: E_t, \mathbb{E}_t, \operatorname{E}_t … go (the steady state is not random)
+  for (const op of res.operators || []) {
+    if (inTaken(op.pos)) continue;
+    const m = /^(?:\\mathbb\s*\{E\}|\\mathbb\s*E|\\operatorname\s*\{E\}|\\mathrm\s*\{E\}|\\mathbf\s*\{E\}|E)\s*_\s*(?:\{[^{}]*\}|[A-Za-z0-9])\s*/.exec(tex.slice(op.pos));
+    if (m) edits.push([op.pos, op.pos + m[0].length, '']);
+  }
+  edits.sort((a, b) => b[0] - a[0] || b[1] - a[1]);
+  let out = tex, last = Infinity;
+  for (const [a, b, t] of edits) { if (b > last) continue; out = out.slice(0, a) + t + out.slice(b); last = a; }
+  // E_t[ x y ] -> x y when the bracket held a single product (no + or − outside braces)
+  const flat = (x) => { let y = x; for (let g = 0; g < 10 && /\{[^{}]*\}/.test(y); g++) y = y.replace(/\{[^{}]*\}/g, ''); return y; };
+  return out.replace(/\\left\[\s*([^\[\]]*?)\s*\\right\]/g, (m, inner) => /[+\-]|\\pm|\\mp/.test(flat(inner)) ? m : inner)
+    .replace(/  +/g, ' ');
+}

@@ -77,6 +77,13 @@ await test('visual view folds commented-out blocks (comment, \\excludecomment, \
   assert.deepEqual(it.filter(x => x.kind === 'cblock').map(x => x.label), ['Commented out', 'Left out (draft)', '\\iffalse … \\fi']);
   assert.ok(!it.some(x => x.kind === 'imath'));
 });
+await test('steady state: dated variables marked, E_t gone, shocks 0, parameters kept', () => {
+  const t = 'c_t^{-\\sigma} = \\beta E_t \\left[ c_{t+1}^{-\\sigma} \\frac{R_t}{\\pi_{t+1}} \\right]';
+  assert.equal(LM.steadyState(t, { mark: 'bar' }), '\\bar{c}^{-\\sigma} = \\beta \\bar{c}^{-\\sigma} \\frac{\\bar{R}}{\\bar{\\pi}}');
+  assert.equal(LM.steadyState(t, { mark: 'ss' }).split(' = ')[0], 'c_{ss}^{-\\sigma}');
+  assert.equal(LM.steadyState('\\ln a_t = \\rho_a \\ln a_{t-1} + \\varepsilon^a_t', { mark: 'bar', shocks: 'zero' }), '\\ln \\bar{a} = \\rho_a \\ln \\bar{a} + 0');
+  assert.equal(LM.steadyState('x_{1,t} = y^{d}_{t-1}', { mark: 'hat' }), '\\hat{x}_{1} = \\hat{y}^{d}');
+});
 await test('published files carry versions (stamp)', () => {
   const ix = fs.readFileSync(path.join(app, 'index.html'), 'utf8');
   assert.match(ix, /app\.css\?v=[0-9a-f]{10}/); assert.match(ix, /core\.js\?v=[0-9a-f]{10}/); assert.match(ix, /<script type="importmap">/);
