@@ -1499,7 +1499,7 @@ function start() {
   }
   // the steady state uses the app's maths reader when it is there (the same as the Model check's steady-state section)
   let LM = null; import('../modules/lib/latex-math.js').then(m => { LM = m; }).catch(() => {});
-  const steadyBest = (x) => LM?.steadyState ? LM.steadyState(x, { mark: 'bar', shocks: 'keep' }) : steady(x);
+  const steadyBest = (x) => LM?.steadyState ? LM.steadyState(x, { mark: 'auto', shocks: 'keep' }) : steady(x);
   const DSGE_OPS = { '#lead': () => rewrite(x => shiftT(x, 1), 'Moved one period forward'), '#lag': () => rewrite(x => shiftT(x, -1), 'Moved one period back'), '#ss': () => rewrite(steadyBest, 'Written as a steady state'), '#dev': () => rewrite(logdev, 'Written in log deviations') };
   const ribbon = document.createElement('div'); ribbon.className = 'ribbon'; ribbon.setAttribute('role', 'toolbar'); ribbon.setAttribute('aria-label', 'Equation tools');
   const rTabs = document.createElement('div'); rTabs.className = 'rtabs';

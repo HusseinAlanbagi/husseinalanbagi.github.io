@@ -84,6 +84,11 @@ await test('steady state: dated variables marked, E_t gone, shocks 0, parameters
   assert.equal(LM.steadyState('\\ln a_t = \\rho_a \\ln a_{t-1} + \\varepsilon^a_t', { mark: 'bar', shocks: 'zero' }), '\\ln \\bar{a} = \\rho_a \\ln \\bar{a} + 0');
   assert.equal(LM.steadyState('x_{1,t} = y^{d}_{t-1}', { mark: 'hat' }), '\\hat{x}_{1} = \\hat{y}^{d}');
 });
+await test('steady state, automatic mark: \\bar on one letter, \\overline on longer names and accented variables', () => {
+  assert.equal(LM.steadyState('mc_t = \\frac{w_t}{a_t}'), '\\overline{mc} = \\frac{\\bar{w}}{\\bar{a}}');
+  assert.equal(LM.steadyState('\\widehat{mc}_t + \\mathrm{GDP}_t + x_{1,t} + a\\,k_t'), '\\overline{\\widehat{mc}} + \\overline{\\mathrm{GDP}} + \\bar{x}_{1} + a\\,\\bar{k}');
+  assert.equal(LM.steadyState('\\bar{k}_t = cw_{t+1}', { multi: ['cw'] }), '\\bar{k} = \\overline{cw}');
+});
 await test('published files carry versions (stamp)', () => {
   const ix = fs.readFileSync(path.join(app, 'index.html'), 'utf8');
   assert.match(ix, /app\.css\?v=[0-9a-f]{10}/); assert.match(ix, /core\.js\?v=[0-9a-f]{10}/); assert.match(ix, /<script type="importmap">/);

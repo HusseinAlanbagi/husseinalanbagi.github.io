@@ -279,13 +279,16 @@ export function toDynare(eq, { dropAccents = true, multi = null, rename = null }
 // ---- the steady state of an equation: dated variables lose their time index and get a mark, E_t goes, shocks can be 0
 // steadyState('c_t^{-\\sigma} = \\beta E_t c_{t+1}^{-\\sigma} R_t / \\pi_{t+1}', { mark: 'bar' })
 //   -> '\\bar{c}^{-\\sigma} = \\beta \\bar{c}^{-\\sigma} \\bar{R} / \\bar{\\pi}'
-// mark: 'bar' (\bar{x}), 'overline', 'hat', 'tilde', 'star' (x^{*}), 'ss' (x_{ss}), 'none' (only the index goes)
+// mark: 'auto' (the default: \bar{x} for a one-letter variable, \overline{mc} for a longer name or one that already has an
+//   accent), 'bar', 'overline', 'hat', 'tilde', 'star' (x^{*}), 'ss' (x_{ss}), 'none' (only the index goes)
+// multi: multi-letter names (the Model check's list); letter runs written against _t (mc_t, rer_t) count as names too
 // shocks: 'zero' writes 0 for shocks (ε, η, ν, ξ, ζ, u, e dated, or the keys in isShock), 'keep' keeps them marked
 // devZero: log deviations (\hat{x}_t, \tilde{x}_t) are 0 in the steady state
 const SHOCK_GUESS = /^(\\(varepsilon|epsilon|eta|nu|xi|zeta|upsilon)|[ue])$/;
 export function steadyState(tex, opts = {}) {
-  const mark = opts.mark || 'bar', zero = opts.shocks === 'zero', isShock = opts.isShock || ((s) => SHOCK_GUESS.test(s.base));
-  const res = scan(tex), edits = [], taken = [];
+  const mark = opts.mark || 'auto', zero = opts.shocks === 'zero', isShock = opts.isShock || ((s) => SHOCK_GUESS.test(s.base));
+  const multi = new Set([...(opts.multi || []), ...multiLetterCandidates(tex)]);
+  const res = scan(tex, 0, undefined, multi.size ? multi : null), edits = [], taken = [];
   const inTaken = (a) => taken.some(([x, y]) => a >= x && a < y);
   // shocks first (they replace their whole span), then the other dated symbols
   const syms = res.symbols.filter(s => s.time !== null).sort((a, b) => a.pos - b.pos);
@@ -311,9 +314,12 @@ export function steadyState(tex, opts = {}) {
       break;
     }
     if (!sub) continue;
-    const already = new RegExp(`^\\\\${mark === 'overline' ? 'overline' : mark}\\s*\\{`).test(name);
+    // automatic: a short bar on one letter (c, \pi, x_1), a long one on a longer name (mc, \mathrm{GDP}) or an accented letter
+    const long = (s.base && /^[A-Za-z]{2,}$/.test(s.base)) || /^\\(?:math(?:rm|it|bf|sf)|text\w*|operatorname)\s*\{[^{}]{2,}\}/.test(name) || (s.accents && s.accents.length) || /^\\wide/.test(name);
+    const mk = mark === 'auto' ? (long ? 'overline' : 'bar') : mark;
+    const already = /^\\(bar|overline)\s*\{/.test(name) && (mk === 'bar' || mk === 'overline') || new RegExp(`^\\\\${mk}\\s*\\{`).test(name);
     let named = name;
-    if (!already && mark !== 'none' && mark !== 'ss') named = mark === 'star' ? `{${name}^{*}}` : `\\${mark}{${name}}`;
+    if (!already && mk !== 'none' && mk !== 'ss') named = mk === 'star' ? `{${name}^{*}}` : `\\${mk}{${name}}`;
     edits.push([sub.from, sub.to, sub.text]);
     if (named !== name) edits.push([s.pos, s.pos + name.length, named]);
   }

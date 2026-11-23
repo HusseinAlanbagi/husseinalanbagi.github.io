@@ -686,7 +686,8 @@ export default {
       const m = /^\\begin\{([^}]*)\}/.exec(text);
       if (m && STAR_FOR[m[1]] !== undefined && STAR_FOR[m[1]]) text = text.replace(m[0], `\\begin{${STAR_FOR[m[1]]}}`).replace(new RegExp(`\\\\end\\{${m[1].replace('*', '\\*')}\\}\\s*$`), `\\end{${STAR_FOR[m[1]]}}`);
       const body = /^(\\begin\{[^}]*\}(?:\{[^}]*\})?|\\\[|\$\$)([\s\S]*?)(\\end\{[^}]*\}|\\\]|\$\$)$/.exec(text);
-      const ss = body ? body[1] + steadyState(body[2], { mark, shocks: 'zero' }) + body[3] : steadyState(text, { mark, shocks: 'zero' });
+      const multi = modelState.result?.multi || [];
+      const ss = body ? body[1] + steadyState(body[2], { mark, shocks: 'zero', multi }) + body[3] : steadyState(text, { mark, shocks: 'zero', multi });
       if (ss === text) return ctx.ui.toast('Nothing to change: this equation has no dated variables (x_t).');
       const end = doc.lineAt(it.to).to;
       v.dispatch({ changes: { from: end, insert: '\n' + ss }, userEvent: 'input' });
@@ -966,8 +967,8 @@ export default {
         const auto = autoSizeOn();
         ctx.ui.menu(anchor, [
           { label: 'Duplicate this equation', hint: 'Ctrl+Shift+D', onClick: () => duplicate(x, false) },
-          ...(x.kind === 'dmath' ? [{ label: 'Write its steady state below (\\bar{x})', title: 'A copy below with the time subscripts dropped and a bar on each variable; E_t goes, shocks are 0', onClick: () => { finishEdit(true); steadyBelow(view, x.from, 'bar'); } },
-            { label: 'Steady state below, with another mark…', onClick: (ev) => { finishEdit(true); ctx.ui.menu(ev?.currentTarget || document.querySelector('.vz-edit-bar') || document.body, [['hat', 'Hat   \\hat{x}'], ['tilde', 'Tilde   \\tilde{x}'], ['star', 'Star   x^{*}'], ['overline', 'Overline   \\overline{x}'], ['ss', 'Subscript   x_{ss}'], ['none', 'Only drop the t']].map(([m, l]) => ({ label: l, onClick: () => steadyBelow(view, x.from, m) }))); } }] : []),
+          ...(x.kind === 'dmath' ? [{ label: 'Write its steady state below', title: 'A copy below with the time subscripts dropped: \\bar{x} on one-letter variables, \\overline{mc} on longer names; E_t goes, shocks are 0', onClick: () => { finishEdit(true); steadyBelow(view, x.from, 'auto'); } },
+            { label: 'Steady state below, with another mark…', onClick: (ev) => { finishEdit(true); ctx.ui.menu(ev?.currentTarget || document.querySelector('.vz-edit-bar') || document.body, [['bar', 'Bar on all   \\bar{x}'], ['overline', 'Overline on all   \\overline{x}'], ['hat', 'Hat   \\hat{x}'], ['tilde', 'Tilde   \\tilde{x}'], ['star', 'Star   x^{*}'], ['ss', 'Subscript   x_{ss}'], ['none', 'Only drop the t']].map(([m, l]) => ({ label: l, onClick: () => steadyBelow(view, x.from, m) }))); } }] : []),
           ...(sess.model.rows > 1 ? [{ label: 'Duplicate this row', onClick: () => duplicate(x, true) }] : []),
           { label: 'Cut the equation', hint: 'with its \\begin … \\end', onClick: () => cutEquation(x) },
           ...(x.kind === 'dmath' && !(sess.model.rows > 1) ? [{ label: 'Make it fit the page (PDF)…', title: 'Break it over lines in the source, so it fits the printed page too', onClick: () => fitPage(x) }] : []),
@@ -1505,7 +1506,8 @@ export default {
       const zero = !!ctx.settings.get('table-ss-zero', false);
       const cells = S.sel ? selList() : S.t.rows.flatMap(r => r.cells);
       const before = cells.map(c => c.tex);
-      const ss = (x) => steadyState(x, { mark, shocks: zero ? 'zero' : 'keep' });
+      const multi = modelState.result?.multi || [];
+      const ss = (x) => steadyState(x, { mark, shocks: zero ? 'zero' : 'keep', multi });
       let n = 0;
       for (const c of cells) {
         const t = c.tex.replace(/(^|[^\\])\$([^$]+)\$/g, (m, pre, x) => pre + '$' + ss(x) + '$').replace(/\\\(([\s\S]*?)\\\)/g, (m, x) => '\\(' + ss(x) + '\\)');
@@ -1525,7 +1527,7 @@ export default {
       const zero = !!ctx.settings.get('table-ss-zero', false);
       ctx.ui.menu(anchor, [
         { heading: S.sel ? 'Steady state of the selected cells' : 'Steady state of all the maths in the table' },
-        ...[['bar', 'Bar   \\bar{x}'], ['hat', 'Hat   \\hat{x}'], ['overline', 'Overline   \\overline{x}'], ['tilde', 'Tilde   \\tilde{x}'], ['star', 'Star   x^{*}'], ['ss', 'Subscript   x_{ss}'], ['none', 'Only drop the t']]
+        ...[['auto', 'Automatic: \\bar{x} on one letter, \\overline{mc} on longer names'], ['bar', 'Bar on all   \\bar{x}'], ['overline', 'Overline on all   \\overline{x}'], ['hat', 'Hat   \\hat{x}'], ['tilde', 'Tilde   \\tilde{x}'], ['star', 'Star   x^{*}'], ['ss', 'Subscript   x_{ss}'], ['none', 'Only drop the t']]
           .map(([m, l]) => ({ label: l, onClick: () => tableSteady(m, anchor) })),
         '-',
         { label: (zero ? '✓ ' : ' ') + 'Shocks become 0', title: 'ε_t, η_t, u_t … become 0 (otherwise they are marked like the other variables)', onClick: () => { ctx.settings.set('table-ss-zero', !zero); steadyMenu(anchor); } },
@@ -1702,7 +1704,7 @@ export default {
         h('button', { title: 'Bold (Ctrl+B): the selected words, or the whole cell', onMousedown: (e) => { e.preventDefault(); styleSel('bold'); } }, h('b', {}, 'B')),
         h('button', { title: 'Italic (Ctrl+I): the selected words, or the whole cell', onMousedown: (e) => { e.preventDefault(); styleSel('italic'); } }, h('i', { style: { fontFamily: 'var(--serif, serif)' } }, 'I')),
         h('button', { title: 'Insert maths at the cursor, edited like an equation (Ctrl+M, or type $)', onMousedown: (e) => { e.preventDefault(); const td = S.el.querySelector('td.editing'); if (td?.classList.contains('visual')) insertMath(td); else wrapCell('math'); } }, h('span', { class: 'vz-om' }, '∑')), sep(),
-        h('button', { title: 'Steady state: write the maths of the table (or of the selected cells) in its steady state, x_t → \\bar{x} (choose the mark); E_t goes, parameters stay', 'aria-label': 'Steady state', onMousedown: (e) => { e.preventDefault(); steadyMenu(e.currentTarget); } }, h('span', { class: 'vz-acc vz-ssbtn', 'data-acc': '¯' }, 'x'), h('span', { class: 'vz-sssub' }, 'ss')), sep(),
+        h('button', { title: 'Steady state: write the maths of the table (or of the selected cells) in its steady state, x_t → \\bar{x}, mc_t → \\overline{mc} (or choose one mark); E_t goes, parameters stay', 'aria-label': 'Steady state', onMousedown: (e) => { e.preventDefault(); steadyMenu(e.currentTarget); } }, h('span', { class: 'vz-acc vz-ssbtn', 'data-acc': '¯' }, 'x'), h('span', { class: 'vz-sssub' }, 'ss')), sep(),
         b('merge', 'Merge the selected cells of a row (drag across them, or Shift+click)'), b('split', 'Split a merged cell'), sep(),
         h('button', { title: 'Copy cells: the selected cells, or the cell you are in (Ctrl+C; Ctrl+X cuts). They paste into Excel, Word, or another table here', 'aria-label': 'Copy cells', onMousedown: (e) => { e.preventDefault(); copyCells(false); } }, ico('copy', 15)),
         h('button', { title: 'Copy the whole table: a table in Word and Excel, the complete LaTeX (with caption and label) in any LaTeX editor', 'aria-label': 'Copy the whole table', onMousedown: (e) => { e.preventDefault(); copyTable(); } }, ico('copyTable', 16)), sep(),
@@ -2170,7 +2172,7 @@ export default {
     } }));
     const goDef = () => { const v = view(); const r = v && refAt(v, v.state.selection.main.head); if (!r) { ctx.ui.toast('Put the cursor on a \\ref, \\eqref or \\cite first.'); return false; } jumpTo(v, r.kind, r.key); return true; };
     ctx.editor.addKeymap([{ key: 'F12', run: () => { const v = view(); if (!v || !refAt(v, v.state.selection.main.head)) return false; return goDef(); } }]);
-    ctx.ui.addCommand({ id: 'equation.steady', name: 'Steady state of the equation at the cursor (written below it)', run: () => { const v = view(); const it = v && (v.state.field(field, false)?.p || parse(v.state.doc.toString())).items.find(y => y.kind === 'dmath' && v.state.selection.main.head >= y.from && v.state.selection.main.head <= y.to); if (!it) return ctx.ui.toast('Put the cursor in a display equation first. For the whole model: “Model equations: write the steady state as a section…”.'); steadyBelow(v, it.from, 'bar'); } });
+    ctx.ui.addCommand({ id: 'equation.steady', name: 'Steady state of the equation at the cursor (written below it)', run: () => { const v = view(); const it = v && (v.state.field(field, false)?.p || parse(v.state.doc.toString())).items.find(y => y.kind === 'dmath' && v.state.selection.main.head >= y.from && v.state.selection.main.head <= y.to); if (!it) return ctx.ui.toast('Put the cursor in a display equation first. For the whole model: “Model equations: write the steady state as a section…”.'); steadyBelow(v, it.from, 'auto'); } });
     ctx.ui.addCommand({ id: 'table.insert', name: 'Insert a table…', run: () => insertTablePicker(document.querySelector('[data-tb="table"]') || document.querySelector('.vz-switch') || document.body) });
     { const tb = ctx.ui.addToolbarButton({ label: 'Table', icon: 'insert', title: 'Insert a table: pick rows × columns, then fill it in like Word', onClick: (e) => insertTablePicker(e?.currentTarget || document.querySelector('[data-tb="table"]')) }); tb.el.dataset.tb = 'table'; tb.el.replaceChildren(ico('table', 16), h('span', { class: 'lbl' }, 'Table')); tb.el.setAttribute('aria-label', 'Insert a table'); ctx.onDispose(() => tb()); }
     ctx.ui.addCommand({ id: 'nav.definition', name: 'Go to the label or reference under the cursor', key: 'F12', run: goDef });
