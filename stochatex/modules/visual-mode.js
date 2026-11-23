@@ -88,6 +88,7 @@ import { loadMathJax } from './lib/mathjax.js';
 import * as VP from './lib/viewplace.js';
 import { modelState } from './lib/model-state.js';
 import { MODEL_COMMENT, steadyState } from './lib/latex-math.js';
+import { cleanTeX } from './lib/clean.js';
 const LONE_LINE = /^\s*(?:\\(textbf|textit|emph|underline|textsc)\s*\{.*\}|(\$)[^$]+\$|(\\\()[\s\S]*?\\\))\s*[.:,;]?\s*$/;
 const svgCache = new Map();
 function renderMath(tex, display, macros, width = 0) {
@@ -666,7 +667,7 @@ export default {
       rowAbove: 'M4 13h16v7H4z M12 3v7 M9 6l3-3 3 3', rowBelow: 'M4 4h16v7H4z M12 21v-7 M9 18l3 3 3-3', colLeft: 'M13 4h7v16h-7z M3 12h7 M6 9l-3 3 3 3', colRight: 'M4 4h7v16H4z M21 12h-7 M18 9l3 3-3 3',
       delRow: 'M4 9h16v6H4z M9 4l6 0 M8 19l8 0', delCol: 'M9 4h6v16H9z M4 9v6 M20 9v6',
       alL: 'M4 6h16 M4 10h10 M4 14h16 M4 18h10', alC: 'M4 6h16 M7 10h10 M4 14h16 M7 18h10', alR: 'M4 6h16 M10 10h10 M4 14h16 M10 18h10',
-      merge: 'M3 6h18v12H3z M8 12h8 M10 10l-2 2 2 2 M14 10l2 2-2 2', copyTable: 'M8 8h13v13H8z M8 12.5h13 M8 17h13 M12.5 8v13 M4 16V4h12', split: 'M3 6h18v12H3z M12 6v12', table: 'M3 5h18v14H3z M3 10h18 M3 15h18 M9 5v14 M15 5v14' };
+      merge: 'M3 6h18v12H3z M8 12h8 M10 10l-2 2 2 2 M14 10l2 2-2 2', copyTable: 'M8 8h13v13H8z M8 12.5h13 M8 17h13 M12.5 8v13 M4 16V4h12', sparkle: 'M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z', split: 'M3 6h18v12H3z M12 6v12', table: 'M3 5h18v14H3z M3 10h18 M3 15h18 M9 5v14 M15 5v14' };
     const ico = (n, size = 14) => { const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('width', size); svg.setAttribute('height', size); svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', n === 'more' ? '3' : '1.8'); svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round'); svg.setAttribute('aria-hidden', 'true'); const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', ICO[n]); svg.append(p); return svg; };
     // the symbol picker: [LaTeX, what it looks like, words to find it by]
     const SYM_GROUPS = [
@@ -1347,6 +1348,7 @@ export default {
       const cbar = h('div', { class: 'vz-cellbar', role: 'toolbar', 'aria-label': 'Maths in this cell' },
         h('span', { class: 'vz-cellbar-end' },
           cbtn(h('span', { class: 'vz-ib vz-om' }, 'Ω'), 'Insert a symbol: Greek letters, operators, relations, arrows (Ctrl+Shift+S)', (b) => symbolPop(b, mf)),
+          cbtn(ico('sparkle'), 'Clean this maths: empty braces and scripts, x^{2} → x^2, extra spaces', () => { const v = tidyTeX(mf.getValue('latex')), r = cleanTeX(v); if (!r.changes) return ctx.ui.toast('Already clean.'); mf.value = (window.StochaBrackets?.stackAccents || ((x) => x))(r.text); mf.dispatchEvent(new Event('input', { bubbles: true })); ctx.ui.toast(`Tidied ${r.changes} thing${r.changes === 1 ? '' : 's'}.`); }),
           cbtn(ico('expand'), 'Open in the full equation editor, beside the paper (Ctrl+E)', () => openCellMathFull(td)),
           cbtn(ico('check'), 'Done (Enter or Esc)', () => finish(), 'primary')),
         buildFmtBar(mf, cbtn));
@@ -1517,6 +1519,26 @@ export default {
       const keep = S.sel, { r, c } = S;
       S.dirty = true; pinTable(() => { buildTableUI(); writeTable(); if (keep) selectCells(keep); else focusCell(r, c); });
       ctx.ui.toast(h('span', {}, `Steady state written in ${n} cell${n === 1 ? '' : 's'}. `, h('button', { class: 'small', onClick: (ev) => {
+        ev.target.closest('.toast')?.remove();
+        if (tableSess !== S) return ctx.ui.toast('The table is closed: use Ctrl+Z in the text to undo.');
+        cells.forEach((cl, k) => { cl.tex = before[k]; }); S.dirty = true; pinTable(() => { buildTableUI(); writeTable(); focusCell(r, c); });
+      } }, 'Undo')), '', 8000);
+    }
+    // tidy the maths of the table (or of the selected cells) with the equation editor's safe clean-up rules
+    function tableClean() {
+      const S = tableSess; if (!S) return; syncCell();
+      const cells = S.sel ? selList() : S.t.rows.flatMap(r => r.cells);
+      const before = cells.map(c => c.tex);
+      let n = 0, things = 0;
+      const tidy = (x) => { const r = cleanTeX(x); things += r.changes; return r.text.replace(/\s+$/, ''); };
+      for (const c of cells) {
+        const t = c.tex.replace(/(^|[^\\])\$([^$]+)\$/g, (m, pre, x) => pre + '$' + tidy(x) + '$').replace(/\\\(([\s\S]*?)\\\)/g, (m, x) => '\\(' + tidy(x) + '\\)');
+        if (t !== c.tex) { c.tex = t; n++; }
+      }
+      if (!n) return ctx.ui.toast(S.sel ? 'The maths in the selected cells is already clean.' : 'The maths in this table is already clean.');
+      const keep = S.sel, { r, c } = S;
+      S.dirty = true; pinTable(() => { buildTableUI(); writeTable(); if (keep) selectCells(keep); else focusCell(r, c); });
+      ctx.ui.toast(h('span', {}, `Tidied ${things} thing${things === 1 ? '' : 's'} in ${n} cell${n === 1 ? '' : 's'} (empty braces and scripts, x^{2} → x^2, extra spaces …). `, h('button', { class: 'small', onClick: (ev) => {
         ev.target.closest('.toast')?.remove();
         if (tableSess !== S) return ctx.ui.toast('The table is closed: use Ctrl+Z in the text to undo.');
         cells.forEach((cl, k) => { cl.tex = before[k]; }); S.dirty = true; pinTable(() => { buildTableUI(); writeTable(); focusCell(r, c); });
@@ -1704,6 +1726,7 @@ export default {
         h('button', { title: 'Bold (Ctrl+B): the selected words, or the whole cell', onMousedown: (e) => { e.preventDefault(); styleSel('bold'); } }, h('b', {}, 'B')),
         h('button', { title: 'Italic (Ctrl+I): the selected words, or the whole cell', onMousedown: (e) => { e.preventDefault(); styleSel('italic'); } }, h('i', { style: { fontFamily: 'var(--serif, serif)' } }, 'I')),
         h('button', { title: 'Insert maths at the cursor, edited like an equation (Ctrl+M, or type $)', onMousedown: (e) => { e.preventDefault(); const td = S.el.querySelector('td.editing'); if (td?.classList.contains('visual')) insertMath(td); else wrapCell('math'); } }, h('span', { class: 'vz-om' }, '∑')), sep(),
+        h('button', { title: 'Clean: tidy the maths of the table (or of the selected cells) as the equation editor does: empty braces and scripts, x^{2} → x^2, \\operatorname{sin} → \\sin, extra spaces', 'aria-label': 'Clean the maths', onMousedown: (e) => { e.preventDefault(); tableClean(); } }, ico('sparkle', 15)),
         h('button', { title: 'Steady state: write the maths of the table (or of the selected cells) in its steady state, x_t → \\bar{x}, mc_t → \\overline{mc} (or choose one mark); E_t goes, parameters stay', 'aria-label': 'Steady state', onMousedown: (e) => { e.preventDefault(); steadyMenu(e.currentTarget); } }, h('span', { class: 'vz-acc vz-ssbtn', 'data-acc': '¯' }, 'x'), h('span', { class: 'vz-sssub' }, 'ss')), sep(),
         b('merge', 'Merge the selected cells of a row (drag across them, or Shift+click)'), b('split', 'Split a merged cell'), sep(),
         h('button', { title: 'Copy cells: the selected cells, or the cell you are in (Ctrl+C; Ctrl+X cuts). They paste into Excel, Word, or another table here', 'aria-label': 'Copy cells', onMousedown: (e) => { e.preventDefault(); copyCells(false); } }, ico('copy', 15)),

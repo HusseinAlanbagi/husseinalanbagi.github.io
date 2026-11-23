@@ -89,6 +89,14 @@ await test('steady state, automatic mark: \\bar on one letter, \\overline on lon
   assert.equal(LM.steadyState('\\widehat{mc}_t + \\mathrm{GDP}_t + x_{1,t} + a\\,k_t'), '\\overline{\\widehat{mc}} + \\overline{\\mathrm{GDP}} + \\bar{x}_{1} + a\\,\\bar{k}');
   assert.equal(LM.steadyState('\\bar{k}_t = cw_{t+1}', { multi: ['cw'] }), '\\bar{k} = \\overline{cw}');
 });
+await test('clean-up: safe rules as in the equation editor; left-right pairs only with all', async () => {
+  const C = await import(path.join(app, 'modules/lib/clean.js'));
+  assert.equal(C.cleanTeX('x^{2} + {b} + y_{} + \\mathrm{} + {{z}}').text, 'x^2 + b + y +  + z');
+  assert.equal(C.cleanTeX('\\operatorname{sin} x').text, '\\sin x');
+  assert.equal(C.cleanTeX('\\left( a+b \\right)').text, '\\left( a+b \\right)');
+  assert.equal(C.cleanTeX('\\left( a+b \\right)', { all: true }).text, '( a+b )');
+  assert.equal(C.cleanTeX('\\text{a  b} + \\label{x_{1}}').text, '\\text{a  b} + \\label{x_{1}}');
+});
 await test('published files carry versions (stamp)', () => {
   const ix = fs.readFileSync(path.join(app, 'index.html'), 'utf8');
   assert.match(ix, /app\.css\?v=[0-9a-f]{10}/); assert.match(ix, /core\.js\?v=[0-9a-f]{10}/); assert.match(ix, /<script type="importmap">/);

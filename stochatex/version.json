@@ -1,7 +1,7 @@
 {
- "v": "593496d177",
+ "v": "8713aa28c0",
  "files": {
-  "app.css": "a06ed449b6",
+  "app.css": "d01f1539d3",
   "core.js": "006432d5d2",
   "pdfwin.js": "331affa1f3",
   "engine-worker.js": "76f66486ad",
@@ -14,6 +14,7 @@
   "modules/equation-editor.js": "232dd8dcaf",
   "modules/formatting.js": "cffb51f8b7",
   "modules/irf-figures.js": "c6f8e6d11a",
+  "modules/lib/clean.js": "6170077d98",
   "modules/lib/dynare.js": "192d992d57",
   "modules/lib/latex-math.js": "e455d42b78",
   "modules/lib/latex-text.js": "f26c6e5cb3",
@@ -26,7 +27,7 @@
   "modules/outline.js": "4923030bfc",
   "modules/proofread.js": "b0c01daa8a",
   "modules/snippets.js": "9b01f7efc8",
-  "modules/visual-mode.js": "d7c04161ee",
+  "modules/visual-mode.js": "db1eeb7837",
   "modules/word-count.js": "d8d5dff0a0"
  }
 }
