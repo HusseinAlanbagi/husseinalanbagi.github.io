@@ -679,10 +679,63 @@ export default {
     ].map(([name, list]) => [name, list.split('|').map(e => { const [cmd, glyph] = e.split(' '); return { tex: cmd === 'degree' ? '^{\\circ}' : '\\' + cmd, glyph, find: cmd.replace(/mathbb\{(\w)\}/, 'mathbb $1 blackboard') }; })]);
     let symPopEl = null;
     const closeSym = () => { if (symPopEl) { symPopEl.remove(); symPopEl = null; } };
-    function symbolPop(anchor) {
-      const s = session; if (!s) return;
+    // the floating format bar (in-place equations and maths in table cells): style what you type or what is selected;
+    // with a selection, also accents, braces and wraps
+    function buildFmtBar(mf, btn) {
+      const wrap = (tpl, wide) => () => {
+        const r = mf.selection?.ranges?.[0] || [mf.position, mf.position], sel = r[0] !== r[1];
+        let t = tpl;
+        if (wide && sel) { const s = mf.getValue(Math.min(...r), Math.max(...r), 'latex').replace(/[{}\s]/g, ''); if (s.length > 1 && !/^\\[A-Za-z]+$/.test(s)) t = wide; }
+        mf.focus();
+        mf.insert(sel ? t.replace('#0', '#@') : t, { format: 'latex', selectionMode: 'placeholder' });
+      };
+      const fb = (label, title, fn, cls = '') => btn(h('span', { class: 'vz-fb ' + cls }, label), title, fn);
+      const sep = () => h('span', { class: 'vz-bsep' });
+      const fmtBar = h('span', { class: 'vz-fmt-bar', role: 'toolbar', 'aria-label': 'Format the equation' },
+        fb('B', 'Bold (Ctrl+B): \\boldsymbol', wrap('\\boldsymbol{#0}'), 'b'),
+        fb('I', 'Italic (Ctrl+I): \\mathit', wrap('\\mathit{#0}'), 'i'),
+        fb('R', 'Upright, for names like “max” or “d” (\\mathrm)', wrap('\\mathrm{#0}'), 'r'),
+        fb('U', 'Underline (Ctrl+U)', wrap('\\underline{#0}'), 'u'),
+        fb('ℝ', 'Blackboard bold (\\mathbb), for ℝ, ℕ, 𝔼', wrap('\\mathbb{#0}')),
+        fb('𝒜', 'Calligraphic (\\mathcal)', wrap('\\mathcal{#0}')),
+        fb('Tt', 'Words inside the equation (\\text)', wrap('\\text{#0}'), 'tt'),
+        sep(),
+        h('span', { class: 'vz-only-sel' },
+          fb(h('span', { class: 'vz-acc', 'data-acc': '¯' }, 'x'), 'Bar over the selection (\\bar, or \\overline for more than one letter)', wrap('\\bar{#0}', '\\overline{#0}')),
+          fb(h('span', { class: 'vz-acc', 'data-acc': 'ˆ' }, 'x'), 'Hat (\\hat, or \\widehat)', wrap('\\hat{#0}', '\\widehat{#0}')),
+          fb(h('span', { class: 'vz-acc', 'data-acc': '˜' }, 'x'), 'Tilde (\\tilde, or \\widetilde)', wrap('\\tilde{#0}', '\\widetilde{#0}')),
+          fb(h('span', { class: 'vz-acc', 'data-acc': '˙' }, 'x'), 'Dot: time derivative (\\dot)', wrap('\\dot{#0}')),
+          fb(h('span', { class: 'vz-vec' }, 'x'), 'Vector arrow (\\vec, or \\overrightarrow)', wrap('\\vec{#0}', '\\overrightarrow{#0}')),
+          fb(h('span', { class: 'vz-acc' }, 'x', h('sup', {}, '*')), 'Star: steady state or optimum (^*)', wrap('{#0}^{*}')),
+          sep(),
+          fb('(x)', 'Round brackets around the selection (they grow with it)', wrap('\\left(#0\\right)')),
+          fb('[x]', 'Square brackets', wrap('\\left[#0\\right]')),
+          fb('{x}', 'Curly braces', wrap('\\left\\{#0\\right\\}')),
+          fb('|x|', 'Absolute value', wrap('\\left|#0\\right|')),
+          fb(ico('ubrace', 16), 'Underbrace with a note under it', wrap('\\underbrace{#0}_{#?}')),
+          fb(ico('obrace', 16), 'Overbrace with a note over it', wrap('\\overbrace{#0}^{#?}')),
+          fb(ico('box'), 'Box the selection (\\boxed)', wrap('\\boxed{#0}')),
+          sep(),
+          fb(ico('frac'), 'Make the selection the top of a fraction', wrap('\\frac{#0}{#?}')),
+          fb(ico('sqrt'), 'Square root of the selection', wrap('\\sqrt{#0}')),
+          fb(ico('slot'), 'Replace the selection with an empty box to fill in', () => { mf.focus(); mf.insert('#?', { format: 'latex', selectionMode: 'placeholder' }); })),
+        h('span', { class: 'vz-only-nosel' },
+          fb(ico('frac'), 'Fraction', wrap('\\frac{#0}{#?}')),
+          fb(ico('sqrt'), 'Square root', wrap('\\sqrt{#0}')),
+          fb('xⁿ', 'Superscript (^)', () => { mf.focus(); mf.executeCommand('moveToSuperscript'); }),
+          fb('xₙ', 'Subscript (_)', () => { mf.focus(); mf.executeCommand('moveToSubscript'); }),
+          fb('Σ', 'Sum with limits', wrap('\\sum_{#?}^{#?}#0')),
+          fb('E', 'Expectation: \\mathbb{E}_t[ … ]', wrap('\\mathbb{E}_{t}\\left[#0\\right]')),
+          fb('( )', 'Brackets that grow with what is inside', wrap('\\left(#0\\right)')),
+          fb(ico('slot'), 'An empty box to fill in', () => { mf.focus(); mf.insert('#?', { format: 'latex', selectionMode: 'placeholder' }); }),
+          h('span', { class: 'vz-hint' }, 'Select part of it for accents and braces')));
+      const syncSel = () => { const r = mf.selection?.ranges?.[0] || [0, 0]; fmtBar.classList.toggle('has-sel', r[0] !== r[1]); };
+      mf.addEventListener('selection-change', syncSel);
+      return fmtBar;
+    }
+    function symbolPop(anchor, mfArg) {
+      const mf = mfArg || session?.mf; if (!mf) return;
       if (symPopEl) return closeSym();
-      const mf = s.mf;
       let recent = []; try { recent = JSON.parse(localStorage.getItem('stx-sym-recent') || '[]'); } catch {}
       const put = (sym) => {
         mf.focus(); mf.insert(sym.tex + (/^\\[A-Za-z]+$/.test(sym.tex) ? ' ' : ''), { format: 'latex' });
@@ -744,56 +797,7 @@ export default {
         btn(ico('trash'), 'Delete this equation (Ctrl+Z brings it back)', () => { const x = itemNow(); if (x) deleteEq(x); }, 'vz-danger'),
         btn(ico('more'), 'More: duplicate, cut, make it fit the page, box, flip a fraction, auto-size brackets, model check', (b) => moreMenu(b)),
         btn(ico('check'), 'Done (Esc)', () => finishEdit(true), 'primary'));
-      // the floating format bar: style what you type or what is selected; with a selection, also accents, braces and wraps
-      const wrap = (tpl, wide) => () => {
-        const r = mf.selection?.ranges?.[0] || [mf.position, mf.position], sel = r[0] !== r[1];
-        let t = tpl;
-        if (wide && sel) { const s = mf.getValue(Math.min(...r), Math.max(...r), 'latex').replace(/[{}\s]/g, ''); if (s.length > 1 && !/^\\[A-Za-z]+$/.test(s)) t = wide; }
-        mf.focus();
-        mf.insert(sel ? t.replace('#0', '#@') : t, { format: 'latex', selectionMode: 'placeholder' });
-      };
-      const fb = (label, title, fn, cls = '') => btn(h('span', { class: 'vz-fb ' + cls }, label), title, fn);
-      const sep = () => h('span', { class: 'vz-bsep' });
-      const fmtBar = h('span', { class: 'vz-fmt-bar', role: 'toolbar', 'aria-label': 'Format the equation' },
-        fb('B', 'Bold (Ctrl+B): \\boldsymbol', wrap('\\boldsymbol{#0}'), 'b'),
-        fb('I', 'Italic (Ctrl+I): \\mathit', wrap('\\mathit{#0}'), 'i'),
-        fb('R', 'Upright, for names like “max” or “d” (\\mathrm)', wrap('\\mathrm{#0}'), 'r'),
-        fb('U', 'Underline (Ctrl+U)', wrap('\\underline{#0}'), 'u'),
-        fb('ℝ', 'Blackboard bold (\\mathbb), for ℝ, ℕ, 𝔼', wrap('\\mathbb{#0}')),
-        fb('𝒜', 'Calligraphic (\\mathcal)', wrap('\\mathcal{#0}')),
-        fb('Tt', 'Words inside the equation (\\text)', wrap('\\text{#0}'), 'tt'),
-        sep(),
-        h('span', { class: 'vz-only-sel' },
-          fb(h('span', { class: 'vz-acc', 'data-acc': '¯' }, 'x'), 'Bar over the selection (\\bar, or \\overline for more than one letter)', wrap('\\bar{#0}', '\\overline{#0}')),
-          fb(h('span', { class: 'vz-acc', 'data-acc': 'ˆ' }, 'x'), 'Hat (\\hat, or \\widehat)', wrap('\\hat{#0}', '\\widehat{#0}')),
-          fb(h('span', { class: 'vz-acc', 'data-acc': '˜' }, 'x'), 'Tilde (\\tilde, or \\widetilde)', wrap('\\tilde{#0}', '\\widetilde{#0}')),
-          fb(h('span', { class: 'vz-acc', 'data-acc': '˙' }, 'x'), 'Dot: time derivative (\\dot)', wrap('\\dot{#0}')),
-          fb(h('span', { class: 'vz-vec' }, 'x'), 'Vector arrow (\\vec, or \\overrightarrow)', wrap('\\vec{#0}', '\\overrightarrow{#0}')),
-          fb(h('span', { class: 'vz-acc' }, 'x', h('sup', {}, '*')), 'Star: steady state or optimum (^*)', wrap('{#0}^{*}')),
-          sep(),
-          fb('(x)', 'Round brackets around the selection (they grow with it)', wrap('\\left(#0\\right)')),
-          fb('[x]', 'Square brackets', wrap('\\left[#0\\right]')),
-          fb('{x}', 'Curly braces', wrap('\\left\\{#0\\right\\}')),
-          fb('|x|', 'Absolute value', wrap('\\left|#0\\right|')),
-          fb(ico('ubrace', 16), 'Underbrace with a note under it', wrap('\\underbrace{#0}_{#?}')),
-          fb(ico('obrace', 16), 'Overbrace with a note over it', wrap('\\overbrace{#0}^{#?}')),
-          fb(ico('box'), 'Box the selection (\\boxed)', wrap('\\boxed{#0}')),
-          sep(),
-          fb(ico('frac'), 'Make the selection the top of a fraction', wrap('\\frac{#0}{#?}')),
-          fb(ico('sqrt'), 'Square root of the selection', wrap('\\sqrt{#0}')),
-          fb(ico('slot'), 'Replace the selection with an empty box to fill in', () => { mf.focus(); mf.insert('#?', { format: 'latex', selectionMode: 'placeholder' }); })),
-        h('span', { class: 'vz-only-nosel' },
-          fb(ico('frac'), 'Fraction', wrap('\\frac{#0}{#?}')),
-          fb(ico('sqrt'), 'Square root', wrap('\\sqrt{#0}')),
-          fb('xⁿ', 'Superscript (^)', () => { mf.focus(); mf.executeCommand('moveToSuperscript'); }),
-          fb('xₙ', 'Subscript (_)', () => { mf.focus(); mf.executeCommand('moveToSubscript'); }),
-          fb('Σ', 'Sum with limits', wrap('\\sum_{#?}^{#?}#0')),
-          fb('E', 'Expectation: \\mathbb{E}_t[ … ]', wrap('\\mathbb{E}_{t}\\left[#0\\right]')),
-          fb('( )', 'Brackets that grow with what is inside', wrap('\\left(#0\\right)')),
-          fb(ico('slot'), 'An empty box to fill in', () => { mf.focus(); mf.insert('#?', { format: 'latex', selectionMode: 'placeholder' }); }),
-          h('span', { class: 'vz-hint' }, 'Select part of it for accents and braces')));
-      const syncSel = () => { const r = mf.selection?.ranges?.[0] || [0, 0]; fmtBar.classList.toggle('has-sel', r[0] !== r[1]); };
-      mf.addEventListener('selection-change', syncSel);
+      const fmtBar = buildFmtBar(mf, btn);
       const el = h(display ? 'div' : 'span', { class: display ? 'vz-edit' : 'vz-edit vz-edit-i' }, mf, tag, ...(display ? [h('div', { class: 'vz-edit-head' }, bar), fmtBar] : [fmtBar, bar]));
       const sess = session = { el, mf, model, view, base: null, orig: model.body };
       // a long equation shrinks a little to fit the field (MathLive cannot wrap a line); the caret stays in view
@@ -1234,7 +1238,7 @@ export default {
     }
     const tableAway = (e) => {
       if (!tableSess) return document.removeEventListener('mousedown', tableAway, true);
-      if (tableSess.el.contains(e.target) || e.target.closest?.('.menu, .ui-menu-container, .modal, .toasts, .vz-tabgrid, .ML__popover, #mathlive-suggestion-popover, .ML__keyboard, .vz-sym')) return;
+      if (tableSess.el.contains(e.target) || e.target.closest?.('.menu, .ui-menu-container, .modal, .toasts, .vz-tabgrid, .ML__popover, #mathlive-suggestion-popover, .ML__keyboard, .vz-sym, .vz-cellbar, .eqside, [data-tb="equation"]')) return;
       finishTable(true);
     };
     // keep the table where it is on screen while it changes (and while what is above it is re-measured):
@@ -1276,6 +1280,8 @@ export default {
       const S = tableSess; if (!S) return;
       if (save) { syncCell(); writeTable(); }
       document.removeEventListener('mousedown', tableAway, true);
+      if (S.cellMath) { try { S.cellMath.finish('quiet'); } catch {} }
+      if (S.fullMath) dispatchEvent(new CustomEvent('stochatex:close-math'));
       tableSess = null; poke();
     }
     const cellTd = (r, c) => tableSess?.el.querySelector(`td[data-r="${r}"][data-c="${c}"]`);
@@ -1318,31 +1324,81 @@ export default {
       td.contentEditable = 'false';
       chip.replaceWith(mf);
       let done = false;
+      // the same floating bar as for equations: format, accents and braces, symbols, and the full editor
+      const cbtn = (label, title, fn, cls = '') => h('button', { class: cls, title, 'aria-label': title.split(/[(:]/)[0].trim(), onMousedown: (e) => { e.preventDefault(); e.stopPropagation(); fn(e.currentTarget, e); } }, label);
+      const cbar = h('div', { class: 'vz-cellbar', role: 'toolbar', 'aria-label': 'Maths in this cell' },
+        h('span', { class: 'vz-cellbar-end' },
+          cbtn(h('span', { class: 'vz-ib vz-om' }, 'Ω'), 'Insert a symbol: Greek letters, operators, relations, arrows (Ctrl+Shift+S)', (b) => symbolPop(b, mf)),
+          cbtn(ico('expand'), 'Open in the full equation editor, beside the paper (Ctrl+E)', () => openCellMathFull(td)),
+          cbtn(ico('check'), 'Done (Enter or Esc)', () => finish(), 'primary')),
+        buildFmtBar(mf, cbtn));
+      document.body.append(cbar);
+      const place = () => { if (!cbar.isConnected || !mf.isConnected) return; const r = mf.getBoundingClientRect(); cbar.style.left = Math.max(8, Math.min(innerWidth - cbar.offsetWidth - 8, r.left)) + 'px'; cbar.style.top = (r.bottom + 6 + cbar.offsetHeight < innerHeight ? r.bottom + 6 : Math.max(8, r.top - cbar.offsetHeight - 6)) + 'px'; };
+      const ro = new ResizeObserver(place); ro.observe(mf); S.view.scrollDOM.addEventListener('scroll', place, { passive: true });
+      S.cellMath = { td, mf, finish: () => finish() };
       const finish = (move) => {
         if (done) return; done = true;
+        ro.disconnect(); S.view.scrollDOM.removeEventListener('scroll', place); cbar.remove(); closeSym(); if (S.cellMath?.mf === mf) S.cellMath = null;
         const tex = tidyTeX(mf.getValue('latex')).trim();
         const next = tex ? mathChip(tex) : document.createTextNode('');
         mf.replaceWith(next);
         td.contentEditable = 'true';
         const cell = S.t.rows[+td.dataset.r].cells[+td.dataset.i]; cell.tex = cellText(td); changed();
-        if (move === 'tab') return focusCell(...nextCell(+td.dataset.r, +td.dataset.c));
-        td.focus(); const rg = document.createRange(); rg.setStartAfter(next); rg.collapse(true); const sl = getSelection(); sl.removeAllRanges(); sl.addRange(rg);
+        if (move === 'tab') { focusCell(...nextCell(+td.dataset.r, +td.dataset.c)); return next; }
+        if (move !== 'quiet') { td.focus(); const rg = document.createRange(); rg.setStartAfter(next); rg.collapse(true); const sl = getSelection(); sl.removeAllRanges(); sl.addRange(rg); }
+        return next;
       };
+      S.cellMath.finish = (m) => finish(m);
       mf.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && mf.mode === 'latex') return;             // finishing a typed \command: MathLive accepts it
         if (e.key === 'Escape' && mf.mode === 'latex') return;
+        if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'e') { e.preventDefault(); e.stopPropagation(); return openCellMathFull(td); }
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 's') { e.preventDefault(); e.stopPropagation(); return symbolPop(cbar.querySelector('.vz-cellbar-end button'), mf); }
         if (e.key === 'Escape' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); finish(); }
         else if (e.key === 'Tab' && !mf.querySelector?.('[part="placeholder"]') && !/\\placeholder/.test(mf.getValue('latex'))) { e.preventDefault(); e.stopPropagation(); finish('tab'); }
         else if (e.key === 'ArrowRight' && mf.position === mf.lastOffset) { e.preventDefault(); finish(); }
       }, true);
       mf.addEventListener('input', () => { const cell = S.t.rows[+td.dataset.r].cells[+td.dataset.i]; cell.tex = TE.partsTex(domParts(td)); changed(); });
-      mf.addEventListener('focusout', () => setTimeout(() => { if (!mf.isConnected || document.activeElement === mf || mf.contains(document.activeElement)) return; if (document.querySelector('.ML__popover[style*="visible"]')) return; finish(); }, 120));
+      mf.addEventListener('focusout', () => setTimeout(() => { if (!mf.isConnected || document.activeElement === mf || mf.contains(document.activeElement) || document.activeElement?.closest?.('.vz-sym, .vz-cellbar')) return; if (document.querySelector('.ML__popover[style*="visible"]')) return; finish(); }, 120));
       requestAnimationFrame(() => {
         try { window.StochaBrackets?.setupField(mf, { note: (m) => ctx.ui.toast(m) }); } catch {}
         try { const mm = mlMacros(S.macros); if (Object.keys(mm).length) { mf.macros = { ...mf.macros, ...mm }; mf.value = stk(chip.dataset.tex || ''); } } catch {}
         mf.focus(); if (mf.value) mf.executeCommand('moveToMathfieldEnd');
+        place();
       });
     }
+    // maths in a table cell, in the full equation editor beside the paper: what changes there goes into the cell
+    function openCellMathFull(td) {
+      const S = tableSess; if (!S || !td?.isConnected) return;
+      let chip = null;
+      if (S.cellMath?.td === td) chip = S.cellMath.finish('quiet');                           // the field that is open
+      if (!chip || chip.nodeType !== 1) { const sl = getSelection(); chip = [...td.querySelectorAll('.vz-cm')].find(c => sl.rangeCount && sl.getRangeAt(0).intersectsNode(c)) || td.querySelector('.vz-cm'); }
+      if (!chip) { chip = mathChip(''); const sl = getSelection(); if (sl.rangeCount && td.contains(sl.anchorNode)) { const rg = sl.getRangeAt(0); rg.collapse(false); rg.insertNode(chip); } else td.append(chip); }
+      const r = +td.dataset.r, i = +td.dataset.i, k = [...td.querySelectorAll('.vz-cm')].indexOf(chip);
+      const cell = () => (tableSess === S ? S.t.rows[r]?.cells[i] : null);
+      // write one maths part of the cell (the k-th), keeping the text around it
+      const setMath = (tex) => {
+        const c = cell(); if (!c) return;
+        const parts = TE.cellParts(c.tex) || []; let n = -1, hit = false;
+        for (const p of parts) if (p.t === 'math' && ++n === k) { p.tex = tex; hit = true; }
+        if (!hit) parts.push({ t: 'math', tex });
+        c.tex = TE.partsTex(parts); S.dirty = true; changed();
+        const cur = S.el.querySelector(`td[data-r="${r}"][data-i="${i}"]`);
+        if (cur) { if (cur.classList.contains('visual')) { const chips = cur.querySelectorAll('.vz-cm'); const old = chips[k]; if (old) old.replaceWith(mathChip(tex)); else fillVisual(cur, c.tex); } else if (!cur.classList.contains('editing')) drawCell(cur, c); }
+      };
+      S.fullMath = { r, i, k };
+      dispatchEvent(new CustomEvent('stochatex:open-math', { detail: {
+        latex: chip.dataset.tex || '', where: `maths in the table, row ${r + 1}, column ${+td.dataset.c + 1}`,
+        onChange: (tex) => setMath(tex),
+        onClose: () => { if (S.fullMath?.r === r && S.fullMath?.i === i) S.fullMath = null; },
+      } }));
+    }
+    // Σ / Ctrl+E while a table cell is being edited: its maths goes to the full editor
+    window.__stxMathTarget = () => {
+      const S = tableSess; if (!S) return null;
+      const td = S.cellMath?.td || S.el.querySelector('td.editing.visual'); if (!td) return null;
+      openCellMathFull(td); return 'handled';
+    };
     function insertMath(td) {
       const chip = mathChip('');
       const sl = getSelection();
@@ -1354,6 +1410,7 @@ export default {
       const S = tableSess; if (!S) return;
       r = Math.max(0, Math.min(r, S.t.rows.length - 1)); c = Math.max(0, Math.min(c, S.t.cols.length - 1));
       const i = TE.cellAt(S.t.rows[r], c); c = TE.colOf(S.t.rows[r], i);
+      if (S.cellMath) { try { S.cellMath.finish('quiet'); } catch {} }           // maths open in another cell: close it first
       const old = S.el.querySelector('td.editing');
       if (old) { syncCell(); drawCell(old, S.t.rows[+old.dataset.r].cells[+old.dataset.i]); }
       S.r = r; S.c = c;
@@ -1539,6 +1596,7 @@ export default {
       if (mod && !e.shiftKey && (e.key.toLowerCase() === 'b' || e.key.toLowerCase() === 'i')) { e.preventDefault(); return styleSel(e.key.toLowerCase() === 'b' ? 'bold' : 'italic'); }
       if (mod && e.key.toLowerCase() === 'm') { e.preventDefault(); return td.classList.contains('visual') ? insertMath(td) : wrapCell('math'); }
       if (mod && e.key === 'Enter') { e.preventDefault(); return op('rowBelow'); }
+      if (mod && !e.shiftKey && e.key.toLowerCase() === 'e' && td.classList.contains('visual')) { e.preventDefault(); return openCellMathFull(td); }
     }
     // bold / italic: the selected words when typing visually, else the whole cell
     function styleSel(kind) {
@@ -2351,6 +2409,11 @@ export default {
 .vz-tabedit.has-cells .vz-table-edit { user-select: none; } .vz-tabedit:focus { outline: none; }
 .vz-empty { display: inline-block; min-width: 2em; }
 .vz-cblock-w { display: flow-root; }
+.vz-cellbar { position: fixed; z-index: 960; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; max-width: min(620px, calc(100vw - 16px)); }
+.vz-cellbar .vz-fmt-bar { position: static; max-width: none; }
+.vz-cellbar-end { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); box-shadow: 0 2px 8px rgb(0 0 0 / 8%); }
+.vz-cellbar-end button { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 22px; padding: 0 4px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); cursor: pointer; }
+.vz-cellbar-end button:hover { background: var(--accent-soft, #e8eefc); color: var(--ink); } .vz-cellbar-end button.primary { background: var(--accent); color: #fff; }
 .vz-cblock { margin: 4px 0; padding: 3px 10px; border: 1px dashed var(--line); border-radius: 6px; color: var(--muted); font: italic 12px var(--ui); text-align: center; cursor: pointer; background: color-mix(in srgb, var(--panel-2, var(--panel)) 60%, transparent); }
 .vz-cblock:hover { border-color: var(--accent); color: var(--accent); }
 .vz-table-edit td.editing.visual { font: inherit; white-space: nowrap; box-shadow: inset 0 0 0 2px var(--accent); }

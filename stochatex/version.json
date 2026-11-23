@@ -1,5 +1,5 @@
 {
- "v": "e15290fa89",
+ "v": "2beebe1844",
  "files": {
   "app.css": "a06ed449b6",
   "core.js": "006432d5d2",
@@ -11,7 +11,7 @@
   "modules/brackets.js": "fcf3ac5868",
   "modules/dark-mode.js": "fbf1483daf",
   "modules/dynare.js": "3ce02e80c5",
-  "modules/equation-editor.js": "78bdca4756",
+  "modules/equation-editor.js": "232dd8dcaf",
   "modules/formatting.js": "cffb51f8b7",
   "modules/irf-figures.js": "c6f8e6d11a",
   "modules/lib/dynare.js": "192d992d57",
@@ -26,7 +26,7 @@
   "modules/outline.js": "4923030bfc",
   "modules/proofread.js": "b0c01daa8a",
   "modules/snippets.js": "9b01f7efc8",
-  "modules/visual-mode.js": "4159d655f7",
+  "modules/visual-mode.js": "74ad920a96",
   "modules/word-count.js": "d8d5dff0a0"
  }
 }

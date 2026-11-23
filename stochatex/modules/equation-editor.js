@@ -12,15 +12,18 @@ export default {
     let btn = null;
     // ---- the live link to the editor (side panel or tab) over a BroadcastChannel ----
     let chan = null, linkRange = null, linkText = null, linkTimer = 0, newAt = null;
+    // maths that is not in the source as it is (e.g. in a table cell being edited): another module hands it over
+    // with { latex, where, onChange(latex), onClose() } and gets every change back
+    let target = null;
     const linkPost = (m) => chan?.postMessage({ target: 'equation-editor', ...m });
-    function unlink() { try { chan?.close(); } catch (e) {} chan = null; linkRange = null; linkText = null; newAt = null; }
+    function unlink() { try { chan?.close(); } catch (e) {} chan = null; linkRange = null; linkText = null; newAt = null; if (target) { const t = target; target = null; try { t.onClose?.(); } catch {} } }
     let side = null;
     const syncBtn = () => { btn?.classList.toggle('on', !!side); btn?.setAttribute('aria-pressed', String(!!side)); };
     function closeSide() { if (!side) return; side.el.remove(); side = null; document.body.classList.remove('eq-side'); if (chan) { linkPost({ type: 'gone' }); unlink(); } syncBtn(); ctx.editor.focus(); }
-    function openSide() {
+    function openSide(forTarget) {
       const wrap = document.getElementById('pdfwrap'); if (!wrap) return openFull(true);
       if (side) closeSide();
-      const id = link(); if (!id) return;
+      const id = forTarget ? linkTarget(forTarget) : link(); if (!id) return;
       const frameEl = h('iframe', { class: 'eqside-frame', title: 'Full equation editor', src: new URL('./equation/index.html?link=' + id + '&embed=side', document.baseURI).href });
       const el = h('div', { class: 'eqside', role: 'complementary', 'aria-label': 'Full equation editor' },
         h('div', { class: 'eqside-head' }, h('strong', {}, 'Equation editor'), h('span', { class: 'muted eqside-where' }), h('span', { class: 'spacer' }),
@@ -30,7 +33,7 @@ export default {
       wrap.append(el); document.body.classList.add('eq-side');
       side = { el, id }; syncBtn(); where();
     }
-    const where = () => { const w = side?.el.querySelector('.eqside-where'); if (!w) return; w.textContent = linkRange ? `· line ${ctx.editor.view.state.doc.lineAt(Math.min(linkRange.from, ctx.editor.view.state.doc.length)).number}, linked to the paper` : '· a new equation, inserted at the cursor as you type'; };
+    const where = () => { const w = side?.el.querySelector('.eqside-where'); if (!w) return; w.textContent = target ? '· ' + (target.where || 'maths') + ', linked' : linkRange ? `· line ${ctx.editor.view.state.doc.lineAt(Math.min(linkRange.from, ctx.editor.view.state.doc.length)).number}, linked to the paper` : '· a new equation, inserted at the cursor as you type'; };
     // start a live link to the equation at the cursor (or to a new one); returns the channel id
     function link() {
       if (!/\.(tex|ltx)$/i.test(ctx.project.activeFile || '')) { ctx.ui.toast('Open a .tex file first.'); return null; }
@@ -42,6 +45,15 @@ export default {
       chan.onmessage = onLinkMsg;
       return id;
     }
+    function linkTarget(t) {
+      if (chan) { linkPost({ type: 'gone' }); unlink(); }
+      const id = Math.random().toString(36).slice(2, 10);
+      chan = new BroadcastChannel('stochatex-eq-' + id);
+      target = t; linkRange = null; newAt = null; linkText = null;
+      chan.onmessage = onLinkMsg;
+      return id;
+    }
+    const strip = (x) => { const m = /^\s*(?:\$([\s\S]*)\$|\\\(([\s\S]*)\\\))\s*$/.exec(x || ''); return (m ? (m[1] ?? m[2]) : (x || '')).trim(); };
     function insertNew(latex) {
       if (!/^\s*(\\begin\{|\\\[|\$|\\\()/.test(latex)) latex = `\\begin{equation}\n  ${latex}\n\\end{equation}`;
       const sel = newAt || ctx.editor.getSelection(), text = ctx.editor.getText();
@@ -52,6 +64,13 @@ export default {
     }
     function onLinkMsg(e) {
       const d = e.data; if (!d || d.source !== 'equation-editor') return;
+      if (target) {
+        if (d.type === 'ready') { linkText = '$' + (target.latex || '') + '$'; linkPost({ type: 'set', latex: linkText, theme: document.documentElement.dataset.theme, focus: true }); }
+        else if (d.type === 'change') { linkText = d.latex || ''; try { target.onChange(strip(linkText)); } catch {} }
+        else if (d.type === 'close-panel') closeSide();
+        else if (d.type === 'closed' && !side) unlink();
+        return;
+      }
       if (d.type === 'ready') { linkText = linkRange ? ctx.editor.view.state.sliceDoc(linkRange.from, linkRange.to) : ''; linkPost({ type: 'set', latex: linkText, theme: document.documentElement.dataset.theme, focus: true }); }
       else if (d.type === 'change') {
         const latex = d.latex || '';
@@ -66,7 +85,7 @@ export default {
     }
     // the side panel follows the cursor to another equation
     ctx.on('cursor', () => {
-      if (!side || !chan) return;
+      if (!side || !chan || target) return;
       const r = findMath(ctx.editor.getText(), ctx.editor.getCursor().pos);
       if (r && (!linkRange || r.from !== linkRange.from)) { linkRange = { ...r }; newAt = null; linkText = ctx.editor.view.state.sliceDoc(r.from, r.to); linkPost({ type: 'set', latex: linkText, focus: false }); where(); }
     });
@@ -77,7 +96,12 @@ export default {
       const w = window.open(new URL('./equation/index.html?link=' + id, document.baseURI).href, '_blank');
       if (!w) { unlink(); ctx.ui.toast('Your browser blocked the new tab. Allow pop-ups for this site and try again.'); }
     }
-    const toggle = () => { if (side) closeSide(); else openSide(); };
+    // Σ / Ctrl+E: a module may claim it first (the table editor, for the maths of the cell being edited)
+    const toggle = () => { if (side) return closeSide(); if (window.__stxMathTarget && window.__stxMathTarget()) return; openSide(); };
+    const onOpenMath = (e) => openSide(e.detail);
+    const onCloseMath = () => { if (target) closeSide(); };
+    addEventListener('stochatex:open-math', onOpenMath); addEventListener('stochatex:close-math', onCloseMath);
+    ctx.onDispose(() => { removeEventListener('stochatex:open-math', onOpenMath); removeEventListener('stochatex:close-math', onCloseMath); });
     // keep the linked equation in place while the text around it changes, and show source edits in the editor
     ctx.editor.addExtension(EditorView.updateListener.of((u) => {
       if (!u.docChanged || !linkRange) return;
@@ -95,6 +119,7 @@ export default {
     const onKey = (e) => { if (e.key === 'Escape' && side && !e.defaultPrevented && !document.querySelector('.modal-back, .menu')) closeSide(); };
     addEventListener('keydown', onKey);
     btn = ctx.ui.addToolbarButton({ label: 'Equation', icon: 'sigma', title: 'Equation editor beside the paper: open or close (Ctrl+E)', onClick: toggle }).el;
+    btn.dataset.tb = 'equation';
     syncBtn();
     const bye = () => { linkPost({ type: 'gone' }); }; addEventListener('pagehide', bye);
     ctx.onDispose(() => { bye(); closeSide(); unlink(); removeEventListener('pagehide', bye); removeEventListener('keydown', onKey); themeWatch.disconnect(); });
