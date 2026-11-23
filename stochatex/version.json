@@ -1,5 +1,5 @@
 {
- "v": "01810d27c3",
+ "v": "20d615cd7f",
  "files": {
   "app.css": "a06ed449b6",
   "core.js": "006432d5d2",
@@ -26,7 +26,7 @@
   "modules/outline.js": "4923030bfc",
   "modules/proofread.js": "b0c01daa8a",
   "modules/snippets.js": "9b01f7efc8",
-  "modules/visual-mode.js": "b75211d0b3",
+  "modules/visual-mode.js": "851b105bec",
   "modules/word-count.js": "d8d5dff0a0"
  }
 }

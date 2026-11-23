@@ -1498,6 +1498,39 @@ export default {
       if (!ok) { try { navigator.clipboard.writeText(latex); ok = true; } catch {} }
       ctx.ui.toast(ok ? `Copied the whole table${best ? ' (with its caption and label)' : ''}: it pastes as a table in Word and Excel, and as LaTeX in any LaTeX editor.` : 'The browser did not allow copying.');
     }
+    // every maths part of the table (or of the selected cells) in its steady state: dated variables lose the time
+    // index and get a mark, E_t goes; text and parameters stay. One click on Undo in the note puts it all back.
+    function tableSteady(mark, anchor) {
+      const S = tableSess; if (!S) return; syncCell();
+      const zero = !!ctx.settings.get('table-ss-zero', false);
+      const cells = S.sel ? selList() : S.t.rows.flatMap(r => r.cells);
+      const before = cells.map(c => c.tex);
+      const ss = (x) => steadyState(x, { mark, shocks: zero ? 'zero' : 'keep' });
+      let n = 0;
+      for (const c of cells) {
+        const t = c.tex.replace(/(^|[^\\])\$([^$]+)\$/g, (m, pre, x) => pre + '$' + ss(x) + '$').replace(/\\\(([\s\S]*?)\\\)/g, (m, x) => '\\(' + ss(x) + '\\)');
+        if (t !== c.tex) { c.tex = t; n++; }
+      }
+      if (!n) return ctx.ui.toast(S.sel ? 'No dated variables (x_t) in the maths of the selected cells.' : 'No dated variables (x_t) in the maths of this table.');
+      const keep = S.sel, { r, c } = S;
+      S.dirty = true; pinTable(() => { buildTableUI(); writeTable(); if (keep) selectCells(keep); else focusCell(r, c); });
+      ctx.ui.toast(h('span', {}, `Steady state written in ${n} cell${n === 1 ? '' : 's'}. `, h('button', { class: 'small', onClick: (ev) => {
+        ev.target.closest('.toast')?.remove();
+        if (tableSess !== S) return ctx.ui.toast('The table is closed: use Ctrl+Z in the text to undo.');
+        cells.forEach((cl, k) => { cl.tex = before[k]; }); S.dirty = true; pinTable(() => { buildTableUI(); writeTable(); focusCell(r, c); });
+      } }, 'Undo')), '', 8000);
+    }
+    function steadyMenu(anchor) {
+      const S = tableSess; if (!S) return;
+      const zero = !!ctx.settings.get('table-ss-zero', false);
+      ctx.ui.menu(anchor, [
+        { heading: S.sel ? 'Steady state of the selected cells' : 'Steady state of all the maths in the table' },
+        ...[['bar', 'Bar   \\bar{x}'], ['hat', 'Hat   \\hat{x}'], ['overline', 'Overline   \\overline{x}'], ['tilde', 'Tilde   \\tilde{x}'], ['star', 'Star   x^{*}'], ['ss', 'Subscript   x_{ss}'], ['none', 'Only drop the t']]
+          .map(([m, l]) => ({ label: l, onClick: () => tableSteady(m, anchor) })),
+        '-',
+        { label: (zero ? '✓ ' : ' ') + 'Shocks become 0', title: 'ε_t, η_t, u_t … become 0 (otherwise they are marked like the other variables)', onClick: () => { ctx.settings.set('table-ss-zero', !zero); steadyMenu(anchor); } },
+      ]);
+    }
     function clearCells() {
       const S = tableSess, gone = new Set(selList());
       pinTable(() => {
@@ -1669,6 +1702,7 @@ export default {
         h('button', { title: 'Bold (Ctrl+B): the selected words, or the whole cell', onMousedown: (e) => { e.preventDefault(); styleSel('bold'); } }, h('b', {}, 'B')),
         h('button', { title: 'Italic (Ctrl+I): the selected words, or the whole cell', onMousedown: (e) => { e.preventDefault(); styleSel('italic'); } }, h('i', { style: { fontFamily: 'var(--serif, serif)' } }, 'I')),
         h('button', { title: 'Insert maths at the cursor, edited like an equation (Ctrl+M, or type $)', onMousedown: (e) => { e.preventDefault(); const td = S.el.querySelector('td.editing'); if (td?.classList.contains('visual')) insertMath(td); else wrapCell('math'); } }, h('span', { class: 'vz-om' }, '∑')), sep(),
+        h('button', { title: 'Steady state: write the maths of the table (or of the selected cells) in its steady state, x_t → \\bar{x} (choose the mark); E_t goes, parameters stay', 'aria-label': 'Steady state', onMousedown: (e) => { e.preventDefault(); steadyMenu(e.currentTarget); } }, h('span', { class: 'vz-acc vz-ssbtn', 'data-acc': '¯' }, 'x'), h('span', { class: 'vz-sssub' }, 'ss')), sep(),
         b('merge', 'Merge the selected cells of a row (drag across them, or Shift+click)'), b('split', 'Split a merged cell'), sep(),
         h('button', { title: 'Copy cells: the selected cells, or the cell you are in (Ctrl+C; Ctrl+X cuts). They paste into Excel, Word, or another table here', 'aria-label': 'Copy cells', onMousedown: (e) => { e.preventDefault(); copyCells(false); } }, ico('copy', 15)),
         h('button', { title: 'Copy the whole table: a table in Word and Excel, the complete LaTeX (with caption and label) in any LaTeX editor', 'aria-label': 'Copy the whole table', onMousedown: (e) => { e.preventDefault(); copyTable(); } }, ico('copyTable', 16)), sep(),
@@ -2427,6 +2461,7 @@ export default {
 .vz-tabedit.has-cells .vz-table-edit { user-select: none; } .vz-tabedit:focus { outline: none; }
 .vz-empty { display: inline-block; min-width: 2em; }
 .vz-cblock-w { display: flow-root; }
+.vz-tabbar .vz-ssbtn { font: italic 15px var(--serif, serif); color: var(--ink); } .vz-sssub { font: 600 9px var(--ui); margin-left: 1px; align-self: flex-end; margin-bottom: 3px; }
 .vz-cellbar { position: fixed; z-index: 960; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; max-width: min(620px, calc(100vw - 16px)); }
 .vz-cellbar .vz-fmt-bar { position: static; max-width: none; }
 .vz-cellbar-end { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); box-shadow: 0 2px 8px rgb(0 0 0 / 8%); }
