@@ -662,6 +662,7 @@ export default {
     const ICO = { copy: 'M9 9h10v10H9z M5 15V5h10', chev: 'M6 9l6 6 6-6', code: 'M8 7l-5 5 5 5 M16 7l5 5-5 5 M13.500 5l-3 14', hash: 'M5 9h14 M5 15h14 M10 4L8 20 M16 4l-2 16',
       tag: 'M3 11.500V4h7.500L21 14.500 13.500 22z M7.500 7.500h.010', expand: 'M14 4h6v6 M20 4l-7 7 M10 20H4v-6 M4 20l7-7', trash: 'M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13 M10 11v6 M14 11v6',
       more: 'M5 12h.010 M12 12h.010 M19 12h.010', check: 'M5 12.500l4.500 4.500L19 7',
+      dup: 'M8 8h11v11H8z M5 16V5h11 M13.500 11v5 M11 13.500h5', cut: 'M6 20a2.500 2.500 0 1 0 0-5 2.500 2.500 0 0 0 0 5z M18 20a2.500 2.500 0 1 0 0-5 2.500 2.500 0 0 0 0 5z M7.800 15.700 17 4 M16.200 15.700 7 4',
       ubrace: 'M3 7c0 3 2 4.500 4.500 4.500h2.500c1.300 0 2 1 2 3 0-2 .700-3 2-3h2.500C19 11.500 21 10 21 7', obrace: 'M3 17c0-3 2-4.500 4.500-4.500h2.500c1.300 0 2-1 2-3 0 2 .700 3 2 3h2.500c2.500 0 4.500 1.500 4.500 4.500',
       frac: 'M9 3h6v5H9z M5 12h14 M9 16h6v5H9z', sqrt: 'M3 13h3l3 7 4-16h8', box: 'M4 6h16v12H4z', slot: 'M7 6h10v12H7z',
       rowAbove: 'M4 13h16v7H4z M12 3v7 M9 6l3-3 3 3', rowBelow: 'M4 4h16v7H4z M12 21v-7 M9 18l3 3 3-3', colLeft: 'M13 4h7v16h-7z M3 12h7 M6 9l-3 3 3 3', colRight: 'M4 4h7v16H4z M21 12h-7 M18 9l3 3-3 3',
@@ -717,6 +718,7 @@ export default {
         fb('𝒜', 'Calligraphic (\\mathcal)', wrap('\\mathcal{#0}')),
         fb('Tt', 'Words inside the equation (\\text)', wrap('\\text{#0}'), 'tt'),
         sep(),
+        fb('a·b', 'Multiplication dot (\\cdot); typing ** does the same', () => { mf.focus(); mf.insert('\\cdot ', { format: 'latex' }); }, 'cdot'),
         h('span', { class: 'vz-only-sel' },
           fb(h('span', { class: 'vz-acc', 'data-acc': '¯' }, 'x'), 'Bar over the selection (\\bar, or \\overline for more than one letter)', wrap('\\bar{#0}', '\\overline{#0}')),
           fb(h('span', { class: 'vz-acc', 'data-acc': 'ˆ' }, 'x'), 'Hat (\\hat, or \\widehat)', wrap('\\hat{#0}', '\\widehat{#0}')),
@@ -804,6 +806,8 @@ export default {
       const numbered0 = () => { const x = itemNow(); if (!x || x.kind !== 'dmath') return null; const starred = /\*$/.test(view.state.sliceDoc(x.from, x.from + 40).match(/^\\begin\{([^}]*)\}/)?.[1] || ''); return { x, starred, has: !!x.env && !starred && x.env !== 'displaymath' && x.env !== 'math' }; };
       const bar = h('span', { class: 'vz-edit-bar' },
         btn(h('span', { class: 'vz-ib' }, ico('copy'), ico('chev', 10)), 'Copy this equation: as LaTeX, for Word, as an image, or a reference to it', (b) => copyMenu(b)),
+        btn(ico('dup'), 'Duplicate: a copy right below this equation, open for editing; its label gets a number (Ctrl+Shift+D)', () => { const x = itemNow(); if (x) duplicate(x, false); }),
+        btn(ico('cut'), 'Cut: the whole equation, with its \\begin … \\end and label; paste it anywhere (Ctrl+Z puts it back)', () => { const x = itemNow(); if (x) cutEquation(x); }),
         btn(h('span', { class: 'vz-ib vz-om' }, 'Ω'), 'Insert a symbol: Greek letters, operators, relations, arrows (Ctrl+Shift+S)', (b) => symbolPop(b)),
         btn(ico('code'), 'Show the LaTeX of this equation (Alt+click does the same; Esc there, or “Visual”, comes back)', () => { const pos = view.state.field(editField)?.bodyFrom; finishEdit(true, pos); }),
         ...(display ? [
@@ -836,7 +840,15 @@ export default {
         else if (e.altKey && e.code === 'Slash' && window.StochaBrackets) { e.preventDefault(); e.stopPropagation(); window.StochaBrackets.flipInField(mf); }
       }, true);
       // finish on a real click outside; MathLive's own pop-ups (command suggestions, menus) and our menus do not count
-      const away = (e) => { if (session !== sess) return document.removeEventListener('mousedown', away, true); const t = e.target; if (el.contains(t) || (t.closest && t.closest('.ML__popover, #mathlive-suggestion-popover, .ML__keyboard, .ui-menu-container, .menu, .modal, .toasts, .vz-sym'))) return; finishEdit(false); };
+      const away = (e) => { if (session !== sess) return document.removeEventListener('mousedown', away, true); const t = e.target; if (el.contains(t) || (t.closest && t.closest('.ML__popover, #mathlive-suggestion-popover, .ML__keyboard, .ui-menu-container, .menu, .modal, .toasts, .vz-sym'))) return;
+        // a click on empty space beside the equation closes the editor without putting the cursor into its LaTeX
+        // (which would show the code and move the text below); the equation stays where it is on screen
+        const x = itemNow(), swallow = x && x.kind === 'dmath' && clickInside(view, e, x.from, x.to), y0 = x ? blockTop(view, x.from) : null;
+        if (swallow) { e.preventDefault(); e.stopPropagation(); }
+        finishEdit(false);
+        if (x) holdPlace(view, x.from, y0);
+        if (swallow) cursorAfter(view, { from: x.from, to: x.to });
+      };
       document.addEventListener('mousedown', away, true); sess.away = away;
       // copying inside the field gives plain LaTeX (MathLive would wrap it in $$ … $$)
       el.addEventListener('copy', (e) => {
@@ -847,7 +859,7 @@ export default {
       }, true);
       el.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'd') { e.preventDefault(); e.stopPropagation(); const x = itemNow(); if (x) duplicate(x, false); }
-        else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 's') { e.preventDefault(); e.stopPropagation(); symbolPop(bar.children[1]); }
+        else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 's') { e.preventDefault(); e.stopPropagation(); symbolPop(bar.querySelector('.vz-om')?.closest('button') || bar.children[0]); }
       }, true);
       // cutting everything cuts the whole equation (environment and label too)
       el.addEventListener('cut', (e) => {
@@ -1258,8 +1270,72 @@ export default {
     const tableAway = (e) => {
       if (!tableSess) return document.removeEventListener('mousedown', tableAway, true);
       if (tableSess.el.contains(e.target) || e.target.closest?.('.menu, .ui-menu-container, .modal, .toasts, .vz-tabgrid, .ML__popover, #mathlive-suggestion-popover, .ML__keyboard, .vz-sym, .vz-cellbar, .eqside, [data-tb="equation"]')) return;
+      const S = tableSess, v = S.view, rng = floatRange(v.state.doc.toString(), S.from);
+      // a click on empty space beside the table (or its caption) only closes the editor: it must not put the cursor
+      // inside the table, which would show the whole table as LaTeX and move everything below it
+      const swallow = rng && clickInside(v, e, rng.from, rng.to);
+      if (swallow) { e.preventDefault(); e.stopPropagation(); }
+      const y0 = rng ? blockTop(v, rng.from) : null;
       finishTable(true);
+      if (rng) holdPlace(v, rng.from, y0);
+      if (swallow) cursorAfter(v, floatRange(v.state.doc.toString(), S.from) || rng);
+      else if (rng && !v.contentDOM.contains(e.target)) cursorAfter(v, floatRange(v.state.doc.toString(), S.from) || rng, false);     // clicked outside the text: the cursor still leaves the old place
     };
+    // Esc or Done: close, keep the table where it is on screen, and put the cursor just after it (not wherever it
+    // was before the table was opened, which could be far away)
+    function closeTableHere() {
+      const S = tableSess; if (!S) return;
+      const v = S.view, rng = floatRange(v.state.doc.toString(), S.from), y0 = rng ? blockTop(v, rng.from) : null;
+      finishTable(true);
+      if (rng) { holdPlace(v, rng.from, y0); cursorAfter(v, floatRange(v.state.doc.toString(), S.from) || rng); }
+      else v.focus();
+    }
+    // the table float around a tabular: table / table* / sidewaystable / threeparttable (else just the tabular)
+    function floatRange(doc, from) {
+      const loc = locateTable(doc, from); if (!loc) return null;
+      const endTab = doc.indexOf('}', loc.bodyTo) + 1;
+      let a = from, b = endTab;
+      for (let k = 0; k < 3; k++) {
+        const before = doc.slice(0, a), re = /\\begin\{(table\*?|sidewaystable\*?|threeparttable)\}/g; let m, last = null;
+        while ((m = re.exec(before))) last = m;
+        if (!last) break;
+        const endRe = new RegExp('\\\\end\\{' + last[1].replace('*', '\\*') + '\\}', 'g'); endRe.lastIndex = last.index;
+        const e2 = endRe.exec(doc); if (!e2 || e2.index < b) break;
+        a = last.index; b = e2.index + e2[0].length;
+      }
+      return { from: a, to: b };
+    }
+    // is a mouse press inside the editor's text, at a place that belongs to from..to?
+    function clickInside(v, e, from, to) {
+      if (!v.contentDOM.contains(e.target) && e.target !== v.scrollDOM && !v.scrollDOM.contains(e.target)) return false;
+      if (e.target.closest?.('.cm-gutters, .cm-scroller > :not(.cm-content)') && !v.contentDOM.contains(e.target)) return false;
+      const pos = v.posAtCoords({ x: e.clientX, y: e.clientY }, false);
+      return pos != null && pos >= from && pos <= to;
+    }
+    const blockTop = (v, pos) => { try { return v.lineBlockAt(Math.min(pos, v.state.doc.length)).top + v.documentTop; } catch { return null; } };
+    // keep the text at pos where it is on screen while the drawing changes (an editor closing, a table redrawn);
+    // scrolling or typing yourself stops it
+    function holdPlace(v, pos, y0) {
+      if (y0 == null) return;
+      let stop = false; const t0 = performance.now(), sc = v.scrollDOM;
+      const user = () => { stop = true; };
+      sc.addEventListener('wheel', user, { passive: true, once: true }); addEventListener('keydown', user, { once: true, capture: true });
+      const tick = () => {
+        if (stop) return;
+        v.requestMeasure({ key: 'vz-hold-place', read: () => blockTop(v, pos), write: (top) => {
+          if (stop || top == null) return;
+          const dy = top - y0; if (Math.abs(dy) > 0.5) sc.scrollTop += dy;
+          if (performance.now() - t0 < 900) requestAnimationFrame(tick); else { sc.removeEventListener('wheel', user); removeEventListener('keydown', user, true); }
+        } });
+      };
+      tick();
+    }
+    // the cursor goes just after the table (or equation), on the next line, without scrolling
+    function cursorAfter(v, rng, focus = true) {
+      if (!rng) return;
+      const d = v.state.doc, ln = d.lineAt(Math.min(rng.to, d.length)), at = ln.number < d.lines ? d.line(ln.number + 1).from : ln.to;
+      try { v.dispatch({ selection: { anchor: at }, scrollIntoView: false }); if (focus) v.focus(); } catch {}
+    }
     // keep the table where it is on screen while it changes (and while what is above it is re-measured):
     // for a moment after each change, any shift of the table is scrolled back; scrolling yourself stops it
     function pinTable(fn) {
@@ -1656,7 +1732,7 @@ export default {
         syncCell(); TE.addRow(t, r); S.dirty = true; buildTableUI(); changed(); return go(r + 1, 0);       // Tab in the last cell adds a row, as in Word
       }
       if (e.key === 'Enter') { e.preventDefault(); if (e.shiftKey) return go(Math.max(0, r - 1), c); if (r + 1 < t.rows.length) return go(r + 1, c); syncCell(); TE.addRow(t, r); S.dirty = true; buildTableUI(); changed(); return go(r + 1, c); }
-      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); finishTable(true); S.view.focus(); return; }
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeTableHere(); return; }
       if (e.key === 'ArrowUp' && !e.shiftKey && r > 0) return go(r - 1, c, false);
       if (e.key === 'ArrowDown' && !e.shiftKey && r + 1 < t.rows.length) return go(r + 1, c, false);
       if (e.key === 'ArrowLeft' && !e.shiftKey && atStart() && (c > 0 || r > 0)) return c > 0 ? go(r, c - 1, false) : go(r - 1, t.cols.length - 1, false);
@@ -1734,7 +1810,7 @@ export default {
         rules, h('span', { class: 'spacer' }),
         h('button', { class: 'vz-latexsw' + (S.latex ? ' on' : ''), title: S.latex ? 'Cells show their LaTeX: click to type in them as drawn' : 'Show the LaTeX of the cells while you edit (click again to go back)', 'aria-pressed': String(S.latex), onMousedown: (e) => { e.preventDefault(); syncCell(); S.latex = !S.latex; ctx.settings.set('table-latex', S.latex); const { r, c } = S; buildTableUI(); focusCell(r, c, false); } }, 'LaTeX'),
         h('button', { title: 'Open the whole table as LaTeX in the source', onMousedown: (e) => { e.preventDefault(); const from = S.from; finishTable(true); S.view.dispatch({ selection: { anchor: from + 1 }, scrollIntoView: false }); S.view.focus(); } }, ico('code', 15)),
-        h('button', { class: 'primary', title: 'Done (Esc)', onMousedown: (e) => { e.preventDefault(); finishTable(true); } }, ico('check', 15)));
+        h('button', { class: 'primary', title: 'Done (Esc)', onMousedown: (e) => { e.preventDefault(); closeTableHere(); } }, ico('check', 15)));
       if (!S.listening) {
         S.listening = true;
         S.el.addEventListener('keydown', selKey);
@@ -1760,17 +1836,50 @@ export default {
     // insert a new table: a grid to pick rows × columns, like Word's
     function insertTablePicker(anchor) {
       document.querySelector('.vz-tabgrid')?.remove();
-      const N = 8, M = 10, pop = h('div', { class: 'vz-tabgrid', role: 'dialog', 'aria-label': 'Insert a table' }), label = h('div', { class: 'vz-tabgrid-l' }, 'Insert a table');
-      const grid = h('div', { class: 'vz-tabgrid-g', style: { gridTemplateColumns: `repeat(${N}, 18px)` } });
-      for (let r = 0; r < M; r++) for (let c = 0; c < N; c++) grid.append(h('span', { 'data-r': r, 'data-c': c }));
-      const over = (r, c) => { grid.querySelectorAll('span').forEach(x => x.classList.toggle('on', +x.dataset.r <= r && +x.dataset.c <= c)); label.textContent = `${r + 1} × ${c + 1} table (rows × columns)`; };
+      // mouse: hover and click a size; keyboard: arrows move, Enter inserts, or type Rows and Columns; Esc closes
+      const N = 8, M = 10, back = document.activeElement;
+      const pop = h('div', { class: 'vz-tabgrid', role: 'dialog', 'aria-label': 'Insert a table' }), label = h('div', { class: 'vz-tabgrid-l', 'aria-live': 'polite' }, 'Insert a table');
+      const grid = h('div', { class: 'vz-tabgrid-g', role: 'grid', tabindex: '0', 'aria-label': 'Table size: arrow keys choose rows and columns, Enter inserts', style: { gridTemplateColumns: `repeat(${N}, 18px)` } });
+      for (let r = 0; r < M; r++) for (let c = 0; c < N; c++) grid.append(h('span', { 'data-r': r, 'data-c': c, role: 'gridcell', id: `vz-tg-${r}-${c}`, 'aria-label': `${r + 1} rows × ${c + 1} columns` }));
+      const num = (v, max, lab) => h('input', { type: 'number', min: '1', max: String(max), value: String(v), 'aria-label': lab, class: 'vz-tabgrid-n' });
+      const rowsIn = num(3, 60, 'Rows'), colsIn = num(3, 20, 'Columns');
+      let cr = 2, cc = 2;
+      const over = (r, c, fromInputs) => {
+        cr = Math.max(0, r); cc = Math.max(0, c);
+        grid.querySelectorAll('span').forEach(x => x.classList.toggle('on', +x.dataset.r <= cr && +x.dataset.c <= cc));
+        label.textContent = `${cr + 1} × ${cc + 1} table (rows × columns)`;
+        grid.setAttribute('aria-activedescendant', `vz-tg-${Math.min(cr, M - 1)}-${Math.min(cc, N - 1)}`);
+        if (!fromInputs) { rowsIn.value = String(cr + 1); colsIn.value = String(cc + 1); }
+      };
+      const close = (restore) => { pop.remove(); document.removeEventListener('mousedown', off, true); if (restore) try { (back && back.isConnected ? back : anchor).focus({ preventScroll: true }); } catch {} };
+      const go = (r, c) => { close(false); insertTable(r, c); };
+      const okBtn = h('button', { class: 'primary small', onClick: () => go(Math.max(1, Math.min(60, +rowsIn.value || 1)), Math.max(1, Math.min(20, +colsIn.value || 1))) }, 'Insert');
       grid.addEventListener('mouseover', (e) => { const x = e.target.closest('span'); if (x) over(+x.dataset.r, +x.dataset.c); });
-      grid.addEventListener('mousedown', (e) => { const x = e.target.closest('span'); if (!x) return; e.preventDefault(); pop.remove(); insertTable(+x.dataset.r + 1, +x.dataset.c + 1); });
-      pop.append(label, grid, h('div', { class: 'muted vz-tabgrid-f' }, 'With a caption and a label; book-style lines'));
+      grid.addEventListener('mousedown', (e) => { const x = e.target.closest('span'); if (!x) return; e.preventDefault(); go(+x.dataset.r + 1, +x.dataset.c + 1); });
+      grid.addEventListener('keydown', (e) => {
+        const mv = { ArrowRight: [0, 1], ArrowLeft: [0, -1], ArrowDown: [1, 0], ArrowUp: [-1, 0] }[e.key];
+        if (mv) { e.preventDefault(); over(Math.min(M - 1, cr + mv[0]), Math.min(N - 1, cc + mv[1])); }
+        else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(cr + 1, cc + 1); }
+      });
+      [rowsIn, colsIn].forEach(x => {
+        x.addEventListener('input', () => over((+rowsIn.value || 1) - 1, (+colsIn.value || 1) - 1, true));
+        x.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); okBtn.click(); } });
+      });
+      pop.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(true); }
+        else if (e.key === 'Tab') {     // Tab stays inside the picker
+          const f = [grid, rowsIn, colsIn, okBtn], i = f.indexOf(document.activeElement);
+          e.preventDefault(); f[(i + (e.shiftKey ? f.length - 1 : 1)) % f.length].focus();
+        }
+      });
+      pop.append(label, grid,
+        h('div', { class: 'vz-tabgrid-in' }, h('label', {}, 'Rows ', rowsIn), h('label', {}, 'Columns ', colsIn), okBtn),
+        h('div', { class: 'muted vz-tabgrid-f' }, 'With a caption and a label; book-style lines'));
       document.body.append(pop);
+      over(2, 2);
       const rr = anchor.getBoundingClientRect(); pop.style.left = Math.max(8, Math.min(innerWidth - 240, rr.left)) + 'px'; pop.style.top = (rr.bottom + 6) + 'px';
-      const off = (e) => { if (!pop.contains(e.target) && !anchor.contains(e.target)) { pop.remove(); document.removeEventListener('mousedown', off, true); } };
-      setTimeout(() => document.addEventListener('mousedown', off, true), 0);
+      const off = (e) => { if (!pop.contains(e.target) && !anchor.contains(e.target)) close(false); };
+      setTimeout(() => { document.addEventListener('mousedown', off, true); grid.focus({ preventScroll: true }); }, 0);
     }
     function insertTable(rows, cols) {
       const v = view(); if (!v) return;
@@ -2289,6 +2398,9 @@ export default {
     ctx.ui.addCommand({ id: 'visual.breaks', name: 'Page breaks: show or hide', run: () => { breaksOn = !breaksOn; save(); apply(); } });
     ctx.editor.addKeymap([{ key: 'Mod-Shift-v', run: () => (setOn(!on), true) }]);
     ctx.on('open', () => setTimeout(measure, 0));
+    // leaving a file closes a table or an equation being edited there first (saved into that file), so nothing
+    // stays open, half-linked, when you come back to it
+    ctx.on('leave', () => { try { if (tableSess) finishTable(true); } catch {} try { if (session) finishEdit(false); } catch {} document.querySelectorAll('.vz-cellbar').forEach(x => x.remove()); });
     ctx.on('compile', () => setTimeout(measure, 0));
     apply();
     const offMc = modelState.on(() => poke());
@@ -2506,6 +2618,10 @@ math-field.vz-cellmath::part(menu-toggle), math-field.vz-cellmath::part(virtual-
 .vz-tabgrid-l { font: 600 12px var(--ui); margin-bottom: 6px; } .vz-tabgrid-f { font: 11px var(--ui); margin-top: 6px; }
 .vz-tabgrid-g { display: grid; gap: 3px; } .vz-tabgrid-g span { width: 18px; height: 18px; border: 1px solid var(--line); border-radius: 3px; background: var(--paper); cursor: pointer; }
 .vz-tabgrid-g span.on { background: color-mix(in srgb, var(--accent) 30%, var(--paper)); border-color: var(--accent); }
+.vz-tabgrid-g:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.vz-tabgrid-in { display: flex; gap: 8px; align-items: center; margin-top: 8px; font: 12px var(--ui); }
+.vz-tabgrid-in label { display: inline-flex; gap: 4px; align-items: center; }
+.vz-tabgrid-n { width: 46px; padding: 2px 4px; font: inherit; }
 .vz-toc, .vz-bib { display: flex; flex-direction: column; gap: .15em; padding: 6px 0 10px; cursor: text; }
 .vz-toc-h, .vz-bib-h { font-weight: 700; font-size: 1.38em; margin-bottom: .3em; }
 .vz-toc-l.l1 { padding-left: 1.5em; } .vz-toc-l.l2 { padding-left: 3em; } .vz-toc-l.l0 { font-weight: 700; }

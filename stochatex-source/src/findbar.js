@@ -12,7 +12,8 @@ export function latexLoose(text, wholeWord) {
   const words = text.trim().split(/\s+/).filter(Boolean).map(esc);
   const gap = '(?:\\s|[{}~]|\\\\[a-zA-Z]+\\*?)+';
   const body = words.join(gap);
-  return wholeWord ? `\\b${body}\\b` : body;
+  // word edges that also respect accented letters (\b alone counts é as an edge)
+  return wholeWord ? `(?<![\\w\\u00C0-\\u024F])${body}(?![\\w\\u00C0-\\u024F])` : body;
 }
 
 export function findBar(app) {
@@ -20,8 +21,10 @@ export function findBar(app) {
   let opts = { caseSensitive: false, wholeWord: false, regexp: false, loose: false };
   let replaceOpen = false;
   function makeQuery(view, text) {
-    const st = { search: text, caseSensitive: opts.caseSensitive, wholeWord: opts.wholeWord && !opts.loose, regexp: opts.regexp, replace: view?.__fb?.replace?.value || '' };
-    if (opts.loose && !opts.regexp && text.trim().includes(' ')) { st.search = latexLoose(text, opts.wholeWord); st.regexp = true; }
+    // Whole word stays the editor's own option unless Ignore LaTeX really turned the text into a pattern; then the
+    // pattern carries its own word edges (a single word with Ignore LaTeX is searched as it is)
+    const st = { search: text, caseSensitive: opts.caseSensitive, wholeWord: opts.wholeWord, regexp: opts.regexp, replace: view?.__fb?.replace?.value || '' };
+    if (opts.loose && !opts.regexp && text.trim().includes(' ')) { st.search = latexLoose(text, opts.wholeWord); st.regexp = true; st.wholeWord = false; }
     return new SearchQuery(st);
   }
   function createPanel(view) {
@@ -37,7 +40,8 @@ export function findBar(app) {
       btn('Replace all', 'Replace every match in this file (one Ctrl+Z undoes it)', () => { const n = countMatches(view).total; if (!n) return; replaceAll(view); update(); flash(`Replaced ${n}`); }, 'txt'));
     const toggleRepl = h('button', { class: 'fb-btn fb-expand', title: 'Show or hide Replace (Ctrl+H)', 'aria-label': 'Replace', 'aria-expanded': String(replaceOpen), onClick: () => setRepl(!replaceOpen) }, '⇄');
     const allBtn = h('button', { class: 'fb-tog', title: 'Find in every file of the project', 'aria-pressed': 'false', onClick: () => { allFiles = !allFiles; allBtn.classList.toggle('on', allFiles); allBtn.setAttribute('aria-pressed', String(allFiles)); listAll(); } }, 'All files');
-    let allFiles = false;
+    let allFiles = false, listT = 0;
+    const allFilesOn = () => allFiles;
     const dom = h('div', { class: 'fb' },
       h('div', { class: 'fb-row' }, toggleRepl, input, count,
         btn('↑', 'Previous match (Shift+Enter)', () => { findPrevious(view); update(); }),
@@ -88,11 +92,24 @@ export function findBar(app) {
         for (const m of hits.slice(0, 50)) {
           const line = t.slice(0, m.index).split('\n').length, ls = t.lastIndexOf('\n', m.index - 1) + 1, le = t.indexOf('\n', m.index);
           const text = t.slice(ls, le < 0 ? t.length : le), col = m.index - ls;
-          out.push(h('button', { class: 'fb-hit', onClick: () => app.onOpenFile(path, m.index, m.index + m[0].length) },
+          out.push(h('button', { class: 'fb-hit', onClick: () => goHit(path, m, re) },
             h('span', { class: 'ln' }, String(line)), h('span', {}, text.slice(Math.max(0, col - 30), col)), h('mark', {}, text.slice(col, col + m[0].length)), h('span', {}, text.slice(col + m[0].length, col + m[0].length + 60))));
         }
       }
       results.replaceChildren(...(out.length ? out : [h('div', { class: 'fb-file' }, 'No matches in the project')]));
+    }
+    // a result is checked against the file as it is now: if the text moved, the nearest match of the same text is used
+    function goHit(path, m, re) {
+      const now = path === app.activePath() ? view.state.doc.toString() : app.read(path);
+      let at = m.index, len = m[0].length;
+      if (now != null && now.slice(at, at + len) !== m[0]) {
+        let best = null;
+        re.lastIndex = 0;
+        for (const x of now.matchAll(re)) { if (!x[0]) break; if (!best || Math.abs(x.index - m.index) < Math.abs(best.index - m.index)) best = x; }
+        if (best) { at = best.index; len = best[0].length; }
+      }
+      app.onOpenFile(path, at, at + len);
+      if (allFiles) setTimeout(listAll, 0);
     }
     let t = 0;
     input.addEventListener('input', () => { clearTimeout(t); t = setTimeout(commit, 80); });
@@ -117,7 +134,11 @@ export function findBar(app) {
         if (pick) commit(); else update();
         input.focus(); input.select();
       },
-      update(u) { if (u.docChanged || u.selectionSet || u.transactions.some(tr => tr.effects.some(e => e.is(setSearchQuery)))) update(); },
+      update(u) {
+        if (u.docChanged || u.selectionSet || u.transactions.some(tr => tr.effects.some(e => e.is(setSearchQuery)))) update();
+        // the project list follows edits (shortly after typing stops), so its counts and places match the text
+        if (u.docChanged && allFilesOn()) { clearTimeout(listT); listT = setTimeout(listAll, 250); }
+      },
       destroy() { delete view.__fb; },
     };
   }

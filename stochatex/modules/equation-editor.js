@@ -12,10 +12,13 @@ export default {
     let btn = null;
     // ---- the live link to the editor (side panel or tab) over a BroadcastChannel ----
     let chan = null, linkRange = null, linkText = null, linkTimer = 0, newAt = null;
+    // gen changes whenever the panel is pointed at another equation (another file, project or maths part): the
+    // editor then starts a fresh Undo history, so Undo can never put one equation's old text into another
+    let gen = 0;
     // maths that is not in the source as it is (e.g. in a table cell being edited): another module hands it over
     // with { latex, where, onChange(latex), onClose() } and gets every change back
     let target = null;
-    const linkPost = (m) => chan?.postMessage({ target: 'equation-editor', ...m });
+    const linkPost = (m) => chan?.postMessage({ target: 'equation-editor', gen: (ctx.project.id || '') + '|' + (ctx.project.activeFile || '') + '|' + gen, ...m });
     function unlink() { try { chan?.close(); } catch (e) {} chan = null; linkRange = null; linkText = null; newAt = null; if (target) { const t = target; target = null; try { t.onClose?.(); } catch {} } }
     let side = null;
     const syncBtn = () => { btn?.classList.toggle('on', !!side); btn?.setAttribute('aria-pressed', String(!!side)); };
@@ -41,7 +44,7 @@ export default {
       if (chan) { linkPost({ type: 'gone' }); unlink(); }
       const id = Math.random().toString(36).slice(2, 10);
       chan = new BroadcastChannel('stochatex-eq-' + id);
-      linkRange = r ? { ...r } : null; newAt = r ? null : ctx.editor.getSelection(); linkText = null;
+      linkRange = r ? { ...r } : null; newAt = r ? null : ctx.editor.getSelection(); linkText = null; gen++;
       chan.onmessage = onLinkMsg;
       return id;
     }
@@ -49,7 +52,7 @@ export default {
       if (chan) { linkPost({ type: 'gone' }); unlink(); }
       const id = Math.random().toString(36).slice(2, 10);
       chan = new BroadcastChannel('stochatex-eq-' + id);
-      target = t; linkRange = null; newAt = null; linkText = null;
+      target = t; linkRange = null; newAt = null; linkText = null; gen++;
       chan.onmessage = onLinkMsg;
       return id;
     }
@@ -87,7 +90,7 @@ export default {
     ctx.on('cursor', () => {
       if (!side || !chan || target) return;
       const r = findMath(ctx.editor.getText(), ctx.editor.getCursor().pos);
-      if (r && (!linkRange || r.from !== linkRange.from)) { linkRange = { ...r }; newAt = null; linkText = ctx.editor.view.state.sliceDoc(r.from, r.to); linkPost({ type: 'set', latex: linkText, focus: false }); where(); }
+      if (r && (!linkRange || r.from !== linkRange.from)) { linkRange = { ...r }; newAt = null; gen++; linkText = ctx.editor.view.state.sliceDoc(r.from, r.to); linkPost({ type: 'set', latex: linkText, focus: false }); where(); }
     });
     ctx.on('open', () => { if (side) closeSide(); });
     function openFull(tab) {

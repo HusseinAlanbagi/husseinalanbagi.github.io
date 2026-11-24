@@ -42,6 +42,7 @@ export function createEditor(parent, { onChange, onCursor, find }) {
   const sources = new Set();           // completion sources registered by modules
   let moduleExts = [], view, suppress = false;
   const states = new Map();            // path -> EditorState
+  const snaps = new Map();             // path -> scroll position when the file was left (a CodeMirror scroll snapshot)
   let current = null;
 
   const complete = async (ctx) => {
@@ -80,15 +81,17 @@ export function createEditor(parent, { onChange, onCursor, find }) {
     view, cm,
     get path() { return current; },
     open(path, text) {
-      if (current) states.set(current, view.state);
-      let st = states.get(path);
-      if (!st || st.doc.toString() !== text) st = EditorState.create({ doc: text, extensions: base(path) });
+      if (current) { states.set(current, view.state); try { snaps.set(current, view.scrollSnapshot()); } catch {} }
+      let st = states.get(path), same = true;
+      if (!st || st.doc.toString() !== text) { st = EditorState.create({ doc: text, extensions: base(path) }); same = false; }
       current = path;
       suppress = true; view.setState(st); view.dispatch({ effects: moduleComp.reconfigure(moduleExts) }); suppress = false;
+      // coming back to a file: the same place on screen as when you left it (not the top)
+      const snap = same && snaps.get(path); if (snap) { try { view.dispatch({ effects: snap }); } catch {} }
       onCursor && onCursor(view.state); view.requestMeasure();
     },
-    forget(path) { states.delete(path); if (current === path) current = null; },
-    rename(from, to) { if (states.has(from)) { states.set(to, states.get(from)); states.delete(from); } if (current === from) current = to; },
+    forget(path) { states.delete(path); snaps.delete(path); if (current === path) current = null; },
+    rename(from, to) { if (states.has(from)) { states.set(to, states.get(from)); states.delete(from); } if (snaps.has(from)) { snaps.set(to, snaps.get(from)); snaps.delete(from); } if (current === from) current = to; },
     getText: () => view.state.doc.toString(),
     setText(text) { view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: text } }); },
     getSelection() { const r = view.state.selection.main; return { from: r.from, to: r.to, text: view.state.sliceDoc(r.from, r.to) }; },

@@ -276,6 +276,9 @@
         <option value="gather">gather</option>
         <option value="gather*">gather*</option>
         <option value="multline">multline</option>
+        <option value="multline*">multline*</option>
+        <option value="flalign">flalign</option>
+        <option value="flalign*">flalign*</option>
       </select>
         <button id="numBtn" title="Numbering on/off (Alt+N)">#</button>
         <button id="sizeBtn" title="Auto-size brackets: ( ) [ ] { } | | grow with tall content (\left…\right) and stay plain otherwise" aria-pressed="false">( )<span class="lbl"> Auto-size</span></button>
@@ -437,9 +440,27 @@ function start() {
     else if ((m = s.match(/^\\\[([\s\S]*)\\\]$/))) { pre = '\\['; post = '\\]'; s = m[1]; }
     else if ((m = s.match(/^\\\(([\s\S]*)\\\)$/))) { pre = '\\('; post = '\\)'; s = m[1]; }
     else if ((m = s.match(/^\$([\s\S]*)\$$/))) { pre = '$'; post = '$'; s = m[1]; }
+    // \label, \nonumber, \notag and \tag stay out of the field. In align/gather/… each row keeps its own (rowExtras),
+    // so editing never moves a label to another row
+    const EX = /\\label\s*\{[^}]*\}|\\(?:nonumber|notag)(?![A-Za-z])|\\tag\*?\s*\{[^}]*\}/g;
     const extras = [];
-    s = s.replace(/\\label\{[^}]*\}|\\nonumber\b|\\notag\b/g, (x) => { extras.push(x); return ''; }).trim();
-    return { body: s, pre, post, multi, extras };
+    let rowExtras = null;
+    if (multi) {
+      const rows = splitTop(s, '\\\\');
+      rowExtras = rows.map(r => r.match(EX) || []);
+      s = rows.map(r => r.replace(EX, '').trim()).join(' \\\\ ').trim();
+      rowExtras.forEach(r => extras.push(...r));
+      if (!rowExtras.some(r => r.length)) rowExtras = null;
+    } else s = s.replace(EX, (x) => { extras.push(x); return ''; }).trim();
+    return { body: s, pre, post, multi, extras, rowExtras };
+  }
+  // put each row's \label / \nonumber / \tag back on its own row; rows added since go without, extra ones end on the last row
+  function attachRows(body, rowExtras) {
+    const rows = splitTop(body, '\\\\');
+    const out = rows.map((r, i) => { const x = (rowExtras[i] || []).join(' '); return x ? r.replace(/\s*$/, '') + ' ' + x + ' ' : r; });
+    const left = rowExtras.slice(rows.length).flat();
+    if (left.length) out[out.length - 1] = out[out.length - 1].replace(/\s*$/, '') + ' ' + left.join(' ');
+    return out.join('\\\\').replace(/\s+$/, '');
   }
 
   function buildOutput(edited) {
@@ -450,6 +471,7 @@ function start() {
       const m = body.match(/^\\begin\{aligned\}([\s\S]*?)\\end\{aligned\}([\s\S]*)$/);
       if (m) body = m[1] + (m[2].trim() ? ' ' + m[2].trim() : '');
     }
+    if (wrap.multi && wrap.rowExtras) { output.value = wrap.pre + attachRows(body, wrap.rowExtras) + wrap.post; return; }
     const extras = wrap.extras.length ? ' ' + wrap.extras.join(' ') : '';
     output.value = wrap.pre + body + extras + wrap.post;
   }
@@ -979,7 +1001,9 @@ function start() {
   // =================== Shared helpers for the extra tools ===================
   var afterLoadHooks = afterLoadHooks || [];
   const undoBtn = document.getElementById('undoBtn');
-  function pushUndo(txt) { undoStack.push(txt); if (undoStack.length > 50) undoStack.shift(); undoBtn.disabled = false; }
+  // each Undo step remembers the equation box it belongs to, so Undo never writes one equation's old text into another
+  function pushUndo(txt) { undoStack.push({ t: txt, card: (() => { try { return cards[active]; } catch (e) { return null; } })() }); if (undoStack.length > 50) undoStack.shift(); undoBtn.disabled = false; }
+  function resetUndo() { undoStack = []; undoBtn.disabled = true; }
   function setInput(txt, note) {
     pushUndo(input.value);
     input.value = txt;
@@ -988,8 +1012,12 @@ function start() {
     if (cleanBox.classList.contains('on')) renderClean(note || '');
   }
   undoBtn.onclick = () => {
-    if (!undoStack.length) return;
-    input.value = undoStack.pop();
+    // steps of a box that is gone (removed, or the panel moved to another equation) are dropped
+    while (undoStack.length && undoStack[undoStack.length - 1].card && !cards.includes(undoStack[undoStack.length - 1].card)) undoStack.pop();
+    if (!undoStack.length) { undoBtn.disabled = true; return; }
+    const step = undoStack.pop();
+    if (step.card && step.card !== cur()) setActive(cards.indexOf(step.card), true);
+    input.value = step.t;
     load(); clearHl();
     if (cleanBox.classList.contains('on')) renderClean('Undone.');
     undoBtn.disabled = !undoStack.length;
@@ -1105,8 +1133,10 @@ function start() {
   const formSel = document.getElementById('formSel');
   const FORMS = {
     inline: ['$', '$'], paren: ['\\(', '\\)'], display: ['\\[ ', ' \\]'],
-    'equation': null, 'equation*': null, 'align': null, 'align*': null, 'gather': null, 'gather*': null, 'multline': null,
+    'equation': null, 'equation*': null, 'align': null, 'align*': null, 'gather': null, 'gather*': null, 'multline': null, 'multline*': null,
+    'flalign': null, 'flalign*': null,
   };
+  const NUMBERED = /^(equation|align|gather|multline|flalign|alignat|eqnarray)$/;
   const MULTI_ENVS = /^(align|gather|multline|flalign|alignat|eqnarray)\*?$/;
   function currentForm(txt) {
     const t = txt.trim(), m = t.match(/^\\begin\{((?:equation|align|alignat|flalign|gather|multline|eqnarray|displaymath|math)\*?)\}/);
@@ -1120,32 +1150,38 @@ function start() {
   function convertTo(form) {
     const p = parse(input.value);
     let body = p.body;
-    const extras = p.extras.filter(x => !(/^\\(nonumber|notag)/.test(x) && !/^(equation|align|gather|multline)$/.test(form)));
+    const keep = (x) => !(/^\\(nonumber|notag)/.test(x) && !NUMBERED.test(form));
+    const extras = p.extras.filter(keep);
     const toMulti = MULTI_ENVS.test(form);
+    // align ⇄ align*, gather ⇄ multline …: every row keeps its own \label / \tag
+    const perRow = toMulti && p.multi && p.rowExtras;
+    if (perRow) body = attachRows(body, p.rowExtras.map(r => r.filter(keep)));
     // single-line forms can't hold \\ directly: wrap the lines in aligned
     if (!toMulti && hasTopLevelBreak(body) && !/^\\begin\{(aligned|gathered|split)\}/.test(body.trim())) body = `\\begin{aligned}\n  ${body}\n\\end{aligned}`;
     // going to align: unwrap an aligned block, it's no longer needed
     const un = body.trim().match(/^\\begin\{(aligned|gathered)\}([\s\S]*)\\end\{\1\}$/);
     if (toMulti && un) body = un[2].trim();
-    const ex = extras.length ? ' ' + extras.join(' ') : '';
+    const ex = extras.length && !perRow ? ' ' + extras.join(' ') : '';
     let out;
     if (FORMS[form]) out = FORMS[form][0] + body + ex + FORMS[form][1];
     else out = `\\begin{${form}}\n  ${body}${ex}\n\\end{${form}}`;
     setInput(out);
-    showNote(`Converted to ${formSel.selectedOptions[0].textContent}.` +
-      (extras.some(x => x.startsWith('\\label')) && !/^(equation|align|gather|multline)$/.test(form) ? ' Note: \\label has no number to point to in this form.' : ''));
+    const optEl = [...formSel.options].find(o => o.value === form);
+    showNote(`Converted to ${optEl ? optEl.textContent : form}.` +
+      (extras.some(x => x.startsWith('\\label')) && !NUMBERED.test(form) ? ' Note: \\label has no number to point to in this form.' : ''));
   }
   formSel.addEventListener('change', () => { if (formSel.value) convertTo(formSel.value); });
   const numBtn = document.getElementById('numBtn');
   numBtn.onclick = () => {
     let f = currentForm(input.value);
-    if (!f || f === 'inline' || f === 'paren' || f === 'display') f = 'equation*';
-    convertTo(f.endsWith('*') ? f.slice(0, -1) : (FORMS[f + '*'] !== undefined ? f + '*' : f));
+    if (!f || !NUMBERED.test(f.replace(/\*$/, ''))) f = 'equation*';     // $…$, \[…\], displaymath: becomes a numbered equation
+    // every environment has a starred, unnumbered twin (multline → multline*, flalign → flalign* …)
+    convertTo(f.endsWith('*') ? f.slice(0, -1) : f + '*');
   };
   function syncForm() {
     const f = currentForm(input.value);
     formSel.value = FORMS[f] !== undefined ? f : '';
-    const numbered = /^(equation|align|gather|multline|flalign|alignat|eqnarray)$/.test(f);
+    const numbered = NUMBERED.test(f);
     numBtn.textContent = numbered ? '# Numbered ✓' : '# Numbered ✗';
     numBtn.classList.toggle('sel', numbered);
     alignBtn.disabled = !(MULTI_ENVS.test(f) || /\\begin\{(aligned|split|cases|matrix|pmatrix|bmatrix|array)/.test(input.value));
@@ -1431,6 +1467,7 @@ function start() {
       ['\\displaystyle #@', 'Display size (\\displaystyle), e.g. for a fraction inside a line', '\\displaystyle\\frac{a}{b}'], ['\\tfrac{#@}{#?}', 'Small fraction (\\tfrac)', '\\tfrac{a}{b}'],
     ],
     Accents: [
+      ['\\cdot ', 'Multiplication dot (\\cdot); typing ** does the same', 'a\\cdot b'], null,
       ['\\hat{#@}', 'Hat (Alt+H)', '\\hat{x}'], ['\\widehat{#@}', 'Wide hat, over several symbols', '\\widehat{xy}'], ['\\tilde{#@}', 'Tilde (Alt+T)', '\\tilde{x}'], ['\\widetilde{#@}', 'Wide tilde', '\\widetilde{xy}'],
       ['\\bar{#@}', 'Bar (Alt+B)', '\\bar{x}'], ['\\overline{#@}', 'Overline, a long bar (Alt+O)', '\\overline{xy}'], ['\\check{#@}', 'Check', '\\check{x}'], ['\\breve{#@}', 'Breve', '\\breve{x}'],
       ['\\acute{#@}', 'Acute', '\\acute{x}'], ['\\grave{#@}', 'Grave', '\\grave{x}'], ['\\dot{#@}', 'Dot: time derivative', '\\dot{x}'], ['\\ddot{#@}', 'Double dot', '\\ddot{x}'],
@@ -1573,11 +1610,24 @@ function start() {
     const name = await askLabel('eq:' + (words.join('_') || ''));
     if (!name || /[\s{}\\]/.test(name)) return;
     pushUndo(v);
+    // a label needs a number: an environment keeps its kind (a starred one loses the star); $…$, \(…\), \[…\], $$…$$
+    // or bare maths become a numbered equation, with the old delimiters removed (shared parse())
     const m = /^\s*\\begin\{([^}]*)\}/.exec(v);
-    if (m) input.value = v.replace(m[0], m[0] + '\\label{' + name + '}');
-    else input.value = '\\begin{equation}\\label{' + name + '}\n  ' + v.replace(/^\s*\\\[|\\\]\s*$/g, '').trim() + '\n\\end{equation}';
+    let extra = '';
+    if (m && /^(equation|align|gather|multline|flalign|alignat|eqnarray)\*?$/.test(m[1])) {
+      const env = m[1].replace(/\*$/, '');
+      let t = v;
+      if (m[1].endsWith('*')) { t = t.replace(m[0], m[0].replace(m[1], env)).replace(new RegExp('\\\\end\\{' + env + '\\*\\}\\s*$'), '\\end{' + env + '}'); extra = ' It is now numbered (' + env + ').'; }
+      const m2 = /^\s*\\begin\{[^}]*\}/.exec(t);
+      input.value = t.replace(m2[0], m2[0] + '\\label{' + name + '}');
+    } else {
+      const p = parse(m ? v.replace(/^\s*\\begin\{[^}]*\}|\\end\{[^}]*\}\s*$/g, '') : v), kept = p.extras.filter(x => !/^\\(nonumber|notag)/.test(x));
+      const inl = /^\s*(\$(?!\$)|\\\()/.test(v);
+      input.value = '\\begin{equation}\\label{' + name + '}\n  ' + p.body + (kept.length ? ' ' + kept.join(' ') : '') + '\n\\end{equation}';
+      if (inl) extra = ' Inline maths has no number, so it is now a numbered display equation.';
+    }
     load();
-    try { await navigator.clipboard.writeText('\\eqref{' + name + '}'); showNote('Labelled ' + name + '. Copied \\eqref{' + name + '} to paste where you mention it.'); } catch { showNote('Labelled ' + name + '.'); }
+    try { await navigator.clipboard.writeText('\\eqref{' + name + '}'); showNote('Labelled ' + name + '.' + extra + ' Copied \\eqref{' + name + '} to paste where you mention it.'); } catch { showNote('Labelled ' + name + '.' + extra); }
   };
 
 
@@ -2519,12 +2569,17 @@ function start() {
   if ((QS.has('embed') && window.parent !== window) || chan) {
     if (!chan) document.documentElement.classList.add('embed');
     window.__eqEmbedded = true; // no sample equation: it would be sent to the paper as an edit
-    const setAll = (latex) => {
+    // same: the document sent new text for the same equation (keep Undo); otherwise the panel now edits another one
+    const setAll = (latex, same) => {
+      const old = cards.slice();
       cards = [makeCard('')]; active = 0; renderCards();
       syncing = true; NV.set.call(input, ''); syncing = false;
       input.value = latex || ''; autosize(cur()); maybeSplit(cur());
+      if (same) undoStack.forEach(u => { const k = old.indexOf(u.card); u.card = cards[k] || cards[0]; });
+      else resetUndo();
       load(); clearHl();
     };
+    let linkGen = null;
     const dockMode = !chan && QS.get('embed') === 'dock', live = dockMode || !!chan, sideMode = !!chan && QS.get('embed') === 'side';
     if (dockMode) document.documentElement.classList.add('dock');
     if (sideMode) document.documentElement.classList.add('side');
@@ -2556,7 +2611,7 @@ function start() {
       if (!data || data.target !== 'equation-editor') return;
       if (data.type === 'gone') { const li = document.getElementById('linkInfo'); if (li) li.textContent = '⚠ The document was closed — this tab is no longer linked. Copy your equation before closing.'; return; }
       const e = { data };
-      if (e.data.type === 'set') { gotSet = true; window.__eqGotSet = true; if (e.data.theme) setTheme(e.data.theme); setAll(e.data.latex); dockBase = allText(); if (e.data.focus !== false) setTimeout(() => { try { mf.focus(); } catch (err) {} }, 50); }
+      if (e.data.type === 'set') { gotSet = true; window.__eqGotSet = true; if (e.data.theme) setTheme(e.data.theme); const same = e.data.gen != null && e.data.gen === linkGen; linkGen = e.data.gen; setAll(e.data.latex, same); dockBase = allText(); if (e.data.focus !== false) setTimeout(() => { try { mf.focus(); } catch (err) {} }, 50); }
       if (e.data.type === 'theme' && e.data.theme) setTheme(e.data.theme);
       if (e.data.type === 'focus') { try { mf.focus(); } catch (err) {} }
     };
