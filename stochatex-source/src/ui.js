@@ -112,8 +112,29 @@ export function menu(anchor, items) {
   const r = anchor.getBoundingClientRect ? anchor.getBoundingClientRect() : { left: anchor.x, bottom: anchor.y, top: anchor.y };
   m.style.left = Math.min(r.left, innerWidth - m.offsetWidth - 8) + 'px';
   m.style.top = (r.bottom + m.offsetHeight > innerHeight - 8 ? Math.max(8, r.top - m.offsetHeight) : r.bottom + 2) + 'px';
-  const off = (e) => { if (!m.contains(e.target)) { m.remove(); document.removeEventListener('mousedown', off, true); } };
-  setTimeout(() => document.addEventListener('mousedown', off, true), 0);
+  const off = (e) => { if (!m.contains(e.target)) close(false); };
+  // keyboard: focus goes into the menu; ↑ ↓ Home End move, Enter chooses, Esc (or Tab) closes and focus goes back
+  const back = anchor instanceof Element ? anchor : document.activeElement;
+  const close = (restore) => {
+    m.remove(); document.removeEventListener('mousedown', off, true);
+    if (restore && back && back.isConnected) try { back.focus({ preventScroll: true }); } catch {}
+  };
+  const btns = () => [...m.querySelectorAll('button[role=menuitem]:not(:disabled)')];
+  m.addEventListener('keydown', (e) => {
+    const b = btns(), i = b.indexOf(document.activeElement);
+    const go = (k) => { e.preventDefault(); b[(k + b.length) % b.length]?.focus(); };
+    if (e.key === 'ArrowDown') go(i + 1);
+    else if (e.key === 'ArrowUp') go(i < 0 ? b.length - 1 : i - 1);
+    else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(b.length - 1);
+    else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(true); }
+    else if (e.key === 'Tab') { e.preventDefault(); close(true); }
+  });
+  m.querySelectorAll('button[role=menuitem]').forEach(b => b.addEventListener('click', () => { if (back && back.isConnected) try { back.focus({ preventScroll: true }); } catch {} }, { capture: true }));
+  // Esc also closes it while the focus is still outside (a menu opened with the mouse)
+  const esc = (e) => { if (e.key === 'Escape' && m.isConnected && !m.contains(document.activeElement)) { e.preventDefault(); e.stopPropagation(); close(true); } if (!m.isConnected) document.removeEventListener('keydown', esc, true); };
+  document.addEventListener('keydown', esc, true);
+  setTimeout(() => { document.addEventListener('mousedown', off, true); if (m.isConnected) btns()[0]?.focus({ preventScroll: true }); }, 0);
   return m;
 }
 // Drag handle that resizes `target` (px, stored in a CSS variable on the root).

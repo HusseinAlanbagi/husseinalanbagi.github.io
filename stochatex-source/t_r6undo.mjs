@@ -24,7 +24,7 @@ await put('a_t'); await sleep(200);
 await p.evaluate(() => window.texbench.app.ui.runCommand('equation.side')); await sleep(3000);
 const fr = await (await p.$('.eqside-frame')).contentFrame();
 await fr.waitForFunction(() => window.__eqGotSet, { timeout: 20000 });
-await fr.click('#numBtn'); await sleep(800);
+await fr.click('#numBtn'); await sleep(500); console.log('asks with refs:', await fr.evaluate(() => document.querySelector('.unnum-pop li')?.textContent)); await fr.evaluate(() => [...document.querySelectorAll('.unnum-pop button')].find(b => /Remove numbers/.test(b.textContent))?.click()); await sleep(800);
 console.log('A unnumbered:', /equation\*\}\\label\{eq:a\}|begin\{equation\*\}/.test(await src()));
 await put('y_t'); await sleep(1200);
 await fr.click('#undoBtn'); await sleep(800);

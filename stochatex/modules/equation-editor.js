@@ -18,7 +18,19 @@ export default {
     // maths that is not in the source as it is (e.g. in a table cell being edited): another module hands it over
     // with { latex, where, onChange(latex), onClose() } and gets every change back
     let target = null;
-    const linkPost = (m) => chan?.postMessage({ target: 'equation-editor', gen: (ctx.project.id || '') + '|' + (ctx.project.activeFile || '') + '|' + gen, ...m });
+    // with each equation sent, how often its labels are referred to in the paper (for "remove the number?")
+    const refsOf = (t) => {
+      const labels = [...String(t || '').matchAll(/\\label\s*\{([^}]*)\}/g)].map(x => x[1]); if (!labels.length) return undefined;
+      try {
+        const n = {}; labels.forEach(l => { n[l] = 0; });
+        for (const f of ctx.project.files().filter(f => /\.tex$/i.test(f))) {
+          const txt = f === ctx.editor.path ? ctx.editor.view.state.doc.toString() : ctx.project.read(f) || '';
+          for (const x of txt.matchAll(/\\[a-zA-Z]*ref\*?\s*\{([^}]*)\}/g)) for (const k of x[1].split(',')) if (k.trim() in n) n[k.trim()]++;
+        }
+        return n;
+      } catch { return undefined; }
+    };
+    const linkPost = (m) => chan?.postMessage({ target: 'equation-editor', gen: (ctx.project.id || '') + '|' + (ctx.project.activeFile || '') + '|' + gen, ...(m.type === 'set' ? { refs: refsOf(m.latex) } : {}), ...m });
     function unlink() { try { chan?.close(); } catch (e) {} chan = null; linkRange = null; linkText = null; newAt = null; if (target) { const t = target; target = null; try { t.onClose?.(); } catch {} } }
     let side = null;
     const syncBtn = () => { btn?.classList.toggle('on', !!side); btn?.setAttribute('aria-pressed', String(!!side)); };

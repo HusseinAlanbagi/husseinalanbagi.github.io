@@ -214,6 +214,12 @@ pre.code { background: var(--panel); border: 1px solid var(--line); border-radiu
 
 /* the full equation editor beside the paper (in the PDF's place) */
 #pdfwrap { position: relative; }
+/* the preview is older than the text, or the last compile failed */
+.pdf-fresh { display: flex; align-items: center; gap: 10px; padding: 5px 10px; font-size: 12.5px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, #d99a1e 14%, var(--paper)); color: var(--ink); }
+.pdf-fresh.err { background: color-mix(in srgb, #c43d3d 12%, var(--paper)); }
+.pdf-fresh[hidden] { display: none; }
+.pdf-fresh span { flex: 1; min-width: 0; }
+.pdf-fresh button { flex: none; }
 body.eq-side #pdfwrap, body.eq-side #split2 { display: flex !important; }
 body.eq-side.pdf-off #work { grid-template-columns: var(--rail-w) var(--side-w) 5px minmax(260px, 1fr) 5px var(--pdf-w); }
 body.eq-side.side-off.pdf-off #work { grid-template-columns: var(--rail-w) 0 0 minmax(260px, 1fr) 5px var(--pdf-w); }

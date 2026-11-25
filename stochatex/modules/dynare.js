@@ -57,6 +57,21 @@ export default {
       ctx.ui.toast(added.length ? `Inserted. Added \\usepackage{${added.join(', ')}} to the preamble.` : 'Inserted.');
     }
 
+    // parameter values: taken from a .mod file in the project when it sets them; otherwise NaN with a note, so the
+    // file is never syntactically blank ("beta = ;") and the missing values are listed above the code
+    function paramValues(params) {
+      const known = new Map();
+      for (const f of mods()) { const t = (ctx.project.read(f) || '').replace(/\/\/.*$|%.*$/gm, '').split(/^\s*model\s*(?:\([^)]*\))?\s*;/m)[0]; for (const m of t.matchAll(/^\s*([A-Za-z_]\w*)\s*=\s*([^;\n]+);/gm)) if (!known.has(m[1]) && !/\b(model|var|varexo|parameters)\b/.test(m[2])) known.set(m[1], { v: m[2].trim(), f }); }
+      const missing = params.filter(p => !known.has(p));
+      const text = params.map(p => known.has(p) ? `${p} = ${known.get(p).v};` : `${p} = NaN;   // value missing: set it before running`).join('\n');
+      return { text, missing, from: [...new Set([...known.values()].map(x => x.f))] };
+    }
+    const draftHead = (pv) => pv.missing.length ? `// DRAFT: ${pv.missing.length} parameter value${pv.missing.length > 1 ? 's are' : ' is'} missing (${pv.missing.join(', ')}). Dynare will stop until they are set.\n` : '';
+    const missingNote = (pv) => pv.missing.length
+      ? h('div', { class: 'dyn-missing', role: 'note', style: { padding: '8px 10px', margin: '0 0 8px', borderRadius: '6px', background: 'color-mix(in srgb, #d99a1e 16%, var(--paper))', fontSize: '13px' } },
+          h('strong', {}, `${pv.missing.length} parameter value${pv.missing.length > 1 ? 's' : ''} missing: `), pv.missing.join(', '), '. They are written as NaN; give them values before running Dynare.' + (pv.from.length ? ` The others come from ${pv.from.join(', ')}.` : ''))
+      : (pv.from.length ? h('p', { class: 'muted' }, `Parameter values come from ${pv.from.join(', ')}.`) : null);
+
     function exportDialog() {
       const sel = ctx.editor.getSelection(), all = ctx.editor.getText();
       const src = sel.from !== sel.to ? sel.text : all;
@@ -75,12 +90,13 @@ export default {
       }
       const vars = [...names].filter(([, v]) => v === 'var').map(([k]) => k), shocks = vars.filter(v => /^(eps|eta|nu|u)(_|$)/.test(v)), endo = vars.filter(v => !shocks.includes(v));
       const params = [...names].filter(([, v]) => v === 'param').map(([k]) => k);
-      const text = `// Draft written from the LaTeX equations. Check every line before you run it.\nvar ${endo.join(' ')};\nvarexo ${shocks.join(' ')};\nparameters ${params.join(' ')};\n\n${params.map(p => `${p} = ;`).join('\n')}\n\nmodel;\n${lines.join('\n')}\nend;\n`;
+      const pv = paramValues(params);
+      const text = `// Draft written from the LaTeX equations. Check every line before you run it.\n${draftHead(pv)}var ${endo.join(' ')};\nvarexo ${shocks.join(' ')};\nparameters ${params.join(' ')};\n\n${pv.text}\n\nmodel;\n${lines.join('\n')}\nend;\n`;
       const out = h('textarea', { spellcheck: false, style: { width: '100%', height: '50vh', fontFamily: 'var(--mono, monospace)', fontSize: '12.5px' } }); out.value = text;
       const count = lines.filter(l => !l.trim().startsWith('//')).length;
       ctx.ui.modal({
         title: 'Equations as Dynare code', wide: true,
-        body: h('div', {}, out, h('p', { class: 'muted' }, `${count} equation${count === 1 ? '' : 's'}, ${endo.length} endogenous variable${endo.length === 1 ? '' : 's'}, ${shocks.length} shock${shocks.length === 1 ? '' : 's'}. ` + (sel.from !== sel.to ? 'From your selection.' : 'From every display equation in this file — select the model equations first to convert only those.') + ' This is a draft: hats and tildes are dropped, a symbol with a time index is a variable, one without is a parameter.' + ([...new Set(notes)].length ? ' ' + [...new Set(notes)].join(' ') : ''))),
+        body: h('div', {}, missingNote(pv), out, h('p', { class: 'muted' }, `${count} equation${count === 1 ? '' : 's'}, ${endo.length} endogenous variable${endo.length === 1 ? '' : 's'}, ${shocks.length} shock${shocks.length === 1 ? '' : 's'}. ` + (sel.from !== sel.to ? 'From your selection.' : 'From every display equation in this file — select the model equations first to convert only those.') + ' This is a draft: hats and tildes are dropped, a symbol with a time index is a variable, one without is a parameter.' + ([...new Set(notes)].length ? ' ' + [...new Set(notes)].join(' ') : ''))),
         buttons: [{ label: 'Close' }, { label: 'Copy', onClick: () => { navigator.clipboard?.writeText(out.value); ctx.ui.toast('Copied.'); } },
           { label: 'Save as model.mod in the project', primary: true, onClick: (m) => { let p = 'model.mod', i = 2; while (ctx.project.exists(p)) p = `model-${i++}.mod`; ctx.project.write(p, out.value, { open: true }); m.close(); } }],
       });
@@ -100,11 +116,12 @@ export default {
       // names in the lines that the table does not list (steady states such as y_bar): parameters
       const listed = new Set(mc.vars.map(v => v.name));
       for (const n of seen) if (!listed.has(n)) params.push(n);
-      const text = `// Written from the model equations of the paper (the model check's choice). Check every line before you run it.\nvar ${endo.join(' ')};\nvarexo ${shocks.join(' ')};\nparameters ${params.join(' ')};\n\n${params.map(p => `${p} = ;`).join('\n')}\n\nmodel;\n${lines.join('\n')}\nend;\n` + (notes.length ? '\n// ' + [...new Set(notes)].join('\n// ') + '\n' : '');
+      const pv = paramValues(params);
+      const text = `// Written from the model equations of the paper (the model check's choice). Check every line before you run it.\n${draftHead(pv)}var ${endo.join(' ')};\nvarexo ${shocks.join(' ')};\nparameters ${params.join(' ')};\n\n${pv.text}\n\nmodel;\n${lines.join('\n')}\nend;\n` + (notes.length ? '\n// ' + [...new Set(notes)].join('\n// ') + '\n' : '');
       const out = h('textarea', { spellcheck: false, style: { width: '100%', height: '50vh', fontFamily: 'var(--mono, monospace)', fontSize: '12.5px' } }); out.value = text;
       ctx.ui.modal({
         title: 'Model as Dynare code', wide: true,
-        body: h('div', {}, out, h('p', { class: 'muted' }, `${mc.model.length} equation${mc.model.length === 1 ? '' : 's'}, ${endo.length} endogenous variable${endo.length === 1 ? '' : 's'}, ${shocks.length} shock${shocks.length === 1 ? '' : 's'}, ${params.length} parameter${params.length === 1 ? '' : 's'}. Types and names come from the variables table of the model check (Visualise variables); select equations first to export only those.`)),
+        body: h('div', {}, missingNote(pv), out, h('p', { class: 'muted' }, `${mc.model.length} equation${mc.model.length === 1 ? '' : 's'}, ${endo.length} endogenous variable${endo.length === 1 ? '' : 's'}, ${shocks.length} shock${shocks.length === 1 ? '' : 's'}, ${params.length} parameter${params.length === 1 ? '' : 's'}. Types and names come from the variables table of the model check (Visualise variables); select equations first to export only those.`)),
         buttons: [{ label: 'Close' }, { label: 'Copy', onClick: () => { navigator.clipboard?.writeText(out.value); ctx.ui.toast('Copied.'); } },
           { label: 'Save as model.mod in the project', primary: true, onClick: (m) => { let p = 'model.mod', i = 2; while (ctx.project.exists(p)) p = `model-${i++}.mod`; ctx.project.write(p, out.value, { open: true }); m.close(); } }],
       });

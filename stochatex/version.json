@@ -1,17 +1,17 @@
 {
- "v": "8ef38a5cdf",
+ "v": "80393662cc",
  "files": {
-  "app.css": "d01f1539d3",
-  "core.js": "7ba530aab2",
+  "app.css": "8caf9f2943",
+  "core.js": "8aef4494e7",
   "pdfwin.js": "331affa1f3",
   "engine-worker.js": "76f66486ad",
-  "equation/brackets.js": "4fca815e1c",
-  "equation/index.html": "0d2cac45bb",
+  "equation/brackets.js": "55b57fb0f8",
+  "equation/index.html": "aafcba176d",
   "modules/autocomplete.js": "615a01357a",
   "modules/brackets.js": "fcf3ac5868",
   "modules/dark-mode.js": "fbf1483daf",
-  "modules/dynare.js": "3ce02e80c5",
-  "modules/equation-editor.js": "cb0cbd9bde",
+  "modules/dynare.js": "9c0dd5c087",
+  "modules/equation-editor.js": "213319ceb5",
   "modules/formatting.js": "cffb51f8b7",
   "modules/irf-figures.js": "c6f8e6d11a",
   "modules/lib/clean.js": "6170077d98",
@@ -27,7 +27,7 @@
   "modules/outline.js": "4923030bfc",
   "modules/proofread.js": "b0c01daa8a",
   "modules/snippets.js": "9b01f7efc8",
-  "modules/visual-mode.js": "fa413df194",
+  "modules/visual-mode.js": "667b24469e",
   "modules/word-count.js": "d8d5dff0a0"
  }
 }

@@ -82,7 +82,7 @@ const editor = createEditor($('ed'), {
   },
   onChange(path, text) {
     if (!project || !path || !project.files[path]) return;
-    project.files[path] = { t: text }; save(); events.emit('change', path, text); scheduleCompile(); checkPackagesSoon(); clearTimeout(mainUiT); mainUiT = setTimeout(refreshMainUI, 600);
+    project.files[path] = { t: text }; save(); events.emit('change', path, text); scheduleCompile(); checkPackagesSoon(); freshnessSoon(); clearTimeout(mainUiT); mainUiT = setTimeout(refreshMainUI, 600);
   },
   onCursor(state) { const pos = state.selection.main.head, ln = state.doc.lineAt(pos); if (!$('cursorInfo').dataset.note) $('cursorInfo').textContent = `Ln ${ln.number}, Col ${pos - ln.from + 1}`; events.emit('cursor', { line: ln.number, column: pos - ln.from, pos }); crumbsSoon(); },
 });
@@ -255,7 +255,7 @@ const app = {
   goto, setProblems(source, list) { problems.set(source, list); if (!list.length) problems.delete(source); renderProblems(); },
 };
 const modules = createModuleHost(app);
-window.texbench = window.stochatex = { app, modules, openFolder: (d) => openFolder(d), linkFolder: (d) => linkFolder(d), folder: () => folder, folderPull: (o) => folderPull(o), folderSync: () => folderSync() };       // handy for debugging and for module authors
+window.texbench = window.stochatex = { app, modules, openFolder: (d) => openFolder(d), linkFolder: (d) => linkFolder(d), folder: () => folder, folderPull: (o) => folderPull(o), folderSync: () => folderSync(), createProject: (n, f) => createProject(n, f) };       // handy for debugging and for module authors
 
 function goto(file, line) {
   if (!project.files[file]) return;
@@ -340,10 +340,15 @@ async function runCompile() {
   compiling = true; dirty = false;
   setStatus('Compiling…', 'busy');
   const files = new Map(Object.entries(project.files).map(([p, f]) => [p, f.t != null ? f.t : f.b]));
+  // the result belongs to this project and this text: if another project is open by the time it comes back, it
+  // is thrown away (no errors, PDF, automatic fixes or folder output from the wrong project)
+  const proj = project, req = ++compileReq;
+  freshness();
   let r;
   try { r = await compileProject(files, main, project.engine || 'pdflatex'); }
   catch (e) { r = { success: false, error: e.message, log: String(e.stack || e), ms: 0 }; }
   compiling = false;
+  if (project !== proj || req !== compileReq) { if (project) { setStatus('', ''); runCompile(); } return; }
   lastResult = { ...r, mainFile: main, sizes: Object.fromEntries([...files].map(([p, v]) => [p, typeof v === 'string' ? v.length : 0])) };
   const list = parseLog(r.log, main, Object.keys(project.files));
   if (!r.success && !list.some(p => p.severity === 'error')) list.unshift({ severity: 'error', file: main, line: null, message: r.error || 'Compilation failed. See the log for details.' });
@@ -358,6 +363,8 @@ async function runCompile() {
   const errs = list.filter(p => p.severity === 'error').length, warns = list.filter(p => p.severity === 'warning').length;
   if (r.success && r.pdf) {
     try { await pdf.load(r.pdf); $('pdfEmpty').hidden = true; } catch (e) { console.error(e); }
+    if (project !== proj) { pdf.clear(); $('pdfEmpty').hidden = false; if (project) runCompile(); return; }
+    lastOk = { files, at: Date.now(), proj };
     sendPdfToTab(); writePdfToFolder(r.pdf);
     sync = r.syncTexData ? parseSyncTeX(r.syncTexData) : null;
     setStatus(`Compiled in ${(r.ms / 1000).toFixed(1)} s` + (errs ? ` · ${errs} error${errs > 1 ? 's' : ''}` : warns ? ` · ${warns} warning${warns > 1 ? 's' : ''}` : ''), errs ? 'err' : 'ok');
@@ -365,8 +372,38 @@ async function runCompile() {
     setStatus(`${errs || 1} error${errs > 1 ? 's' : ''} — PDF not updated`, 'err');
     if (!pdf.pageCount) showBottom('problems');
   }
+  lastFailed = !(r.success && r.pdf) ? (list.find(p => p.severity === 'error') || { file: main }) : null;
+  freshness();
   events.emit('compile', lastResult);
   if (dirty) runCompile();
+}
+// ---------------------------------------------------------------- is the PDF up to date?
+// Saved, compiled and up to date are three different things: the PDF pane says when the preview is older than the text
+let compileReq = 0, lastOk = null, lastFailed = null, freshT = 0;
+function pdfIsStale() {
+  if (!lastOk || lastOk.proj !== project) return false;
+  const now = Object.entries(project.files);
+  if (now.length !== lastOk.files.size) return true;
+  for (const [p, f] of now) { const v = f.t != null ? f.t : f.b; if (lastOk.files.get(p) !== v) return true; }
+  return false;
+}
+function freshnessSoon() { clearTimeout(freshT); freshT = setTimeout(freshness, 300); }
+function freshness() {
+  const bar = $('pdfFresh'); if (!bar) return;
+  const at = lastOk && lastOk.proj === project ? new Date(lastOk.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null;
+  const stale = pdfIsStale();
+  let msg = '', kind = '', act = null;
+  if (!at) { bar.hidden = true; return; }
+  if (lastFailed) {
+    msg = `PDF not updated: the last compile failed. It shows the version from ${at}.`; kind = 'err';
+    act = lastFailed.line ? ['Go to the error', () => goto(lastFailed.file, lastFailed.line)] : ['Show problems', () => showBottom('problems')];
+  } else if (stale) {
+    msg = compiling ? 'Updating the PDF…' : `Preview is out of date: the text changed since ${at}.`; kind = 'warn';
+    if (!compiling) act = ['Compile now', () => runCompile()];
+  } else { bar.hidden = true; bar.title = ''; $('pdfwrap').dataset.fresh = 'yes'; return; }
+  $('pdfwrap').dataset.fresh = 'no';
+  bar.className = 'pdf-fresh ' + kind; bar.hidden = false;
+  bar.replaceChildren(h('span', {}, msg), act ? h('button', { class: 'ghost small', onClick: act[1] }, act[0]) : '');
 }
 function setStatus(text, kind = '') { const s = $('status'); s.textContent = text; s.className = 'status ' + kind; $('compileBtn').classList.toggle('busy', kind === 'busy'); }
 
@@ -510,7 +547,7 @@ function showBottom(which) {
 // ---------------------------------------------------------------- projects
 async function loadProject(p) {
   await flush(); await folderSync();
-  project = p; active = null; lastResult = null; sync = null; problems.clear(); pdf.clear(); $('pdfEmpty').hidden = false;
+  project = p; active = null; lastResult = null; sync = null; lastOk = null; lastFailed = null; compileReq++; problems.clear(); pdf.clear(); $('pdfEmpty').hidden = false; freshness();
   $('projName').textContent = p.name; document.title = `${p.name} — ${APP_NAME}`;
   prefs.set('lastProject', p.id);
   renderTree(); renderProblems();

@@ -322,5 +322,49 @@
       mf.insert(t, { format: 'latex', selectionMode: 'placeholder' }); mf.dispatchEvent(new Event('input', { bubbles: true }));
     });
   }
-  window.StochaBrackets = { stackAccents, unstackAccents, tidySigns, autoSize: autoSizeBrackets, flipInText, flipInField, BIG, setupField, removeStructure, structureAt, wholeStructure, balancedGroup };
+  // ---- taking the numbers off an equation that has labels (unnumbered labels break: amsmath "Multiple \label"
+  // in align*, and every \ref/\eqref to them shows ??). Shared by the in-place editor and the full editor.
+  function splitTopRows(s) {
+    const out = []; let d = 0, a = 0;
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      if (c === '\\') { if (s[i + 1] === '\\' && d === 0) { out.push(s.slice(a, i)); a = i + 2; i++; continue; } i++; continue; }
+      if (c === '{') d++; else if (c === '}') d--;
+    }
+    out.push(s.slice(a)); return out;
+  }
+  const LAB = /\\label\s*\{([^}]*)\}/g, NONUM = /\\(?:nonumber|notag)(?![A-Za-z])/g, TAG = /\\tag\*?\s*\{/;
+  const ROWENVS = /^(align|gather|flalign|alignat|eqnarray)$/;
+  // src: the whole environment. Returns null when there is nothing to ask (no label, or not numbered).
+  function unnumberPlan(src) {
+    const m = /^(\s*)\\begin\{([A-Za-z]+)(\*?)\}(\{[^}]*\})?/.exec(src); if (!m || m[3]) return null;
+    const env = m[2], endRe = new RegExp('\\\\end\\{' + env + '\\}(\\s*)$'), e = endRe.exec(src); if (!e) return null;
+    const head = m[0], inner = src.slice(head.length, e.index), tail = src.slice(e.index);
+    const labels = [...inner.matchAll(LAB)].map(x => x[1]); if (!labels.length) return null;
+    const star = (t) => t.replace('\\begin{' + env + '}', '\\begin{' + env + '*}').replace(endRe, '\\end{' + env + '*}$1');
+    const rows = splitTopRows(inner);
+    const plan = {
+      env, labels, rows: rows.length,
+      // no numbers at all: the labels go (and \nonumber, which a starred environment does not need); \tag stays
+      remove: () => star(head) + inner.replace(/[ \t]*\\label\s*\{[^}]*\}/g, '').replace(/[ \t]*\\(?:nonumber|notag)(?![A-Za-z])/g, '') + star(tail),
+      // several rows: only the labelled (or tagged) rows keep a number
+      keepLabelled: null,
+    };
+    if (ROWENVS.test(env) && rows.length > 1 && rows.some(r => !r.match(LAB) && !TAG.test(r) && r.trim())) {
+      plan.keepLabelled = () => head + rows.map((r, i) => {
+        const has = /\\label\s*\{/.test(r) || TAG.test(r);
+        if (has) return r.replace(/[ \t]*\\(?:nonumber|notag)(?![A-Za-z])/g, '');
+        if (!r.trim() || NONUM.test(r)) { NONUM.lastIndex = 0; return r; }
+        return r.replace(/(\s*)$/, ' \\nonumber$1');
+      }).join('\\\\') + tail;
+    }
+    return plan;
+  }
+  // how often each label is referred to (\ref, \eqref, \cref, \autoref, \pageref …) in the given texts
+  function refCounts(labels, texts) {
+    const n = {}; labels.forEach(l => { n[l] = 0; });
+    for (const t of texts) for (const x of (t || '').matchAll(/\\(?:[a-zA-Z]*ref)\*?\s*\{([^}]*)\}/g)) for (const k of x[1].split(',')) { const kk = k.trim(); if (kk in n) n[kk]++; }
+    return n;
+  }
+  window.StochaBrackets = { unnumberPlan, refCounts, stackAccents, unstackAccents, tidySigns, autoSize: autoSizeBrackets, flipInText, flipInField, BIG, setupField, removeStructure, structureAt, wholeStructure, balancedGroup };
 })();

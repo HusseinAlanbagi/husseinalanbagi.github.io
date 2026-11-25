@@ -11,11 +11,11 @@ await p.evaluate(() => { const mf = document.getElementById('mf'); mf.focus(); m
 await p.evaluate(() => { const mf = document.getElementById('mf'); mf.executeCommand('moveToMathfieldEnd'); mf.insert('+z'); mf.dispatchEvent(new Event('input', { bubbles: true })); }); await sleep(400);
 console.log('B2:', JSON.stringify(await val()));
 // B2 numbering toggle keeps rows
-await p.click('#numBtn'); await sleep(300); console.log('B2 star:', JSON.stringify(await val()));
+await p.click('#numBtn'); await sleep(300); console.log('R7 asks:', await p.evaluate(() => document.querySelector('.unnum-pop')?.textContent.replace(/\s+/g, ' ').slice(0, 120))); await p.evaluate(() => [...document.querySelectorAll('.unnum-pop button')].find(b => /only the labelled/.test(b.textContent))?.click()); await sleep(300); console.log('B2 star:', JSON.stringify(await val()));
 await p.click('#numBtn'); await sleep(300); console.log('B2 unstar:', JSON.stringify(await val()));
 // B4
 await setIn('\\begin{multline}\na + b \\\\\n+ c \\label{eq:m}\n\\end{multline}'); await sleep(300);
-await p.click('#numBtn'); await sleep(300); console.log('B4:', JSON.stringify(await val()), await p.$eval('#note', e => e.textContent).catch(() => ''));
+await p.click('#numBtn'); await sleep(300); await p.evaluate(() => [...document.querySelectorAll('.unnum-pop button')].find(b => /Remove numbers/.test(b.textContent))?.click()); await sleep(300); console.log('B4:', JSON.stringify(await val()), await p.$eval('#note', e => e.textContent).catch(() => ''));
 await p.click('#numBtn'); await sleep(300); console.log('B4 back:', JSON.stringify(await val()));
 // B3
 await setIn('$x_t=a_t$'); await sleep(300);

@@ -997,6 +997,28 @@ export default {
       }
       function toggleNumber(x, starred) {
         const src = view.state.sliceDoc(x.from, x.to);
+        // taking the number off an equation with labels: ask first, saying which references would show ??
+        const plan = !starred && x.env ? window.StochaBrackets?.unnumberPlan(src) : null;
+        if (plan) {
+          const texts = [view.state.doc.toString(), ...ctx.project.files().filter(f => /\.tex$/i.test(f) && f !== ctx.editor.path).map(f => ctx.project.read(f) || '')];
+          const n = window.StochaBrackets.refCounts(plan.labels, texts);
+          const put = (next) => { finishEdit(false); if (next !== src) view.dispatch({ changes: { from: x.from, to: x.to, insert: next }, userEvent: 'input' }); };
+          const used = plan.labels.filter(l => n[l]);
+          ctx.ui.modal({
+            title: 'Remove the equation number?',
+            body: h('div', {},
+              h('p', {}, plan.labels.length === 1 ? 'This equation has a label:' : `This equation has ${plan.labels.length} labels:`),
+              h('ul', {}, plan.labels.map(l => h('li', {}, h('code', {}, l), ' · ', n[l] ? `referred to ${n[l]} time${n[l] > 1 ? 's' : ''}` : 'not referred to'))),
+              h('p', { class: 'muted' }, 'A label needs a number. Left in an unnumbered equation it can stop the compile (“Multiple \\label”)' + (used.length ? ', and the references above would show ?? or a wrong number.' : '.')),
+            ),
+            buttons: [
+              ...(plan.keepLabelled ? [{ label: 'Number only the labelled rows', primary: true, onClick: (m) => { m.close(); put(plan.keepLabelled()); } }] : []),
+              { label: 'Remove numbers and labels', primary: !plan.keepLabelled && !used.length, danger: !!used.length, onClick: (m) => { m.close(); put(plan.remove()); } },
+              { label: 'Keep the numbers', onClick: (m) => m.close() },
+            ],
+          });
+          return;
+        }
         let next;
         if (!x.env) next = '\\begin{equation}' + src.slice(2, -2) + '\\end{equation}';
         else { const env = x.env.replace(/\*$/, ''); next = starred ? src.replace(`\\begin{${env}*}`, `\\begin{${env}}`).replace(new RegExp(`\\\\end\\{${env}\\*\\}$`), `\\end{${env}}`) : src.replace(`\\begin{${env}}`, `\\begin{${env}*}`).replace(new RegExp(`\\\\end\\{${env}\\}$`), `\\end{${env}*}`); }
