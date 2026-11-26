@@ -1398,6 +1398,18 @@ function start() {
       // chaining (x → hat → prime): apply to what we just accented
       let target = !collapsed;
       if (collapsed && lastWrap && lastWrap.value === mf.getValue('latex') && mf.position === lastWrap.end) { mf.selection = { ranges: [[lastWrap.start, lastWrap.end]] }; target = true; }
+      // an accent on something that already has it (or that was just given it): a second click takes it off
+      const am = /^\\(\w+)\{#@\}$/.exec(l);
+      if (am && target) {
+        const fam = { bar: ['bar', 'overline'], overline: ['bar', 'overline'], hat: ['hat', 'widehat'], widehat: ['hat', 'widehat'], tilde: ['tilde', 'widetilde'], widetilde: ['tilde', 'widetilde'], vec: ['vec', 'overrightarrow'], overrightarrow: ['vec', 'overrightarrow'] }[am[1]] || [am[1]];
+        const r0 = mf.selection.ranges[0], a0 = Math.min(...r0), b0 = Math.max(...r0), cur0 = mf.getValue(a0, b0, 'latex').trim();
+        const inner = (t, open) => { if (!t.startsWith(open) || !t.endsWith('}')) return null; let d = 0; for (let i = open.length - 1; i < t.length; i++) { if (t[i] === '\\') { i++; continue; } if (t[i] === '{') d++; else if (t[i] === '}' && --d === 0) return i === t.length - 1 ? t.slice(open.length, -1) : null; } return null; };
+        let off = null;
+        for (const c of fam) { off = inner(cur0, '\\' + c + '{'); if (off != null) break; }
+        if (off == null) { const sm = /^\\overset\{\\(\w+)\{\}\}\{/.exec(cur0); if (sm && fam.includes(sm[1])) off = inner(cur0, sm[0]); }
+        if (off != null) { mf.insert(off, { format: 'latex', insertionMode: 'replaceSelection', selectionMode: 'item' }); lastWrap = null; return; }
+      }
+      if (target) { /* chained or selected: wrap it below */ }
       else if (collapsed && mf.position > 0) {
         // no selection: use the item just before the cursor
         const p = mf.position, norm = (x) => (x || '').replace(/\s+/g, '');

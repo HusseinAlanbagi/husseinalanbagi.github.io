@@ -38,7 +38,10 @@ const baseTheme = EditorView.theme({
 
 export function createEditor(parent, { onChange, onCursor, find }) {
   const fb = findBar(find || { files: () => [], read: () => null, activePath: () => null, onOpenFile: () => {} });
-  const moduleComp = new Compartment(), langComp = new Compartment(), wrapComp = new Compartment();
+  const moduleComp = new Compartment(), langComp = new Compartment(), wrapComp = new Compartment(), roComp = new Compartment();
+  // read-only (the project is being edited in another tab): no typing, and no change from any module either
+  let ro = false;
+  const roExt = () => ro ? [EditorState.readOnly.of(true), EditorState.transactionFilter.of(tr => tr.docChanged ? [] : tr)] : [];
   const sources = new Set();           // completion sources registered by modules
   let moduleExts = [], view, suppress = false;
   const states = new Map();            // path -> EditorState
@@ -68,7 +71,7 @@ export function createEditor(parent, { onChange, onCursor, find }) {
     wrapComp.of(EditorView.lineWrapping),
     langComp.of(/\.(tex|sty|cls|ltx|tikz|bbl|def|clo)$/i.test(path) ? StreamLanguage.define(stex) : []),
     EditorState.languageData.of(() => [{ commentTokens: { line: '%' } }]),
-    moduleComp.of(moduleExts),
+    moduleComp.of(moduleExts), roComp.of(roExt()),
     EditorView.updateListener.of((u) => {
       if (u.docChanged && !suppress) onChange && onChange(current, u.state.doc.toString(), u);
       if (u.selectionSet || u.docChanged) onCursor && onCursor(u.state);
@@ -85,7 +88,7 @@ export function createEditor(parent, { onChange, onCursor, find }) {
       let st = states.get(path), same = true;
       if (!st || st.doc.toString() !== text) { st = EditorState.create({ doc: text, extensions: base(path) }); same = false; }
       current = path;
-      suppress = true; view.setState(st); view.dispatch({ effects: moduleComp.reconfigure(moduleExts) }); suppress = false;
+      suppress = true; view.setState(st); view.dispatch({ effects: [moduleComp.reconfigure(moduleExts), roComp.reconfigure(roExt())] }); suppress = false;
       // coming back to a file: the same place on screen as when you left it (not the top)
       const snap = same && snaps.get(path); if (snap) { try { view.dispatch({ effects: snap }); } catch {} }
       onCursor && onCursor(view.state); view.requestMeasure();
@@ -119,6 +122,8 @@ export function createEditor(parent, { onChange, onCursor, find }) {
       return () => { moduleExts = moduleExts.filter(e => e !== ext); view.dispatch({ effects: moduleComp.reconfigure(moduleExts) }); };
     },
     addKeymap(bindings) { return api.addExtension(Prec.high(keymap.of(bindings))); },
+    setReadOnly(on) { ro = !!on; view.dispatch({ effects: roComp.reconfigure(roExt()) }); view.dom.classList.toggle('cm-ro', ro); },
+    get readOnly() { return ro; },
     setWrap(on) { view.dispatch({ effects: wrapComp.reconfigure(on ? EditorView.lineWrapping : []) }); },
     toggleComment: () => toggleComment(view),
     openSearch: () => openSearchPanel(view),

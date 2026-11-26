@@ -12,6 +12,7 @@ import { explain } from './explain.js';
 import { parseSyncTeX, forward, inverse, pageStarts, tagOf } from './synctex.js';
 import { createModuleHost } from './modules.js';
 import { SAMPLE_MAIN, SAMPLE_BIB, BLANK_MAIN } from './template.js';
+import { createHistory } from './history.js';
 
 const APP_NAME = 'StochaTeX', VERSION = '0.2.0';
 const $ = (id) => document.getElementById(id);
@@ -54,11 +55,134 @@ function saveMenu(anchor) {
     { label: 'Download the project as a .zip', onClick: () => exportZip() },
   ]);
 }
+// A save never replaces newer work: it is checked against the revision this tab read (or last saved). A read-only
+// tab (the project is being edited in another tab) never saves.
+let baseRev = 0, readOnly = false, conflictOpen = false;
 const flush = async () => {
-  clearTimeout(saveTimer); if (!project) return;
-  project.updated = Date.now(); setSaveState('saving');
-  try { await store.put(project); setSaveState('saved'); } catch (e) { setSaveState('unsaved', e); }
+  clearTimeout(saveTimer); if (!project || readOnly || conflictOpen) return;
+  const p = project;
+  p.updated = Date.now(); setSaveState('saving');
+  try {
+    const r = await store.save(p, baseRev);
+    if (p !== project) return;
+    if (r.conflict) return onConflict(r.conflict);
+    baseRev = r.rev; setSaveState('saved');
+    tabs.post({ type: 'saved', pid: p.id, rev: r.rev });
+    hist.auto();
+  } catch (e) { setSaveState('unsaved', e); }
 };
+// ---------------------------------------------------------------- several tabs
+// One tab edits a project at a time (a browser lock per project). Another tab with the same project opens it
+// read-only, follows the editing tab's saves, and can take over with "Edit here instead"; when the editing tab
+// closes, a read-only tab takes over by itself.
+const TAB_ID = uid();
+const tabs = (() => {
+  const bc = 'BroadcastChannel' in window ? new BroadcastChannel('stochatex-tabs') : null;
+  let release = null, holder = null, waiting = null;
+  const name = (pid) => 'stochatex-project-' + pid;
+  const api = {
+    post: (m) => { try { bc?.postMessage({ ...m, tab: TAB_ID }); } catch {} },
+    // true when this tab may edit pid
+    take(pid) {
+      if (!navigator.locks) return Promise.resolve(true);
+      return new Promise((res) => {
+        navigator.locks.request(name(pid), { ifAvailable: true }, (lock) => {
+          if (!lock) { res(false); return; }
+          return new Promise((rel) => { release = rel; holder = pid; res(true); });
+        }).catch(() => res(true));
+      });
+    },
+    drop() { waiting?.abort(); waiting = null; if (release) release(); release = null; holder = null; },
+    // queue for the lock; when it comes (the other tab closed or handed over), this tab becomes the editor
+    wait(pid, onGot) {
+      if (!navigator.locks) return;
+      waiting?.abort(); const ac = new AbortController(); waiting = ac;
+      navigator.locks.request(name(pid), { signal: ac.signal }, (lock) => {
+        if (!project || project.id !== pid) return;       // moved on: give it back at once
+        waiting = null;
+        return new Promise((rel) => { release = rel; holder = pid; onGot(); });
+      }).catch(() => {});
+    },
+    get holder() { return holder; },
+  };
+  bc && (bc.onmessage = async (e) => {
+    const m = e.data || {}; if (m.tab === TAB_ID || !project || m.pid !== project.id) return;
+    if (m.type === 'yield' && !readOnly && api.holder === project.id) {
+      // another tab asked to edit: save, hand over, and follow it read-only
+      await flush(); await folderSync();
+      setReadOnly(true, 'moved');
+      api.drop(); api.wait(project.id, becomeEditor);
+    }
+    if (m.type === 'saved' && readOnly) followSaved();
+  });
+  return api;
+})();
+async function followSaved() {
+  const fresh = await store.get(project.id).catch(() => null);
+  if (fresh && project && fresh.id === project.id) { baseRev = fresh.rev || 0; replaceFiles(fresh); }
+}
+async function becomeEditor() {
+  const fresh = await store.get(project.id).catch(() => null);
+  if (fresh) { baseRev = fresh.rev || 0; replaceFiles(fresh); }
+  setReadOnly(false);
+  toast('This tab can edit the project now.', '', 4000);
+}
+// put another copy of the project's files in place (another tab's save, a conflict choice, a restore), keeping
+// the open file and its place on screen
+function replaceFiles(fresh) {
+  const old = project.files;
+  for (const k of new Set([...Object.keys(old), ...Object.keys(fresh.files)])) {
+    const a = old[k], b = fresh.files[k];
+    if (!a || !b || a.t !== b.t || a.b !== b.b) editor.forget(k);
+  }
+  Object.assign(project, { files: fresh.files, main: fresh.main, name: fresh.name, engine: fresh.engine, rev: fresh.rev });
+  if (active && project.files[active]) {
+    const v = editor.view, top = v.scrollDOM.scrollTop, pos = v.state.selection.main.head;
+    if (project.files[active].t != null && editor.getText() !== project.files[active].t) {
+      editor.open(active, project.files[active].t);
+      try { v.dispatch({ selection: { anchor: Math.min(pos, v.state.doc.length) } }); } catch {}
+      requestAnimationFrame(() => { v.scrollDOM.scrollTop = top; });
+    }
+  } else openFile(mainFile() || projectApi.files()[0]);
+  renderTree(); events.emit('files'); scheduleCompile();
+}
+function setReadOnly(on, why) {
+  readOnly = !!on; editor.setReadOnly(readOnly);
+  document.body.classList.toggle('read-only', readOnly);
+  let bar = $('roBar');
+  if (!bar) { bar = h('div', { id: 'roBar', class: 'ro-bar', role: 'status' }); $('ed').before(bar); }
+  bar.hidden = !readOnly;
+  if (readOnly) {
+    bar.replaceChildren(h('span', {}, why === 'moved' ? 'Editing moved to another tab. This tab now shows the project read-only and follows its changes.' : 'This project is open for editing in another tab, so this tab is read-only. It follows the other tab’s changes and nothing here can overwrite them.'),
+      h('button', { class: 'small primary', onClick: () => { tabs.post({ type: 'yield', pid: project.id }); bar.firstChild.textContent = 'Asking the other tab to hand over…'; } }, 'Edit here instead'));
+    const el = $('saveState'); if (el) { el.className = 'save-state ro'; el.textContent = 'Read-only'; el.title = 'Another tab is editing this project'; }
+  } else setSaveState(saveState === 'ro' ? 'saved' : saveState);
+}
+// another tab or window saved newer work since this tab read the project: ask, and keep both in Version history
+async function onConflict(other) {
+  conflictOpen = true; setSaveState('unsaved', new Error('another tab or window saved newer changes'));
+  const when = new Date(other.updated || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  modal({
+    title: 'This project was changed somewhere else',
+    body: h('div', {}, h('p', {}, `Another tab or window saved this project at ${when}, after this tab last saved. Saving now would replace that work, so nothing was saved.`),
+      h('p', {}, 'Choose which version to keep. The other one is kept in Version history, so nothing is lost.')),
+    buttons: [
+      { label: 'Use the saved version', onClick: async (m) => { m.close(); await hist.snapshot(project, { reason: 'This tab’s version (not kept)' }); baseRev = other.rev || 0; conflictOpen = false; replaceFiles(other); setSaveState('saved'); } },
+      { label: 'Keep this tab’s version', primary: true, onClick: async (m) => { m.close(); await hist.snapshot(other, { reason: 'Replaced by another tab’s version' }); baseRev = other.rev || 0; conflictOpen = false; flush(); } },
+    ],
+    onClose: () => { conflictOpen = false; },
+  });
+}
+const hist = createHistory({
+  getProject: () => project,
+  canWrite: () => !readOnly,
+  restoreFiles(files) {
+    if (readOnly) return toast('This tab is read-only: restore from the tab that edits the project.', 'err');
+    for (const [k, t] of Object.entries(files)) if (t != null) { project.files[k] = { t }; if (k !== active) editor.forget(k); }
+    if (active && files[active] != null) { const v = editor.view, top = v.scrollDOM.scrollTop; editor.open(active, files[active]); requestAnimationFrame(() => { v.scrollDOM.scrollTop = top; }); }
+    save(); renderTree(); events.emit('files'); for (const k of Object.keys(files)) events.emit('change', k, files[k]); scheduleCompile();
+  },
+});
 addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
 // a newer version of the app was published: offer to reload (the page's files are versioned, so it never mixes old and new)
 const APP_V = document.querySelector('meta[name="stx-version"]')?.content || '';
@@ -101,6 +225,7 @@ const projectApi = {
   read: (p) => { const f = project?.files[p]; return f ? (f.t != null ? f.t : f.b) : null; },
   write(p, content, { open = false } = {}) {
     p = cleanPath(p); if (!p) return;
+    if (readOnly) { toast('This tab is read-only: the project is being edited in another tab.', 'err', 4000); return; }
     const isNew = !project.files[p];
     project.files[p] = typeof content === 'string' ? { t: content } : { b: content };
     if (p === active && typeof content === 'string' && editor.getText() !== content) { const pos = editor.getCursor().pos; editor.open(p, content); editor.setPos(Math.min(pos, content.length)); }
@@ -547,14 +672,18 @@ function showBottom(which) {
 // ---------------------------------------------------------------- projects
 async function loadProject(p) {
   await flush(); await folderSync();
+  if (tabs.holder !== p.id) tabs.drop();
+  const mine = tabs.holder === p.id || await tabs.take(p.id);
+  baseRev = p.rev || 0; conflictOpen = false;
   project = p; active = null; lastResult = null; sync = null; lastOk = null; lastFailed = null; compileReq++; problems.clear(); pdf.clear(); $('pdfEmpty').hidden = false; freshness();
   $('projName').textContent = p.name; document.title = `${p.name} — ${APP_NAME}`;
   prefs.set('lastProject', p.id);
   renderTree(); renderProblems();
   openFile(p.lastOpen && p.files[p.lastOpen] ? p.lastOpen : mainFile() || projectApi.files()[0]);
   events.emit('project'); events.emit('files'); refreshMainUI(); setTimeout(askMainOnce, 800);
+  setReadOnly(!mine); if (!mine) tabs.wait(p.id, becomeEditor);
   scheduleCompile(0);
-  await folderConnect();
+  if (mine) await folderConnect();
 }
 // a full copy of the project: files, main file, per-project settings; saved next to the original's folder when it has one
 async function duplicateProject() {
@@ -596,6 +725,8 @@ async function projectMenu() {
     '-',
     { label: 'Duplicate this project…', title: 'A full copy (files and settings); the original stays as it is', onClick: () => duplicateProject() },
     { label: 'Rename this project…', onClick: async () => { const n = await promptBox('Rename project', 'Project name', project.name); if (n) { project.name = n; $('projName').textContent = n; document.title = `${n} — ${APP_NAME}`; save(); } } },
+    { label: 'Version history…', hint: 'Ctrl+Alt+H', title: 'Earlier versions of this project: compare and restore', onClick: () => hist.open() },
+    { label: 'Save a version…', disabled: readOnly, title: 'A named snapshot, for example “Sent to supervisor”', onClick: () => hist.name() },
     { label: 'Download as .zip', onClick: exportZip },
     folder.dir ? { label: `Unlink the folder “${folder.dir.name}”`, onClick: unlinkFolder } : { label: 'Link this project to a folder…', disabled: !window.showDirectoryPicker, title: window.showDirectoryPicker ? 'Save every change to a folder on this computer' : 'Needs Chrome or Edge on a computer', onClick: () => linkFolder() },
     { label: 'Delete this project…', onClick: deleteProject },
@@ -1040,6 +1171,8 @@ ui.addCommand({ id: 'quick.findall', name: 'Find in all files of the project', r
 ui.addCommand({ id: 'quick.insert', name: 'Insert: figure, table, citation, cross-reference, footnote', run: () => insertMenu() });
 ui.addCommand({ id: 'quick.snippets', name: 'Snippets: insert a ready-made block', run: () => { const b = [...document.querySelectorAll('#toolbar button')].find(x => /Snippets/i.test(x.title || x.textContent)); b ? b.click() : quickSearch('snippet'); } });
 ui.addCommand({ id: 'project.duplicate', name: 'Project: duplicate this project', run: () => duplicateProject() });
+ui.addCommand({ id: 'project.history', name: 'Version history: compare and restore earlier versions', key: 'Mod+Alt+H', run: () => hist.open() });
+ui.addCommand({ id: 'project.saveVersion', name: 'Save a version (a named snapshot)…', run: () => readOnly ? toast('This tab is read-only.', 'err') : hist.name() });
 ui.addCommand({ id: 'quick.search', name: 'Search or run (files, sections, labels, citations, commands)', key: 'Mod+K', run: () => quickSearch() });
 function insertMenu() {
   const ins = (t, back = 0) => { const v = editor.view, r = v.state.selection.main; v.dispatch({ changes: { from: r.from, to: r.to, insert: t }, selection: { anchor: r.from + t.length - back } }); v.focus(); };

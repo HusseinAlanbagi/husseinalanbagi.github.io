@@ -699,57 +699,87 @@ export default {
     const closeSym = () => { if (symPopEl) { symPopEl.remove(); symPopEl = null; } };
     // the floating format bar (in-place equations and maths in table cells): style what you type or what is selected;
     // with a selection, also accents, braces and wraps
+    // The format bar under an equation (and under maths in a table cell): three short rows that never change
+    // width. Style (B I R U ℝ 𝒜 Tt, Ω) · accents and braces (a second click on an accent takes it off again) ·
+    // structures (fraction with its flip, root, powers, sum, 𝔼, empty box).
     function buildFmtBar(mf, btn) {
+      const range = () => { const r = mf.selection?.ranges?.[0] || [mf.position, mf.position]; return [Math.min(...r), Math.max(...r)]; };
       const wrap = (tpl, wide) => () => {
-        const r = mf.selection?.ranges?.[0] || [mf.position, mf.position], sel = r[0] !== r[1];
+        const r = range(), sel = r[0] !== r[1];
         let t = tpl;
-        if (wide && sel) { const s = mf.getValue(Math.min(...r), Math.max(...r), 'latex').replace(/[{}\s]/g, ''); if (s.length > 1 && !/^\\[A-Za-z]+$/.test(s)) t = wide; }
+        if (wide && sel) { const s = mf.getValue(r[0], r[1], 'latex').replace(/[{}\s]/g, ''); if (s.length > 1 && !/^\\[A-Za-z]+$/.test(s)) t = wide; }
         mf.focus();
         mf.insert(sel ? t.replace('#0', '#@') : t, { format: 'latex', selectionMode: 'placeholder' });
       };
+      // an accent: on a selection that already carries it (or right after putting it on), it comes off again
+      const ACC = { bar: ['bar', 'overline'], hat: ['hat', 'widehat'], tilde: ['tilde', 'widetilde'], dot: ['dot'], vec: ['vec', 'overrightarrow'] };
+      const inner = (t, open) => { if (!t.startsWith(open) || !t.endsWith('}')) return null; let d = 0; for (let i = open.length - 1; i < t.length; i++) { if (t[i] === '\\') { i++; continue; } if (t[i] === '{') d++; else if (t[i] === '}' && --d === 0) return i === t.length - 1 ? t.slice(open.length, -1) : null; } return null; };
+      const peel = (t, key) => {
+        t = t.trim();
+        if (key === 'star') { const m = /^\{([\s\S]*)\}\^\{?\*\}?$/.exec(t) || /^([\s\S]+?)\^\{?\*\}?$/.exec(t); return m ? m[1] : null; }
+        if (key === 'boxed') return inner(t, '\\boxed{');
+        for (const c of ACC[key] || []) { const x = inner(t, '\\' + c + '{'); if (x != null) return x; }
+        // a stacked accent while editing: \overset{\hat{}}{…}
+        const m = /^\\overset\{\\(\w+)\{\}\}\{/.exec(t); if (m && (ACC[key] || []).includes(m[1])) return inner(t, m[0]);
+        return null;
+      };
+      const acc = (key, tpl, wide) => () => {
+        let [a, b] = range();
+        if (a === b && mf.__lastAcc && mf.__lastAcc.key === key && mf.__lastAcc.at === mf.position) [a, b] = mf.__lastAcc.range;     // just put on: the second click takes it off
+        // nothing selected, the cursor right after something that has this accent: take it off that
+        if (a === b && a > 0) for (let k = a - 1; k >= Math.max(0, a - 8); k--) { const v = mf.getValue(k, a, 'latex').trim(); if (v && peel(v, key) != null) { [a, b] = [k, a]; break; } }
+        if (a !== b) {
+          const s = mf.getValue(a, b, 'latex'), off = peel(s, key);
+          if (off != null) { mf.focus(); mf.selection = { ranges: [[a, b]] }; mf.insert(off, { format: 'latex', insertionMode: 'replaceSelection', selectionMode: 'item' }); mf.__lastAcc = null; return; }
+        }
+        const before = mf.lastOffset;
+        wrap(tpl, wide)();
+        // remember what was put on, so the next click on the same accent can take it off
+        const grew = mf.lastOffset - before, end = mf.position;
+        mf.__lastAcc = a !== b ? { key, at: end, range: [a, Math.max(a + 1, b + grew)] } : null;
+      };
       const fb = (label, title, fn, cls = '') => btn(h('span', { class: 'vz-fb ' + cls }, label), title, fn);
       const sep = () => h('span', { class: 'vz-bsep' });
-      const fmtBar = h('span', { class: 'vz-fmt-bar', role: 'toolbar', 'aria-label': 'Format the equation' },
-        fb('B', 'Bold (Ctrl+B): \\boldsymbol', wrap('\\boldsymbol{#0}'), 'b'),
-        fb('I', 'Italic (Ctrl+I): \\mathit', wrap('\\mathit{#0}'), 'i'),
-        fb('R', 'Upright, for names like “max” or “d” (\\mathrm)', wrap('\\mathrm{#0}'), 'r'),
-        fb('U', 'Underline (Ctrl+U)', wrap('\\underline{#0}'), 'u'),
-        fb('ℝ', 'Blackboard bold (\\mathbb), for ℝ, ℕ, 𝔼', wrap('\\mathbb{#0}')),
-        fb('𝒜', 'Calligraphic (\\mathcal)', wrap('\\mathcal{#0}')),
-        fb('Tt', 'Words inside the equation (\\text)', wrap('\\text{#0}'), 'tt'),
-        sep(),
-        fb('a·b', 'Multiplication dot (\\cdot); typing ** does the same', () => { mf.focus(); mf.insert('\\cdot ', { format: 'latex' }); }, 'cdot'),
-        h('span', { class: 'vz-only-sel' },
-          fb(h('span', { class: 'vz-acc', 'data-acc': '¯' }, 'x'), 'Bar over the selection (\\bar, or \\overline for more than one letter)', wrap('\\bar{#0}', '\\overline{#0}')),
-          fb(h('span', { class: 'vz-acc', 'data-acc': 'ˆ' }, 'x'), 'Hat (\\hat, or \\widehat)', wrap('\\hat{#0}', '\\widehat{#0}')),
-          fb(h('span', { class: 'vz-acc', 'data-acc': '˜' }, 'x'), 'Tilde (\\tilde, or \\widetilde)', wrap('\\tilde{#0}', '\\widetilde{#0}')),
-          fb(h('span', { class: 'vz-acc', 'data-acc': '˙' }, 'x'), 'Dot: time derivative (\\dot)', wrap('\\dot{#0}')),
-          fb(h('span', { class: 'vz-vec' }, 'x'), 'Vector arrow (\\vec, or \\overrightarrow)', wrap('\\vec{#0}', '\\overrightarrow{#0}')),
-          fb(h('span', { class: 'vz-acc' }, 'x', h('sup', {}, '*')), 'Star: steady state or optimum (^*)', wrap('{#0}^{*}')),
+      const row = (...k) => h('span', { class: 'vz-frow' }, ...k);
+      const slot = () => { mf.focus(); mf.insert('#?', { format: 'latex', selectionMode: 'placeholder' }); };
+      const flip = () => { mf.focus(); window.StochaBrackets?.flipInField(mf); };
+      const fmtBar = h('div', { class: 'vz-fmt-bar', role: 'toolbar', 'aria-label': 'Format the equation' },
+        row(
+          fb('B', 'Bold (Ctrl+B): \\boldsymbol', wrap('\\boldsymbol{#0}'), 'b'),
+          fb('I', 'Italic (Ctrl+I): \\mathit', wrap('\\mathit{#0}'), 'i'),
+          fb('R', 'Upright, for names like “max” or “d” (\\mathrm)', wrap('\\mathrm{#0}'), 'r'),
+          fb('U', 'Underline (Ctrl+U)', wrap('\\underline{#0}'), 'u'),
+          fb('ℝ', 'Blackboard bold (\\mathbb), for ℝ, ℕ, 𝔼', wrap('\\mathbb{#0}')),
+          fb('𝒜', 'Calligraphic (\\mathcal)', wrap('\\mathcal{#0}')),
+          fb('Tt', 'Words inside the equation (\\text)', wrap('\\text{#0}'), 'tt'),
           sep(),
-          fb('(x)', 'Round brackets around the selection (they grow with it)', wrap('\\left(#0\\right)')),
+          btn(h('span', { class: 'vz-ib vz-om' }, 'Ω'), 'Insert a symbol: Greek letters, operators, relations, arrows (Ctrl+Shift+S)', (b2) => symbolPop(b2, mf))),
+        row(
+          fb('a·b', 'Multiplication dot (\\cdot); typing ** does the same', () => { mf.focus(); mf.insert('\\cdot ', { format: 'latex' }); }, 'cdot'),
+          sep(),
+          fb(h('span', { class: 'vz-acc', 'data-acc': '¯' }, 'x'), 'Bar (\\bar, or \\overline for more than one letter); click again to take it off', acc('bar', '\\bar{#0}', '\\overline{#0}')),
+          fb(h('span', { class: 'vz-acc', 'data-acc': 'ˆ' }, 'x'), 'Hat (\\hat, or \\widehat); click again to take it off', acc('hat', '\\hat{#0}', '\\widehat{#0}')),
+          fb(h('span', { class: 'vz-acc', 'data-acc': '˜' }, 'x'), 'Tilde (\\tilde, or \\widetilde); click again to take it off', acc('tilde', '\\tilde{#0}', '\\widetilde{#0}')),
+          fb(h('span', { class: 'vz-acc', 'data-acc': '˙' }, 'x'), 'Dot, a time derivative (\\dot); click again to take it off', acc('dot', '\\dot{#0}')),
+          fb(h('span', { class: 'vz-vec' }, 'x'), 'Vector arrow (\\vec, or \\overrightarrow); click again to take it off', acc('vec', '\\vec{#0}', '\\overrightarrow{#0}')),
+          fb(h('span', { class: 'vz-acc' }, 'x', h('sup', {}, '*')), 'Star: steady state or optimum (^*); click again to take it off', acc('star', '{#0}^{*}')),
+          sep(),
+          fb('(x)', 'Round brackets that grow with what is inside', wrap('\\left(#0\\right)')),
           fb('[x]', 'Square brackets', wrap('\\left[#0\\right]')),
           fb('{x}', 'Curly braces', wrap('\\left\\{#0\\right\\}')),
           fb('|x|', 'Absolute value', wrap('\\left|#0\\right|')),
           fb(ico('ubrace', 16), 'Underbrace with a note under it', wrap('\\underbrace{#0}_{#?}')),
           fb(ico('obrace', 16), 'Overbrace with a note over it', wrap('\\overbrace{#0}^{#?}')),
-          fb(ico('box'), 'Box the selection (\\boxed)', wrap('\\boxed{#0}')),
-          sep(),
-          fb(ico('frac'), 'Make the selection the top of a fraction', wrap('\\frac{#0}{#?}')),
-          fb(ico('sqrt'), 'Square root of the selection', wrap('\\sqrt{#0}')),
-          fb(ico('slot'), 'Replace the selection with an empty box to fill in', () => { mf.focus(); mf.insert('#?', { format: 'latex', selectionMode: 'placeholder' }); })),
-        h('span', { class: 'vz-only-nosel' },
-          fb(ico('frac'), 'Fraction', wrap('\\frac{#0}{#?}')),
+          fb(ico('box'), 'Box (\\boxed); click again on a boxed part to take the box off', acc('boxed', '\\boxed{#0}'))),
+        row(
+          fb(ico('frac'), 'Fraction (with a selection: the selection on top)', wrap('\\frac{#0}{#?}')),
+          fb('⇄', 'Flip the fraction at the cursor: a/b becomes b/a (Alt+/)', flip, 'flip'),
           fb(ico('sqrt'), 'Square root', wrap('\\sqrt{#0}')),
           fb('xⁿ', 'Superscript (^)', () => { mf.focus(); mf.executeCommand('moveToSuperscript'); }),
           fb('xₙ', 'Subscript (_)', () => { mf.focus(); mf.executeCommand('moveToSubscript'); }),
           fb('Σ', 'Sum with limits', wrap('\\sum_{#?}^{#?}#0')),
-          fb('E', 'Expectation: \\mathbb{E}_t[ … ]', wrap('\\mathbb{E}_{t}\\left[#0\\right]')),
-          fb('( )', 'Brackets that grow with what is inside', wrap('\\left(#0\\right)')),
-          fb(ico('slot'), 'An empty box to fill in', () => { mf.focus(); mf.insert('#?', { format: 'latex', selectionMode: 'placeholder' }); }),
-          h('span', { class: 'vz-hint' }, 'Select part of it for accents and braces')));
-      const syncSel = () => { const r = mf.selection?.ranges?.[0] || [0, 0]; fmtBar.classList.toggle('has-sel', r[0] !== r[1]); };
-      mf.addEventListener('selection-change', syncSel);
+          fb('𝔼', 'Expectation: \\mathbb{E}_t[ … ]', wrap('\\mathbb{E}_{t}\\left[#0\\right]')),
+          fb(ico('slot'), 'An empty box to fill in (replaces the selection)', slot)));
       return fmtBar;
     }
     function symbolPop(anchor, mfArg) {
@@ -804,23 +834,40 @@ export default {
       const tag = nums.length ? h('span', { class: 'vz-edit-num' }, nums.length > 1 ? `(${nums[0]})–(${nums[nums.length - 1]})` : `(${nums[0]})`) : null;
       const btn = (label, title, fn, cls = '') => h('button', { class: cls, title, 'aria-label': title.split(/[(:]/)[0].trim(), onMousedown: (e) => { e.preventDefault(); e.stopPropagation(); fn(e.currentTarget, e); } }, label);
       const numbered0 = () => { const x = itemNow(); if (!x || x.kind !== 'dmath') return null; const starred = /\*$/.test(view.state.sliceDoc(x.from, x.from + 40).match(/^\\begin\{([^}]*)\}/)?.[1] || ''); return { x, starred, has: !!x.env && !starred && x.env !== 'displaymath' && x.env !== 'math' }; };
+      // the bar above: what you do with the whole equation (copy, duplicate, cut, number, label), ⋯ for the rest
       const bar = h('span', { class: 'vz-edit-bar' },
         btn(h('span', { class: 'vz-ib' }, ico('copy'), ico('chev', 10)), 'Copy this equation: as LaTeX, for Word, as an image, or a reference to it', (b) => copyMenu(b)),
         btn(ico('dup'), 'Duplicate: a copy right below this equation, open for editing; its label gets a number (Ctrl+Shift+D)', () => { const x = itemNow(); if (x) duplicate(x, false); }),
         btn(ico('cut'), 'Cut: the whole equation, with its \\begin … \\end and label; paste it anywhere (Ctrl+Z puts it back)', () => { const x = itemNow(); if (x) cutEquation(x); }),
-        btn(h('span', { class: 'vz-ib vz-om' }, 'Ω'), 'Insert a symbol: Greek letters, operators, relations, arrows (Ctrl+Shift+S)', (b) => symbolPop(b)),
-        btn(ico('code'), 'Show the LaTeX of this equation (Alt+click does the same; Esc there, or “Visual”, comes back)', () => { const pos = view.state.field(editField)?.bodyFrom; finishEdit(true, pos); }),
         ...(display ? [
+          h('span', { class: 'vz-bsep' }),
           btn(ico('hash'), 'Number: give it an equation number, or remove it', () => { const n = numbered0(); if (n) toggleNumber(n.x, !n.has); }),
           btn(ico('tag'), 'Label: add a \\label so you can refer to it with \\eqref (or rename it)', () => { const x = itemNow(); if (x) editLabel(x, ((x.body || '').match(/\\label\{([^}]*)\}/) || [])[1]); }),
         ] : []),
-        btn(ico('expand'), 'Open in the full equation editor, beside the paper', () => { const pos = view.state.field(editField)?.bodyFrom; finishEdit(true, pos); ctx.ui.runCommand('equation.side'); }),
-        btn(ico('trash'), 'Delete this equation (Ctrl+Z brings it back)', () => { const x = itemNow(); if (x) deleteEq(x); }, 'vz-danger'),
-        btn(ico('more'), 'More: duplicate, cut, make it fit the page, box, flip a fraction, auto-size brackets, model check', (b) => moreMenu(b)),
+        h('span', { class: 'vz-bsep' }),
+        btn(ico('more'), 'More: LaTeX, full editor, box, steady state, make it fit the page, delete…', (b) => moreMenu(b)),
         btn(ico('check'), 'Done (Esc)', () => finishEdit(true), 'primary'));
       const fmtBar = buildFmtBar(mf, btn);
       const el = h(display ? 'div' : 'span', { class: display ? 'vz-edit' : 'vz-edit vz-edit-i' }, mf, tag, ...(display ? [h('div', { class: 'vz-edit-head' }, bar), fmtBar] : [fmtBar, bar]));
       const sess = session = { el, mf, model, view, base: null, orig: model.body };
+      // both bars stay inside the editor, whatever the window width: shifted sideways if needed, and the format
+      // bar's rows wrap when even that is not enough
+      const keepIn = () => {
+        if (!el.isConnected) { removeEventListener('resize', keepIn); ro2.disconnect(); return; }
+        const sd = view.scrollDOM, box = sd.getBoundingClientRect(), minL = box.left + 4, maxR = box.left + sd.clientWidth - 4;
+        fmtBar.style.maxWidth = Math.max(160, maxR - minL) + 'px';
+        for (const b of [bar, fmtBar]) {
+          b.style.transform = '';
+          const r = b.getBoundingClientRect(); let dx = 0;
+          if (r.right > maxR) dx = maxR - r.right;
+          if (r.left + dx < minL) dx = minL - r.left;
+          if (dx) b.style.transform = `translateX(${Math.round(dx)}px)`;
+        }
+      };
+      const ro2 = new ResizeObserver(() => requestAnimationFrame(keepIn));
+      ro2.observe(view.scrollDOM); ro2.observe(el);
+      addEventListener('resize', keepIn); mf.addEventListener('input', () => requestAnimationFrame(keepIn));
+      requestAnimationFrame(() => requestAnimationFrame(keepIn));
       // a long equation shrinks a little to fit the field (MathLive cannot wrap a line); the caret stays in view
       const fitField = () => { try { mf.style.fontSize = ''; const box = mf.getBoundingClientRect().width - 24, cont = mf.shadowRoot?.querySelector('.ML__content, .ML__latex'); const w = cont ? cont.scrollWidth : 0; if (w > box && box > 0) mf.style.fontSize = Math.max(0.7, box / w) * (display ? 1.15 : 1) + 'em'; } catch {} };
       mf.addEventListener('input', () => requestAnimationFrame(fitField)); setTimeout(fitField, 120);
@@ -859,7 +906,7 @@ export default {
       }, true);
       el.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'd') { e.preventDefault(); e.stopPropagation(); const x = itemNow(); if (x) duplicate(x, false); }
-        else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 's') { e.preventDefault(); e.stopPropagation(); symbolPop(bar.querySelector('.vz-om')?.closest('button') || bar.children[0]); }
+        else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 's') { e.preventDefault(); e.stopPropagation(); symbolPop(fmtBar.querySelector('.vz-om')?.closest('button') || bar.children[0]); }
       }, true);
       // cutting everything cuts the whole equation (environment and label too)
       el.addEventListener('cut', (e) => {
@@ -978,21 +1025,28 @@ export default {
         const label = ((x.body || '').match(/\\label\{([^}]*)\}/) || [])[1];
         const mc = x.kind === 'dmath' ? mcFor(view.state, x) : null;
         const auto = autoSizeOn();
+        const boxedNow = (() => { const v = mf.getValue('latex').trim(), r = mf.selection?.ranges?.[0] || [0, 0];
+          if (/^\\begin\{aligned\}/.test(v)) return splitRows((view.state.field(field).p.items.find(y => y.from === x.from)?.body || '').trim()).every(rw => /^\s*\\Aboxed\{/.test(rw));
+          if (r[0] !== r[1]) return /^\\boxed\{[\s\S]*\}$/.test(mf.getValue(Math.min(...r), Math.max(...r), 'latex').trim());
+          return /^\\boxed\{[\s\S]*\}$/.test(v); })();
         ctx.ui.menu(anchor, [
-          { label: 'Duplicate this equation', hint: 'Ctrl+Shift+D', onClick: () => duplicate(x, false) },
+          { label: 'Show the LaTeX', hint: 'Alt+click', onClick: () => { const pos = view.state.field(editField)?.bodyFrom; finishEdit(true, pos); } },
+          { label: 'Open in the full editor', hint: 'Ctrl+E', onClick: () => { const pos = view.state.field(editField)?.bodyFrom; finishEdit(true, pos); ctx.ui.runCommand('equation.side'); } },
+          '-',
           ...(x.kind === 'dmath' ? [{ label: 'Write its steady state below', title: 'A copy below with the time subscripts dropped: \\bar{x} on one-letter variables, \\overline{mc} on longer names; E_t goes, shocks are 0', onClick: () => { finishEdit(true); steadyBelow(view, x.from, 'auto'); } },
             { label: 'Steady state below, with another mark…', onClick: (ev) => { finishEdit(true); ctx.ui.menu(ev?.currentTarget || document.querySelector('.vz-edit-bar') || document.body, [['bar', 'Bar on all   \\bar{x}'], ['overline', 'Overline on all   \\overline{x}'], ['hat', 'Hat   \\hat{x}'], ['tilde', 'Tilde   \\tilde{x}'], ['star', 'Star   x^{*}'], ['ss', 'Subscript   x_{ss}'], ['none', 'Only drop the t']].map(([m, l]) => ({ label: l, onClick: () => steadyBelow(view, x.from, m) }))); } }] : []),
           ...(sess.model.rows > 1 ? [{ label: 'Duplicate this row', onClick: () => duplicate(x, true) }] : []),
-          { label: 'Cut the equation', hint: 'with its \\begin … \\end', onClick: () => cutEquation(x) },
           ...(x.kind === 'dmath' && !(sess.model.rows > 1) ? [{ label: 'Make it fit the page (PDF)…', title: 'Break it over lines in the source, so it fits the printed page too', onClick: () => fitPage(x) }] : []),
           '-',
-          { label: 'Box it', hint: 'selection or all', onClick: () => box(x) },
+          { label: boxedNow ? 'Unbox it' : 'Box it', hint: 'selection or all', onClick: () => box(x) },
           ...(window.StochaBrackets?.structureAt(mf) ? [
             { label: 'Remove the brace/box, keep what is under it', onClick: () => window.StochaBrackets.removeStructure(mf, true) },
             { label: 'Delete the brace/box with everything under it', onClick: () => window.StochaBrackets.removeStructure(mf, false) }] : []),
           { label: 'Flip the fraction at the cursor', hint: 'Alt+/', onClick: () => { mf.focus(); window.StochaBrackets?.flipInField(mf); } },
           { label: (auto ? '✓ ' : '') + 'Auto-size brackets', title: '( ) [ ] { } grow with tall content (\\left … \\right) as you edit', onClick: () => { try { localStorage.setItem('olve-autosize', JSON.stringify(!auto)); } catch {} ctx.ui.toast(auto ? 'Auto-size off.' : 'Brackets you edit now grow with tall content.'); } },
           ...(mc ? ['-', { label: mc.status === 'in' ? 'Leave it out of the model check' : 'Put it in the model check', onClick: () => { finishEdit(false); setModel(view, x, mc); } }] : []),
+          '-',
+          { label: 'Delete this equation', hint: 'Ctrl+Z brings it back', onClick: () => deleteEq(x) },
         ]);
       }
       function toggleNumber(x, starred) {
@@ -1445,7 +1499,6 @@ export default {
       const cbtn = (label, title, fn, cls = '') => h('button', { class: cls, title, 'aria-label': title.split(/[(:]/)[0].trim(), onMousedown: (e) => { e.preventDefault(); e.stopPropagation(); fn(e.currentTarget, e); } }, label);
       const cbar = h('div', { class: 'vz-cellbar', role: 'toolbar', 'aria-label': 'Maths in this cell' },
         h('span', { class: 'vz-cellbar-end' },
-          cbtn(h('span', { class: 'vz-ib vz-om' }, 'Ω'), 'Insert a symbol: Greek letters, operators, relations, arrows (Ctrl+Shift+S)', (b) => symbolPop(b, mf)),
           cbtn(ico('sparkle'), 'Clean this maths: empty braces and scripts, x^{2} → x^2, extra spaces', () => { const v = tidyTeX(mf.getValue('latex')), r = cleanTeX(v); if (!r.changes) return ctx.ui.toast('Already clean.'); mf.value = (window.StochaBrackets?.stackAccents || ((x) => x))(r.text); mf.dispatchEvent(new Event('input', { bubbles: true })); ctx.ui.toast(`Tidied ${r.changes} thing${r.changes === 1 ? '' : 's'}.`); }),
           cbtn(ico('expand'), 'Open in the full equation editor, beside the paper (Ctrl+E)', () => openCellMathFull(td)),
           cbtn(ico('check'), 'Done (Enter or Esc)', () => finish(), 'primary')),
@@ -1853,6 +1906,13 @@ export default {
         S.el.addEventListener('dragstart', (e) => { if (e.target.closest?.('math-field')) return; e.preventDefault(); });
       }
       S.el.replaceChildren(S.bar, h('div', { class: 'vz-tabgridwrap' }, renderGrid()), h('div', { class: 'vz-tabfoot' }, S.where), h('div', { class: 'vz-tabhint muted' }, S.latex ? 'Cells show LaTeX · Tab: next cell (adds a row at the end) · Enter: cell below · “LaTeX” goes back to typing as drawn · Esc: done' : 'Type as in Word · $ or Ctrl+M: maths · Tab: next cell (adds a row at the end) · Enter: cell below · drag across cells (or Shift+arrows) to select them: Ctrl+C, Ctrl+X, Delete, Ctrl+V · Esc: done'));
+      // the bar keeps the width and height it had when the table opened: as you type, the table (and so the paper's
+      // column) can get wider, which used to let the bar's buttons fit on fewer lines and pull the table up under
+      // the cursor. Now it only ever grows, when the column gets narrower than the bar.
+      if (S.barW) { S.bar.style.width = S.barW + 'px'; S.bar.style.maxWidth = '100%'; S.bar.style.minHeight = S.barH + 'px'; }
+      else requestAnimationFrame(() => { if (tableSess !== S || !S.bar.isConnected) return; S.barW = S.bar.getBoundingClientRect().width; S.barH = S.bar.getBoundingClientRect().height; S.bar.style.width = S.barW + 'px'; S.bar.style.maxWidth = '100%'; S.bar.style.minHeight = S.barH + 'px'; });
+      if (!S.barRO) { S.barRO = new ResizeObserver(() => { if (tableSess !== S || !S.bar.isConnected) return S.barRO.disconnect(); const hh = S.bar.getBoundingClientRect().height; if (S.barH && hh > S.barH + 0.5) { S.barH = hh; S.bar.style.minHeight = hh + 'px'; } }); }
+      S.barRO.observe(S.bar);
       syncBar();
     }
     // insert a new table: a grid to pick rows × columns, like Word's
@@ -2533,16 +2593,19 @@ export default {
 .vz-edit-bar button.primary { background: var(--accent); color: #fff; padding: 0 6px; } .vz-edit-bar button.primary:hover { background: var(--accent); filter: brightness(1.08); color: #fff; }
 .vz-edit-bar button.vz-danger:hover { background: color-mix(in srgb, #d33 14%, transparent); color: #c22; }
 .vz-ib { display: inline-flex; align-items: center; gap: 1px; } .vz-om { font: 600 14px var(--serif, serif); }
-.vz-fmt-bar { position: absolute; left: 0; top: calc(100% - 4px); z-index: 4; display: inline-flex; flex-wrap: wrap; align-items: center; max-width: 100%; box-sizing: border-box; }
-.vz-fmt-bar > span:not(.vz-bsep):not(.vz-hint) { display: contents; }
+.vz-fmt-bar { position: absolute; left: 0; top: calc(100% - 4px); z-index: 4; display: flex; flex-direction: column; align-items: stretch; gap: 1px; width: max-content; max-width: 100%; box-sizing: border-box; }
+.vz-frow { display: flex; flex-wrap: wrap; align-items: center; gap: 1px; }
+.vz-frow + .vz-frow { border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent); padding-top: 1px; }
+.vz-fb.flip { font: 15px/1 var(--ui); }
 .vz-acc { position: relative; display: inline-block; font-style: italic; padding: 0 1px; } .vz-acc::after { content: attr(data-acc); position: absolute; left: 50%; top: -0.16em; transform: translateX(-38%); font-style: normal; font-size: 0.95em; line-height: 1; } .vz-acc sup { font-size: 0.7em; font-style: normal; }
 .vz-vec { position: relative; display: inline-block; font-style: italic; } .vz-vec::after { content: ''; position: absolute; left: 1px; right: -1px; top: -1px; height: 4px; background: no-repeat center/100% 100% url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 4'%3E%3Cpath d='M0 2h9M7 0.300l2 1.700-2 1.700' fill='none' stroke='%23888' stroke-width='0.900'/%3E%3C/svg%3E"); }
 .vz-fb { font: 15px/1 var(--serif, 'STIX Two Text', serif); color: var(--ink); white-space: nowrap; }
 .vz-fb.b { font-weight: 700; } .vz-fb.i { font-style: italic; } .vz-fb.u { text-decoration: underline; } .vz-fb.tt { font: 600 11px var(--ui); }
 .vz-bsep { display: inline-block; width: 1px; height: 16px; min-width: 0; padding: 0; margin: 0 3px; background: var(--line); flex: none; }
-.vz-fmt-bar:not(.has-sel) > .vz-only-sel, .vz-fmt-bar.has-sel > .vz-only-nosel { display: none !important; }
+
 .vz-hint { font: 11px var(--ui); color: var(--muted); padding: 0 6px; white-space: nowrap; }
-.vz-edit-i .vz-fmt-bar { top: calc(100% + 3px); width: max-content; max-width: min(560px, 90vw); }
+.vz-edit-i .vz-fmt-bar { top: calc(100% + 3px); max-width: none; }
+.vz-edit-bar, .vz-fmt-bar { will-change: transform; }
 .vz-edit-i .vz-hint { display: none; }
 .vz-sym { position: fixed; z-index: 1000; width: 320px; display: flex; flex-direction: column; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 8px 28px rgb(0 0 0 / 18%); overflow: hidden; }
 .vz-sym-q { margin: 8px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); font: 13px var(--ui); }

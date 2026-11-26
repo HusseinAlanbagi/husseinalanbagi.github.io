@@ -1,12 +1,12 @@
 {
- "v": "80393662cc",
+ "v": "3bc0e39df9",
  "files": {
-  "app.css": "8caf9f2943",
-  "core.js": "8aef4494e7",
+  "app.css": "c9c2f40f3a",
+  "core.js": "d6c92a3adb",
   "pdfwin.js": "331affa1f3",
   "engine-worker.js": "76f66486ad",
   "equation/brackets.js": "55b57fb0f8",
-  "equation/index.html": "aafcba176d",
+  "equation/index.html": "1f9938fd4f",
   "modules/autocomplete.js": "615a01357a",
   "modules/brackets.js": "fcf3ac5868",
   "modules/dark-mode.js": "fbf1483daf",
@@ -27,7 +27,7 @@
   "modules/outline.js": "4923030bfc",
   "modules/proofread.js": "b0c01daa8a",
   "modules/snippets.js": "9b01f7efc8",
-  "modules/visual-mode.js": "667b24469e",
+  "modules/visual-mode.js": "0d3da0f302",
   "modules/word-count.js": "d8d5dff0a0"
  }
 }
