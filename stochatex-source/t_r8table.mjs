@@ -22,7 +22,7 @@ const doc = String.raw`\documentclass{article}
     Name & Symbol & Value \\
     \midrule
     Discount factor & $\beta$ & 0.99 \\
-    Habit & $h$ & 0.7 \\
+    Habit & $h$ & 0.7 \\` + (process.argv[4] === 'tall' ? Array.from({ length: 30 }, (_, i) => `\n    Row ${i} & $x_{${i}}$ & ${i} \\\\`).join('') : '') + String.raw`
     \bottomrule
   \end{tabular}
 \end{table}
