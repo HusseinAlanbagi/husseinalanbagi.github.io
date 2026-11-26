@@ -1310,6 +1310,9 @@ export default {
       eq(o) { return o.from === this.from; }
       toDOM() { return tableSess?.el || h('div'); }
       ignoreEvent() { return true; }
+      // the real height (or, before it is drawn, the drawn table's height plus the bar): with the default one-line
+      // guess a tall table was thought to be above the screen, was taken off the page, and everything jumped
+      get estimatedHeight() { const S = tableSess; return S ? (S.el.offsetHeight || S.h0 || 200) : -1; }
     }
     // where the parts of the tabular starting at `from` are in the document now
     function locateTable(doc, from) {
@@ -1336,11 +1339,27 @@ export default {
       if (at) ({ r, c } = at);
       r = Math.max(0, Math.min(r, t.rows.length - 1)); c = Math.max(0, Math.min(c, t.cols.length - 1));
       const el = h('div', { class: 'vz-tabedit' });
-      tableSess = { view, from: it.from, t, el, r, c, sel: null, timer: 0, macros: view.state.field(field).p.info.macros, dirty: false, latex: !!ctx.settings.get('table-latex', false) };
+      // the clicked cell stays under the mouse: opening adds the bar above the table, which used to push the cell
+      // down (out of view in a smaller window), and the browser then scrolled and lost the keyboard focus
+      const y0 = td ? td.getBoundingClientRect().top : null;
+      const drawn = e?.target?.closest?.('table')?.closest?.('.cm-content > *') || e?.target?.closest?.('table');
+      const h0 = drawn ? drawn.getBoundingClientRect().height + 110 : 0;
+      tableSess = { view, from: it.from, t, el, r, c, sel: null, timer: 0, macros: view.state.field(field).p.info.macros, dirty: false, latex: !!ctx.settings.get('table-latex', false), h0 };
+      const S = tableSess;
       loadMathLive().catch(() => {});
       buildTableUI();
       poke();
+      if (y0 != null) {
+        let n = 0;
+        const keep = () => view.requestMeasure({ key: 'vz-tab-open', read: () => { const x = S.el.isConnected && S.el.querySelector(`td[data-r="${r}"]`); return x ? x.getBoundingClientRect().top : null; },
+          write: (top) => { if (tableSess !== S) return; if (top != null && Math.abs(top - y0) > 0.5) view.scrollDOM.scrollTop += top - y0; if (++n < 8) requestAnimationFrame(keep); } });
+        keep();
+      }
       setTimeout(() => focusCell(r, c, true), 30);
+      // the click that opened the table can still put the focus back into the text afterwards (the mouse button is
+      // released over the new layout): while the table is open, the keyboard always belongs to its cell
+      S.guard = (e) => { if (tableSess !== S) return document.removeEventListener('focusin', S.guard, true); if (e.target === view.contentDOM) { const cur = S.el.querySelector('td.editing'); if (cur) cur.focus({ preventScroll: true }); else focusCell(S.r, S.c, false); } };
+      document.addEventListener('focusin', S.guard, true);
       document.addEventListener('mousedown', tableAway, true);
     }
     const tableAway = (e) => {
@@ -1450,7 +1469,7 @@ export default {
     function finishTable(save) {
       const S = tableSess; if (!S) return;
       if (save) { syncCell(); writeTable(); }
-      document.removeEventListener('mousedown', tableAway, true);
+      document.removeEventListener('mousedown', tableAway, true); if (S.guard) document.removeEventListener('focusin', S.guard, true);
       if (S.cellMath) { try { S.cellMath.finish('quiet'); } catch {} }
       if (S.fullMath) dispatchEvent(new CustomEvent('stochatex:close-math'));
       tableSess = null; poke();
