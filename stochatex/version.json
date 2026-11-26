@@ -1,8 +1,8 @@
 {
- "v": "483703f5a5",
+ "v": "506df72275",
  "files": {
-  "app.css": "c9c2f40f3a",
-  "core.js": "d6c92a3adb",
+  "app.css": "f9d7ef624f",
+  "core.js": "ae47d16827",
   "pdfwin.js": "331affa1f3",
   "engine-worker.js": "76f66486ad",
   "equation/brackets.js": "55b57fb0f8",
@@ -27,7 +27,7 @@
   "modules/outline.js": "4923030bfc",
   "modules/proofread.js": "b0c01daa8a",
   "modules/snippets.js": "9b01f7efc8",
-  "modules/visual-mode.js": "4fc60ff544",
+  "modules/visual-mode.js": "881def8366",
   "modules/word-count.js": "d8d5dff0a0"
  }
 }

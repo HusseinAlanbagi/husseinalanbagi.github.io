@@ -12,6 +12,8 @@ export function h(tag, attrs, ...kids) {
 }
 // Line icons, drawn for this app. icon('name') returns an <svg>; unknown names give a text glyph.
 const ICONS = {
+  split: 'M4 5h16v14H4z M12 5v14',
+  splitrows: 'M4 5h16v14H4z M4 12h16',
   search: 'M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14 M20 20l-4-4',
   insert: 'M12 5v14 M5 12h14 M4 4h4 M16 20h4',
   keyboard: 'M3 7h18v10H3z M7 11h0.01 M11 11h0.01 M15 11h0.01 M8 14h8',

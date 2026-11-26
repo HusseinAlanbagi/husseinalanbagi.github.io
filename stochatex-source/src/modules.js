@@ -11,7 +11,7 @@ export function createModuleHost(app) {
     return {
       app: { name: app.name, version: app.version },
       cm: app.editor.cm, h: app.ui.h,
-      editor: Object.assign(Object.create(app.editor), wrap(app.editor, ['addCompletionSource', 'addExtension', 'addKeymap'])),     // getters such as path stay live
+      editor: Object.assign(Object.create(app.editor), wrap(app.editor, ['addCompletionSource', 'addKeymap']), { addExtension: (ext) => track(app.editor.addExtension(ext, id)) }),     // getters such as path stay live
       project: app.project,
       ui: { ...app.ui, ...wrap(app.ui, ['addPanel', 'addToolbarButton', 'addCommand', 'addStatusItem', 'addEditorButton']) },
       compile: { run: app.compile, last: () => app.lastResult, pageStarts: (file) => app.pageStarts(file) },

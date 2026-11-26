@@ -662,7 +662,7 @@ export default {
     const ICO = { copy: 'M9 9h10v10H9z M5 15V5h10', chev: 'M6 9l6 6 6-6', code: 'M8 7l-5 5 5 5 M16 7l5 5-5 5 M13.500 5l-3 14', hash: 'M5 9h14 M5 15h14 M10 4L8 20 M16 4l-2 16',
       tag: 'M3 11.500V4h7.500L21 14.500 13.500 22z M7.500 7.500h.010', expand: 'M14 4h6v6 M20 4l-7 7 M10 20H4v-6 M4 20l7-7', trash: 'M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13 M10 11v6 M14 11v6',
       more: 'M5 12h.010 M12 12h.010 M19 12h.010', check: 'M5 12.500l4.500 4.500L19 7',
-      dup: 'M8 8h11v11H8z M5 16V5h11 M13.500 11v5 M11 13.500h5', cut: 'M6 20a2.500 2.500 0 1 0 0-5 2.500 2.500 0 0 0 0 5z M18 20a2.500 2.500 0 1 0 0-5 2.500 2.500 0 0 0 0 5z M7.800 15.700 17 4 M16.200 15.700 7 4',
+      dup: 'M8 8h11v11H8z M5 16V5h11 M13.500 11v5 M11 13.500h5', palette: 'M6 18L12 4l6 14M8.500 12.500h7 M4 21h16', strike: 'M5 20L19 4 M8 8l8 8', link: 'M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1 M14 10a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1', listcheck: 'M4 5h16M4 12h10M4 19h7 M14 17.500l2.500 2.500L21 15', cut: 'M6 20a2.500 2.500 0 1 0 0-5 2.500 2.500 0 0 0 0 5z M18 20a2.500 2.500 0 1 0 0-5 2.500 2.500 0 0 0 0 5z M7.800 15.700 17 4 M16.200 15.700 7 4',
       ubrace: 'M3 7c0 3 2 4.500 4.500 4.500h2.500c1.300 0 2 1 2 3 0-2 .700-3 2-3h2.500C19 11.500 21 10 21 7', obrace: 'M3 17c0-3 2-4.500 4.500-4.500h2.500c1.300 0 2-1 2-3 0 2 .700 3 2 3h2.500c2.500 0 4.500 1.500 4.500 4.500',
       frac: 'M9 3h6v5H9z M5 12h14 M9 16h6v5H9z', sqrt: 'M3 13h3l3 7 4-16h8', box: 'M4 6h16v12H4z', slot: 'M7 6h10v12H7z',
       rowAbove: 'M4 13h16v7H4z M12 3v7 M9 6l3-3 3 3', rowBelow: 'M4 4h16v7H4z M12 21v-7 M9 18l3 3 3-3', colLeft: 'M13 4h7v16h-7z M3 12h7 M6 9l-3 3 3 3', colRight: 'M4 4h7v16H4z M21 12h-7 M18 9l3 3-3 3',
@@ -752,6 +752,13 @@ export default {
           fb('ℝ', 'Blackboard bold (\\mathbb), for ℝ, ℕ, 𝔼', wrap('\\mathbb{#0}')),
           fb('𝒜', 'Calligraphic (\\mathcal)', wrap('\\mathcal{#0}')),
           fb('Tt', 'Words inside the equation (\\text)', wrap('\\text{#0}'), 'tt'),
+          fb(h('span', { style: 'font: 700 14px var(--ui)' }, 'B'), 'Bold upright (\\mathbf): vectors and matrices', wrap('\\mathbf{#0}')),
+          fb(h('span', { style: 'font: 14px var(--ui)' }, 'Sf'), 'Sans serif (\\mathsf)', wrap('\\mathsf{#0}')),
+          fb('𝔉', 'Fraktur (\\mathfrak)', wrap('\\mathfrak{#0}')),
+          fb('𝒮', 'Script (\\mathscr): ℒ for a Lagrangian (adds the mathrsfs package)', wrap('\\mathscr{#0}')),
+          sep(),
+          btn(ico('palette'), 'Colour the selection (\\textcolor; adds the xcolor package)', (b2) => ctx.ui.menu(b2, [['red', 'Red'], ['blue', 'Blue'], ['teal', 'Teal'], ['orange', 'Orange'], ['gray', 'Grey']].map(([c, l]) => ({ label: l, onClick: wrap(`\\textcolor{${c}}{#0}`) })))),
+          btn(ico('strike'), 'Strike out (\\cancel), for terms that drop out (adds the cancel package)', wrap('\\cancel{#0}')),
           sep(),
           btn(h('span', { class: 'vz-ib vz-om' }, 'Ω'), 'Insert a symbol: Greek letters, operators, relations, arrows (Ctrl+Shift+S)', (b2) => symbolPop(b2, mf))),
         row(
@@ -779,8 +786,50 @@ export default {
           fb('xₙ', 'Subscript (_)', () => { mf.focus(); mf.executeCommand('moveToSubscript'); }),
           fb('Σ', 'Sum with limits', wrap('\\sum_{#?}^{#?}#0')),
           fb('𝔼', 'Expectation: \\mathbb{E}_t[ … ]', wrap('\\mathbb{E}_{t}\\left[#0\\right]')),
-          fb(ico('slot'), 'An empty box to fill in (replaces the selection)', slot)));
-      return fmtBar;
+          fb(ico('slot'), 'An empty box to fill in (replaces the selection)', slot),
+          sep(),
+          fb(h('span', {}, h('sup', { style: 'font-size: 9px; margin-right: -2px' }, 'n'), '√'), 'n-th root (\\sqrt[n]{…})', wrap('\\sqrt[#?]{#0}')),
+          fb(h('span', {}, h('i', {}, 'x'), '′'), 'Prime: x′ (a derivative, or next period)', wrap("{#0}'")),
+          fb(h('span', {}, h('i', {}, 'x'), h('sup', { style: 'font-size: 10px' }, '−1')), 'Inverse: x⁻¹', wrap('{#0}^{-1}')),
+          fb(h('span', {}, h('i', {}, 'x'), h('sup', { style: 'font-size: 10px' }, '⊤')), 'Transpose: xᵀ (\\top)', wrap('{#0}^{\\top}')),
+          fb(h('span', { class: 'vz-dfrac' }, h('span', {}, 'a'), h('span', {}, 'b')), 'Display-size fraction (\\dfrac), for a fraction inside a line', wrap('\\dfrac{#0}{#?}')),
+          fb(h('span', {}, '(', h('span', { class: 'vz-binom' }, h('span', {}, 'n'), h('span', {}, 'k')), ')'), 'Binomial (\\binom)', wrap('\\binom{#?}{#?}'))));
+      // the second block: recent symbols · time and model (lead, lag, steady state, ln, exp, ∂, max) · structures
+      let recent = []; try { recent = JSON.parse(localStorage.getItem('stx-sym-recent') || '[]'); } catch {}
+      const all = SYM_GROUPS.flatMap(g => g[1]);
+      const recentSyms = [...recent.map(t => all.find(x => x.tex === t)).filter(Boolean), ...['\\beta', '\\sigma', '\\varepsilon', '\\alpha', '\\pi', '\\rho', '\\leq', '\\to'].map(t => all.find(x => x.tex === t)).filter(Boolean)]
+        .filter((x, i, a) => a.findIndex(y => y.tex === x.tex) === i).slice(0, 8);
+      const put = (tex) => () => { mf.focus(); mf.insert(tex + (/^\\[A-Za-z]+$/.test(tex) ? ' ' : ''), { format: 'latex' }); };
+      // lead / lag: every time index of the selection (or of the whole equation) moves by d periods
+      const shiftT = (tex, d) => {
+        const sh = (k) => { const n = k + d; return n === 0 ? 't' : n > 0 ? `t+${n}` : `t-${-n}`; };
+        const inner = (g) => g.replace(/(^|[,\s])t(?:([+-])(\d+))?(?=$|[,\s])/g, (all0, pre, sgn, num) => pre + sh(num ? (sgn === '-' ? -num : +num) : 0));
+        return tex.replace(/_\{([^{}]*)\}/g, (all0, g) => '_{' + inner(g) + '}').replace(/_t(?![A-Za-z])/g, () => d === 0 ? '_t' : `_{${sh(0)}}`);
+      };
+      const onSel = (fn) => () => {
+        const r = range(); mf.focus();
+        if (r[0] !== r[1]) { const t = mf.getValue(r[0], r[1], 'latex'), n = fn(t); if (n !== t) mf.insert(n, { format: 'latex', insertionMode: 'replaceSelection', selectionMode: 'item' }); return; }
+        const t = mf.getValue('latex'), n = fn(t); if (n !== t) { mf.value = n; mf.dispatchEvent(new Event('input', { bubbles: true })); } else ctx.ui.toast('Nothing to change here.');
+      };
+      const fmt2 = h('div', { class: 'vz-fmt-bar vz-fmt-2', role: 'toolbar', 'aria-label': 'More maths' },
+        row(...recentSyms.map(x => fb(x.glyph, 'Insert ' + x.tex + (recent.includes(x.tex) ? ' (recently used)' : ''), put(x.tex))), h('span', { class: 'vz-hint' }, 'recent')),
+        row(
+          fb(h('span', {}, h('i', {}, 'x'), h('sub', { style: 'font-size: 9px' }, 't+1')), 'Lead: every time index of the selection (or the whole equation) one period ahead', onSel((t) => shiftT(t, 1))),
+          fb(h('span', {}, h('i', {}, 'x'), h('sub', { style: 'font-size: 9px' }, 't−1')), 'Lag: every time index one period back', onSel((t) => shiftT(t, -1))),
+          fb(h('span', { class: 'vz-acc', 'data-acc': '¯' }, 'x'), 'Steady state: drop the time index and put a bar (one letter) or an overline (longer names) on it; E_t goes', onSel((t) => steadyState(t, { mark: 'auto', shocks: 'keep', multi: modelState.result?.multi || [] }))),
+          sep(),
+          fb('ln', 'Natural log (\\ln)', wrap('\\ln\\left(#0\\right)')),
+          fb('exp', 'Exponential (\\exp)', wrap('\\exp\\left(#0\\right)')),
+          fb('∂', 'Partial derivative ∂f/∂x', wrap('\\frac{\\partial #0}{\\partial #?}')),
+          fb('max', 'Maximum over something (\\max_{…})', wrap('\\max_{#?} #0'))),
+        row(
+          fb(h('span', { style: 'font-size: 12px' }, '[⋮⋮]'), 'Matrix, 2 × 2 (Tab moves to the next cell)', wrap('\\begin{pmatrix}#0 & #?\\\\ #? & #?\\end{pmatrix}')),
+          fb(h('span', { style: 'font-size: 13px' }, '{⋮'), 'Cases: a definition in parts', wrap('\\begin{cases}#0 & \\text{if } #?\\\\ #? & \\text{otherwise}\\end{cases}')),
+          fb('∫', 'Integral with limits', wrap('\\int_{#?}^{#?} #0 \\, d#?')),
+          fb('∏', 'Product with limits', wrap('\\prod_{#?}^{#?}#0')),
+          fb('lim', 'Limit', wrap('\\lim_{#? \\to #?} #0')),
+          fb('⋰', 'Two lines under a sum or max (\\substack)', wrap('\\substack{#0\\\\ #?}'))));
+      return h('div', { class: 'vz-fmt-wrap' }, fmtBar, fmt2);
     }
     function symbolPop(anchor, mfArg) {
       const mf = mfArg || session?.mf; if (!mf) return;
@@ -848,14 +897,46 @@ export default {
         btn(ico('more'), 'More: LaTeX, full editor, box, steady state, make it fit the page, delete…', (b) => moreMenu(b)),
         btn(ico('check'), 'Done (Esc)', () => finishEdit(true), 'primary'));
       const fmtBar = buildFmtBar(mf, btn);
-      const el = h(display ? 'div' : 'span', { class: display ? 'vz-edit' : 'vz-edit vz-edit-i' }, mf, tag, ...(display ? [h('div', { class: 'vz-edit-head' }, bar), fmtBar] : [fmtBar, bar]));
+      // what this equation is, beside the top bar: number · label · how often it is referred to · in the model
+      const idChips = display ? h('span', { class: 'vz-idchips' }) : null;
+      const drawIds = () => {
+        if (!idChips) return;
+        const x = itemNow(); if (!x) return;
+        const label = ((x.body || '').match(/\\label\{([^}]*)\}/) || [])[1];
+        const chip = (content, title, fn, cls = '') => h('button', { class: 'vz-idchip ' + cls, title, 'aria-label': title, onMousedown: (e) => { e.preventDefault(); e.stopPropagation(); fn(e.currentTarget); } }, ...content);
+        const kids = [];
+        if (nums.length) kids.push(chip([ico('hash', 13), nums.length > 1 ? `${nums[0]}–${nums[nums.length - 1]}` : String(nums[0])], `Equation ${nums.join(', ')}: show it in the PDF`, () => { finishEdit(false); view.dispatch({ selection: { anchor: x.from } }); ctx.ui.runCommand('core.showInPdf'); }));
+        kids.push(label ? chip([ico('tag', 13), h('span', { class: 'vz-idlab' }, label)], `Label ${label}: click to rename it (every reference follows)`, () => editLabel(x, label), 'lab')
+          : chip([ico('tag', 13), '+'], 'No label yet: add one, so you can refer to it with \\eqref', () => editLabel(x, undefined), 'nolab'));
+        if (label) {
+          const refs = [];
+          for (const f of ctx.project.files().filter(f => /\.tex$/i.test(f))) {
+            const t = f === ctx.editor.path ? view.state.doc.toString() : (ctx.project.read(f) || '');
+            for (const m of t.matchAll(/\\[a-zA-Z]*ref\*?\s*\{([^}]*)\}/g)) if (m[1].split(',').map(k => k.trim()).includes(label)) {
+              const ln = t.slice(0, m.index).split('\n').length, lt = t.split('\n')[ln - 1] || '';
+              refs.push({ f, ln, snip: lt.trim().slice(0, 70) });
+            }
+          }
+          kids.push(chip([ico('link', 13), String(refs.length)], refs.length ? `Referred to ${refs.length} time${refs.length > 1 ? 's' : ''}: click to go there` : 'Not referred to yet', (b) => {
+            if (!refs.length) return ctx.ui.toast(`Nothing refers to ${label} yet. Copy \\eqref{${label}} from Copy ▾ to refer to it.`);
+            ctx.ui.menu(b, [{ heading: `References to ${label}` }, ...refs.map(r => ({ label: r.snip || '(empty line)', hint: `${r.f === ctx.editor.path ? '' : r.f + ' '}line ${r.ln}`, onClick: () => { finishEdit(false); if (r.f !== ctx.editor.path) ctx.project.open(r.f); setTimeout(() => ctx.editor.gotoLine(r.ln), 30); } }))]);
+          }, refs.length ? '' : 'zero'));
+        }
+        const mc = mcFor(view.state, x);
+        if (mc) kids.push(chip([ico('listcheck', 14)], mc.status === 'in' ? 'In the model check: click to leave it out' : mc.status === 'part' ? 'Partly in the model check: click to put all of it in' : 'Not in the model check: click to put it in', () => { finishEdit(false); setModel(view, x, mc); }, 'mc-' + mc.status));
+        idChips.replaceChildren(...kids);
+      };
+      const el = h(display ? 'div' : 'span', { class: display ? 'vz-edit' : 'vz-edit vz-edit-i' }, mf, tag, ...(display ? [h('div', { class: 'vz-edit-head' }, idChips, bar), fmtBar] : [fmtBar, bar]));
       const sess = session = { el, mf, model, view, base: null, orig: model.body };
+      requestAnimationFrame(() => { try { drawIds(); } catch (e) { console.warn(e); } });
       // both bars stay inside the editor, whatever the window width: shifted sideways if needed, and the format
       // bar's rows wrap when even that is not enough
       const keepIn = () => {
         if (!el.isConnected) { removeEventListener('resize', keepIn); ro2.disconnect(); return; }
         const sd = view.scrollDOM, box = sd.getBoundingClientRect(), minL = box.left + 4, maxR = box.left + sd.clientWidth - 4;
         fmtBar.style.maxWidth = Math.max(160, maxR - minL) + 'px';
+        // the head (chips and top bar) may wrap onto two lines in a narrow column: the field moves down to make room
+        const head = el.querySelector('.vz-edit-head'); if (head) el.style.paddingTop = Math.max(28, head.offsetHeight + 6) + 'px';
         for (const b of [bar, fmtBar]) {
           b.style.transform = '';
           const r = b.getBoundingClientRect(); let dx = 0;
@@ -2606,13 +2687,23 @@ export default {
 .vz-edit-head { position: absolute; left: 0; right: 0; top: 2px; display: flex; align-items: center; gap: 8px; z-index: 3; pointer-events: none; }
 .vz-edit-head > * { pointer-events: auto; }
 .vz-edit-head .vz-edit-bar { position: static; flex: none; margin-left: auto; }
+.vz-idchips { display: inline-flex; flex-wrap: wrap; gap: 4px; min-width: 0; flex: 0 1 auto; }
+.vz-edit-head { flex-wrap: wrap; row-gap: 4px; }
+.vz-idchip { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 7px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--muted); font: 12px var(--ui); cursor: pointer; }
+.vz-idchip:hover { color: var(--ink); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.vz-idchip.lab .vz-idlab { font: 11.5px var(--mono, monospace); color: var(--ink); max-width: 16em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vz-idchip.nolab, .vz-idchip.zero { opacity: .75; }
+.vz-idchip.mc-in { color: #1f7a3f; border-color: color-mix(in srgb, #1f7a3f 40%, var(--line)); }
+.vz-idchip.mc-part { color: #a06a12; }
 .vz-edit-bar, .vz-fmt-bar { gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); box-shadow: 0 2px 8px rgb(0 0 0 / 8%); }
 .vz-edit-bar button, .vz-fmt-bar button { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 22px; padding: 0 4px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); cursor: pointer; }
 .vz-edit-bar button:hover, .vz-fmt-bar button:hover { background: var(--accent-soft, #e8eefc); color: var(--ink); }
 .vz-edit-bar button.primary { background: var(--accent); color: #fff; padding: 0 6px; } .vz-edit-bar button.primary:hover { background: var(--accent); filter: brightness(1.08); color: #fff; }
 .vz-edit-bar button.vz-danger:hover { background: color-mix(in srgb, #d33 14%, transparent); color: #c22; }
 .vz-ib { display: inline-flex; align-items: center; gap: 1px; } .vz-om { font: 600 14px var(--serif, serif); }
-.vz-fmt-bar { position: absolute; left: 0; top: calc(100% - 4px); z-index: 4; display: flex; flex-direction: column; align-items: stretch; gap: 1px; width: max-content; max-width: 100%; box-sizing: border-box; }
+.vz-fmt-wrap { position: absolute; left: 0; top: calc(100% - 4px); z-index: 4; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px; width: max-content; max-width: 100%; box-sizing: border-box; }
+.vz-fmt-bar { display: flex; flex-direction: column; align-items: stretch; gap: 1px; box-sizing: border-box; }
+.vz-dfrac, .vz-binom { display: inline-flex; flex-direction: column; line-height: 1; font-size: 12px; vertical-align: middle; } .vz-dfrac > span + span { border-top: 1.4px solid currentColor; padding: 0 2px; } .vz-dfrac { font-weight: 600; } .vz-binom { font-size: 10px; }
 .vz-frow { display: flex; flex-wrap: wrap; align-items: center; gap: 1px; }
 .vz-frow + .vz-frow { border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent); padding-top: 1px; }
 .vz-fb.flip { font: 15px/1 var(--ui); }
@@ -2623,8 +2714,8 @@ export default {
 .vz-bsep { display: inline-block; width: 1px; height: 16px; min-width: 0; padding: 0; margin: 0 3px; background: var(--line); flex: none; }
 
 .vz-hint { font: 11px var(--ui); color: var(--muted); padding: 0 6px; white-space: nowrap; }
-.vz-edit-i .vz-fmt-bar { top: calc(100% + 3px); max-width: none; }
-.vz-edit-bar, .vz-fmt-bar { will-change: transform; }
+.vz-edit-i .vz-fmt-wrap { top: calc(100% + 3px); max-width: none; }
+.vz-edit-bar, .vz-fmt-wrap { will-change: transform; }
 .vz-edit-i .vz-hint { display: none; }
 .vz-sym { position: fixed; z-index: 1000; width: 320px; display: flex; flex-direction: column; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 8px 28px rgb(0 0 0 / 18%); overflow: hidden; }
 .vz-sym-q { margin: 8px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); font: 13px var(--ui); }
@@ -2704,7 +2795,7 @@ export default {
 .vz-cblock-w { display: flow-root; }
 .vz-tabbar .vz-ssbtn { font: italic 15px var(--serif, serif); color: var(--ink); } .vz-sssub { font: 600 9px var(--ui); margin-left: 1px; align-self: flex-end; margin-bottom: 3px; }
 .vz-cellbar { position: fixed; z-index: 960; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; max-width: min(620px, calc(100vw - 16px)); }
-.vz-cellbar .vz-fmt-bar { position: static; max-width: none; }
+.vz-cellbar .vz-fmt-wrap { position: static; max-width: none; }
 .vz-cellbar-end { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); box-shadow: 0 2px 8px rgb(0 0 0 / 8%); }
 .vz-cellbar-end button { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 22px; padding: 0 4px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); cursor: pointer; }
 .vz-cellbar-end button:hover { background: var(--accent-soft, #e8eefc); color: var(--ink); } .vz-cellbar-end button.primary { background: var(--accent); color: #fff; }

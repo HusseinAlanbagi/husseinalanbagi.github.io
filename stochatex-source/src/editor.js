@@ -1,5 +1,5 @@
 // The source editor (CodeMirror 6).
-import { EditorState, Compartment, EditorSelection, StateEffect, StateField, Prec, RangeSetBuilder } from '@codemirror/state';
+import { EditorState, Compartment, EditorSelection, StateEffect, StateField, Prec, RangeSetBuilder, Annotation, Transaction } from '@codemirror/state';
 import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLineGutter, drawSelection, dropCursor, highlightSpecialChars, rectangularSelection, Decoration, ViewPlugin, WidgetType, hoverTooltip, showTooltip } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap, indentWithTab, toggleComment, undo } from '@codemirror/commands';
 import { StreamLanguage, syntaxHighlighting, HighlightStyle, bracketMatching, indentOnInput, foldGutter, foldKeymap, indentUnit } from '@codemirror/language';
@@ -44,6 +44,17 @@ export function createEditor(parent, { onChange, onCursor, find }) {
   const roExt = () => ro ? [EditorState.readOnly.of(true), EditorState.transactionFilter.of(tr => tr.docChanged ? [] : tr)] : [];
   const sources = new Set();           // completion sources registered by modules
   let moduleExts = [], view, suppress = false;
+  // split screen: extra panes, each with its own file and scroll. A pane on the same file as the main editor
+  // shares its text: every change is copied across (syncAnn marks the copies so they are not copied back).
+  const owners = new Map();            // module extension -> the module that added it
+  const panes = new Set();
+  const syncAnn = Annotation.define();
+  const paneExts = (pane) => pane.code ? moduleExts.filter(e => owners.get(e) !== 'visual-mode') : moduleExts;
+  const copyTo = (target, trs) => {
+    for (const tr of trs) if (tr.docChanged && !tr.annotation(syncAnn)) {
+      try { target.dispatch({ changes: tr.changes, annotations: [syncAnn.of(true), Transaction.addToHistory.of(false)] }); } catch (e) { console.warn('split sync', e); }
+    }
+  };
   const states = new Map();            // path -> EditorState
   const snaps = new Map();             // path -> scroll position when the file was left (a CodeMirror scroll snapshot)
   let current = null;
@@ -61,7 +72,7 @@ export function createEditor(parent, { onChange, onCursor, find }) {
     update(v, tr) { v = v.map(tr.changes); for (const e of tr.effects) if (e.is(flashEffect)) v = e.value == null ? Decoration.none : Decoration.set([Decoration.line({ class: 'cm-flash' }).range(e.value)]); return v; },
     provide: f => EditorView.decorations.from(f),
   });
-  const base = (path) => [
+  const base = (path, pane = null) => [
     lineNumbers(), highlightActiveLineGutter(), highlightSpecialChars(), history(), drawSelection(), dropCursor(),
     EditorState.allowMultipleSelections.of(true), indentOnInput(), bracketMatching(), closeBrackets(), rectangularSelection(),
     highlightActiveLine(), highlightSelectionMatches(), fb.extension, lintGutter(), flashField,
@@ -71,15 +82,17 @@ export function createEditor(parent, { onChange, onCursor, find }) {
     wrapComp.of(EditorView.lineWrapping),
     langComp.of(/\.(tex|sty|cls|ltx|tikz|bbl|def|clo)$/i.test(path) ? StreamLanguage.define(stex) : []),
     EditorState.languageData.of(() => [{ commentTokens: { line: '%' } }]),
-    moduleComp.of(moduleExts), roComp.of(roExt()),
-    EditorView.updateListener.of((u) => {
+    moduleComp.of(pane ? paneExts(pane) : moduleExts), roComp.of(roExt()),
+    pane ? EditorView.updateListener.of((u) => pane.onUpdate(u)) : EditorView.updateListener.of((u) => {
       if (u.docChanged && !suppress) onChange && onChange(current, u.state.doc.toString(), u);
       if (u.selectionSet || u.docChanged) onCursor && onCursor(u.state);
     }),
   ];
-  view = new EditorView({ parent, state: EditorState.create({ doc: '', extensions: base('x.tex') }) });
+  view = new EditorView({ parent, state: EditorState.create({ doc: '', extensions: base('x.tex') }),
+    dispatchTransactions: (trs, v) => { v.update(trs); if (!suppress) for (const p of panes) if (p.path === current) copyTo(p.view, trs); } });
   new ResizeObserver(() => view.requestMeasure()).observe(parent);
 
+  function refreshPanes() { for (const p of panes) try { p.view.dispatch({ effects: moduleComp.reconfigure(paneExts(p)) }); } catch {} }
   const api = {
     view, cm,
     get path() { return current; },
@@ -92,6 +105,7 @@ export function createEditor(parent, { onChange, onCursor, find }) {
       // coming back to a file: the same place on screen as when you left it (not the top)
       const snap = same && snaps.get(path); if (snap) { try { view.dispatch({ effects: snap }); } catch {} }
       onCursor && onCursor(view.state); view.requestMeasure();
+      for (const p of panes) if (p.path === path) p.adopt();
     },
     forget(path) { states.delete(path); snaps.delete(path); if (current === path) current = null; },
     rename(from, to) { if (states.has(from)) { states.set(to, states.get(from)); states.delete(from); } if (snaps.has(from)) { snaps.set(to, snaps.get(from)); snaps.delete(from); } if (current === from) current = to; },
@@ -116,13 +130,44 @@ export function createEditor(parent, { onChange, onCursor, find }) {
       view.dispatch(setDiagnostics(view.state, diags));
     },
     addCompletionSource(fn) { sources.add(fn); return () => sources.delete(fn); },
-    addExtension(ext) {
-      moduleExts = [...moduleExts, ext];
-      view.dispatch({ effects: moduleComp.reconfigure(moduleExts) });
-      return () => { moduleExts = moduleExts.filter(e => e !== ext); view.dispatch({ effects: moduleComp.reconfigure(moduleExts) }); };
+    addExtension(ext, owner) {
+      moduleExts = [...moduleExts, ext]; if (owner) owners.set(ext, owner);
+      view.dispatch({ effects: moduleComp.reconfigure(moduleExts) }); refreshPanes();
+      return () => { moduleExts = moduleExts.filter(e => e !== ext); owners.delete(ext); view.dispatch({ effects: moduleComp.reconfigure(moduleExts) }); refreshPanes(); };
     },
+    // a second pane (split screen). onChange(path, text) is called for edits in a file the main editor does not show
+    // (the main editor's own edits and a shared file go through the usual path).
+    createPane(parentEl, { onChange: paneChange, onFocus } = {}) {
+      const pane = {
+        path: null, code: false, view: null,
+        onUpdate(u) {
+          if (!u.docChanged || u.transactions.every(tr => tr.annotation(syncAnn))) return;
+          if (pane.path === current) return;            // shared with the main editor: it saves
+          paneChange && paneChange(pane.path, u.state.doc.toString());
+        },
+        open(path, text) {
+          pane.path = path;
+          const doc = path === current ? view.state.doc.toString() : text;
+          pane.view.setState(EditorState.create({ doc, extensions: base(path, pane) }));
+          pane.view.dispatch({ effects: [moduleComp.reconfigure(paneExts(pane)), roComp.reconfigure(roExt())] });
+        },
+        // the main editor now shows this pane's file: take its text so both start the same
+        adopt() { const t = view.state.doc.toString(); if (pane.view.state.doc.toString() !== t) pane.view.dispatch({ changes: { from: 0, to: pane.view.state.doc.length, insert: t }, annotations: [syncAnn.of(true), Transaction.addToHistory.of(false)] }); },
+        // another part of the app changed this file (not through either editor)
+        fileChanged(path, text) { if (pane.path === path && path !== current && pane.view.state.doc.toString() !== text) pane.view.dispatch({ changes: { from: 0, to: pane.view.state.doc.length, insert: text }, annotations: [syncAnn.of(true)] }); },
+        setCode(on) { pane.code = !!on; pane.view.dispatch({ effects: moduleComp.reconfigure(paneExts(pane)) }); },
+        destroy() { panes.delete(pane); pane.view.destroy(); },
+      };
+      pane.view = new EditorView({ parent: parentEl, state: EditorState.create({ doc: '', extensions: base('x.tex', pane) }),
+        dispatchTransactions: (trs, v) => { v.update(trs); if (pane.path === current) copyTo(view, trs); } });
+      pane.view.contentDOM.addEventListener('focus', () => onFocus && onFocus(pane));
+      new ResizeObserver(() => pane.view.requestMeasure()).observe(parentEl);
+      panes.add(pane);
+      return pane;
+    },
+    get panes() { return [...panes]; },
     addKeymap(bindings) { return api.addExtension(Prec.high(keymap.of(bindings))); },
-    setReadOnly(on) { ro = !!on; view.dispatch({ effects: roComp.reconfigure(roExt()) }); view.dom.classList.toggle('cm-ro', ro); },
+    setReadOnly(on) { ro = !!on; view.dispatch({ effects: roComp.reconfigure(roExt()) }); view.dom.classList.toggle('cm-ro', ro); for (const p of panes) p.view.dispatch({ effects: roComp.reconfigure(roExt()) }); },
     get readOnly() { return ro; },
     setWrap(on) { view.dispatch({ effects: wrapComp.reconfigure(on ? EditorView.lineWrapping : []) }); },
     toggleComment: () => toggleComment(view),

@@ -133,7 +133,7 @@ function replaceFiles(fresh) {
   const old = project.files;
   for (const k of new Set([...Object.keys(old), ...Object.keys(fresh.files)])) {
     const a = old[k], b = fresh.files[k];
-    if (!a || !b || a.t !== b.t || a.b !== b.b) editor.forget(k);
+    if (!a || !b || a.t !== b.t || a.b !== b.b) { editor.forget(k); if (b && b.t != null) split.fileChanged(k, b.t); }
   }
   Object.assign(project, { files: fresh.files, main: fresh.main, name: fresh.name, engine: fresh.engine, rev: fresh.rev });
   if (active && project.files[active]) {
@@ -178,7 +178,7 @@ const hist = createHistory({
   canWrite: () => !readOnly,
   restoreFiles(files) {
     if (readOnly) return toast('This tab is read-only: restore from the tab that edits the project.', 'err');
-    for (const [k, t] of Object.entries(files)) if (t != null) { project.files[k] = { t }; if (k !== active) editor.forget(k); }
+    for (const [k, t] of Object.entries(files)) if (t != null) { project.files[k] = { t }; if (k !== active) editor.forget(k); split.fileChanged(k, t); }
     if (active && files[active] != null) { const v = editor.view, top = v.scrollDOM.scrollTop; editor.open(active, files[active]); requestAnimationFrame(() => { v.scrollDOM.scrollTop = top; }); }
     save(); renderTree(); events.emit('files'); for (const k of Object.keys(files)) events.emit('change', k, files[k]); scheduleCompile();
   },
@@ -230,6 +230,7 @@ const projectApi = {
     project.files[p] = typeof content === 'string' ? { t: content } : { b: content };
     if (p === active && typeof content === 'string' && editor.getText() !== content) { const pos = editor.getCursor().pos; editor.open(p, content); editor.setPos(Math.min(pos, content.length)); }
     else if (p !== active) editor.forget(p);
+    if (typeof content === 'string') split.fileChanged(p, content);
     save(); if (isNew) { renderTree(); events.emit('files'); }
     events.emit('change', p, content); scheduleCompile();
     if (open) openFile(p);
@@ -682,6 +683,7 @@ async function loadProject(p) {
   openFile(p.lastOpen && p.files[p.lastOpen] ? p.lastOpen : mainFile() || projectApi.files()[0]);
   events.emit('project'); events.emit('files'); refreshMainUI(); setTimeout(askMainOnce, 800);
   setReadOnly(!mine); if (!mine) tabs.wait(p.id, becomeEditor);
+  try { split.restore(); } catch (e) { console.warn(e); }
   scheduleCompile(0);
   if (mine) await folderConnect();
 }
@@ -1154,7 +1156,8 @@ addEventListener('keydown', (e) => {
   else if (mod && e.shiftKey && e.key.toLowerCase() === 'p') { e.preventDefault(); palette(); }
   else if (mod && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'k') { e.preventDefault(); quickSearch(); }
   else if (mod && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'j') { e.preventDefault(); showInPdf(); }
-  else if (mod && !e.shiftKey && e.key === '\\') { e.preventDefault(); setSide(document.body.classList.contains('side-off')); }
+  else if (mod && e.altKey && !e.shiftKey && (e.key === '\\' || e.code === 'Backslash')) { e.preventDefault(); split.toggle(); }
+  else if (mod && !e.shiftKey && !e.altKey && e.key === '\\') { e.preventDefault(); setSide(document.body.classList.contains('side-off')); }
   else if (mod && e.shiftKey && e.key.toLowerCase() === 'h') { e.preventDefault(); setPdfMode(pdfMode === 'side' ? 'hidden' : 'side'); }
 }, true);
 const tree = $('side');
@@ -1171,6 +1174,81 @@ ui.addCommand({ id: 'quick.findall', name: 'Find in all files of the project', r
 ui.addCommand({ id: 'quick.insert', name: 'Insert: figure, table, citation, cross-reference, footnote', run: () => insertMenu() });
 ui.addCommand({ id: 'quick.snippets', name: 'Snippets: insert a ready-made block', run: () => { const b = [...document.querySelectorAll('#toolbar button')].find(x => /Snippets/i.test(x.title || x.textContent)); b ? b.click() : quickSearch('snippet'); } });
 ui.addCommand({ id: 'project.duplicate', name: 'Project: duplicate this project', run: () => duplicateProject() });
+// ---------------------------------------------------------------- split screen
+// A second editor beside the first (or under it): the same file (both stay in step as you type) or another one,
+// each with its own scroll and cursor; the second can show LaTeX while the first shows the Visual view.
+// Remembered per project: open or not, which file, side by side or one above the other, the split position.
+const split = (() => {
+  let pane = null, box = null, row = null, sel = null, codeBtn = null, dirBtn = null;
+  const key = () => 'split:' + (project?.id || '');
+  const saveSt = () => { if (!project) return; prefs.set(key(), pane ? { on: true, path: pane.path, code: pane.code, rows: row.classList.contains('rows'), frac: parseFloat(row.style.getPropertyValue('--ed2') || '50') } : { on: false }); };
+  function ensureRow() {
+    if (row) return;
+    row = h('div', { id: 'edrow' }); $('ed').before(row); row.append($('ed'));
+  }
+  function fill() {
+    const files = projectApi.files().filter(f => project.files[f].t != null);
+    sel.replaceChildren(...files.map(f => h('option', { value: f, selected: f === pane.path }, f)));
+  }
+  function show(path) {
+    if (!project.files[path] || project.files[path].t == null) path = active && project.files[active]?.t != null ? active : projectApi.files().find(f => project.files[f].t != null);
+    if (!path) return;
+    pane.open(path, project.files[path].t); fill(); saveSt();
+    box.classList.toggle('same', path === active);
+    box.title = path === active ? 'The same file as on the left: both follow what you type' : '';
+  }
+  function open(st = {}) {
+    if (pane) return;
+    ensureRow();
+    sel = h('select', { class: 'ed2-file', 'aria-label': 'File in the second pane', onChange: (e) => show(e.target.value) });
+    codeBtn = h('button', { class: 'ghost small ed2-code', 'aria-pressed': 'false', title: 'Show this pane as LaTeX (the other keeps the Visual view)', onClick: () => { pane.setCode(!pane.code); codeBtn.setAttribute('aria-pressed', String(pane.code)); codeBtn.classList.toggle('on', pane.code); saveSt(); } }, 'LaTeX');
+    dirBtn = h('button', { class: 'ghost icon-only', title: 'Side by side, or one above the other', 'aria-label': 'Side by side, or one above the other', onClick: () => { row.classList.toggle('rows'); dirBtn.replaceChildren(icon(row.classList.contains('rows') ? 'split' : 'splitrows')); saveSt(); } }, icon('splitrows'));
+    const body = h('div', { class: 'ed2-body' });
+    const grip = h('div', { class: 'ed2-grip', role: 'separator', title: 'Drag to resize' });
+    box = h('div', { class: 'ed2' }, h('div', { class: 'bar ed2-bar' }, icon('split', 14), sel, h('span', { class: 'spacer' }), codeBtn, dirBtn,
+      h('button', { class: 'ghost icon-only', title: 'Close the second pane (Ctrl+Alt+\\)', 'aria-label': 'Close the second pane', onClick: () => close() }, icon('close'))), body);
+    row.append(grip, box);
+    // drag the divider: the second pane's share of the row, 20–80 %
+    grip.addEventListener('pointerdown', (e) => {
+      e.preventDefault(); grip.setPointerCapture(e.pointerId); document.body.classList.add('dragging');
+      const r = row.getBoundingClientRect(), vert = row.classList.contains('rows');
+      const mv = (ev) => { const f = vert ? (r.bottom - ev.clientY) / r.height : (r.right - ev.clientX) / r.width; row.style.setProperty('--ed2', Math.max(20, Math.min(80, f * 100)).toFixed(1)); };
+      const up = () => { grip.removeEventListener('pointermove', mv); grip.removeEventListener('pointerup', up); document.body.classList.remove('dragging'); saveSt(); };
+      grip.addEventListener('pointermove', mv); grip.addEventListener('pointerup', up);
+    });
+    pane = editor.createPane(body, {
+      onChange(path, text) {
+        if (readOnly || !project.files[path]) return;
+        project.files[path] = { t: text }; editor.forget(path); save(); events.emit('change', path, text); scheduleCompile(); freshnessSoon();
+      },
+    });
+    if (st.rows) { row.classList.add('rows'); dirBtn.replaceChildren(icon('split')); }
+    if (st.frac) row.style.setProperty('--ed2', st.frac);
+    show(st.path || active);
+    if (st.code) codeBtn.click();
+    $('splitBtn')?.classList.add('on'); $('splitBtn')?.setAttribute('aria-pressed', 'true');
+    saveSt();
+  }
+  function close() {
+    if (!pane) return;
+    pane.destroy(); pane = null; box.previousElementSibling?.remove(); box.remove(); box = null;
+    $('splitBtn')?.classList.remove('on'); $('splitBtn')?.setAttribute('aria-pressed', 'false');
+    saveSt(); editor.focus();
+  }
+  events.on('files', () => { if (pane) { if (!project.files[pane.path]) show(active); else fill(); } });
+  events.on('open', () => { if (box) box.classList.toggle('same', pane.path === active); });
+  return {
+    toggle: () => pane ? close() : open({}),
+    restore() { if (pane) close(); const st = prefs.get(key(), null); if (st && st.on) open(st); },
+    fileChanged: (path, text) => pane && pane.fileChanged(path, text),
+    get pane() { return pane; },
+  };
+})();
+{
+  const b = h('button', { id: 'splitBtn', class: 'ghost icon-only', title: 'Split screen: a second pane with this file or another one (Ctrl+Alt+\\)', 'aria-label': 'Split screen', 'aria-pressed': 'false', onClick: () => split.toggle() }, icon('split'));
+  $('syncBtn').before(b);
+}
+ui.addCommand({ id: 'view.split', name: 'Split screen: open or close a second editor pane', key: 'Mod+Alt+\\', run: () => split.toggle() });
 ui.addCommand({ id: 'project.history', name: 'Version history: compare and restore earlier versions', key: 'Mod+Alt+H', run: () => hist.open() });
 ui.addCommand({ id: 'project.saveVersion', name: 'Save a version (a named snapshot)…', run: () => readOnly ? toast('This tab is read-only.', 'err') : hist.name() });
 ui.addCommand({ id: 'quick.search', name: 'Search or run (files, sections, labels, citations, commands)', key: 'Mod+K', run: () => quickSearch() });
