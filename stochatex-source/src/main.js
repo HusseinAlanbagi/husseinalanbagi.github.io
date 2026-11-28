@@ -1179,9 +1179,18 @@ ui.addCommand({ id: 'project.duplicate', name: 'Project: duplicate this project'
 // each with its own scroll and cursor; the second can show LaTeX while the first shows the Visual view.
 // Remembered per project: open or not, which file, side by side or one above the other, the split position.
 const split = (() => {
-  let pane = null, box = null, row = null, sel = null, codeBtn = null, dirBtn = null;
+  let pane = null, box = null, row = null, sel = null, codeBtn = null, dirBtn = null, lockBtn = null;
+  // the second pane is read-only until unlocked: it shows another place in the paper without risk
+  function setLock(on) {
+    pane.setLocked(on);
+    lockBtn.replaceChildren(icon(on ? 'lock' : 'unlock'));
+    lockBtn.title = on ? 'Read-only: click to allow editing in this pane' : 'Editing allowed: click to make this pane read-only again';
+    lockBtn.setAttribute('aria-label', on ? 'Allow editing in this pane' : 'Make this pane read-only');
+    lockBtn.setAttribute('aria-pressed', String(on));
+    box.classList.toggle('unlocked', !on); saveSt();
+  }
   const key = () => 'split:' + (project?.id || '');
-  const saveSt = () => { if (!project) return; prefs.set(key(), pane ? { on: true, path: pane.path, code: pane.code, rows: row.classList.contains('rows'), frac: parseFloat(row.style.getPropertyValue('--ed2') || '50') } : { on: false }); };
+  const saveSt = () => { if (!project) return; prefs.set(key(), pane ? { on: true, path: pane.path, code: pane.code, locked: pane.locked, rows: row.classList.contains('rows'), frac: parseFloat(row.style.getPropertyValue('--ed2') || '50') } : { on: false }); };
   function ensureRow() {
     if (row) return;
     row = h('div', { id: 'edrow' }); $('ed').before(row); row.append($('ed'));
@@ -1202,10 +1211,11 @@ const split = (() => {
     ensureRow();
     sel = h('select', { class: 'ed2-file', 'aria-label': 'File in the second pane', onChange: (e) => show(e.target.value) });
     codeBtn = h('button', { class: 'ghost small ed2-code', 'aria-pressed': 'false', title: 'Show this pane as LaTeX (the other keeps the Visual view)', onClick: () => { pane.setCode(!pane.code); codeBtn.setAttribute('aria-pressed', String(pane.code)); codeBtn.classList.toggle('on', pane.code); saveSt(); } }, 'LaTeX');
+    lockBtn = h('button', { class: 'ghost icon-only ed2-lock', title: 'Read-only: click to allow editing in this pane', 'aria-label': 'Allow editing in this pane', 'aria-pressed': 'true', onClick: () => setLock(!pane.locked) }, icon('lock'));
     dirBtn = h('button', { class: 'ghost icon-only', title: 'Side by side, or one above the other', 'aria-label': 'Side by side, or one above the other', onClick: () => { row.classList.toggle('rows'); dirBtn.replaceChildren(icon(row.classList.contains('rows') ? 'split' : 'splitrows')); saveSt(); } }, icon('splitrows'));
     const body = h('div', { class: 'ed2-body' });
     const grip = h('div', { class: 'ed2-grip', role: 'separator', title: 'Drag to resize' });
-    box = h('div', { class: 'ed2' }, h('div', { class: 'bar ed2-bar' }, icon('split', 14), sel, h('span', { class: 'spacer' }), codeBtn, dirBtn,
+    box = h('div', { class: 'ed2' }, h('div', { class: 'bar ed2-bar' }, icon('split', 14), sel, h('span', { class: 'spacer' }), lockBtn, codeBtn, dirBtn,
       h('button', { class: 'ghost icon-only', title: 'Close the second pane (Ctrl+Alt+\\)', 'aria-label': 'Close the second pane', onClick: () => close() }, icon('close'))), body);
     row.append(grip, box);
     // drag the divider: the second pane's share of the row, 20–80 %
@@ -1226,6 +1236,7 @@ const split = (() => {
     if (st.frac) row.style.setProperty('--ed2', st.frac);
     show(st.path || active);
     if (st.code) codeBtn.click();
+    setLock(st.locked !== false);
     $('splitBtn')?.classList.add('on'); $('splitBtn')?.setAttribute('aria-pressed', 'true');
     saveSt();
   }

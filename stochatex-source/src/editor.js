@@ -1,5 +1,5 @@
 // The source editor (CodeMirror 6).
-import { EditorState, Compartment, EditorSelection, StateEffect, StateField, Prec, RangeSetBuilder, Annotation, Transaction } from '@codemirror/state';
+import { EditorState, Compartment, EditorSelection, StateEffect, StateField, Prec, RangeSetBuilder, Annotation, Transaction, Facet } from '@codemirror/state';
 import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLineGutter, drawSelection, dropCursor, highlightSpecialChars, rectangularSelection, Decoration, ViewPlugin, WidgetType, hoverTooltip, showTooltip } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap, indentWithTab, toggleComment, undo } from '@codemirror/commands';
 import { StreamLanguage, syntaxHighlighting, HighlightStyle, bracketMatching, indentOnInput, foldGutter, foldKeymap, indentUnit } from '@codemirror/language';
@@ -11,7 +11,10 @@ import { stex } from '@codemirror/legacy-modes/mode/stex';
 import { tags as t } from '@lezer/highlight';
 
 // Everything modules may need from CodeMirror, so they never have to bundle their own copy.
-export const cm = { undo, EditorState, Compartment, EditorSelection, StateEffect, StateField, Prec, RangeSetBuilder, EditorView, keymap, Decoration, ViewPlugin, WidgetType, hoverTooltip, showTooltip, snippet, snippetCompletion, startCompletion, setDiagnostics, openSearchPanel };
+// which editor a state belongs to: 'main', or 'pane' for the split screen's second pane (modules that keep one
+// editing session, such as a table being edited, draw it only in the editor where it was opened)
+const viewId = Facet.define({ combine: (v) => v[0] || 'main' });
+export const cm = { viewId, undo, EditorState, Compartment, EditorSelection, StateEffect, StateField, Prec, RangeSetBuilder, EditorView, keymap, Decoration, ViewPlugin, WidgetType, hoverTooltip, showTooltip, snippet, snippetCompletion, startCompletion, setDiagnostics, openSearchPanel };
 
 const light = HighlightStyle.define([
   { tag: [t.keyword, t.tagName], color: 'var(--syn-cmd)' }, { tag: t.comment, color: 'var(--syn-comment)', fontStyle: 'italic' },
@@ -49,6 +52,8 @@ export function createEditor(parent, { onChange, onCursor, find }) {
   const owners = new Map();            // module extension -> the module that added it
   const panes = new Set();
   const syncAnn = Annotation.define();
+  const lockComp = new Compartment();
+  const lockExt = (pane) => pane.locked ? [EditorState.readOnly.of(true), EditorState.transactionFilter.of(tr => tr.docChanged && !tr.annotation(syncAnn) ? [] : tr)] : [];
   const paneExts = (pane) => pane.code ? moduleExts.filter(e => owners.get(e) !== 'visual-mode') : moduleExts;
   const copyTo = (target, trs) => {
     for (const tr of trs) if (tr.docChanged && !tr.annotation(syncAnn)) {
@@ -82,7 +87,7 @@ export function createEditor(parent, { onChange, onCursor, find }) {
     wrapComp.of(EditorView.lineWrapping),
     langComp.of(/\.(tex|sty|cls|ltx|tikz|bbl|def|clo)$/i.test(path) ? StreamLanguage.define(stex) : []),
     EditorState.languageData.of(() => [{ commentTokens: { line: '%' } }]),
-    moduleComp.of(pane ? paneExts(pane) : moduleExts), roComp.of(roExt()),
+    moduleComp.of(pane ? paneExts(pane) : moduleExts), roComp.of(roExt()), pane ? lockComp.of(lockExt(pane)) : [], pane ? viewId.of('pane') : [],
     pane ? EditorView.updateListener.of((u) => pane.onUpdate(u)) : EditorView.updateListener.of((u) => {
       if (u.docChanged && !suppress) onChange && onChange(current, u.state.doc.toString(), u);
       if (u.selectionSet || u.docChanged) onCursor && onCursor(u.state);
@@ -149,13 +154,16 @@ export function createEditor(parent, { onChange, onCursor, find }) {
           pane.path = path;
           const doc = path === current ? view.state.doc.toString() : text;
           pane.view.setState(EditorState.create({ doc, extensions: base(path, pane) }));
-          pane.view.dispatch({ effects: [moduleComp.reconfigure(paneExts(pane)), roComp.reconfigure(roExt())] });
+          pane.view.dispatch({ effects: [moduleComp.reconfigure(paneExts(pane)), roComp.reconfigure(roExt()), lockComp.reconfigure(lockExt(pane))] });
         },
         // the main editor now shows this pane's file: take its text so both start the same
         adopt() { const t = view.state.doc.toString(); if (pane.view.state.doc.toString() !== t) pane.view.dispatch({ changes: { from: 0, to: pane.view.state.doc.length, insert: t }, annotations: [syncAnn.of(true), Transaction.addToHistory.of(false)] }); },
         // another part of the app changed this file (not through either editor)
         fileChanged(path, text) { if (pane.path === path && path !== current && pane.view.state.doc.toString() !== text) pane.view.dispatch({ changes: { from: 0, to: pane.view.state.doc.length, insert: text }, annotations: [syncAnn.of(true)] }); },
         setCode(on) { pane.code = !!on; pane.view.dispatch({ effects: moduleComp.reconfigure(paneExts(pane)) }); },
+        // locked (the default): read only. Changes made in the main editor still come in (they carry syncAnn).
+        locked: true,
+        setLocked(on) { pane.locked = !!on; pane.view.dispatch({ effects: lockComp.reconfigure(lockExt(pane)) }); pane.view.dom.classList.toggle('cm-ro', pane.locked); },
         destroy() { panes.delete(pane); pane.view.destroy(); },
       };
       pane.view = new EditorView({ parent: parentEl, state: EditorState.create({ doc: '', extensions: base('x.tex', pane) }),

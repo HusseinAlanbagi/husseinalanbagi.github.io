@@ -9,6 +9,12 @@ await sleep(600);
 await p.click('#splitBtn'); await sleep(800);
 const panes = () => p.evaluate(() => [...document.querySelectorAll('.cm-editor')].filter(e => e.closest('#ed, .ed2-body')).map(e => e.closest('.ed2-body') ? 'R:' + e.querySelector('.cm-content').textContent.slice(0, 40) : 'L:' + e.querySelector('.cm-content').textContent.slice(0, 40)));
 console.log('open:', await p.evaluate(() => !!document.querySelector('.ed2')), await p.$eval('.ed2-file', s => s.value));
+// locked by default: typing there changes nothing
+console.log('locked:', await p.evaluate(() => window.texbench.app.editor.panes[0].locked), await p.$eval('.ed2-lock', b => b.title.slice(0, 20)));
+await p.evaluate(() => { const v = window.texbench.app.editor.panes[0].view; v.dispatch({ changes: { from: 0, insert: '% blocked\n' } }); });
+await sleep(200); console.log('blocked:', !(await p.evaluate(() => window.texbench.app.project.read('main.tex').includes('% blocked'))));
+await p.click('.ed2-lock'); await sleep(200);
+console.log('unlocked:', !(await p.evaluate(() => window.texbench.app.editor.panes[0].locked)));
 // type in the right pane (same file)
 await p.evaluate(() => { const v = window.texbench.app.editor.panes[0].view; const i = v.state.doc.toString().indexOf('Hello main.') + 11; v.dispatch({ changes: { from: i, insert: ' From right.' }, userEvent: 'input' }); });
 await sleep(300);

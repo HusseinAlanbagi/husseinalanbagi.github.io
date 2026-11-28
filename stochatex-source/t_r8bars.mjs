@@ -35,12 +35,12 @@ await clickBtn('^Hat'); await sleep(200); console.log('hat off at cursor after \
 // flip
 await p.evaluate(() => { const mf = document.querySelector('.vz-edit math-field'); mf.value = '\\frac{a}{b}'; mf.position = 1; });
 await clickBtn('^Flip'); await sleep(200); console.log('flip:', await mfv());
-// box / unbox label
-await p.evaluate(() => [...document.querySelectorAll('.vz-edit-bar > button')].find(x => /^More/.test(x.getAttribute('aria-label'))).dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
-await sleep(300); console.log('menu:', await p.$$eval('.menu button', bs => bs.map(x => x.textContent).filter(t => /Box|Unbox|LaTeX|full editor|Delete/.test(t)).join(' | ')));
-await p.evaluate(() => [...document.querySelectorAll('.menu button')].find(x => /Box it/.test(x.textContent)).click()); await sleep(300);
-await p.evaluate(() => [...document.querySelectorAll('.vz-edit-bar > button')].find(x => /^More/.test(x.getAttribute('aria-label'))).dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
-await sleep(300); console.log('after boxing:', await mfv(), '|', await p.$$eval('.menu button', bs => bs.map(x => x.textContent).filter(t => /Box|Unbox/.test(t)).join(' | ')));
+// box / unbox from the bar (round 10: the ⋯ menu no longer repeats it)
+await p.evaluate(() => { const mf = document.querySelector('.vz-edit math-field'); mf.position = mf.lastOffset; });
+await clickBtn('^Box'); await sleep(300); console.log('box all:', await mfv());
+await clickBtn('^Box'); await sleep(300); console.log('unbox all:', await mfv());
+await p.evaluate(() => [...document.querySelectorAll('.vz-edit-bar button')].find(x => /^More/.test(x.getAttribute('aria-label'))).dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
+await sleep(300); console.log('menu:', await p.$$eval('.menu button', bs => bs.map(x => x.textContent).join(' | ')));
 await p.keyboard.press('Escape');
 await p.screenshot({ path: `/tmp/stx/bars${W}.png` });
 console.log(errs.filter(e => !/google|favicon/.test(e)));

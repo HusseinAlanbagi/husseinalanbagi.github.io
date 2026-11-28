@@ -309,3 +309,6 @@ body.eq-side.side-off.pdf-off #work { grid-template-columns: var(--rail-w) 0 0 m
 .ed2.same .ed2-bar { box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--accent) 40%, transparent); }
 .ed2-body { flex: 1; min-height: 0; } .ed2-body .cm-editor { height: 100%; } .ed2-body .cm-editor.cm-focused { outline: none; }
 #splitBtn.on { color: var(--accent); background: var(--accent-soft, #e8eefc); }
+
+.ed2.unlocked .ed2-bar { background: color-mix(in srgb, #d99a1e 14%, var(--panel)); }
+.ed2.unlocked .ed2-lock { color: #9a5d00; }
